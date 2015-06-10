@@ -1,0 +1,225 @@
+
+Steps for running a HRLDAS simulation using NLDAS for forcing. Confirm that your domain lies entirely inside the NLDAS domain. If this is not the case, you may need to use something like NARR or GLDAS for forcing.
+
+
+1. Create your geo_em file through WPS. These are not needed until the end of Step 2, but there is no point in creating the forcing if you don't have the domain.
+
+--------------------------------------------------
+
+2. Compile HRLDAS
+
+Place the HRLDAS tar file where you will be running the model. 
+
+tar xvf HRLDAS-v3.x.tar
+
+I will refer to this location as /root_path/HRLDAS-v3.x
+
+In /root_path/HRLDAS-v3.x, modify user_build_options to link to the proper compilers and paths.
+
+ To compile with parallel version
+  edit the file 'user_build_options'
+  uncommment the compiler section with MPI (available for pgf90 and ifort compilers)
+
+ To compile with sequential version
+  edit the file 'user_build_options'
+  uncommment the compiler section without MPI
+
+type 'make'
+
+If successful, there should be two executables created
+
+HRLDAS_forcing/create_forcing.exe
+
+and 
+
+run/hrldas.exe
+
+--------------------------------------------------
+
+3. Prepare NLDAS-based forcing data.
+
+This step can be quite involved for a first-time user. It involves converting NLDAS output in GRIB format to NetCDF forcing files in HRLDAS format. This will be done in the /root_path/HRLDAS-v3.x/HRLDAS_forcing/ directory. In that directory you will find another directory named examples/ that contains some useful scripts for doing the NLDAS steps below.
+
+Required programs and libraries:
+
+- wgrib
+- Perl
+
+--------------------------------------------------
+
+3.1 Get the NLDAS raw files.
+
+They can be retrieved from here:
+
+ftp://hydro1.sci.gsfc.nasa.gov/data/s4pa/NLDAS/NLDAS_FORA0125_H.002
+
+If you want to use NLDAS for initial conditions, you can retrieve them here:
+
+ftp://hydro1.sci.gsfc.nasa.gov/data/s4pa/NLDAS/NLDAS_NOAH0125_H.002/
+
+I stick all of these "raw" NLDAS files in one directory (e.g., /raw_NLDAS_data_path)
+
+--------------------------------------------------
+
+3.2 extract_nldas.perl: extract the individual variables from the NLDAS GRIB files
+
+The current script uses wgrib to extract individual fields from the NLDAS files. It will process entire years or sections of one year. You can change this by modifying the Perl script.
+
+Change these two paths for where raw NLDAS files are located and where separated(extracted) files will go. 
+
+$data_dir = "/raw_NLDAS_data_path";
+$results_dir = "/extracted_NLDAS_data_path";
+
+For convenience, you may want to create directories in the results_dir for each variable and a few more for processed fields.
+
+`cd /extracted_NLDAS_data_path`
+`mkdir DLWRF/ DSWRF/ APCP/ PRES/ TMP/ SPFH/ UGRD/ VGRD/ INIT/ FIXED/`
+
+--------------------------------------------------
+
+3.3 extract_nldas_init.perl: extract the initial-only fields (TSOIL,SOILM,AVSFT,CNWAT,WEASD) from the NLDAS GRIB output files
+
+Change the date of initialization and run the script one time. The files should appear in the /extracted_NLDAS_data_path/INIT/ directory.
+
+Note: this step is not necessary unless you want to intialize using the NLDAS states
+
+--------------------------------------------------
+
+3.4 intermediate clean-up (optional)
+
+If you are space-limited, at this point you can remove the raw NLDAS files. You have extracted all you need and they are no longer needed.
+
+--------------------------------------------------
+
+3.5 Uncompress the NLDAS elevation file for height adjustment of forcing.
+
+  - this is provided in the examples/NLDAS directory
+
+  - you can put these wherever, but I leave them here (see the namelist Zfile_template)
+  
+--------------------------------------------------
+
+3.6 Run the HRLDAS pre-processor code.
+
+At this point, you should have all the NARR output extracted into different directories at /extracted_NARR_data_path/. Now it's finally time to run the first step of the HRLDAS.
+
+cd /root_path/HRLDAS-v3.x/HRLDAS_COLLECT_DATA/run
+
+In the examples/NARR/ directory there is a namelist.input file that is consistent with the NARR procedure described above. You can modify this file for your case and place it in the pre-processor run directory:
+
+cp examples/NARR/namelist.input.NARR .
+
+--------------------------------------------------
+
+3.6.1 Modify the namelist
+
+Modifying the namelist.input.NARR to your case. The following is a short description of each line in the file. A longer description is available in README.namelist
+
+ STARTDATE         : start date of your simulation
+ ENDDATE           : end date of your simulation
+ DATADIR           : base directory for your NLDAS GRIB files (will be substituted in the paths below)
+ OUTPUTDIR         : where you want the forcing files to be placed
+ FULL_IC_FRQ       : set to 0 if you want initial conditions in the init file, -1 otherwise
+ RAINFALL_INTERP   : rainfall interpolation procedure ! 0=Nearest Neighbor; 1=more expensive, grid fill method
+ RESCALE_SHORTWAVE : set to .FALSE. for NLDAS
+ UPDATE_SNOW       : do you want to read in snow during the simulation?
+ FORCING_HEIGHT_2D : set to .FALSE. for NLDAS
+ TRUNCATE_SW       : set to .FALSE. for NLDAS
+ EXPAND_LOOP       : the number of loops to fill missing NLDAS data (e.g., soil over ocean). Set to at least 1 for NLDAS, may need to set higher if, for example, you have islands in your WRF grid that are not resolved by NLDAS.
+ INIT_LAI          : .true. to put LAI in the init file
+ VARY_LAI          : .true. to put time-varying LAI in the forcing files
+ MASK_WATER        : .true. to put missing values over water points (could reduce size if you compress later)
+
+ geo_em_flnm      = path and name of your geo_em file
+
+ Zfile_template     = template for your NLDAS terrain height file
+ LANDSfile_template = template for your NLDAS land-sea file
+ Tfile_template     = template for your NLDAS temperature file
+ Ufile_template     = template for your NLDAS u-wind file
+ Vfile_template     = template for your NLDAS v-wind file
+ Pfile_template     = template for your NLDAS pressure file
+ Qfile_template     = template for your NLDAS q file
+ LWfile_template    = template for your NLDAS longwave file
+ SWfile_primary     = template for your NLDAS primary shortwave file
+ SWfile_secondary   = template for your NLDAS secondary shortwave file
+ PCPfile_primary    = template for your NLDAS primary precipitation file
+ PCPfile_secondary  = template for your NLDAS secondary precipitation file
+ WEASDfile_template = template for your NLDAS SWE file (not necessary if you don't want initial conditions)
+ CANWTfile_template = template for your NLDAS canopy water file (not necessary if you don't want initial conditions)
+ SKINTfile_template = template for your NLDAS skin temperature file (not necessary if you don't want initial conditions)
+ STfile_template    = template for your NLDAS soil temperature file (not necessary if you don't want initial conditions)
+ SMfile_template    = template for your NLDAS soil moisture file (not necessary if you don't want initial conditions)
+
+Note: for NLDAS there will be no need to include a secondary SW and precipitation file, so just set them to be the same
+
+3.6.2 Run the pre-processor
+
+Run the pre-processor with the NLDAS namelist
+
+../create_forcing.exe namelist.input.NLDAS
+
+In your OUTPUTDIR, you should now have all your LDASIN files.
+
+4. Run HRLDAS
+
+The hard part is over. Go to the HRLDAS Run directory:
+
+cd /root_path/HRLDAS-v3.x/run
+
+4.1 Modify the namelist
+
+There is an example namelist.hrldas in the examples/NLDAS/ directory. Copy this to the run/ directory
+
+cp examples/NLDAS/namelist.hrldas.NLDAS namelist.hrldas
+
+See the full documentation for a complete description of items, but these are the important modifications:
+
+ HRLDAS_SETUP_FILE     = path and name of your grid/initial conditions file (can also be a wrfinput file)
+ MMF_RUNOFF_FILE       = special for OPT_RUN=5, which is unsupported, for now
+ INDIR                 = where the LDASIN files are located
+ OUTDIR                = where the LDASOUT files will be located
+
+ START_YEAR  = start year of your simulation
+ START_MONTH = start month of your simulation
+ START_DAY   = start day of your simulation
+ START_HOUR  = start hour of your simulation
+ START_MIN   = start minute of your simulation
+
+ RESTART_FILENAME_REQUESTED = uncomment for a restart
+
+ KHOUR = length of simulation in hours  (either KHOUR or KDAY must be set)
+ KDAY  = length of simulation in days
+
+ DYNAMIC_VEG_OPTION                = Noah-MP options
+ CANOPY_STOMATAL_RESISTANCE_OPTION = 
+ BTR_OPTION                        = 
+ RUNOFF_OPTION                     = 
+ SURFACE_DRAG_OPTION               = 
+ FROZEN_SOIL_OPTION                = 
+ SUPERCOOLED_WATER_OPTION          = 
+ RADIATIVE_TRANSFER_OPTION         = 
+ SNOW_ALBEDO_OPTION                = 
+ PCP_PARTITION_OPTION              = 
+ TBOT_OPTION                       = 
+ TEMP_TIME_SCHEME_OPTION           = 
+
+
+ FORCING_TIMESTEP = time increment of available forcing (3600 for NLDAS)
+ NOAH_TIMESTEP    = time increment for model (<= FORCING_TIMESTEP)
+ OUTPUT_TIMESTEP  = time increment for output (>= NOAH_TIMESTEP)
+
+ SPLIT_OUTPUT_COUNT = split output after this many writes, 0 = all in one file
+ RESTART_FREQUENCY_HOURS = write restart files after this many hours
+
+ XSTART = uncomment and set if you want to run a subset of your domain 
+ XEND   = 
+ YSTART = 
+ YEND   = 
+
+ ZLVL = forcing height (set to 10.0 for NLDAS; don't have two forcing heights now so use wind height)
+
+4.2 Run the HRLDAS
+
+./hrldas.exe
+
+The output will be saved to the OUTDIR directory.
