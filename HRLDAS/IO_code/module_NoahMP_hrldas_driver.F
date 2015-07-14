@@ -820,11 +820,11 @@ module module_NoahMP_hrldas_driver
   SNOW       = undefined_real
   SNOWH      = undefined_real
   CANWAT     = undefined_real
-  ACSNOM     = undefined_real
-  ACSNOW     = undefined_real
+  ACSNOM     = 0.0
+  ACSNOW     = 0.0
   QSFC       = undefined_real
-  SFCRUNOFF  = undefined_real
-  UDRUNOFF   = undefined_real
+  SFCRUNOFF  = 0.0
+  UDRUNOFF   = 0.0
   SMOISEQ    = undefined_real
   ALBEDO     = undefined_real
   ISNOWXY    = undefined_int
@@ -860,8 +860,8 @@ module module_NoahMP_hrldas_driver
   XLONIN     = undefined_real
   SEAICE     = undefined_real
   SMCWTDXY   = undefined_real
-  DEEPRECHXY = undefined_real
-  RECHXY     = undefined_real
+  DEEPRECHXY = 0.0
+  RECHXY     = 0.0
   ZSNSOXY    = undefined_real
   GRDFLX     = undefined_real
   HFX        = undefined_real
