@@ -1,8 +1,6 @@
 MODULE module_sf_noahmpdrv
 
 !-------------------------------
-  USE module_sf_noahmplsm
-  USE module_sf_noahmp_glacier
 #if ( WRF_CHEM == 1 )
   USE module_data_gocart_dust
 #endif
@@ -47,7 +45,9 @@ CONTAINS
                its,ite,  jts,jte,  kts,kte,                    &
                MP_RAINC, MP_RAINNC, MP_SHCV, MP_SNOW, MP_GRAUP, MP_HAIL     )
 !----------------------------------------------------------------
-    USE NOAHMP_PARAMETERS, ONLY: TRANSFER_MP_PARAMETERS, CO2, O2, ISICE
+    USE MODULE_SF_NOAHMPLSM, only: noahmp_options, NOAHMP_SFLX
+    USE module_sf_noahmp_glacier
+    USE NOAHMP_TABLES, ONLY: ISICE_TABLE, CO2_TABLE, O2_TABLE
 !----------------------------------------------------------------
     IMPLICIT NONE
 !----------------------------------------------------------------
@@ -555,15 +555,13 @@ CONTAINS
           SOILTYP = 7
        ENDIF
 
-       CALL TRANSFER_MP_PARAMETERS(VEGTYP,SOILTYP,SLOPETYP,SOILCOLOR)
-
 ! Initialized local
 
        FICEOLD = 0.0
        FICEOLD(ISNOW+1:0) = SNICEXY(I,ISNOW+1:0,J) &  ! snow ice fraction  
            /(SNICEXY(I,ISNOW+1:0,J)+SNLIQXY(I,ISNOW+1:0,J))
-       CO2PP  = CO2 * P_ML                            ! partial pressure co2 [Pa]
-       O2PP   = O2  * P_ML                            ! partial pressure  o2 [Pa]
+       CO2PP  = CO2_TABLE * P_ML                      ! partial pressure co2 [Pa]
+       O2PP   = O2_TABLE  * P_ML                      ! partial pressure  o2 [Pa]
        FOLN   = 1.0                                   ! for now, set to nitrogen saturation
        QC     = undefined_value                       ! test dummy value
        PBLH   = undefined_value                       ! test dummy value ! PBL height
@@ -576,7 +574,7 @@ CONTAINS
        IF(VEGTYP == 27) FVEG = 0.0
        IF(VEGTYP == 27) PLAI = 0.0
 
-       IF ( VEGTYP == ISICE ) THEN
+       IF ( VEGTYP == ISICE_TABLE ) THEN
          ICE = -1                           ! Land-ice point
          CALL NOAHMP_OPTIONS_GLACIER(IDVEG  ,IOPT_CRS  ,IOPT_BTR  ,IOPT_RUN  ,IOPT_SFC  ,IOPT_FRZ , &
                       IOPT_INF  ,IOPT_RAD  ,IOPT_ALB  ,IOPT_SNF  ,IOPT_TBOT, IOPT_STC )
@@ -663,6 +661,7 @@ CONTAINS
             I       , J       , LAT     , YEARLEN , JULIAN  , COSZ    , & ! IN : Time/Space-related
             DT      , DX      , DZ8W1D  , NSOIL   , ZSOIL   , NSNOW   , & ! IN : Model configuration 
             FVEG    , FVGMAX  , VEGTYP  , ICE     , IST     ,           & ! IN : Vegetation/Soil characteristics
+            SOILTYP ,SLOPETYP ,SOILCOLOR,                               & ! IN : Vegetation/Soil characteristics
             SMCEQ   ,                                                   & ! IN : Vegetation/Soil characteristics
             T_ML    , P_ML    , PSFC    , U_ML    , V_ML    , Q_ML    , & ! IN : Forcing
             QC      , SWDN    , LWDN    ,                               & ! IN : Forcing
@@ -841,9 +840,7 @@ CONTAINS
        wtddt    ,stepwtd  ,dt       ,qrfsxy     ,qspringsxy  , qslatxy    ,  &      ! Optional groundwater
        fdepthxy ,ht     ,riverbedxy ,eqzwt     ,rivercondxy ,pexpxy            )    ! Optional groundwater
 
-  USE NOAHMP_VEG_PARAMETERS
-  USE NOAHMP_SOIL_PARAMETERS
-  USE NOAHMP_RAD_PARAMETERS
+  USE NOAHMP_TABLES
 
   IMPLICIT NONE
 
@@ -960,6 +957,7 @@ CONTAINS
     call read_mp_veg_parameters(trim(MMINLU))
     call read_mp_soil_parameters()
     call read_mp_rad_parameters()
+    call read_mp_global_parameters()
 
     IF( .NOT. restart ) THEN
 
@@ -1160,7 +1158,7 @@ CONTAINS
              STEPWTD = max(STEPWTD,1)
 
               CALL groundwater_init ( & 
-      &       nsoil, zsoil , dzs  ,isltyp, ivgtyp, isurban_TABLE, isice_TABLE ,iswater_TABLE ,wtddt , &
+      &       nsoil, zsoil , dzs  ,isltyp, ivgtyp,wtddt , &
       &       fdepthxy, ht, riverbedxy, eqzwt, rivercondxy, pexpxy , areaxy, zwtxy,   &
       &       smois,sh2o, smoiseq, smcwtdxy, deeprechxy, rechxy, qslatxy, qrfsxy, qspringsxy, &
       &       ids,ide, jds,jde, kds,kde,                    &
@@ -1282,7 +1280,7 @@ CONTAINS
 ! ==================================================================================================
 ! ----------------------------------------------------------------------
     SUBROUTINE GROUNDWATER_INIT (   &
-            &            NSOIL , ZSOIL , DZS, ISLTYP, IVGTYP, ISURBAN, ISICE ,ISWATER , WTDDT , &
+            &            NSOIL , ZSOIL , DZS, ISLTYP, IVGTYP, WTDDT , &
             &            FDEPTH, TOPO, RIVERBED, EQWTD, RIVERCOND, PEXP , AREA ,WTD ,  &
             &            SMOIS,SH2O, SMOISEQ, SMCWTDXY, DEEPRECHXY, RECHXY ,  &
             &            QSLATXY, QRFSXY, QSPRINGSXY,                  &
@@ -1291,7 +1289,8 @@ CONTAINS
             &            its,ite, jts,jte, kts,kte                     )
 
 
-  USE NOAHMP_SOIL_PARAMETERS, ONLY : BEXP_TABLE,SMCMAX_TABLE,PSISAT_TABLE,SMCWLT_TABLE,DWSAT_TABLE,DKSAT_TABLE
+  USE NOAHMP_TABLES, ONLY : BEXP_TABLE,SMCMAX_TABLE,PSISAT_TABLE,SMCWLT_TABLE,DWSAT_TABLE,DKSAT_TABLE, &
+                                ISURBAN_TABLE, ISICE_TABLE ,ISWATER_TABLE
   USE module_sf_noahmp_groundwater, ONLY : LATERALFLOW
 
 ! ----------------------------------------------------------------------
@@ -1301,7 +1300,7 @@ CONTAINS
     INTEGER,  INTENT(IN   )   ::     ids,ide, jds,jde, kds,kde,  &
          &                           ims,ime, jms,jme, kms,kme,  &
          &                           its,ite, jts,jte, kts,kte
-    INTEGER, INTENT(IN)                              :: NSOIL, ISURBAN, ISWATER ,ISICE
+    INTEGER, INTENT(IN)                              :: NSOIL
     REAL,   INTENT(IN)                               ::     WTDDT
     REAL,    INTENT(IN), DIMENSION(1:NSOIL)          :: ZSOIL,DZS
     INTEGER, INTENT(IN), DIMENSION(ims:ime, jms:jme) :: ISLTYP, IVGTYP
@@ -1336,7 +1335,7 @@ CONTAINS
 
     DELTAT = WTDDT * 60. !timestep in seconds for this calculation
 
-    WHERE(IVGTYP.NE.ISWATER.AND.IVGTYP.NE.ISICE)
+    WHERE(IVGTYP.NE.ISWATER_TABLE.AND.IVGTYP.NE.ISICE_TABLE)
          LANDMASK=1
     ELSEWHERE
          LANDMASK=-1
@@ -1377,7 +1376,7 @@ CALL LATERALFLOW(ISLTYP,WTD,QLAT,FDEPTH,TOPO,LANDMASK,DELTAT,AREA       &
              BEXP   =   BEXP_TABLE(ISLTYP(I,J))
              SMCMAX = SMCMAX_TABLE(ISLTYP(I,J))
              SMCWLT = SMCWLT_TABLE(ISLTYP(I,J))
-             IF(IVGTYP(I,J)==ISURBAN)THEN
+             IF(IVGTYP(I,J)==ISURBAN_TABLE)THEN
                  SMCMAX = 0.45         
                  SMCWLT = 0.40         
              ENDIF 
