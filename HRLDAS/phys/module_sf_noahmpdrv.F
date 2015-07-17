@@ -45,7 +45,8 @@ CONTAINS
                its,ite,  jts,jte,  kts,kte,                    &
                MP_RAINC, MP_RAINNC, MP_SHCV, MP_SNOW, MP_GRAUP, MP_HAIL     )
 !----------------------------------------------------------------
-    USE MODULE_SF_NOAHMPLSM, only: noahmp_options, NOAHMP_SFLX
+    USE MODULE_SF_NOAHMPLSM
+!    USE MODULE_SF_NOAHMPLSM, only: noahmp_options, NOAHMP_SFLX, noahmp_parameters
     USE module_sf_noahmp_glacier
     USE NOAHMP_TABLES, ONLY: ISICE_TABLE, CO2_TABLE, O2_TABLE
 !----------------------------------------------------------------
@@ -388,6 +389,8 @@ CONTAINS
 
     INTEGER, PARAMETER                  :: NSNOW = 3    ! number of snow layers fixed to 3
     REAL, PARAMETER                     :: undefined_value = -1.E36
+    
+    type(noahmp_parameters) :: parameters
 
 
 ! ----------------------------------------------------------------------
@@ -555,6 +558,7 @@ CONTAINS
           SOILTYP = 7
        ENDIF
 
+       CALL TRANSFER_MP_PARAMETERS(VEGTYP,SOILTYP,SLOPETYP,SOILCOLOR,parameters)
 ! Initialized local
 
        FICEOLD = 0.0
@@ -657,11 +661,10 @@ CONTAINS
 
     ELSE
          ICE=0                              ! Neither sea ice or land ice.
-         CALL NOAHMP_SFLX (&
+         CALL NOAHMP_SFLX (parameters, &
             I       , J       , LAT     , YEARLEN , JULIAN  , COSZ    , & ! IN : Time/Space-related
             DT      , DX      , DZ8W1D  , NSOIL   , ZSOIL   , NSNOW   , & ! IN : Model configuration 
             FVEG    , FVGMAX  , VEGTYP  , ICE     , IST     ,           & ! IN : Vegetation/Soil characteristics
-            SOILTYP ,SLOPETYP ,SOILCOLOR,                               & ! IN : Vegetation/Soil characteristics
             SMCEQ   ,                                                   & ! IN : Vegetation/Soil characteristics
             T_ML    , P_ML    , PSFC    , U_ML    , V_ML    , Q_ML    , & ! IN : Forcing
             QC      , SWDN    , LWDN    ,                               & ! IN : Forcing
@@ -820,6 +823,164 @@ CONTAINS
 !------------------------------------------------------
   END SUBROUTINE noahmplsm
 !------------------------------------------------------
+
+SUBROUTINE TRANSFER_MP_PARAMETERS(VEGTYPE,SOILTYPE,SLOPETYPE,SOILCOLOR,parameters)
+
+  USE NOAHMP_TABLES
+!  USE MODULE_SF_NOAHMPLSM, only :: noahmp_parameters
+    USE MODULE_SF_NOAHMPLSM
+
+  implicit none
+
+  INTEGER, INTENT(IN)    :: VEGTYPE
+  INTEGER, INTENT(IN)    :: SOILTYPE
+  INTEGER, INTENT(IN)    :: SLOPETYPE
+  INTEGER, INTENT(IN)    :: SOILCOLOR
+    
+  type (noahmp_parameters), intent(out) :: parameters
+    
+  REAL    :: REFDK
+  REAL    :: REFKDT
+  REAL    :: FRZK
+  REAL    :: FRZFACT
+
+  parameters%ISWATER   =   ISWATER_TABLE
+  parameters%ISBARREN  =  ISBARREN_TABLE
+  parameters%ISICE     =     ISICE_TABLE
+  parameters%EBLFOREST = EBLFOREST_TABLE
+
+  parameters%URBAN_FLAG = .FALSE.
+  IF( VEGTYPE == ISURBAN_TABLE .or. VEGTYPE == 31 .or.VEGTYPE  == 32 .or. VEGTYPE == 33) THEN
+     parameters%URBAN_FLAG = .TRUE.
+  ENDIF
+
+!------------------------------------------------------------------------------------------!
+! Transfer veg parameters
+!------------------------------------------------------------------------------------------!
+
+  parameters%CH2OP  =  CH2OP_TABLE(VEGTYPE)       !maximum intercepted h2o per unit lai+sai (mm)
+  parameters%DLEAF  =  DLEAF_TABLE(VEGTYPE)       !characteristic leaf dimension (m)
+  parameters%Z0MVT  =  Z0MVT_TABLE(VEGTYPE)       !momentum roughness length (m)
+  parameters%HVT    =    HVT_TABLE(VEGTYPE)       !top of canopy (m)
+  parameters%HVB    =    HVB_TABLE(VEGTYPE)       !bottom of canopy (m)
+  parameters%DEN    =    DEN_TABLE(VEGTYPE)       !tree density (no. of trunks per m2)
+  parameters%RC     =     RC_TABLE(VEGTYPE)       !tree crown radius (m)
+  parameters%MFSNO  =  MFSNO_TABLE(VEGTYPE)       !snowmelt m parameter ()
+  parameters%SAIM   =   SAIM_TABLE(VEGTYPE,:)     !monthly stem area index, one-sided
+  parameters%LAIM   =   LAIM_TABLE(VEGTYPE,:)     !monthly leaf area index, one-sided
+  parameters%SLA    =    SLA_TABLE(VEGTYPE)       !single-side leaf area per Kg [m2/kg]
+  parameters%DILEFC = DILEFC_TABLE(VEGTYPE)       !coeficient for leaf stress death [1/s]
+  parameters%DILEFW = DILEFW_TABLE(VEGTYPE)       !coeficient for leaf stress death [1/s]
+  parameters%FRAGR  =  FRAGR_TABLE(VEGTYPE)       !fraction of growth respiration  !original was 0.3 
+  parameters%LTOVRC = LTOVRC_TABLE(VEGTYPE)       !leaf turnover [1/s]
+
+  parameters%C3PSN  =  C3PSN_TABLE(VEGTYPE)       !photosynthetic pathway: 0. = c4, 1. = c3
+  parameters%KC25   =   KC25_TABLE(VEGTYPE)       !co2 michaelis-menten constant at 25c (pa)
+  parameters%AKC    =    AKC_TABLE(VEGTYPE)       !q10 for kc25
+  parameters%KO25   =   KO25_TABLE(VEGTYPE)       !o2 michaelis-menten constant at 25c (pa)
+  parameters%AKO    =    AKO_TABLE(VEGTYPE)       !q10 for ko25
+  parameters%VCMX25 = VCMX25_TABLE(VEGTYPE)       !maximum rate of carboxylation at 25c (umol co2/m**2/s)
+  parameters%AVCMX  =  AVCMX_TABLE(VEGTYPE)       !q10 for vcmx25
+  parameters%BP     =     BP_TABLE(VEGTYPE)       !minimum leaf conductance (umol/m**2/s)
+  parameters%MP     =     MP_TABLE(VEGTYPE)       !slope of conductance-to-photosynthesis relationship
+  parameters%QE25   =   QE25_TABLE(VEGTYPE)       !quantum efficiency at 25c (umol co2 / umol photon)
+  parameters%AQE    =    AQE_TABLE(VEGTYPE)       !q10 for qe25
+  parameters%RMF25  =  RMF25_TABLE(VEGTYPE)       !leaf maintenance respiration at 25c (umol co2/m**2/s)
+  parameters%RMS25  =  RMS25_TABLE(VEGTYPE)       !stem maintenance respiration at 25c (umol co2/kg bio/s)
+  parameters%RMR25  =  RMR25_TABLE(VEGTYPE)       !root maintenance respiration at 25c (umol co2/kg bio/s)
+  parameters%ARM    =    ARM_TABLE(VEGTYPE)       !q10 for maintenance respiration
+  parameters%FOLNMX = FOLNMX_TABLE(VEGTYPE)       !foliage nitrogen concentration when f(n)=1 (%)
+  parameters%TMIN   =   TMIN_TABLE(VEGTYPE)       !minimum temperature for photosynthesis (k)
+
+  parameters%XL     =     XL_TABLE(VEGTYPE)       !leaf/stem orientation index
+  parameters%RHOL   =   RHOL_TABLE(VEGTYPE,:)     !leaf reflectance: 1=vis, 2=nir
+  parameters%RHOS   =   RHOS_TABLE(VEGTYPE,:)     !stem reflectance: 1=vis, 2=nir
+  parameters%TAUL   =   TAUL_TABLE(VEGTYPE,:)     !leaf transmittance: 1=vis, 2=nir
+  parameters%TAUS   =   TAUS_TABLE(VEGTYPE,:)     !stem transmittance: 1=vis, 2=nir
+
+  parameters%MRP    =    MRP_TABLE(VEGTYPE)       !microbial respiration parameter (umol co2 /kg c/ s)
+  parameters%CWPVT  =  CWPVT_TABLE(VEGTYPE)       !empirical canopy wind parameter
+
+  parameters%WRRAT  =  WRRAT_TABLE(VEGTYPE)       !wood to non-wood ratio
+  parameters%WDPOOL = WDPOOL_TABLE(VEGTYPE)       !wood pool (switch 1 or 0) depending on woody or not [-]
+  parameters%TDLEF  =  TDLEF_TABLE(VEGTYPE)       !characteristic T for leaf freezing [K]
+
+  parameters%NROOT  =  NROOT_TABLE(VEGTYPE)       !number of soil layers with root present
+  parameters%RGL    =    RGL_TABLE(VEGTYPE)       !Parameter used in radiation stress function
+  parameters%RSMIN  =     RS_TABLE(VEGTYPE)       !Minimum stomatal resistance [s m-1]
+  parameters%HS     =     HS_TABLE(VEGTYPE)       !Parameter used in vapor pressure deficit function
+  parameters%TOPT   =   TOPT_TABLE(VEGTYPE)       !Optimum transpiration air temperature [K]
+  parameters%RSMAX  =  RSMAX_TABLE(VEGTYPE)       !Maximal stomatal resistance [s m-1]
+
+!------------------------------------------------------------------------------------------!
+! Transfer rad parameters
+!------------------------------------------------------------------------------------------!
+
+   parameters%ALBSAT    = ALBSAT_TABLE(SOILCOLOR,:)
+   parameters%ALBDRY    = ALBDRY_TABLE(SOILCOLOR,:)
+   parameters%ALBICE    = ALBICE_TABLE
+   parameters%ALBLAK    = ALBLAK_TABLE               
+   parameters%OMEGAS    = OMEGAS_TABLE
+   parameters%BETADS    = BETADS_TABLE
+   parameters%BETAIS    = BETAIS_TABLE
+   parameters%EG        = EG_TABLE
+
+!------------------------------------------------------------------------------------------!
+! Transfer global parameters
+!------------------------------------------------------------------------------------------!
+
+   parameters%CO2       =    CO2_TABLE
+   parameters%O2        =     O2_TABLE
+   parameters%TIMEAN    = TIMEAN_TABLE
+   parameters%FSATMX    = FSATMX_TABLE
+   parameters%Z0SNO     =  Z0SNO_TABLE
+   parameters%SSI       =    SSI_TABLE
+   parameters%SWEMX     =  SWEMX_TABLE
+
+! ----------------------------------------------------------------------
+!  Transfer soil parameters
+! ----------------------------------------------------------------------
+
+    parameters%BEXP   = BEXP_TABLE   (SOILTYPE)
+    parameters%DKSAT  = DKSAT_TABLE  (SOILTYPE)
+    parameters%DWSAT  = DWSAT_TABLE  (SOILTYPE)
+    parameters%F1     = F1_TABLE     (SOILTYPE)
+    parameters%PSISAT = PSISAT_TABLE (SOILTYPE)
+    parameters%QUARTZ = QUARTZ_TABLE (SOILTYPE)
+    parameters%SMCDRY = SMCDRY_TABLE (SOILTYPE)
+    parameters%SMCMAX = SMCMAX_TABLE (SOILTYPE)
+    parameters%SMCREF = SMCREF_TABLE (SOILTYPE)
+    parameters%SMCWLT = SMCWLT_TABLE (SOILTYPE)
+
+! ----------------------------------------------------------------------
+! Transfer GENPARM parameters
+! ----------------------------------------------------------------------
+    parameters%CSOIL  = CSOIL_TABLE
+    parameters%ZBOT   = ZBOT_TABLE
+    parameters%CZIL   = CZIL_TABLE
+
+    FRZK   = FRZK_TABLE
+    REFDK  = REFDK_TABLE
+    REFKDT = REFKDT_TABLE
+    parameters%KDT    = REFKDT * parameters%DKSAT / REFDK
+    parameters%SLOPE  = SLOPE_TABLE(SLOPETYPE)
+
+    IF(parameters%URBAN_FLAG)THEN  ! Hardcoding some urban parameters for soil
+       parameters%SMCMAX = 0.45 
+       parameters%SMCREF = 0.42 
+       parameters%SMCWLT = 0.40 
+       parameters%SMCDRY = 0.40 
+       parameters%CSOIL  = 3.E6
+    ENDIF
+
+! adjust FRZK parameter to actual soil type: FRZK * FRZFACT
+
+    IF(SOILTYPE /= 14) then
+      FRZFACT = (parameters%SMCMAX / parameters%SMCREF) * (0.412 / 0.468)
+      parameters%FRZX = FRZK * FRZFACT
+    END IF
+
+ END SUBROUTINE TRANSFER_MP_PARAMETERS
 
   SUBROUTINE NOAHMP_INIT ( MMINLU, SNOW , SNOWH , CANWAT , ISLTYP ,   IVGTYP, &
        TSLB , SMOIS , SH2O , DZS , FNDSOILW , FNDSNOWH ,             &
