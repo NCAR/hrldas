@@ -1257,6 +1257,15 @@ end subroutine land_driver_ini
 
 991  continue
 
+     where(XLAND > 1.5)   T_PHY(:,1,:) = 0.0  ! Prevent some overflow problems with ifort compiler [MB:20150812]
+     where(XLAND > 1.5)   U_PHY(:,1,:) = 0.0
+     where(XLAND > 1.5)   V_PHY(:,1,:) = 0.0
+     where(XLAND > 1.5) QV_CURR(:,1,:) = 0.0
+     where(XLAND > 1.5)     P8W(:,1,:) = 0.0
+     where(XLAND > 1.5)     GLW        = 0.0
+     where(XLAND > 1.5)  SWDOWN        = 0.0
+     where(XLAND > 1.5) RAINBL_tmp     = 0.0
+
      QV_CURR(:,1,:) = QV_CURR(:,1,:)/(1.0 - QV_CURR(:,1,:))  ! Assuming input forcing are specific hum.;
                                                              ! WRF wants mixing ratio at driver level
      P8W(:,2,:)     = P8W(:,1,:)      ! WRF uses lowest two layers
