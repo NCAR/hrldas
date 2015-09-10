@@ -443,10 +443,12 @@ module module_NoahMP_hrldas_driver
 !---------------------------------------------------------------------
 
   update_lai = .true.   ! default: use LAI if present in forcing file
-  if (dynamic_veg_option == 2 .or. dynamic_veg_option == 5) update_lai = .false.
+  if (dynamic_veg_option == 2 .or. dynamic_veg_option == 5 .or. dynamic_veg_option == 6) &
+    update_lai = .false.
 
   update_veg = .false.  ! default: don't use VEGFRA if present in forcing file
-  if (dynamic_veg_option == 1) update_veg = .true.
+  if (dynamic_veg_option == 1 .or. dynamic_veg_option == 6 .or. dynamic_veg_option == 7) &
+    update_veg = .true.
 
   if (nsoil < 0) then
      stop " ***** ERROR: NSOIL must be set in the namelist."
@@ -523,12 +525,12 @@ module module_NoahMP_hrldas_driver
      endif
   endif
 
-  if (dynamic_veg_option == 2 .or. dynamic_veg_option == 5) then
+  if (dynamic_veg_option == 2 .or. dynamic_veg_option == 5 .or. dynamic_veg_option == 6) then
      if ( canopy_stomatal_resistance_option /= 1) then
         write(*, *)
         write(*, '(" ***** Namelist error: ******************************************************")')
         write(*, '(" ***** ")')
-        write(*, '(" *****       CANOPY_STOMATAL_RESISTANCE_OPTION must be 1 when DYNAMIC_VEG_OPTION == 2")')
+        write(*, '(" *****       CANOPY_STOMATAL_RESISTANCE_OPTION must be 1 when DYNAMIC_VEG_OPTION == 2/5/6")')
         write(*, *)
         stop
      endif
