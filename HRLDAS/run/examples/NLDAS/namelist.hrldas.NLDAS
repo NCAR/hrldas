@@ -29,6 +29,7 @@
  TBOT_OPTION                       = 2
  TEMP_TIME_SCHEME_OPTION           = 1
  GLACIER_OPTION                    = 1
+ SURFACE_RESISTANCE_OPTION         = 1
 
  FORCING_TIMESTEP = 3600
  NOAH_TIMESTEP    = 3600
