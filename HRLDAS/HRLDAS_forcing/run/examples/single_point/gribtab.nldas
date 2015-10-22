@@ -1,0 +1,53 @@
+-1:-1:-1:-1
+001: PRES:      Pa:Pressure [Pa]
+007:  HGT:     gpm:NARR hybrid level Geopotential height [gpm]
+011:  TMP:       K:2-m above ground Temperature [K]
+033: UGRD:     m/s:10-m above ground Zonal wind speed [m/s]
+034: VGRD:     m/s:10-m above ground Meridional wind speed [m/s]
+051: SPFH:   kg/kg:2-m above ground Specific humidity [kg/kg]
+061: APCP:  kg/m^2:Precipitation hourly total [kg/m^2]
+063:ACPCP:  kg/m^2:Convective precipitation hourly total [kg/m^2]
+065:WEASD:  kg/m^2:Accum. snow
+085:TSOIL:       K:Soil temperature
+086:SOILM:  kg/m^2:Soil moisture
+153:CONVF:unitless:Fraction of total precipitation that is convective [unitless]
+157: CAPE:    J/kg:180-0 mb above ground Convective Available Potential Energy [J/kg]
+179:ACOND:     m/s:Aerodynamic conductance [m/s]
+204:DSWRF:   W/m^2:SW radiation flux downwards (surface) [W/m^2]
+205:DLWRF:   W/m^2:LW radiation flux downwards (surface) [W/m^2]
+228:PEVAP:  kg/m^2:Potential evaporation [kg/m^2]
+! Below added to prevent errors when running NCL
+111:XXXXX::
+112:XXXXX::
+121:XXXXX::
+122:XXXXX::
+155:XXXXX::
+229:XXXXX::
+161:XXXXX::
+162:XXXXX::
+057:XXXXX::
+235:XXXXX::
+234:XXXXX::
+099:XXXXX::
+148:XXXXX::
+084:XXXXX::
+223:XXXXX::
+250:XXXXX::
+151:XXXXX::
+207:XXXXX::
+200:XXXXX::
+210:XXXXX::
+199:XXXXX::
+198:XXXXX::
+145:XXXXX::
+066:XXXXX::
+238:XXXXX::
+181:XXXXX::
+246:XXXXX::
+247:XXXXX::
+248:XXXXX::
+249:XXXXX::
+203:XXXXX::
+182:XXXXX::
+087:XXXXX::
+255:XXXXX::
