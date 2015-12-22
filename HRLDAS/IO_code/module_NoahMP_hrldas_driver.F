@@ -89,6 +89,21 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  GRAUPELNCV! non-convective graupel forcing (subset of rainncv) [mm]
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  HAILNCV   ! non-convective hail forcing (subset of rainncv) [mm]
 
+! New spatially varying fields
+
+!  CHARACTER(LEN = 256)                    ::  spatial_filename 
+!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  bexp_3D    ! C-H B exponent
+!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  smcdry_3D  ! Soil Moisture Limit: Dry
+!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  smcwlt_3D  ! Soil Moisture Limit: Wilt
+!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  smcref_3D  ! Soil Moisture Limit: Reference
+!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  smcmax_3D  ! Soil Moisture Limit: Max
+!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  dksat_3D   ! Saturated Soil Conductivity
+!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  dwsat_3D   ! Saturated Soil Diffusivity
+!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  psisat_3D  ! Saturated Matric Potential
+!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  quartz_3D  ! Soil quartz content
+!  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  refdk_2D   ! Reference Soil Conductivity
+!  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  refkdt_2D  ! Soil Infiltration Parameter
+
 ! INOUT (with generic LSM equivalent) (as defined in WRF)
 
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  TSK       ! surface radiative temperature [K]
@@ -379,6 +394,7 @@ module module_NoahMP_hrldas_driver
 
        split_output_count, & 
        khour, kday, zlvl, hrldas_setup_file, mmf_runoff_file, &
+!       spatial_filename, &
        external_veg_filename_template, external_lai_filename_template, &
        xstart, xend, ystart, yend
 
@@ -646,6 +662,18 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( SNOWNCV   (XSTART:XEND,YSTART:YEND) )    ! non-covective snow forcing (subset of rainncv) [mm]
   ALLOCATE ( GRAUPELNCV(XSTART:XEND,YSTART:YEND) )    ! non-convective graupel forcing (subset of rainncv) [mm]
   ALLOCATE ( HAILNCV   (XSTART:XEND,YSTART:YEND) )    ! non-convective hail forcing (subset of rainncv) [mm]
+
+!  ALLOCATE ( bexp_3d    (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! C-H B exponent
+!  ALLOCATE ( smcdry_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Dry
+!  ALLOCATE ( smcwlt_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Wilt
+!  ALLOCATE ( smcref_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Reference
+!  ALLOCATE ( smcmax_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Max
+!  ALLOCATE ( dksat_3D   (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Saturated Soil Conductivity
+!  ALLOCATE ( dwsat_3D   (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Saturated Soil Diffusivity
+!  ALLOCATE ( psisat_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Saturated Matric Potential
+!  ALLOCATE ( quartz_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil quartz content
+!  ALLOCATE ( refdk_2D   (XSTART:XEND,YSTART:YEND) )            ! Reference Soil Conductivity
+!  ALLOCATE ( refkdt_2D  (XSTART:XEND,YSTART:YEND) )            ! Soil Infiltration Parameter
 
 ! INOUT (with generic LSM equivalent) (as defined in WRF)
 
@@ -954,6 +982,14 @@ module module_NoahMP_hrldas_driver
   
   WHERE(SEAICE > 0.0) XICE = 1.0
 
+!------------------------------------------------------------------------
+! For spatially-varying soil parameters, read in necessary extra fields
+!------------------------------------------------------------------------
+
+!    CALL READ_3D_SOIL(SPATIAL_FILENAME, XSTART, XEND, YSTART, YEND, &
+!                      NSOIL,BEXP_3D,SMCDRY_3D,SMCWLT_3D,SMCREF_3D,SMCMAX_3D,  &
+!		      DKSAT_3D,DWSAT_3D,PSISAT_3D,QUARTZ_3D,REFDK_2D,REFKDT_2D)
+  
 !------------------------------------------------------------------------
 ! For IOPT_RUN = 5 (MMF groundwater), read in necessary extra fields
 ! This option is not tested for parallel use in the offline driver
@@ -1363,6 +1399,9 @@ end subroutine land_driver_ini
 		  SHGXY,    SHCXY,    SHBXY,    EVGXY,     EVBXY,      GHVXY, &
 		  GHBXY,    IRGXY,    IRCXY,    IRBXY,      TRXY,      EVCXY, &
 	       CHLEAFXY,   CHUCXY,   CHV2XY,   CHB2XY,                        &                          
+!                 BEXP_3D,SMCDRY_3D,SMCWLT_3D,SMCREF_3D,SMCMAX_3D,             &
+!		 DKSAT_3D,DWSAT_3D,PSISAT_3D,QUARTZ_3D,                       &
+!		 REFDK_2D,REFKDT_2D,                                          &
 #ifdef WRF_HYDRO
                  sfcheadrt,INFXSRT,soldrain,                          &    !O
 #endif

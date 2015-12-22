@@ -572,6 +572,192 @@ contains
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
 
+  subroutine read_3d_soil(spatial_filename,xstart, xend,ystart, yend,           &
+                          nsoil,bexp_3d,smcdry_3d,smcwlt_3d,smcref_3d,smcmax_3d,  &
+		          dksat_3d,dwsat_3d,psisat_3d,quartz_3d,refdk_2d,refkdt_2d)
+    implicit none
+    character(len=*),          intent(in)  :: spatial_filename
+    integer,                   intent(in)  :: xstart, xend, ystart, yend
+    integer,                   intent(in)  :: nsoil
+    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: bexp_3d
+    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smcdry_3d
+    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smcwlt_3d
+    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smcref_3d
+    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smcmax_3d
+    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: dksat_3d
+    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: dwsat_3d
+    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: psisat_3d
+    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: quartz_3d
+    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: refdk_2d
+    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: refkdt_2d
+    
+    character(len=24)  :: name
+    character(len=256) :: units
+    integer :: ierr,iret, varid,isoil
+    integer :: ncid
+    real, dimension(xstart:xend,ystart:yend,nsoil) :: xdum
+
+    ierr = nf90_open(spatial_filename, NF90_NOWRITE, ncid)
+    if (ierr /= 0) then
+       write(*,'("read_3d_soil:  Problem opening 3d soil file: ''", A, "''")') trim(spatial_filename)
+       stop
+    endif
+
+    name = "bexp"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,nsoil/))
+    
+    do isoil = 1,4
+      bexp_3d(:,isoil,:) = xdum(:,:,isoil)
+    end do
+
+    name = "smcdry"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,nsoil/))
+    
+    do isoil = 1,4
+      smcdry_3d(:,isoil,:) = xdum(:,:,isoil)
+    end do
+
+    name = "smcwlt"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,nsoil/))
+    
+    do isoil = 1,4
+      smcwlt_3d(:,isoil,:) = xdum(:,:,isoil)
+    end do
+
+    name = "smcref"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,nsoil/))
+    
+    do isoil = 1,4
+      smcref_3d(:,isoil,:) = xdum(:,:,isoil)
+    end do
+
+    name = "smcmax"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,nsoil/))
+    
+    do isoil = 1,4
+      smcmax_3d(:,isoil,:) = xdum(:,:,isoil)
+    end do
+
+    name = "dksat"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,nsoil/))
+    
+    do isoil = 1,4
+      dksat_3d(:,isoil,:) = xdum(:,:,isoil)
+    end do
+
+    name = "dwsat"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,nsoil/))
+    
+    do isoil = 1,4
+      dwsat_3d(:,isoil,:) = xdum(:,:,isoil)
+    end do
+
+    name = "psisat"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,nsoil/))
+    
+    do isoil = 1,4
+      psisat_3d(:,isoil,:) = xdum(:,:,isoil)
+    end do
+
+    name = "quartz"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,nsoil/))
+    
+    do isoil = 1,4
+      quartz_3d(:,isoil,:) = xdum(:,:,isoil)
+    end do
+
+    name = "refdk"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, refdk_2d, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
+    
+    name = "refkdt"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, refkdt_2d, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
+    
+    ! Close the NetCDF file
+    ierr = nf90_close(ncid)
+    if (ierr /= 0) stop "MODULE_NOAHLSM_HRLDAS_INPUT:  read_3d_soil:  NF90_CLOSE"
+
+
+  end subroutine read_3d_soil
+
+!---------------------------------------------------------------------------------------------------------
+
   subroutine get_landuse_netcdf(ncid, array, units, xstart, xend, ystart, yend)
     implicit none
     integer, intent(in) :: ncid
