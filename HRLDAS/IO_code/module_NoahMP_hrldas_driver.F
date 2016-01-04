@@ -159,6 +159,8 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  RTMASSXY  ! mass of fine roots [g/m2]
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  STMASSXY  ! stem mass [g/m2]
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  WOODXY    ! mass of wood (incl. woody roots) [g/m2]
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  GRAINXY   ! XING mass of grain!THREE
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  GDDXY     ! XINGgrowingdegressday
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  STBLCPXY  ! stable carbon in deep soil [g/m2]
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  FASTCPXY  ! short-lived carbon, shallow soil [g/m2]
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  LAI       ! leaf area index
@@ -730,10 +732,12 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( RTMASSXY  (XSTART:XEND,YSTART:YEND) )  ! mass of fine roots [g/m2]
   ALLOCATE ( STMASSXY  (XSTART:XEND,YSTART:YEND) )  ! stem mass [g/m2]
   ALLOCATE ( WOODXY    (XSTART:XEND,YSTART:YEND) )  ! mass of wood (incl. woody roots) [g/m2]
+  ALLOCATE ( GRAINXY   (XSTART:XEND,YSTART:YEND) )  ! mass of grain XING [g/m2]
+  ALLOCATE ( GDDXY     (XSTART:XEND,YSTART:YEND) )  ! growing degree days XING FOUR
   ALLOCATE ( STBLCPXY  (XSTART:XEND,YSTART:YEND) )  ! stable carbon in deep soil [g/m2]
   ALLOCATE ( FASTCPXY  (XSTART:XEND,YSTART:YEND) )  ! short-lived carbon, shallow soil [g/m2]
   ALLOCATE ( LAI       (XSTART:XEND,YSTART:YEND) )  ! leaf area index
-  ALLOCATE ( LAI_tmp       (XSTART:XEND,YSTART:YEND) )  ! leaf area index
+  ALLOCATE ( LAI_tmp   (XSTART:XEND,YSTART:YEND) )  ! leaf area index
   ALLOCATE ( XSAIXY    (XSTART:XEND,YSTART:YEND) )  ! stem area index
   ALLOCATE ( TAUSSXY   (XSTART:XEND,YSTART:YEND) )  ! snow age factor
   
@@ -1050,6 +1054,8 @@ module module_NoahMP_hrldas_driver
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "RTMASS"  , RTMASSXY )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "STMASS"  , STMASSXY )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "WOOD"    , WOODXY   )
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "GRAIN"   , GRAINXY  )
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "GDD"     , GDDXY    )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "STBLCP"  , STBLCPXY )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FASTCP"  , FASTCPXY )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "LAI"     , LAI      )
@@ -1092,6 +1098,7 @@ module module_NoahMP_hrldas_driver
                   FWETXY, SNEQVOXY, ALBOLDXY,  QSNOWXY, WSLAKEXY,    ZWTXY,     WAXY, &
                     WTXY,   TSNOXY,  ZSNSOXY,  SNICEXY,  SNLIQXY, LFMASSXY, RTMASSXY, &
                 STMASSXY,   WOODXY, STBLCPXY, FASTCPXY,   XSAIXY, LAI,                    &
+                 GRAINXY,    GDDXY,                                                   &
                   T2MVXY,   T2MBXY, CHSTARXY,                                         &
                    NSOIL,  .true.,                                                   &
                   .true.,runoff_option,                                                   &
@@ -1181,6 +1188,7 @@ module module_NoahMP_hrldas_driver
                   FWETXY, SNEQVOXY, ALBOLDXY,  QSNOWXY, WSLAKEXY,    ZWTXY,     WAXY, &
                     WTXY,   TSNOXY,  ZSNSOXY,  SNICEXY,  SNLIQXY, LFMASSXY, RTMASSXY, &
                 STMASSXY,   WOODXY, STBLCPXY, FASTCPXY,   XSAIXY, LAI,                    &
+                 GRAINXY,    GDDXY,                                                   &
                   T2MVXY,   T2MBXY, CHSTARXY,                                         &
                    NSOIL,  .false.,                                                   &
                   .true.,runoff_option,                                                   &
@@ -1390,7 +1398,7 @@ end subroutine land_driver_ini
 		QSNOWXY, WSLAKEXY,    ZWTXY,     WAXY,      WTXY,     TSNOXY, &
 		ZSNSOXY,  SNICEXY,  SNLIQXY, LFMASSXY,  RTMASSXY,   STMASSXY, &
 		 WOODXY, STBLCPXY, FASTCPXY,      LAI,    XSAIXY,    TAUSSXY, &
-	        SMOISEQ, SMCWTDXY,DEEPRECHXY,  RECHXY,                        & ! IN/OUT Noah MP only
+	        SMOISEQ, SMCWTDXY,DEEPRECHXY,  RECHXY,   GRAINXY,      GDDXY, & ! IN/OUT Noah MP only
 	         T2MVXY,   T2MBXY,   Q2MVXY,   Q2MBXY,                        &
                  TRADXY,    NEEXY,    GPPXY,    NPPXY,    FVEGXY,    RUNSFXY, &
 	        RUNSBXY,   ECANXY,   EDIRXY,  ETRANXY,     FSAXY,     FIRAXY, &
@@ -1546,6 +1554,8 @@ end subroutine land_driver_ini
               call add_to_output(RTMASSXY   , "RTMASS"  , "Mass of fine roots"                   , "g m{-2}"               )
               call add_to_output(STMASSXY   , "STMASS"  , "Stem mass"                            , "g m{-2}"               )
               call add_to_output(WOODXY     , "WOOD"    , "Mass of wood and woody roots"         , "g m{-2}"               )
+              call add_to_output(GRAINXY    , "GRAIN"   , "Mass of grain "                       , "g m{-2}"               ) !XING!THREE
+              call add_to_output(GDDXY      , "GDD"     , "Growing degree days(10) "             , ""                      ) !XING
               call add_to_output(STBLCPXY   , "STBLCP"  , "Stable carbon in deep soil"           , "g m{-2}"               )
               call add_to_output(FASTCPXY   , "FASTCP"  , "Short-lived carbon in shallow soil"   , "g m{-2}"               )
               call add_to_output(NEEXY      , "NEE"     , "Net ecosystem exchange"                 , "g m{-2} s{-1} CO2"   )
@@ -1656,6 +1666,8 @@ subroutine lsm_restart()
   call add_to_restart(RTMASSXY  , "RTMASS")
   call add_to_restart(STMASSXY  , "STMASS")
   call add_to_restart(WOODXY    , "WOOD"  )
+  call add_to_restart(GRAINXY   , "GRAIN" )
+  call add_to_restart(GDDXY     , "GDD"   )
   call add_to_restart(STBLCPXY  , "STBLCP")
   call add_to_restart(FASTCPXY  , "FASTCP")
   call add_to_restart(LAI       , "LAI"   )
