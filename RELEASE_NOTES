@@ -1,0 +1,125 @@
+
+=========================================================================
+======================= HRLDAS v3.8 Release Notes =======================
+=========================================================================
+
+LSM capabilities/enhancements
+----------------------------------
+
+- Added 3 new dveg option for reading LAI from forcing (vegfra=dynamic,read,max); Add 1 new dveg option for reading FVEG when dynamic vegetation is turned on
+
+- Added glacier options; opt_gla=1 => original version; opt_gla=2 => no ice phase change or sublimation (like Noah glacier)
+
+- Added surface resistance as an option; add new snow fraction weighted rsurf; snow values defined in the table
+
+- Initial commit of crop model into release HRLDAS (opt_dveg = 10); currently runs crop everywhere
+
+- Made the specification of urban types more general (LOW_DENSITY_RESIDENTIAL, HIGH_DENSITY_RESIDENTIAL, HIGH_INTENSITY_INDUSTRIAL), now set in the MPTABLE dependent on classification scheme (i.e., not limited to 31,32,33); this is for future coupling with urban models.
+
+
+LSM bug fixes
+----------------------------------
+
+- Fixed two bugs with OPT_STC=3
+
+- Fixed bug in new surface resistance option causing divide by 0
+
+- Write a message if incoming snow water and snow depth are inconsistent
+  Reduce SWE to 2000mm if input is >2000mm, Noah-MP limits SWE internally to 2000mm
+  
+- Recalculate ESTG in glacier code when snow is melting, will decrease sublimation, but likely increase melting
+
+
+Driver capabilities/enhancements
+----------------------------------
+
+- Added instructions and scripts for extraction of single point forcing and setup files from 2D datasets (e.g., NLDAS)
+
+- Structure for spatially-varying soil properties added to DRV and LSM; Use of the 2D/3D fields in the driver and DRV commented to be consistent with WRF
+
+
+Driver bug fixes
+----------------------------------
+
+- Zero forcing where not land to prevent overflow with ifort
+
+
+===========================================================================
+======================= HRLDAS v3.7.1 Release Notes =======================
+===========================================================================
+
+LSM capabilities/enhancements
+----------------------------------
+
+- Added depth dimension to soil parameters.
+
+
+LSM bug fixes
+----------------------------------
+
+- Reorganized parameters to fix problems with OpenMP in WRF simulations.
+
+
+Driver capabilities/enhancements
+----------------------------------
+
+- none
+
+
+Driver bug fixes
+----------------------------------
+
+- Initialized some accumulated fields at 0 (instead of undefined).
+
+
+=========================================================================
+======================= HRLDAS v3.7 Release Notes =======================
+=========================================================================
+
+New capabilities:
+
+1. A parallel capability has been added by Wei Yu (weiyu@ncar.edu) to support mpi only.
+
+ To compile with parallel version
+  edit the file 'user_build_options'
+  uncommment the compiler section with MPI (available for pgf90 and ifort compilers)
+
+ To compile with sequential version
+  edit the file 'user_build_options'
+  uncommment the compiler section without MPI
+
+
+2. System setup and execution now requires only a WRF/WPS geo_em file. Dependence on the wrfinput file has been removed.
+
+
+3. As part of #2, initialization no longer occurs in the first forcing file, but in the file listed in the namelist as:
+    HRLDAS_SETUP_FILE = ""
+
+   The initialization fields are:
+     SNOW,CANWAT,TSK,TSLB,SMOIS
+   
+   This file also contains the static grid/domain information:
+     XLAT,XLONG,TMN,HGT,SEAICE,MAPFAC_MX,MAPFAC_MY,SHDMAX,SHDMIN,XLAND,IVGTYP,ISLTYP,DZS,ZS
+
+   This file can also contains some optional fields:
+     LAI
+     
+   NOTE: a WRF input file can be used as a HRLDAS_SETUP_FILE
+
+4. The timing structure has changed:
+
+   - The initial conditions are the states at START time. 
+   - First forcing file used is START time + FORCING_TIMESTEP 
+   - First integration is START time + NOAH_TIMESTEP 
+   - First output file is now START time + OUTPUT_TIMESTEP     
+   - RESTART file states are consistent with OUTPUT file states with the same time stamp
+
+
+5. Instructions for using GLDAS and NLDAS as forcing has been provided in addition to the NARR instructions (see /docs)
+     Also, a NCL script has been included for preparing single- or multi-point forcing
+     
+
+6. Initial LAI (if present in the HRLDAS_SETUP_FILE) will be used to initialize the leaf and stem carbon pools
+
+
+7. Removed dependence on external GRIB tables for forcing creation; now in namelist only
