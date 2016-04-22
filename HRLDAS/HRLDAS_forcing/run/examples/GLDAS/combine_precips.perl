@@ -50,7 +50,7 @@ for $hr (@hrs)
   $file2_in  =    "$data_dir/Snowf/GLDAS_Snowf.20$yy$nums[$mon]$nums[$day]$hr.grb";
   $file_out =  "$results_dir/Precip/GLDAS_Precip.20$yy$nums[$mon]$nums[$day]$hr.grb";
   print ("$file_out \n");
-  system ("$filename $file1_in $file2_in $file_out");
+  system ("./$filename $file1_in $file2_in $file_out");
  }
  }
  }

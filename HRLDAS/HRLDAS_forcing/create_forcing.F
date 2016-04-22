@@ -486,9 +486,9 @@ program create_forcing
            do i = 1, 4
               call process(date, STcurrent(i), STprev(i), STpost(i), geo_em, expand_loop);
               call process(date, SMcurrent(i), SMprev(i), SMpost(i), geo_em, expand_loop);
-	      dzs(i) = STcurrent(i)%layer2 - STcurrent(i)%layer1
+	      dzs(i) = SMcurrent(i)%layer2 - SMcurrent(i)%layer1
 	      if (i == 1) then
-	        zs(i) = 0.5 * STcurrent(i)%layer2
+	        zs(i) = 0.5 * SMcurrent(i)%layer2
 	      else
 	        zs(i) = 0.5*dzs(i) + sum(dzs(1:i-1))
 	      end if
