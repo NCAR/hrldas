@@ -53,7 +53,7 @@ for $hr (@hrs)
   $file2_out =  " $results_dir/V/GLDAS_V.20$yy$nums[$mon]$nums[$day]$hr.grb";
 
   print ("$file_in \n");
-  system ("$filename $file_in $file1_out $file2_out");
+  system ("./$filename $file_in $file1_out $file2_out");
  }
  }
  } # End of outer time loop

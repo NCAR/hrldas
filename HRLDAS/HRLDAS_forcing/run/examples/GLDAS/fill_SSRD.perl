@@ -129,7 +129,7 @@ for($hh=0; $hh<=21; $hh=$hh+3)
 
   close(FILE);
 
-  system ("$filename");
+  system ("./$filename");
 
  }
  }
