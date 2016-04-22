@@ -1,0 +1,22 @@
+
+#=============================================================================================
+#  Options for Linux with Intel Fortran
+#=============================================================================================
+
+ COMPILERF90    =      ifort
+ FREESOURCE     =      -free
+ F90FLAGS       =      -convert big_endian -g -O0 -check all,noshape,nopointer,noarg_temp_created -fpe0
+ MODFLAG        =      -I
+ LDFLAGS        =
+ CPP            =      cpp
+ CPPFLAGS       =      -P -traditional # -D_HRLDAS_URBAN_
+ LIBS           =
+ LIBJASPER      =      -ljpeg -ljasper
+ INCJASPER      =      -I/usr/include/jasper
+ NETCDFMOD      =      -I/glade/apps/opt/netcdf/4.3.0/intel/12.1.5/include
+ NETCDFLIB      =      -L/glade/apps/opt/netcdf/4.3.0/intel/12.1.5/lib -lnetcdf -lnetcdff
+ BZIP2          =      NO
+ BZIP2_INCLUDE  =      -I/usr/include
+ BZIP2_LIB      =      -L/usr/lib64 -lbz2
+ RM             =      rm -f
+ CC             =      cc
