@@ -6,15 +6,28 @@
 LSM capabilities/enhancements
 ----------------------------------
 
-- Added 3 new dveg option for reading LAI from forcing (vegfra=dynamic,read,max); Add 1 new dveg option for reading FVEG when dynamic vegetation is turned on
+- Added 3 new dveg option for reading LAI from forcing and 1 new dveg option for reading FVEG;
+   Also added initial commit of crop model; currently runs crop everywhere
+    dveg =  6 -> dynamic vegetation on  (use FVEG = SHDFAC from input)
+    dveg =  7 -> dynamic vegetation off (use input LAI; use FVEG = SHDFAC from input)
+    dveg =  8 -> dynamic vegetation off (use input LAI; calculate FVEG)
+    dveg =  9 -> dynamic vegetation off (use input LAI; use maximum vegetation fraction)
+    dveg = 10 -> crop model on (use maximum vegetation fraction)
 
-- Added glacier options; opt_gla=1 => original version; opt_gla=2 => no ice phase change or sublimation (like Noah glacier)
+- Added glacier options:
+    opt_gla = 1 -> original Noah-MP version
+    opt_gla = 2 -> no ice phase change or sublimation (like Noah glacier)
 
-- Added surface resistance as an option; add new snow fraction weighted rsurf; snow values defined in the table
+- Added surface resistance as an option (now four options)
+    opt_sfc = 1 -> Sakaguchi and Zeng, 2009 (has been Noah-MP default)
+    opt_sfc = 2 -> Sellers (1992)
+    opt_sfc = 3 -> adjusted Sellers to decrease RSURF for wet soil
+    opt_sfc = 4 -> option 1 for non-snow; rsurf = rsurf_snow for snow (set as RSURF_SNOW in MPTABLE)
 
-- Initial commit of crop model into release HRLDAS (opt_dveg = 10); currently runs crop everywhere
-
-- Made the specification of urban types more general (LOW_DENSITY_RESIDENTIAL, HIGH_DENSITY_RESIDENTIAL, HIGH_INTENSITY_INDUSTRIAL), now set in the MPTABLE dependent on classification scheme (i.e., not limited to 31,32,33); this is for future coupling with urban models.
+- Made the specification of urban types more general 
+   (LOW_DENSITY_RESIDENTIAL, HIGH_DENSITY_RESIDENTIAL, HIGH_INTENSITY_INDUSTRIAL), 
+   now set in the MPTABLE dependent on classification scheme (i.e., not limited to 31,32,33); 
+   this is for future coupling with urban models.
 
 
 LSM bug fixes
@@ -27,15 +40,18 @@ LSM bug fixes
 - Write a message if incoming snow water and snow depth are inconsistent
   Reduce SWE to 2000mm if input is >2000mm, Noah-MP limits SWE internally to 2000mm
   
-- Recalculate ESTG in glacier code when snow is melting, will decrease sublimation, but likely increase melting
+- Recalculate ESTG in glacier code when snow is melting, will decrease sublimation, 
+   but likely increase melting
 
 
 Driver capabilities/enhancements
 ----------------------------------
 
-- Added instructions and scripts for extraction of single point forcing and setup files from 2D datasets (e.g., NLDAS)
+- Added instructions and scripts for extraction of single point forcing and setup files from 
+   2D datasets (e.g., NLDAS)
 
-- Structure for spatially-varying soil properties added to DRV and LSM; Use of the 2D/3D fields in the driver and DRV commented to be consistent with WRF
+- Structure for spatially-varying soil properties added to DRV and LSM; 
+   Use of the 2D/3D fields in the driver and DRV commented to be consistent with WRF
 
 
 Driver bug fixes
@@ -89,10 +105,13 @@ New capabilities:
   uncommment the compiler section without MPI
 
 
-2. System setup and execution now requires only a WRF/WPS geo_em file. Dependence on the wrfinput file has been removed.
+2. System setup and execution now requires only a WRF/WPS geo_em file. 
+    Dependence on the wrfinput file has been removed.
 
 
-3. As part of #2, initialization no longer occurs in the first forcing file, but in the file listed in the namelist as:
+3. As part of #2, initialization no longer occurs in the first forcing file, 
+    but in the file listed in the namelist as:
+    
     HRLDAS_SETUP_FILE = ""
 
    The initialization fields are:
