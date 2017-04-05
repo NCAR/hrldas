@@ -570,6 +570,95 @@ contains
   end subroutine read_mmf_runoff
 
 !---------------------------------------------------------------------------------------------------------
+  subroutine read_crop_input(wrfinput_flnm,                            &
+       xstart, xend,                                                   &
+       ystart, yend,                                                   &
+       croptype,planting,harvest,season_gdd)
+    implicit none
+    character(len=*),          intent(in)  :: wrfinput_flnm
+    integer,                   intent(in)  :: xstart, xend, ystart, yend
+    real,    dimension(xstart:xend,5,ystart:yend), intent(out) :: croptype
+    real,    dimension(xstart:xend,  ystart:yend), intent(out) :: planting
+    real,    dimension(xstart:xend,  ystart:yend), intent(out) :: harvest
+    real,    dimension(xstart:xend,  ystart:yend), intent(out) :: season_gdd
+    
+    character(len=256) :: units
+    character(len=24)  :: name
+    integer :: ierr,iret
+    integer :: ncid, varid, icrop
+    real, dimension(xstart:xend,ystart:yend,5) :: xdum
+    integer :: rank
+
+#ifdef _PARALLEL_  
+    call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+    if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
+#else
+    rank = 0
+#endif
+
+
+    ! Open the NetCDF file.
+    if (rank == 0) write(*,'("wrfinput_flnm: ''", A, "''")') trim(wrfinput_flnm)
+#ifdef _PARALLEL_
+    ierr = nf90_open_par(wrfinput_flnm, NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+#else
+    ierr = nf90_open(wrfinput_flnm, NF90_NOWRITE, ncid)
+#endif
+    if (ierr /= 0) then
+       write(*,'("read_mmf_runoff:  Problem opening wrfinput file: ''", A, "''")') trim(wrfinput_flnm)
+#ifdef _PARALLEL_
+       call mpi_finalize(ierr)
+       if (ierr /= 0) write(*, '("Problem with MPI_finalize.")')
+#endif
+       stop
+    endif
+
+! Get crop type data (CROPTYPE)
+    name = "CROPTYPE"
+    iret = nf90_inq_varid(ncid,  name,  varid)
+    if (iret == 0) then
+      ierr = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,5/))
+      do icrop = 1,5
+        croptype(:,icrop,:) = xdum(:,:,icrop)
+      end do
+    else
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using default values."
+    endif
+
+! Get planting date (PLANTING)
+    name = "PLANTING"
+    iret = nf90_inq_varid(ncid,  name,  varid)
+    if (iret == 0) then
+      ierr = nf90_get_var(ncid, varid, planting, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
+    else
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using default values."
+    endif
+
+! Get harvest date (HARVEST)
+    name = "HARVEST"
+    iret = nf90_inq_varid(ncid,  name,  varid)
+    if (iret == 0) then
+      ierr = nf90_get_var(ncid, varid, harvest, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
+    else
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using default values."
+    endif
+
+! Get seasonal growing degree days (SEASON_GDD)
+    name = "SEASON_GDD"
+    iret = nf90_inq_varid(ncid,  name,  varid)
+    if (iret == 0) then
+      ierr = nf90_get_var(ncid, varid, season_gdd, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
+    else
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using default values."
+    endif
+
+! Close the NetCDF file
+    ierr = nf90_close(ncid)
+    if (ierr /= 0) stop "MODULE_NOAHLSM_HRLDAS_INPUT:  read_crop_input:  NF90_CLOSE"
+
+
+  end subroutine read_crop_input
+
 !---------------------------------------------------------------------------------------------------------
 
   subroutine read_3d_soil(spatial_filename,xstart, xend,ystart, yend,           &
