@@ -250,6 +250,17 @@ module module_NoahMP_hrldas_driver
   INTEGER                                 ::  STEPWTD          ! step of groundwater call
 
 !------------------------------------------------------------------------
+! Needed for crop model (DVEG = 10)
+!------------------------------------------------------------------------
+
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)   :: PGSXY
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)   :: CROPCAT
+  REAL   , ALLOCATABLE, DIMENSION(:,:)   :: PLANTING
+  REAL   , ALLOCATABLE, DIMENSION(:,:)   :: HARVEST
+  REAL   , ALLOCATABLE, DIMENSION(:,:)   :: SEASON_GDD
+  REAL   , ALLOCATABLE, DIMENSION(:,:,:) :: CROPTYPE
+
+!------------------------------------------------------------------------
 ! 2D variables not used in WRF - should be removed?
 !------------------------------------------------------------------------
 
@@ -467,7 +478,8 @@ module module_NoahMP_hrldas_driver
 !---------------------------------------------------------------------
 
   update_lai = .true.   ! default: use LAI if present in forcing file
-  if (dynamic_veg_option == 2 .or. dynamic_veg_option == 5 .or. dynamic_veg_option == 6) &
+  if (dynamic_veg_option == 2 .or. dynamic_veg_option == 5 .or. &
+      dynamic_veg_option == 6 .or. dynamic_veg_option == 10) &
     update_lai = .false.
 
   update_veg = .false.  ! default: don't use VEGFRA if present in forcing file
@@ -814,6 +826,17 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( QSLATXY     (XSTART:XEND,YSTART:YEND) )  ! 
 
 !------------------------------------------------------------------------
+! Needed for crop model (DVEG = 10)
+!------------------------------------------------------------------------
+
+  ALLOCATE ( PGSXY       (XSTART:XEND,  YSTART:YEND) )
+  ALLOCATE ( CROPCAT     (XSTART:XEND,  YSTART:YEND) )
+  ALLOCATE ( PLANTING    (XSTART:XEND,  YSTART:YEND) )
+  ALLOCATE ( HARVEST     (XSTART:XEND,  YSTART:YEND) )
+  ALLOCATE ( SEASON_GDD  (XSTART:XEND,  YSTART:YEND) )
+  ALLOCATE ( CROPTYPE    (XSTART:XEND,5,YSTART:YEND) )
+
+!------------------------------------------------------------------------
 
   ALLOCATE ( CHSTARXY  (XSTART:XEND,YSTART:YEND) )  ! for consistency with MP_init; delete later
   ALLOCATE ( SEAICE    (XSTART:XEND,YSTART:YEND) )  ! seaice fraction
@@ -972,6 +995,12 @@ module module_NoahMP_hrldas_driver
   CHSTARXY   = undefined_real
   Z0         = undefined_real
   ZNT        = undefined_real
+  PGSXY      = undefined_real
+  CROPCAT    = undefined_real
+  PLANTING   = undefined_real
+  HARVEST    = undefined_real
+  SEASON_GDD = undefined_real
+  CROPTYPE   = undefined_real
 
   XLAND          = 1.0   ! water = 2.0, land = 1.0
   XICE           = 0.0   ! fraction of grid that is seaice
@@ -1002,6 +1031,19 @@ module module_NoahMP_hrldas_driver
   if (runoff_option == 5) then
     CALL READ_MMF_RUNOFF(MMF_RUNOFF_FILE, XSTART, XEND, YSTART, YEND,&
                          ZWTXY,EQZWT,RIVERBEDXY,RIVERCONDXY,PEXPXY,FDEPTHXY)
+  end if
+
+!------------------------------------------------------------------------
+! For DVEG = 10 (crop model), read in necessary extra fields
+!------------------------------------------------------------------------
+
+  CROPTYPE   = 0       ! make default 0% crops everywhere
+  PLANTING   = 126     ! default planting date
+  HARVEST    = 290     ! default harvest date
+  SEASON_GDD = 1605    ! default total seasonal growing degree days
+  if (dynamic_veg_option == 10) then
+    CALL READ_CROP_INPUT(HRLDAS_SETUP_FILE, XSTART, XEND, YSTART, YEND,&
+                         CROPTYPE,PLANTING,HARVEST,SEASON_GDD)
   end if
 
 !----------------------------------------------------------------------
@@ -1099,6 +1141,7 @@ module module_NoahMP_hrldas_driver
                     WTXY,   TSNOXY,  ZSNSOXY,  SNICEXY,  SNLIQXY, LFMASSXY, RTMASSXY, &
                 STMASSXY,   WOODXY, STBLCPXY, FASTCPXY,   XSAIXY, LAI,                    &
                  GRAINXY,    GDDXY,                                                   &
+                CROPTYPE,  CROPCAT,                                                   &
                   T2MVXY,   T2MBXY, CHSTARXY,                                         &
                    NSOIL,  .true.,                                                   &
                   .true.,runoff_option,                                                   &
@@ -1189,6 +1232,7 @@ module module_NoahMP_hrldas_driver
                     WTXY,   TSNOXY,  ZSNSOXY,  SNICEXY,  SNLIQXY, LFMASSXY, RTMASSXY, &
                 STMASSXY,   WOODXY, STBLCPXY, FASTCPXY,   XSAIXY, LAI,                    &
                  GRAINXY,    GDDXY,                                                   &
+                CROPTYPE,  CROPCAT,                                                   &
                   T2MVXY,   T2MBXY, CHSTARXY,                                         &
                    NSOIL,  .false.,                                                   &
                   .true.,runoff_option,                                                   &
@@ -1382,7 +1426,8 @@ end subroutine land_driver_ini
          CALL noahmplsm(ITIMESTEP,       YR, JULIAN_IN,   COSZEN, XLAT_URB2D, &
 	           DZ8W,     DTBL,      DZS,     NUM_SOIL_LAYERS,         DX, &
 		 IVGTYP,   ISLTYP,   VEGFRA,   GVFMAX,       TMN,             &
-		  XLAND,     XICE,     XICE_THRESHOLD,                        &
+		  XLAND,     XICE,     XICE_THRESHOLD,   CROPCAT,             &
+               PLANTING,  HARVEST,SEASON_GDD,                               &
                   IDVEG, IOPT_CRS, IOPT_BTR, IOPT_RUN,  IOPT_SFC,   IOPT_FRZ, &
 	       IOPT_INF, IOPT_RAD, IOPT_ALB, IOPT_SNF, IOPT_TBOT,   IOPT_STC, &
 	       IOPT_GLA, IOPT_RSF, IZ0TLND,                                   &
@@ -1398,7 +1443,7 @@ end subroutine land_driver_ini
 		QSNOWXY, WSLAKEXY,    ZWTXY,     WAXY,      WTXY,     TSNOXY, &
 		ZSNSOXY,  SNICEXY,  SNLIQXY, LFMASSXY,  RTMASSXY,   STMASSXY, &
 		 WOODXY, STBLCPXY, FASTCPXY,      LAI,    XSAIXY,    TAUSSXY, &
-	        SMOISEQ, SMCWTDXY,DEEPRECHXY,  RECHXY,   GRAINXY,      GDDXY, & ! IN/OUT Noah MP only
+	        SMOISEQ, SMCWTDXY,DEEPRECHXY,  RECHXY,   GRAINXY,      GDDXY,PGSXY, & ! IN/OUT Noah MP only
 	         T2MVXY,   T2MBXY,   Q2MVXY,   Q2MBXY,                        &
                  TRADXY,    NEEXY,    GPPXY,    NPPXY,    FVEGXY,    RUNSFXY, &
 	        RUNSBXY,   ECANXY,   EDIRXY,  ETRANXY,     FSAXY,     FIRAXY, &
