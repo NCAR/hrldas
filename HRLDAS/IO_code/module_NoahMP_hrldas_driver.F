@@ -246,6 +246,9 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QRFXY
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QSPRINGXY
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QSLATXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  RECHCLIM
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  RIVERMASK
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  NONRIVERXY
   REAL                                    ::  WTDDT  = 30.0    ! frequency of groundwater call [minutes]
   INTEGER                                 ::  STEPWTD          ! step of groundwater call
 
@@ -812,6 +815,9 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( QRFXY       (XSTART:XEND,YSTART:YEND) )  ! 
   ALLOCATE ( QSPRINGXY   (XSTART:XEND,YSTART:YEND) )  ! 
   ALLOCATE ( QSLATXY     (XSTART:XEND,YSTART:YEND) )  ! 
+  ALLOCATE ( RECHCLIM    (XSTART:XEND,YSTART:YEND) )  ! 
+  ALLOCATE ( RIVERMASK   (XSTART:XEND,YSTART:YEND) )  ! 
+  ALLOCATE ( NONRIVERXY  (XSTART:XEND,YSTART:YEND) )  ! 
 
 !------------------------------------------------------------------------
 
@@ -1107,7 +1113,8 @@ module module_NoahMP_hrldas_driver
                   its,ite, jts,jte, kts,kte                 &  ! tile
                      ,smoiseq  ,smcwtdxy ,rechxy   ,deeprechxy, areaxy ,dx, dy, msftx, msfty,&
                      wtddt    ,stepwtd  ,dtbl  ,qrfsxy ,qspringsxy  ,qslatxy,                  &
-                     fdepthxy ,terrain ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy              &
+                     fdepthxy ,terrain ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy,              &
+                     rechclim  ,rivermask ,nonriverxy                 &
                      )
   else
 
@@ -1197,7 +1204,8 @@ module module_NoahMP_hrldas_driver
                   its,ite, jts,jte, kts,kte                 &  ! tile
                      ,smoiseq  ,smcwtdxy ,rechxy   ,deeprechxy, areaxy ,dx, dy, msftx, msfty,&
                      wtddt    ,stepwtd  ,dtbl  ,qrfsxy ,qspringsxy  ,qslatxy,                  &
-                     fdepthxy ,terrain ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy              &
+                     fdepthxy ,terrain ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy,              &
+                     rechclim  ,rivermask ,nonriverxy                 &
                      )
 
       TAUSSXY = 0.0   ! Need to be added to _INIT later
