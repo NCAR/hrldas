@@ -8,6 +8,7 @@ include ../user_build_options
 OBJS = \
 	module_date_utilities.o \
 	module_model_constants.o \
+	module_ra_gfdleta.o \
 	module_wrf_utilities.o \
 	kwm_string_utilities.o
 	
