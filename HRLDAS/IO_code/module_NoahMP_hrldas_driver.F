@@ -372,7 +372,6 @@ module module_NoahMP_hrldas_driver
   integer            :: kday
   real               :: zlvl 
   character(len=256) :: hrldas_setup_file = " "
-  character(len=256) :: mmf_runoff_file = " "
   character(len=256) :: external_veg_filename_template = " "
   character(len=256) :: external_lai_filename_template = " "
   integer            :: xstart = 1
@@ -398,7 +397,7 @@ module module_NoahMP_hrldas_driver
        glacier_option, surface_resistance_option, &
 
        split_output_count, & 
-       khour, kday, zlvl, hrldas_setup_file, mmf_runoff_file, &
+       khour, kday, zlvl, hrldas_setup_file, &
 !       spatial_filename, &
        external_veg_filename_template, external_lai_filename_template, &
        xstart, xend, ystart, yend
@@ -1006,8 +1005,8 @@ module module_NoahMP_hrldas_driver
 !------------------------------------------------------------------------
 
   if (runoff_option == 5) then
-    CALL READ_MMF_RUNOFF(MMF_RUNOFF_FILE, XSTART, XEND, YSTART, YEND,&
-                         ZWTXY,EQZWT,RIVERBEDXY,RIVERCONDXY,PEXPXY,FDEPTHXY)
+    CALL READ_MMF_RUNOFF(HRLDAS_SETUP_FILE, XSTART, XEND, YSTART, YEND,&
+                         FDEPTHXY,EQZWT,RECHCLIM,RIVERMASK,RIVERBEDXY,NONRIVERXY)
   end if
 
 !----------------------------------------------------------------------
