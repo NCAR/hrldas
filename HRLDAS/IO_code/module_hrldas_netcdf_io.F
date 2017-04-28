@@ -503,16 +503,16 @@ contains
   subroutine read_mmf_runoff(wrfinput_flnm,                            &
        xstart, xend,                                                   &
        ystart, yend,                                                   &
-       zwt,eqzwt,riverbed,rivercond,pexp,fdepth)
+       fdepth,eqzwt,rechclim,rivermask,riverbed,nonriver)
     implicit none
     character(len=*),          intent(in)  :: wrfinput_flnm
     integer,                   intent(in)  :: xstart, xend, ystart, yend
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: zwt
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: eqzwt
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: riverbed
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: rivercond
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: pexp
     real,    dimension(xstart:xend,ystart:yend), intent(out) :: fdepth
+    real,    dimension(xstart:xend,ystart:yend), intent(out) :: eqzwt
+    real,    dimension(xstart:xend,ystart:yend), intent(out) :: rechclim
+    real,    dimension(xstart:xend,ystart:yend), intent(out) :: rivermask
+    real,    dimension(xstart:xend,ystart:yend), intent(out) :: riverbed
+    real,    dimension(xstart:xend,ystart:yend), intent(out) :: nonriver
     
     character(len=256) :: units
     integer :: ierr
@@ -544,27 +544,27 @@ contains
        stop
     endif
 
-    ! Get water table depth (ZWT)
-    call get_2d_netcdf("ZWT", ncid, zwt,  units, xstart, xend, ystart, yend, FATAL, ierr)
+    ! Get equilibrium water table depth (FDEPTH)
+    call get_2d_netcdf("FDEPTH", ncid, fdepth,  units, xstart, xend, ystart, yend, FATAL, ierr)
 
     ! Get equilibrium water table depth (EQZWT)
     call get_2d_netcdf("EQZWT", ncid, eqzwt,  units, xstart, xend, ystart, yend, FATAL, ierr)
 
+    ! Get water table depth (RECHCLIM)
+    call get_2d_netcdf("RECHCLIM", ncid, rechclim,  units, xstart, xend, ystart, yend, FATAL, ierr)
+
+    ! Get equilibrium water table depth (RIVERMASK)
+    call get_2d_netcdf("RIVERMASK", ncid, rivermask,  units, xstart, xend, ystart, yend, FATAL, ierr)
+
     ! Get equilibrium water table depth (RIVERBED)
     call get_2d_netcdf("RIVERBED", ncid, riverbed,  units, xstart, xend, ystart, yend, FATAL, ierr)
 
-    ! Get equilibrium water table depth (RIVERCOND)
-    call get_2d_netcdf("RIVERCOND", ncid, rivercond,  units, xstart, xend, ystart, yend, FATAL, ierr)
-
-    ! Get equilibrium water table depth (PEXP)
-    call get_2d_netcdf("PEXP", ncid, pexp,  units, xstart, xend, ystart, yend, FATAL, ierr)
-
-    ! Get equilibrium water table depth (FDEPTH)
-    call get_2d_netcdf("FDEPTH", ncid, fdepth,  units, xstart, xend, ystart, yend, FATAL, ierr)
+    ! Get equilibrium water table depth (NONRIVER)
+    call get_2d_netcdf("NONRIVER", ncid, nonriver,  units, xstart, xend, ystart, yend, FATAL, ierr)
 
     ! Close the NetCDF file
     ierr = nf90_close(ncid)
-    if (ierr /= 0) stop "MODULE_NOAHLSM_HRLDAS_INPUT:  READLAND_HRLDAS:  NF90_CLOSE"
+    if (ierr /= 0) stop "MODULE_HRLDAS_NETCDF_IO:  READ_MMF_RUNOFF:  NF90_CLOSE"
 
 
   end subroutine read_mmf_runoff
