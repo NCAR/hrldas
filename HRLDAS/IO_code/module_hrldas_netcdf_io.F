@@ -2432,7 +2432,7 @@ contains
 #ifdef MPP_LAND
       subroutine prepare_restart_file_mpp(outdir, version, igrid, llanduse, olddate, startdate,  &
        ixfull, jxfull, ixpar, jxpar, xstartpar, ystartpar,                                    &
-       nsoil, nsnow, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,                       &
+       nsoil, nsnow, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,                       &
        iswater, vegtyp)
 
     implicit none
@@ -2451,6 +2451,7 @@ contains
     integer,                               intent(in) :: ystartpar
     integer,                               intent(in) :: nsoil
     integer,                               intent(in) :: nsnow
+    integer,                               intent(in) :: num_urban_layers
     real,                                  intent(in) :: dx, dy
     real,                                  intent(in) :: truelat1, truelat2
     integer,                               intent(in) :: mapproj
@@ -2463,7 +2464,7 @@ contains
     if(my_id .eq. io_id) then
       call prepare_restart_file_seq(outdir, version, igrid, llanduse, olddate, startdate,  &
        global_nx, global_ny, global_nx, global_ny, xstartpar, ystartpar,               &
-       nsoil, nsnow, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,         &
+       nsoil, nsnow, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,         &
        iswater, gvegtyp)
     endif 
 
@@ -2474,7 +2475,7 @@ contains
 
   subroutine prepare_restart_file_seq(outdir, version, igrid, llanduse, olddate, startdate,  &
        ixfull, jxfull, ixpar, jxpar, xstartpar, ystartpar,                                    &
-       nsoil, nsnow, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,                       &
+       nsoil, nsnow, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,                       &
        iswater, vegtyp)
 
     implicit none
@@ -2494,6 +2495,7 @@ contains
     integer,                               intent(in) :: ystartpar
     integer,                               intent(in) :: nsoil
     integer,                               intent(in) :: nsnow
+    integer,                               intent(in) :: num_urban_layers
     real,                                  intent(in) :: dx, dy
     real,                                  intent(in) :: truelat1, truelat2
     integer,                               intent(in) :: mapproj
@@ -2506,7 +2508,7 @@ contains
     character(len=256) :: output_flnm
     integer :: ierr
     integer :: varid
-    integer :: dimid_times, dimid_datelen, dimid_ix, dimid_jx, dimid_dum, dimid_layers, dimid_snow_layers, dimid_sosn_layers
+    integer :: dimid_times, dimid_datelen, dimid_ix, dimid_jx, dimid_dum, dimid_layers, dimid_snow_layers, dimid_sosn_layers, dimid_urban
     character(len=19) :: date19
     integer :: rank
 
@@ -2554,6 +2556,7 @@ contains
     ierr = nf90_def_dim(ncid, "soil_layers_stag", nsoil, dimid_layers)
     ierr = nf90_def_dim(ncid, "snow_layers", nsnow, dimid_snow_layers)
     ierr = nf90_def_dim(ncid, "sosn_layers", nsnow+nsoil, dimid_sosn_layers)
+    ierr = nf90_def_dim(ncid, "urban_layers", num_urban_layers, dimid_urban)
 
     ierr = nf90_put_att(ncid, NF90_GLOBAL, "TITLE", "RESTART FILE FROM HRLDAS "//version)
     ierr = nf90_put_att(ncid, NF90_GLOBAL, "missing_value", -1.E33)
@@ -2880,6 +2883,9 @@ contains
     else if (output_layers == "SOSN") then
        ierr = nf90_inq_dimid(ncid, "sosn_layers", dimid_kx)
        call error_handler(ierr, "ADD_TO_RESTART:  nf90_inq_dimid for 'sosn_layers'")
+    else if (output_layers == "URBN") then
+       ierr = nf90_inq_dimid(ncid, "urban_layers", dimid_kx)
+       call error_handler(ierr, "ADD_TO_RESTART:  nf90_inq_dimid for 'urban_layers'")
     else
        stop "PANIC!"
     endif

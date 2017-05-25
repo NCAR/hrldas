@@ -5,6 +5,8 @@ module module_NoahMP_hrldas_driver
   USE module_sf_noahmpdrv, only: noahmp_init, noahmplsm, noahmp_urban
   USE module_sf_urban, only: urban_param_init, urban_var_init
   USE module_date_utilities
+  USE noahmp_tables, ONLY:  LOW_DENSITY_RESIDENTIAL_TABLE, HIGH_DENSITY_RESIDENTIAL_TABLE, &
+                            HIGH_INTENSITY_INDUSTRIAL_TABLE
 #ifdef MPP_LAND
   use module_mpp_land, only: MPP_LAND_PAR_INI, mpp_land_init, getLocalXY, mpp_land_bcast_char
   use module_mpp_land, only: check_land, my_id , node_info
@@ -1015,9 +1017,9 @@ IF(SF_URBAN_PHYSICS > 0 )  THEN  ! any urban model
   ALLOCATE ( hgt_urb2d      (XSTART:XEND,                 YSTART:YEND) )  !
   ALLOCATE ( ust            (XSTART:XEND,                 YSTART:YEND) )  !
 
-ENDIF
+!ENDIF
          
-IF(SF_URBAN_PHYSICS == 1 ) THEN  ! single layer urban model
+!IF(SF_URBAN_PHYSICS == 1 ) THEN  ! single layer urban model
          
   ALLOCATE ( cmr_sfcdif     (XSTART:XEND,                 YSTART:YEND) )  ! 
   ALLOCATE ( chr_sfcdif     (XSTART:XEND,                 YSTART:YEND) )  ! 
@@ -1073,9 +1075,9 @@ IF(SF_URBAN_PHYSICS == 1 ) THEN  ! single layer urban model
   ALLOCATE ( stdh_urb2d     (XSTART:XEND,                 YSTART:YEND) )  !
   ALLOCATE ( lf_urb2d       (XSTART:XEND, 4,              YSTART:YEND) )  !
 
-ENDIF
+!ENDIF
 
-IF(SF_URBAN_PHYSICS == 2 .or. SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
+!IF(SF_URBAN_PHYSICS == 2 .or. SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
          
   ALLOCATE ( trb_urb4d      (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
   ALLOCATE ( tw1_urb4d      (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
@@ -1110,9 +1112,9 @@ IF(SF_URBAN_PHYSICS == 2 .or. SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban mo
   ALLOCATE ( sf_bep         (XSTART:XEND,KDS:KDE,         YSTART:YEND) )  !
   ALLOCATE ( vl_bep         (XSTART:XEND,KDS:KDE,         YSTART:YEND) )  !
 
-ENDIF
+!ENDIF
 
-IF(SF_URBAN_PHYSICS == 3) THEN  ! BEM urban model
+!IF(SF_URBAN_PHYSICS == 3) THEN  ! BEM urban model
          
   ALLOCATE ( tlev_urb3d     (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
   ALLOCATE ( qlev_urb3d     (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
@@ -1141,8 +1143,6 @@ ENDIF
 #endif
 
   COSZEN     = undefined_real
-  HRANG      = undefined_real
-  DECLIN     = undefined_real
   XLAT       = undefined_real
   DZ8W       = undefined_real
   DZS        = undefined_real
@@ -1297,6 +1297,11 @@ ENDIF
   HARVEST    = undefined_real
   SEASON_GDD = undefined_real
   CROPTYPE   = undefined_real
+  
+IF(SF_URBAN_PHYSICS > 0 )  THEN  ! any urban model
+  HRANG      = undefined_real
+  DECLIN     = undefined_real
+ENDIF
 
   XLAND          = 1.0   ! water = 2.0, land = 1.0
   XICE           = 0.0   ! fraction of grid that is seaice
@@ -1529,7 +1534,7 @@ ENDIF
                      )
          IF(SF_URBAN_PHYSICS > 0 ) THEN  !urban
          
-                 CALL urban_param_init(DZR,DZB,DZG,num_soil_layers,sf_urban_physics)
+                CALL urban_param_init(DZR,DZB,DZG,num_soil_layers,sf_urban_physics)
 
                 CALL urban_var_init(ISURBAN,TSK,TSLB,TMN,IVGTYP,                        & !urban
                       ims,ime,jms,jme,kms,kme,num_soil_layers,                          & !urban
@@ -1709,7 +1714,7 @@ ENDIF
 	  ENDIF
 
   endif
-  
+
   NTIME=(KHOUR)*3600./nint(dtbl)
 
   print*, "NTIME = ", NTIME , "KHOUR=",KHOUR,"dtbl = ", dtbl
@@ -1873,8 +1878,8 @@ end subroutine land_driver_ini
       IF(SF_URBAN_PHYSICS == 0) THEN
         CALL CALC_DECLIN(OLDDATE(1:19),XLAT(I,J), XLONG(I,J),COSZEN(I,J),JULIAN)
       ELSE
-        CALL CALC_DECLIN(OLDDATE(1:19),XLAT(I,J), XLONG(I,J),COSZEN(I,J),JULIAN, HRANG(I,J), &
-                         DECLIN, GMT, JULDAY)
+        CALL CALC_DECLIN(OLDDATE(1:19),XLAT(I,J), XLONG(I,J),COSZEN(I,J),JULIAN, &
+                         HRANG(I,J), DECLIN, GMT, JULDAY)
       ENDIF
     END DO
     END DO
@@ -1966,7 +1971,7 @@ end subroutine land_driver_ini
          IF(SF_URBAN_PHYSICS > 0 ) THEN  !urban
          
 	   call noahmp_urban (sf_urban_physics,     NUM_SOIL_LAYERS,     IVGTYP,ITIMESTEP,  & ! IN : Model configuration 
-                               DTBL,         COSZEN,           XLAT,      XLONG,            & ! IN : Time/Space-related
+                               DTBL,         COSZEN,           XLAT,                        & ! IN : Time/Space-related
                               T_PHY,        QV_CURR,          U_PHY,      V_PHY,   SWDOWN,  & ! IN : Forcing
 		                GLW,            P8W,         RAINBL,       DZ8W,      ZNT,  & ! IN : Forcing
                                 TSK,            HFX,            QFX,         LH,   GRDFLX,  & ! IN/OUT : LSM 
@@ -1974,8 +1979,6 @@ end subroutine land_driver_ini
                             ids,ide,        jds,jde,        kds,kde,                        &
                             ims,ime,        jms,jme,        kms,kme,                        &
                             its,ite,        jts,jte,        kts,kte,                        &
-                    num_roof_layers,num_wall_layers,num_road_layers,                        & !I urban
-                   num_urban_layers,   num_urban_hi,                                        & !I multi-layer urban
                          cmr_sfcdif,     chr_sfcdif,     cmc_sfcdif,                        &
 	                 chc_sfcdif,    cmgr_sfcdif,    chgr_sfcdif,                        &
                            tr_urb2d,       tb_urb2d,       tg_urb2d,                        & !H urban
@@ -1987,6 +1990,7 @@ end subroutine land_driver_ini
                        GZ1OZ0_urb2d,     AKMS_URB2D,                                        & !O urban
                           th2_urb2d,       q2_urb2d,      ust_urb2d,                        & !O urban
                              declin,          hrang,                                        & !I urban
+                    num_roof_layers,num_wall_layers,num_road_layers,                        & !I urban
                                 dzr,            dzb,            dzg,                        & !I urban
                          cmcr_urb2d,      tgr_urb2d,     tgrl_urb3d,  smr_urb3d,            & !H urban
                         drelr_urb2d,    drelb_urb2d,    drelg_urb2d,                        & !H urban
@@ -1994,6 +1998,7 @@ end subroutine land_driver_ini
                              julday,             yr,                                        & !H urban
                           frc_urb2d,    utype_urb2d,                                        & !I urban
                                 chs,           chs2,           cqs2,                        & !H
+                   num_urban_layers,   num_urban_hi,                                        & !I multi-layer urban
                           trb_urb4d,      tw1_urb4d,      tw2_urb4d,  tgb_urb4d,            & !H multi-layer urban
                          tlev_urb3d,     qlev_urb3d,                                        & !H multi-layer urban
                        tw1lev_urb3d,   tw2lev_urb3d,                                        & !H multi-layer urban
@@ -2005,7 +2010,7 @@ end subroutine land_driver_ini
                            lp_urb2d,       hi_urb2d,       lb_urb2d,  hgt_urb2d,            & !H multi-layer urban
                            mh_urb2d,     stdh_urb2d,       lf_urb2d,                        & !SLUCM
                         theta_urban,      rho_urban,        p_urban,        ust,            & !I multi-layer urban
-                                gmt,         julday,                                        & !I multi-layer urban
+                                gmt,         julday,          XLONG,       XLAT,            & !I multi-layer urban
                             a_u_bep,        a_v_bep,        a_t_bep,    a_q_bep,            & !O multi-layer urban
                             a_e_bep,        b_u_bep,        b_v_bep,                        & !O multi-layer urban
                             b_t_bep,        b_q_bep,        b_e_bep,    dlg_bep,            & !O multi-layer urban
@@ -2406,52 +2411,42 @@ subroutine lsm_restart()
 
 end subroutine lsm_restart
 
-
-end module module_NoahMP_hrldas_driver
-
-!subroutine wrf_message(msg)
-!  implicit none
-!  character(len=*), intent(in) :: msg
-!  print*, msg
-!end subroutine wrf_message
-
-logical function wrf_dm_on_monitor() result(l)
-  l = .TRUE.
-  return
-end function wrf_dm_on_monitor
-
-
-!------------------------------------------------------------------------------------
 !------------------------------------------------------------------------------------
 
-SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, HRANG, DECLIN, GMT, JULDAY )
+SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
+                         HRANG_OUT, DECLIN_OUT, GMT_OUT, JULDAY_OUT )
 
   USE MODULE_DATE_UTILITIES
 !---------------------------------------------------------------------
    IMPLICIT NONE
 !---------------------------------------------------------------------
 
-   REAL, PARAMETER :: DEGRAD = 3.14159265/180.
-   REAL, PARAMETER :: DPD    = 360./365.
 ! !ARGUMENTS:
    CHARACTER(LEN=19), INTENT(IN)  :: NOWDATE    ! YYYY-MM-DD_HH:MM:SS
    REAL,              INTENT(IN)  :: LATITUDE
    REAL,              INTENT(IN)  :: LONGITUDE
    REAL,              INTENT(OUT) :: COSZ
    REAL,              INTENT(OUT) :: JULIAN
-   REAL,              INTENT(OUT) :: HRANG
-   REAL,              INTENT(OUT) :: DECLIN
-   REAL, OPTIONAL,    INTENT(OUT) :: GMT
-   INTEGER, OPTIONAL, INTENT(OUT) :: JULDAY
+   REAL,    OPTIONAL, INTENT(OUT) :: HRANG_OUT
+   REAL,    OPTIONAL, INTENT(OUT) :: DECLIN_OUT
+   REAL,    OPTIONAL, INTENT(OUT) :: GMT_OUT
+   INTEGER, OPTIONAL, INTENT(OUT) :: JULDAY_OUT
    REAL                           :: OBECL
    REAL                           :: SINOB
    REAL                           :: SXLONG
    REAL                           :: ARG
    REAL                           :: TLOCTIM
+   REAL                           :: HRANG
+   REAL                           :: DECLIN
+   REAL                           :: GMT
+   INTEGER                        :: JULDAY
    INTEGER                        :: IDAY
    INTEGER                        :: IHOUR
    INTEGER                        :: IMINUTE
    INTEGER                        :: ISECOND
+
+   REAL, PARAMETER :: DEGRAD = 3.14159265/180.
+   REAL, PARAMETER :: DPD    = 360./365.
 
    CALL GETH_IDTS(NOWDATE(1:10), NOWDATE(1:4)//"-01-01", IDAY)
    READ(NOWDATE(12:13), *) IHOUR
@@ -2482,8 +2477,25 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, HRANG, DECL
    TLOCTIM = AMOD(TLOCTIM+24.0, 24.0)
    HRANG=15.*(TLOCTIM-12.)*DEGRAD
    COSZ=SIN(LATITUDE*DEGRAD)*SIN(DECLIN)+COS(LATITUDE*DEGRAD)*COS(DECLIN)*COS(HRANG)
+   
+   IF (PRESENT(HRANG_OUT ))  HRANG_OUT = HRANG
+   IF (PRESENT(DECLIN_OUT)) DECLIN_OUT = DECLIN
+   IF (PRESENT(GMT_OUT   ))    GMT_OUT = GMT
+   IF (PRESENT(JULDAY_OUT)) JULDAY_OUT = JULDAY
 
  END SUBROUTINE CALC_DECLIN
 
-!
-!------------------------------------------------------------------------------------------
+
+end module module_NoahMP_hrldas_driver
+
+!subroutine wrf_message(msg)
+!  implicit none
+!  character(len=*), intent(in) :: msg
+!  print*, msg
+!end subroutine wrf_message
+
+logical function wrf_dm_on_monitor() result(l)
+  l = .TRUE.
+  return
+end function wrf_dm_on_monitor
+

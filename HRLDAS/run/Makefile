@@ -26,10 +26,15 @@ OBJS = \
 	../phys/module_sf_noahmplsm.o \
 	../phys/module_sf_noahmp_glacier.o \
 	../phys/module_sf_noahmp_groundwater.o \
+	../phys/module_sf_urban.o \
+	../phys/module_sf_bep.o \
+	../phys/module_sf_bem.o \
+	../phys/module_sf_bep_bem.o \
 	../Utility_routines/module_wrf_utilities.o \
 	../Utility_routines/module_model_constants.o \
 	../Utility_routines/module_date_utilities.o \
-	../Utility_routines/kwm_string_utilities.o
+	../Utility_routines/kwm_string_utilities.o \
+	../Utility_routines/module_ra_gfdleta.o
 
 CMD = hrldas.exe
 all:	$(CMD)
