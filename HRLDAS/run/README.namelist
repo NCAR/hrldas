@@ -46,20 +46,20 @@
 
  ZLVL = 30.0                                                 !*** Height in meters of forcing level       [default = none]
 
- SF_URBAN_PHYSICS = 0                                        !*** Urban physics option                    [default = none]
+ SF_URBAN_PHYSICS = 0                                        !    Urban physics option                    [default = 0   ]
                                                              ! **0 -> Bulk urban slab scheme
                                                              !   1 -> Single-layer urban canopy model
                                                              !   2 -> BEP Multi-layer urban canopy model
                                                              !   3 -> BEP + Building Energy Model
 
- URBAN_ATMOSPHERE_THICKNESS = 2.0                            !*** Thickness of urban atmosphere layers
+ URBAN_ATMOSPHERE_THICKNESS = 2.0                            !    Thickness of urban atmosphere layers
                                                              !     only needed for urban options 2 and 3  [default = 2.0 ]
 							     !     must be less than zlvl/3
 
- NUM_URBAN_LAYERS = 360                                      !*** Number of urban building layers
+ NUM_URBAN_LAYERS = 360                                      !    Number of urban building layers
                                                              !     only needed for urban options 2 and 3  [default = 360 ]
 
- NUM_URBAN_HI     = 15                                       !*** Number of urban atmosphere layers
+ NUM_URBAN_HI     = 15                                       !    Number of urban atmosphere layers
                                                              !     only needed for urban options 2 and 3  [default = 15  ]
 
  EXTERNAL_VEG_FILENAME_TEMPLATE                              ! defunct

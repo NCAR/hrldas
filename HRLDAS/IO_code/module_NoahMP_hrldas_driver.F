@@ -481,9 +481,10 @@ module module_NoahMP_hrldas_driver
   integer            :: restart_frequency_hours
   integer            :: output_timestep
 
-  integer            :: num_urban_layers
-  integer            :: num_urban_hi
-  integer            :: sf_urban_physics
+  integer            :: sf_urban_physics = 0
+  integer            :: num_urban_layers = 360
+  integer            :: num_urban_hi     = 15 
+  real               :: urban_atmosphere_thickness = 2.0
 
   integer            :: dynamic_veg_option
   integer            :: canopy_stomatal_resistance_option
@@ -513,7 +514,6 @@ module module_NoahMP_hrldas_driver
   integer            ::   yend = 0
   integer, PARAMETER    :: MAX_SOIL_LEVELS = 10   ! maximum soil levels in namelist
   REAL, DIMENSION(MAX_SOIL_LEVELS) :: soil_thick_input       ! depth to soil interfaces from namelist [m]
-  real               :: urban_atmosphere_thickness
 
   namelist / NOAHLSM_OFFLINE /    &
 #ifdef WRF_HYDRO
