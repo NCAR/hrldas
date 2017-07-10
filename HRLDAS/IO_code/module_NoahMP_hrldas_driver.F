@@ -423,6 +423,8 @@ module module_NoahMP_hrldas_driver
     REAL, PARAMETER                     :: undefined_real = 9.9692099683868690E36 ! NetCDF float   FillValue
     INTEGER, PARAMETER                  :: undefined_int = -2147483647            ! NetCDF integer FillValue
     LOGICAL                             :: update_lai, update_veg
+    INTEGER                             :: spinup_loop
+    LOGICAL                             :: reset_spinup_date
 
 !---------------------------------------------------------------------
 !  File naming, parallel
@@ -480,6 +482,7 @@ module module_NoahMP_hrldas_driver
   character(len=256) :: restart_filename_requested = " "
   integer            :: restart_frequency_hours
   integer            :: output_timestep
+  integer            :: spinup_loops
 
   integer            :: sf_urban_physics = 0
   integer            :: num_urban_layers = 360
@@ -523,6 +526,7 @@ module module_NoahMP_hrldas_driver
        start_year, start_month, start_day, start_hour, start_min, &
        outdir, &
        restart_filename_requested, restart_frequency_hours, output_timestep, &
+       spinup_loops, &
 
        dynamic_veg_option, canopy_stomatal_resistance_option, &
        btr_option, runoff_option, surface_drag_option, supercooled_water_option, &
@@ -568,6 +572,7 @@ module module_NoahMP_hrldas_driver
   forcing_timestep        = -999
   noah_timestep           = -999
   output_timestep         = -999
+  spinup_loops            = 0
   restart_frequency_hours = -999
 
   open(30, file="namelist.hrldas", form="FORMATTED")
@@ -1715,7 +1720,9 @@ ENDIF
 
   endif
 
-  NTIME=(KHOUR)*3600./nint(dtbl)
+  NTIME=(KHOUR)*3600./nint(dtbl)*(spinup_loops+1)
+  spinup_loop = 0
+  reset_spinup_date = .false.
 
   print*, "NTIME = ", NTIME , "KHOUR=",KHOUR,"dtbl = ", dtbl
   
@@ -1797,7 +1804,7 @@ end subroutine land_driver_ini
         CALL READFORC_HRLDAS(INFLNM_TEMPLATE, FORCING_TIMESTEP, OLDDATE,  &
              XSTART, XEND, YSTART, YEND,                                  &
              T_PHY(:,1,:),QV_CURR(:,1,:),U_PHY(:,1,:),V_PHY(:,1,:),          &
-	       P8W(:,1,:), GLW       ,SWDOWN      ,RAINBL_tmp, VEGFRA, update_veg, LAI, update_lai)
+	       P8W(:,1,:), GLW       ,SWDOWN      ,RAINBL_tmp, VEGFRA, update_veg, LAI, update_lai, reset_spinup_date, startdate)
         VEGFRA = VEGFRA * 100.
      else
         if(olddate == forcDate) then
@@ -1816,7 +1823,7 @@ end subroutine land_driver_ini
      CALL READFORC_HRLDAS(INFLNM_TEMPLATE, FORCING_TIMESTEP, OLDDATE,  &
           XSTART, XEND, YSTART, YEND,                                  &
           T_PHY(:,1,:),QV_CURR(:,1,:),U_PHY(:,1,:),V_PHY(:,1,:),          &
-	    P8W(:,1,:), GLW       ,SWDOWN      ,RAINBL_tmp, VEGFRA, update_veg, LAI, update_lai)
+	    P8W(:,1,:), GLW       ,SWDOWN      ,RAINBL_tmp, VEGFRA, update_veg, LAI, update_lai, reset_spinup_date, startdate)
 #endif
 
 991  continue
@@ -2087,7 +2094,7 @@ end subroutine land_driver_ini
                 igrid, output_timestep, llanduse, split_output_count, hgrid,                &
                 ixfull, jxfull, ixpar, jxpar, xstartpar, ystartpar,                         &
                 iswater, mapproj, lat1, lon1, dx, dy, truelat1, truelat2, cen_lon,          &
-                nsoil, nsnow, dzs, startdate, olddate, IVGTYP, ISLTYP)
+                nsoil, nsnow, dzs, startdate, olddate, spinup_loop, spinup_loops, IVGTYP, ISLTYP)
 
            DEFINE_MODE_LOOP : do imode = 1, 2
 
@@ -2207,7 +2214,7 @@ end subroutine land_driver_ini
 
            enddo DEFINE_MODE_LOOP
 
-           call finalize_output_file(split_output_count)
+           call finalize_output_file(split_output_count,itime)
 
         endif
      endif OUTPUT_FOR_HISTORY
@@ -2242,6 +2249,12 @@ end subroutine land_driver_ini
 
      call geth_newdate(newdate, olddate, nint(dtbl))
      olddate = newdate
+
+     if(itime > 0 .and. spinup_loops > 0 .and. mod(itime,ntime/(spinup_loops+1)) == 0) then
+       spinup_loop = spinup_loop + 1
+       call geth_newdate(olddate, startdate, nint(dtbl))
+       reset_spinup_date = .true.
+     end if
 
 ! update the timer
      call system_clock(count=clock_count_2, count_rate=clock_rate)

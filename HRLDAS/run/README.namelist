@@ -20,6 +20,9 @@
  KDAY  = 1                                                   !    Number of days to run                   [default = none]
  KHOUR = 1                                                   !    Number of hours to run                  [default = none]
 
+ SPINUP_LOOPS = 0                                            !    Number of spinup loops of khour/kday
+                                                             !     before simulation starts               [default = 0   ]
+
                                                              !*** Note: NOAH_TIMESTEP must evenly divide both 
 							     !           FORCING_TIMESTEP and OUTPUT_TIMESTEP
  FORCING_TIMESTEP = 3600                                     !    Seconds between forcing files           [default = none]

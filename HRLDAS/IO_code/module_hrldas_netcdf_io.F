@@ -1416,7 +1416,7 @@ contains
 !---------------------------------------------------------------------------------------------------------
 
   subroutine READFORC_HRLDAS(flnm_template, forcing_timestep, target_date, xstart, xend, ystart, yend,  &
-       t,q,u,v,p,lw,sw,pcp,vegfra,update_veg,lai,update_lai)
+       t,q,u,v,p,lw,sw,pcp,vegfra,update_veg,lai,update_lai,reset_spinup_date,startdate)
     use kwm_string_utilities
     implicit none
 
@@ -1424,7 +1424,7 @@ contains
     integer,                            intent(in)  :: forcing_timestep
     integer,                            intent(in)  :: xstart, xend
     integer,                            intent(in)  :: ystart, yend
-    character(len=19),                  intent(in)  :: target_date ! (YYYY-MM-DD_hh:mm:ss)
+    character(len=19),                  intent(in)  :: target_date, startdate ! (YYYY-MM-DD_hh:mm:ss)
     real,             dimension(xstart:xend,ystart:yend), intent(out)   :: t
     real,             dimension(xstart:xend,ystart:yend), intent(out)   :: q
     real,             dimension(xstart:xend,ystart:yend), intent(out)   :: u
@@ -1436,6 +1436,7 @@ contains
     real,             dimension(xstart:xend,ystart:yend), intent(inout) :: lai    !Barlage v3.7: change to inout
     real,             dimension(xstart:xend,ystart:yend), intent(inout) :: vegfra
     logical,                            intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
+    logical,                                              intent(inout) :: reset_spinup_date
 
     character(len=256) :: flnm
     character(len=256) :: units
@@ -1449,6 +1450,8 @@ contains
     type(inputstruct) :: nextread= inputstruct("0000-00-00_00:00:00", &
          null(), null(), null(), null(), null(), null(), null(), null(), null(), null() )
 
+    if(reset_spinup_date) lastread%read_date = startdate
+    reset_spinup_date = .false.
 !KWM    print*, 'target_date        = ', target_date
 !KWM    print*, 'lastread%read_date = ', lastread%read_date
 !KWM    print*, 'nextread%read_date = ', nextread%read_date
@@ -1868,7 +1871,7 @@ contains
        output_timestep, llanduse, split_output_count, hgrid, &
        ixfull, jxfull, ixpar, jxpar, xstartpar, ystartpar, iswater,  &
        mapproj, lat1, lon1, dx, dy, truelat1, truelat2, cen_lon,     &
-       nsoil, nsnow, sldpth, startdate, date, &
+       nsoil, nsnow, sldpth, startdate, date, spinup_loop, spinup_loops, &
        vegtyp, soltyp)
 
     implicit none
@@ -1900,6 +1903,8 @@ contains
     real,             dimension(nsoil),       intent(in) :: sldpth
     character(len=19),                        intent(in) :: startdate
     character(len=19),                        intent(in) :: date
+    integer,                                  intent(in) :: spinup_loop
+    integer,                                  intent(in) :: spinup_loops
     integer,          dimension(ixpar,jxpar), intent(in) :: vegtyp
     integer,          dimension(ixpar,jxpar), intent(in) :: soltyp
     integer,          dimension(global_nx,global_ny) :: g_vegtyp
@@ -1914,7 +1919,7 @@ contains
        output_timestep, llanduse, split_output_count, hgrid, &
        global_nx, global_ny, global_nx, global_ny, xstartpar, ystartpar, iswater,  &
        mapproj, lat1, lon1, dx, dy, truelat1, truelat2, cen_lon,     &
-       nsoil, nsnow, sldpth, startdate, date, &
+       nsoil, nsnow, sldpth, startdate, date, spinup_loop, spinup_loops, &
        g_vegtyp, g_soltyp)
     end if
 
@@ -1925,7 +1930,7 @@ contains
        output_timestep, llanduse, split_output_count, hgrid, &
        ixfull, jxfull, ixpar, jxpar, xstartpar, ystartpar, iswater,  &
        mapproj, lat1, lon1, dx, dy, truelat1, truelat2, cen_lon,     &
-       nsoil, nsnow, sldpth, startdate, date, &
+       nsoil, nsnow, sldpth, startdate, date, spinup_loop, spinup_loops, &
        vegtyp, soltyp)
     ! To prepare the output file, we create the file, write dimensions and attributes, write the time variable.
     ! At the end of this routine, the output file is out of define mode.
@@ -1959,6 +1964,8 @@ contains
     real,             dimension(nsoil),       intent(in) :: sldpth
     character(len=19),                        intent(in) :: startdate
     character(len=19),                        intent(in) :: date
+    integer,                                  intent(in) :: spinup_loop
+    integer,                                  intent(in) :: spinup_loops
     integer,          dimension(ixpar,jxpar), intent(in) :: vegtyp
     integer,          dimension(ixpar,jxpar), intent(in) :: soltyp
 
@@ -1983,6 +1990,9 @@ contains
        else
           write(output_flnm, '(A,"/",A14,".LDASOUT_DOMAIN",I1)') outdir, date(1:4)//date(6:7)//date(9:10)//date(12:13)//date(15:16)//date(18:19), igrid
        endif
+       if(spinup_loops > 0) then
+         write(output_flnm, '(A,".loop",i4.4)') trim(output_flnm), spinup_loop
+       end if
 #ifdef _PARALLEL_
        iret = nf90_create(trim(output_flnm), &
             OR(NF90_CLOBBER, NF90_NETCDF4), ncid, comm=MPI_COMM_WORLD, info=MPI_INFO_NULL)
@@ -2097,9 +2107,10 @@ contains
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
 
-  subroutine finalize_output_file(split_output_count)
+  subroutine finalize_output_file(split_output_count,itime)
     implicit none
     integer, intent(in)  :: split_output_count
+    integer, intent(in)  :: itime
     integer :: ierr
 
 #ifdef MPP_LAND
@@ -2108,6 +2119,10 @@ contains
 
     output_count_remember = output_count_remember + 1
     if (output_count_remember == split_output_count) then
+       output_count_remember = 0 
+       ierr = nf90_close(ncid_remember)
+       call error_handler(ierr, failure="Problem nf90_close for output file")
+    elseif (split_output_count > 1 .and. itime == 0) then  ! treat first time different
        output_count_remember = 0 
        ierr = nf90_close(ncid_remember)
        call error_handler(ierr, failure="Problem nf90_close for output file")
