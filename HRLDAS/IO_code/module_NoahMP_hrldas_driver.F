@@ -2257,7 +2257,6 @@ end subroutine land_driver_ini
       if ( (restart_frequency_hours .gt. 0) .and. &
            (mod(ITIME, int(restart_frequency_hours*3600./nint(dtbl))) == 0)) then
        call lsm_restart()
-#ifdef WRF_HYDRO
       else
        if (restart_frequency_hours <= 0) then
           if ( (olddate( 9:10) == "01") .and. (olddate(12:13) == "00") .and. &
@@ -2265,7 +2264,6 @@ end subroutine land_driver_ini
                 call lsm_restart()  ! jlm - i moved all the restart code to a subroutine. 
           endif
        endif
-#endif
       endif
 
 !------------------------------------------------------------------------
