@@ -26,6 +26,7 @@ module module_hrldas_netcdf_io
      real, pointer, dimension(:,:) :: lw
      real, pointer, dimension(:,:) :: sw
      real, pointer, dimension(:,:) :: pcp
+     real, pointer, dimension(:,:) :: snow
      real, pointer, dimension(:,:) :: vegfra
      real, pointer, dimension(:,:) :: lai
   end type inputstruct
@@ -1416,7 +1417,9 @@ contains
 !---------------------------------------------------------------------------------------------------------
 
   subroutine READFORC_HRLDAS(flnm_template, forcing_timestep, target_date, xstart, xend, ystart, yend,  &
-       t,q,u,v,p,lw,sw,pcp,vegfra,update_veg,lai,update_lai,reset_spinup_date,startdate)
+       forcing_name_T,forcing_name_Q,forcing_name_U,forcing_name_V,forcing_name_P, &
+       forcing_name_LW,forcing_name_SW,forcing_name_PR,forcing_name_SN, &
+       t,q,u,v,p,lw,sw,pcp,snow,vegfra,update_veg,lai,update_lai,reset_spinup_date,startdate)
     use kwm_string_utilities
     implicit none
 
@@ -1425,6 +1428,16 @@ contains
     integer,                            intent(in)  :: xstart, xend
     integer,                            intent(in)  :: ystart, yend
     character(len=19),                  intent(in)  :: target_date, startdate ! (YYYY-MM-DD_hh:mm:ss)
+    character(len=256),                 intent(in)  :: forcing_name_T
+    character(len=256),                 intent(in)  :: forcing_name_Q
+    character(len=256),                 intent(in)  :: forcing_name_U
+    character(len=256),                 intent(in)  :: forcing_name_V
+    character(len=256),                 intent(in)  :: forcing_name_P
+    character(len=256),                 intent(in)  :: forcing_name_LW
+    character(len=256),                 intent(in)  :: forcing_name_SW
+    character(len=256),                 intent(in)  :: forcing_name_PR
+    character(len=256),                 intent(in)  :: forcing_name_SN
+
     real,             dimension(xstart:xend,ystart:yend), intent(out)   :: t
     real,             dimension(xstart:xend,ystart:yend), intent(out)   :: q
     real,             dimension(xstart:xend,ystart:yend), intent(out)   :: u
@@ -1433,6 +1446,7 @@ contains
     real,             dimension(xstart:xend,ystart:yend), intent(out)   :: lw
     real,             dimension(xstart:xend,ystart:yend), intent(out)   :: sw
     real,             dimension(xstart:xend,ystart:yend), intent(out)   :: pcp
+    real,             dimension(xstart:xend,ystart:yend), intent(out)   :: snow
     real,             dimension(xstart:xend,ystart:yend), intent(inout) :: lai    !Barlage v3.7: change to inout
     real,             dimension(xstart:xend,ystart:yend), intent(inout) :: vegfra
     logical,                            intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
@@ -1446,9 +1460,9 @@ contains
     integer :: rank
 
     type(inputstruct) :: lastread = inputstruct("0000-00-00_00:00:00", &
-         null(), null(), null(), null(), null(), null(), null(), null(), null(), null() )
+         null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null() )
     type(inputstruct) :: nextread= inputstruct("0000-00-00_00:00:00", &
-         null(), null(), null(), null(), null(), null(), null(), null(), null(), null() )
+         null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null() )
 
     if(reset_spinup_date) lastread%read_date = startdate
     reset_spinup_date = .false.
@@ -1529,14 +1543,17 @@ contains
        call allocate_inputstruct(nextread, xstart, xend, ystart, yend)
 
        ! Read the data
-       call get_2d_netcdf("T2D",     ncid, nextread%t,     units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf("Q2D",     ncid, nextread%q,     units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf("U2D",     ncid, nextread%u,     units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf("V2D",     ncid, nextread%v,     units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf("PSFC",    ncid, nextread%p,     units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf("LWDOWN",  ncid, nextread%lw,    units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf("SWDOWN",  ncid, nextread%sw,    units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf("RAINRATE",ncid, nextread%pcp,   units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_T) , ncid, nextread%t,     units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_Q) , ncid, nextread%q,     units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_U) , ncid, nextread%u,     units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_V) , ncid, nextread%v,     units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_P) , ncid, nextread%p,     units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_LW), ncid, nextread%lw,    units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_SW), ncid, nextread%sw,    units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_PR), ncid, nextread%pcp,   units, xstart, xend, ystart, yend, FATAL, ierr)
+       
+       nextread%snow = 0.0  ! Assume zero in case not present
+       call get_2d_netcdf(trim(forcing_name_SN), ncid, nextread%snow,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
        
        if(update_veg) then    ! Barlage v3.7: update only if dveg option is appropriate
        
@@ -1590,7 +1607,7 @@ contains
        !
 
        ! Fill the t, q, u, v, ... arrays with data from the nextread structure.
-       call copyfrom_inputstruct(nextread, t, q, u, v, p, lw, sw, pcp, vegfra, lai, &
+       call copyfrom_inputstruct(nextread, t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, &
                                  update_veg, update_lai, xstart, xend, ystart, yend)
 
        ! Clear the old lastread data
@@ -1615,7 +1632,7 @@ contains
 
        ! Fill the t, q, u, v, ... arrays with data interpolated between lastread and nextread times.
        call interpolate_inputstruct(lastread, nextread, target_date, &
-            t, q, u, v, p, lw, sw, pcp, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend)
+            t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend)
 
     else
 
@@ -1666,6 +1683,9 @@ contains
     allocate(instruct%pcp (xstart:xend,ystart:yend), stat=allostat )
     if (allostat/=0) stop "Problem allocating instruct%pcp"
 
+    allocate(instruct%snow (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%snow"
+
     allocate(instruct%vegfra(xstart:xend,ystart:yend), stat=allostat )
     if (allostat/=0) stop "Problem allocating instruct%vegfra"
 
@@ -1679,13 +1699,13 @@ contains
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
 
-  subroutine copyfrom_inputstruct(instruct, t, q, u, v, p, lw, sw, pcp, vegfra, lai, &
+  subroutine copyfrom_inputstruct(instruct, t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, &
                                   update_veg, update_lai, xstart, xend, ystart, yend)
     implicit none
     type(inputstruct), intent(in) :: instruct
     integer,           intent(in) :: xstart, xend, ystart, yend
     logical,           intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
-    real, dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, vegfra, lai
+    real, dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai
     t    = instruct%t
     q    = instruct%q
     u    = instruct%u
@@ -1693,6 +1713,7 @@ contains
     p    = instruct%p
     lw   = instruct%lw
     sw   = instruct%sw
+    snow = instruct%snow
     pcp  = instruct%pcp
     if(update_veg) vegfra = instruct%vegfra
     if(update_lai)   lai  = instruct%lai
@@ -1702,13 +1723,13 @@ contains
 !---------------------------------------------------------------------------------------------------------
 
   subroutine interpolate_inputstruct(instructA, instructB, target_date, &
-       t, q, u, v, p, lw, sw, pcp, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend)
+       t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend)
     implicit none
     type(inputstruct),                        intent(in)  :: instructA, instructB
     character(len=19),                        intent(in)  :: target_date
     integer,                                  intent(in)  :: xstart, xend, ystart, yend
     logical,                                  intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
-    real, dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, vegfra, lai
+    real, dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai
 
     integer :: idts, idts2
     real    :: fraction
@@ -1724,6 +1745,7 @@ contains
     p  = ( instructA%p  * fraction ) + ( instructB%p  * (1.0-fraction) )
     lw = ( instructA%lw * fraction ) + ( instructB%lw * (1.0-fraction) )
     sw = ( instructA%sw * fraction ) + ( instructB%sw * (1.0-fraction) )
+    snow = instructA%snow
     pcp = instructA%pcp
     if(update_veg) vegfra = instructA%vegfra
     if(update_lai)   lai  = instructA%lai
@@ -1776,6 +1798,11 @@ contains
        nullify(instruct%pcp)
     endif
 
+    if (associated(instruct%snow)) then
+       deallocate(instruct%snow)
+       nullify(instruct%snow)
+    endif
+
     if (associated(instruct%vegfra)) then
        deallocate(instruct%vegfra)
        nullify(instruct%vegfra)
@@ -1802,6 +1829,7 @@ contains
     nullify(instruct%lw)
     nullify(instruct%sw)
     nullify(instruct%pcp)
+    nullify(instruct%snow)
     nullify(instruct%vegfra)
     nullify(instruct%lai)
   end subroutine nullify_inputstruct

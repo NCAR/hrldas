@@ -65,6 +65,19 @@
  NUM_URBAN_HI     = 15                                       !    Number of urban atmosphere layers
                                                              !     only needed for urban options 2 and 3  [default = 15  ]
 
+ FORCING_NAME_T                                              !    Forcing variable name for temperature   [default = "T2D"]
+ FORCING_NAME_Q                                              !    Forcing variable name for spec humidity [default = "Q2D"]
+ FORCING_NAME_U                                              !    Forcing variable name for u-wind        [default = "U2D"]
+ FORCING_NAME_V                                              !    Forcing variable name for v-wind        [default = "V2D"]
+ FORCING_NAME_P                                              !    Forcing variable name for pressure      [default = "PSFC"]
+ FORCING_NAME_LW                                             !    Forcing variable name for LW radiation  [default = "LWDOWN"]
+ FORCING_NAME_SW                                             !    Forcing variable name for SW radiation  [default = "SWDOWN"]
+ FORCING_NAME_PR                                             !    Forcing variable name for total precip  [default = "RAINRATE"]
+ FORCING_NAME_SN                                             !    Forcing variable name for snow component[default = ""]
+                                                             !      if FORCING_NAME_SN is present, it is assumed to be
+							     !       <= total precipitation
+							     !      must set PCP_PARTITION_OPTION = 4
+
  EXTERNAL_VEG_FILENAME_TEMPLATE                              ! defunct
  EXTERNAL_LAI_FILENAME_TEMPLATE                              ! defunct
 
