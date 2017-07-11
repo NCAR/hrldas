@@ -30,6 +30,7 @@
  OUTPUT_TIMESTEP  = 86400                                    !    Seconds between output times            [default = none]
 
  SPLIT_OUTPUT_COUNT = 1                                      !    Number of times per output file         [default = 1   ]
+ SKIP_FIRST_OUTPUT = .false.                                 !    Skips first output file (initial fields)[default = .false.]
  RESTART_FREQUENCY_HOURS = 0                                 !*** Number of hours between restart files   [default = none]
                                                              !     If  0, do not write restart files
                                                              !     If <0, write at beginning of the month

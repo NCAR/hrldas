@@ -516,6 +516,7 @@ module module_NoahMP_hrldas_driver
   integer            :: surface_resistance_option
 
   integer            :: split_output_count = 1
+  logical            :: skip_first_output = .false.
   integer            :: khour
   integer            :: kday
   real               :: zlvl 
@@ -535,7 +536,7 @@ module module_NoahMP_hrldas_driver
 #endif
        indir, nsoil, soil_thick_input, forcing_timestep, noah_timestep, &
        start_year, start_month, start_day, start_hour, start_min, &
-       outdir, &
+       outdir, skip_first_output, &
        restart_filename_requested, restart_frequency_hours, output_timestep, &
        spinup_loops, &
        forcing_name_T,forcing_name_Q,forcing_name_U,forcing_name_V,forcing_name_P, &
@@ -2109,7 +2110,7 @@ end subroutine land_driver_ini
 
 ! Output for history
      OUTPUT_FOR_HISTORY: if (output_timestep > 0) then
-        if (mod(ITIME*noah_timestep, output_timestep) == 0) then
+        if (mod(ITIME*noah_timestep, output_timestep) == 0 .and. .not. skip_first_output ) then
 
            call prepare_output_file (trim(outdir), version, &
                 igrid, output_timestep, llanduse, split_output_count, hgrid,                &
@@ -2236,8 +2237,11 @@ end subroutine land_driver_ini
            enddo DEFINE_MODE_LOOP
 
            call finalize_output_file(split_output_count,itime)
+                   
+	endif
+	   
+	if(skip_first_output) skip_first_output = .false.
 
-        endif
      endif OUTPUT_FOR_HISTORY
 
      if (IVGTYP(xstart,ystart)==ISWATER) then
