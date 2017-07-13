@@ -1,4 +1,91 @@
 
+
+=========================================================================
+======================= HRLDAS v3.9 Release Notes =======================
+=========================================================================
+
+LSM capabilities/enhancements
+----------------------------------
+
+- Crop modifications in v3.9 to read in crop datasets and initialize properly
+
+- Modifications in v3.9 to read in groundwater datasets
+
+- Noah-MP can now run with single-layer and multi-layer urban models
+
+
+LSM bug fixes
+----------------------------------
+
+- Several fixes in Section 1 of SOILPARM.TBL
+
+- Fix strange Noah-MP behavior in soil water in certain conditions
+
+- Fix uninitialized variable in Noah-MP surface exchange option
+
+
+Driver capabilities/enhancements
+----------------------------------
+
+-  Add capability to include snow in forcing files
+    Need to set FORCING_NAME_SN and PCP_PARTITION_OPTION = 4
+    Snow is assumed to be <= incoming precipitation
+
+-  Add capability to define name of forcing variables in namelist.hrldas
+
+-  Add spinup option to namelist
+    controlled by spinup_loops in namelist.hrldas
+    will run kday/khour spinup_loops times before starting the simulation
+
+-   Add capability to exclude the first output file since this file contains only initial states 
+    and no computed fluxes
+      activated by namelist.hrldas option: SKIP_FIRST_OUTPUT = .true.
+
+-  Added README.namelist to describe all the namelist.hrldas options
+
+Driver bug fixes
+----------------------------------
+
+-  None
+
+
+=========================================================================
+======================= HRLDAS v3.8.1 Release Notes =====================
+=========================================================================
+
+LSM capabilities/enhancements
+----------------------------------
+
+- None
+
+LSM bug fixes
+----------------------------------
+
+- Change C3C4 in MPTABLE to integer
+
+- Set some limits on stability function for OPT_SFC = 2
+
+- Change limit for minimum wood pool in dynamic vegetation
+  
+- Fix bug in QSFC calculation
+
+- Prevent divide by zero when soil moisture is zero
+
+- Fix a few bugs in the crop code; make DVEG = 10 activate crop model
+
+
+Driver capabilities/enhancements
+----------------------------------
+
+- Added configure script for generating user_build_options file
+
+
+Driver bug fixes
+----------------------------------
+
+- None
+
+
 =========================================================================
 ======================= HRLDAS v3.8 Release Notes =======================
 =========================================================================
