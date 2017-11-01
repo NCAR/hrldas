@@ -61,6 +61,7 @@ module module_NoahMP_hrldas_driver
   INTEGER                                 ::  ISICE     ! land cover category for ice
   INTEGER                                 ::  ISURBAN   ! land cover category for urban
   INTEGER                                 ::  ISWATER   ! land cover category for water
+  INTEGER                                 ::  ISLAKE    ! land cover category for lake
   INTEGER                                 ::  IDVEG     ! dynamic vegetation (1 -> off ; 2 -> on) with opt_crs = 1   
   INTEGER                                 ::  IOPT_CRS  ! canopy stomatal resistance (1-> Ball-Berry; 2->Jarvis)
   INTEGER                                 ::  IOPT_BTR  ! soil moisture factor for stomatal resistance (1-> Noah; 2-> CLM; 3-> SSiB)
@@ -770,7 +771,7 @@ module module_NoahMP_hrldas_driver
 #endif
 
   call read_hrldas_hdrinfo(hrldas_setup_file, ix, jx, xstart, xend, ystart, yend, &
-       iswater, isurban, isice, llanduse, dx, dy, truelat1, truelat2, cen_lon, lat1, lon1, &
+       iswater, islake, isurban, isice, llanduse, dx, dy, truelat1, truelat2, cen_lon, lat1, lon1, &
        igrid, mapproj)
   write(hgrid,'(I1)') igrid
 
@@ -1333,7 +1334,7 @@ ENDIF
 !----------------------------------------------------------------------
  
   CALL READLAND_HRLDAS(HRLDAS_SETUP_FILE, XSTART, XEND, YSTART, YEND,     &
-       ISWATER, IVGTYP, ISLTYP, TERRAIN, TMN, XLAT, XLONG, XLAND, SEAICE,MSFTX,MSFTY)
+       ISWATER, ISLAKE, IVGTYP, ISLTYP, TERRAIN, TMN, XLAT, XLONG, XLAND, SEAICE,MSFTX,MSFTY)
   
   WHERE(SEAICE > 0.0) XICE = 1.0
 
