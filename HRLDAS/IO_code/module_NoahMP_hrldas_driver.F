@@ -1313,8 +1313,8 @@ ENDIF
   CHSTARXY   = undefined_real
   Z0         = undefined_real
   ZNT        = undefined_real
-  PGSXY      = undefined_real
-  CROPCAT    = undefined_real
+  PGSXY      = undefined_int
+  CROPCAT    = undefined_int
   PLANTING   = undefined_real
   HARVEST    = undefined_real
   SEASON_GDD = undefined_real
