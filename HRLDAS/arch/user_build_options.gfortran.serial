@@ -9,7 +9,7 @@
  MODFLAG        =       -I
  LDFLAGS        =       
  CPP            =       /opt/local/bin/cpp-mp-4.8
- CPPFLAGS       =       -P -traditional -D_GFORTRAN_ # -D_HRLDAS_URBAN_
+ CPPFLAGS       =       -P -traditional -D_GFORTRAN_
  LIBS           =       
  LIBJASPER      =       -ljpeg -L/opt/local/lib -ljasper
  INCJASPER      =       -I/opt/local/include/jasper

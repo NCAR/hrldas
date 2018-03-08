@@ -10,7 +10,7 @@
  HYDRO_LIB      =       
  LDFLAGS	=	
  CPP		=	cpp
- CPPFLAGS	=	-P -traditional # -D_HRLDAS_URBAN_
+ CPPFLAGS	=	-P -traditional
  LIBS		=	
  LIBJASPER      =       -ljpeg -L/usr/lib -ljasper
  INCJASPER      =       -I/usr/include
