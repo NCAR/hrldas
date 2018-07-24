@@ -77,6 +77,8 @@ module module_NoahMP_hrldas_driver
   INTEGER                                 ::  IOPT_GLA  ! glacier option (1->phase change; 2->simple)
   INTEGER                                 ::  IOPT_RSF  ! surface resistance option (1->Zeng; 2->simple)
   INTEGER                                 ::  IZ0TLND   ! option of Chen adjustment of Czil (not used)
+  INTEGER                                 ::  IOPT_SOIL  ! soil configuration option
+  INTEGER                                 ::  IOPT_PEDO  ! soil pedotransfer function option
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  T_PHY     ! 3D atmospheric temperature valid at mid-levels [K]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  QV_CURR   ! 3D water vapor mixing ratio [kg/kg_dry]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  U_PHY     ! 3D U wind component [m/s]
@@ -94,20 +96,24 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  GRAUPELNCV! non-convective graupel forcing (subset of rainncv) [mm]
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  HAILNCV   ! non-convective hail forcing (subset of rainncv) [mm]
 
-! New spatially varying fields
+! Spatially varying fields
 
-!  CHARACTER(LEN = 256)                    ::  spatial_filename 
-!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  bexp_3D    ! C-H B exponent
-!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  smcdry_3D  ! Soil Moisture Limit: Dry
-!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  smcwlt_3D  ! Soil Moisture Limit: Wilt
-!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  smcref_3D  ! Soil Moisture Limit: Reference
-!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  smcmax_3D  ! Soil Moisture Limit: Max
-!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  dksat_3D   ! Saturated Soil Conductivity
-!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  dwsat_3D   ! Saturated Soil Diffusivity
-!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  psisat_3D  ! Saturated Matric Potential
-!  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  quartz_3D  ! Soil quartz content
-!  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  refdk_2D   ! Reference Soil Conductivity
-!  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  refkdt_2D  ! Soil Infiltration Parameter
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  bexp_3D    ! C-H B exponent
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  smcdry_3D  ! Soil Moisture Limit: Dry
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  smcwlt_3D  ! Soil Moisture Limit: Wilt
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  smcref_3D  ! Soil Moisture Limit: Reference
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  smcmax_3D  ! Soil Moisture Limit: Max
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  dksat_3D   ! Saturated Soil Conductivity
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  dwsat_3D   ! Saturated Soil Diffusivity
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  psisat_3D  ! Saturated Matric Potential
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  quartz_3D  ! Soil quartz content
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  refdk_2D   ! Reference Soil Conductivity
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  refkdt_2D  ! Soil Infiltration Parameter
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)     ::  soilcomp   ! Soil sand and clay content [fraction]
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  soilcl1    ! Soil texture class with depth
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  soilcl2    ! Soil texture class with depth
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  soilcl3    ! Soil texture class with depth
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  soilcl4    ! Soil texture class with depth
 
 ! INOUT (with generic LSM equivalent) (as defined in WRF)
 
@@ -516,12 +522,16 @@ module module_NoahMP_hrldas_driver
   integer            :: glacier_option
   integer            :: surface_resistance_option
 
+  integer            :: soil_data_option = 1
+  integer            :: pedotransfer_option = 1
+
   integer            :: split_output_count = 1
   logical            :: skip_first_output = .false.
   integer            :: khour
   integer            :: kday
   real               :: zlvl 
   character(len=256) :: hrldas_setup_file = " "
+  character(len=256) ::  spatial_filename = " "
   character(len=256) :: external_veg_filename_template = " "
   character(len=256) :: external_lai_filename_template = " "
   integer            :: xstart = 1
@@ -549,11 +559,13 @@ module module_NoahMP_hrldas_driver
        pcp_partition_option, tbot_option, temp_time_scheme_option, &
        glacier_option, surface_resistance_option, &
 
+       soil_data_option, pedotransfer_option, &
+
        sf_urban_physics,num_urban_layers,num_urban_hi,urban_atmosphere_thickness, &
 
        split_output_count, & 
        khour, kday, zlvl, hrldas_setup_file, &
-!       spatial_filename, &
+       spatial_filename, &
        external_veg_filename_template, external_lai_filename_template, &
        xstart, xend, ystart, yend
 
@@ -616,6 +628,8 @@ module module_NoahMP_hrldas_driver
   IOPT_STC = temp_time_scheme_option
   IOPT_GLA = glacier_option
   IOPT_RSF = surface_resistance_option
+  IOPT_SOIL = soil_data_option
+  IOPT_PEDO = pedotransfer_option
 !---------------------------------------------------------------------
 !  NAMELIST end
 !---------------------------------------------------------------------
@@ -717,6 +731,15 @@ module module_NoahMP_hrldas_driver
         write(*, *)
         stop
      endif
+  endif
+
+  if (soil_data_option == 4 .and. spatial_filename == " ") then
+        write(*, *)
+        write(*, '(" ***** Namelist error: ******************************************************")')
+        write(*, '(" ***** ")')
+        write(*, '(" *****       SPATIAL_FILENAME must be provided when SOIL_DATA_OPTION == 4)')
+        write(*, *)
+        stop
   endif
 
   if (sf_urban_physics == 2 .or. sf_urban_physics == 3) then
@@ -854,17 +877,22 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( GRAUPELNCV(XSTART:XEND,YSTART:YEND) )    ! non-convective graupel forcing (subset of rainncv) [mm]
   ALLOCATE ( HAILNCV   (XSTART:XEND,YSTART:YEND) )    ! non-convective hail forcing (subset of rainncv) [mm]
 
-!  ALLOCATE ( bexp_3d    (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! C-H B exponent
-!  ALLOCATE ( smcdry_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Dry
-!  ALLOCATE ( smcwlt_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Wilt
-!  ALLOCATE ( smcref_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Reference
-!  ALLOCATE ( smcmax_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Max
-!  ALLOCATE ( dksat_3D   (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Saturated Soil Conductivity
-!  ALLOCATE ( dwsat_3D   (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Saturated Soil Diffusivity
-!  ALLOCATE ( psisat_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Saturated Matric Potential
-!  ALLOCATE ( quartz_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil quartz content
-!  ALLOCATE ( refdk_2D   (XSTART:XEND,YSTART:YEND) )            ! Reference Soil Conductivity
-!  ALLOCATE ( refkdt_2D  (XSTART:XEND,YSTART:YEND) )            ! Soil Infiltration Parameter
+  ALLOCATE ( bexp_3d    (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! C-H B exponent
+  ALLOCATE ( smcdry_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Dry
+  ALLOCATE ( smcwlt_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Wilt
+  ALLOCATE ( smcref_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Reference
+  ALLOCATE ( smcmax_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil Moisture Limit: Max
+  ALLOCATE ( dksat_3D   (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Saturated Soil Conductivity
+  ALLOCATE ( dwsat_3D   (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Saturated Soil Diffusivity
+  ALLOCATE ( psisat_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Saturated Matric Potential
+  ALLOCATE ( quartz_3D  (XSTART:XEND,1:NSOIL,YSTART:YEND) )    ! Soil quartz content
+  ALLOCATE ( refdk_2D   (XSTART:XEND,YSTART:YEND) )            ! Reference Soil Conductivity
+  ALLOCATE ( refkdt_2D  (XSTART:XEND,YSTART:YEND) )            ! Soil Infiltration Parameter
+  ALLOCATE ( soilcomp   (XSTART:XEND,1:2*NSOIL,YSTART:YEND) )  ! Soil sand and clay content [fraction]
+  ALLOCATE ( soilcl1    (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
+  ALLOCATE ( soilcl2    (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
+  ALLOCATE ( soilcl3    (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
+  ALLOCATE ( soilcl4    (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
 
 ! INOUT (with generic LSM equivalent) (as defined in WRF)
 
@@ -1169,6 +1197,11 @@ ENDIF
   DZS        = undefined_real
   IVGTYP     = undefined_int
   ISLTYP     = undefined_int
+  SOILCL1    = undefined_real
+  SOILCL2    = undefined_real
+  SOILCL3    = undefined_real
+  SOILCL4    = undefined_real
+  SOILCOMP   = undefined_real
   VEGFRA     = undefined_real
   GVFMAX     = undefined_real
   TMN        = undefined_real
@@ -1342,9 +1375,25 @@ ENDIF
 ! For spatially-varying soil parameters, read in necessary extra fields
 !------------------------------------------------------------------------
 
-!    CALL READ_3D_SOIL(SPATIAL_FILENAME, XSTART, XEND, YSTART, YEND, &
-!                      NSOIL,BEXP_3D,SMCDRY_3D,SMCWLT_3D,SMCREF_3D,SMCMAX_3D,  &
-!		      DKSAT_3D,DWSAT_3D,PSISAT_3D,QUARTZ_3D,REFDK_2D,REFKDT_2D)
+  if (soil_data_option == 2) then
+    CALL READ_SOIL_TEXTURE(HRLDAS_SETUP_FILE, XSTART, XEND, YSTART, YEND, &
+                      NSOIL,IVGTYP,SOILCL1,SOILCL2,SOILCL3,SOILCL4,ISICE,ISWATER)
+
+    ISLTYP = nint(SOILCL1(:,:))
+
+  end if
+  
+  if (soil_data_option == 3) then
+    CALL READ_SOIL_COMPOSITION(HRLDAS_SETUP_FILE, XSTART, XEND, YSTART, YEND, &
+                      NSOIL,IVGTYP,ISICE,ISWATER, &
+		      SOILCOMP)
+  end if
+  
+  if (soil_data_option == 4) then
+    CALL READ_3D_SOIL(SPATIAL_FILENAME, XSTART, XEND, YSTART, YEND, &
+                      NSOIL,BEXP_3D,SMCDRY_3D,SMCWLT_3D,SMCREF_3D,SMCMAX_3D,  &
+		      DKSAT_3D,DWSAT_3D,PSISAT_3D,QUARTZ_3D,REFDK_2D,REFKDT_2D)
+  end if
   
 !------------------------------------------------------------------------
 ! For IOPT_RUN = 5 (MMF groundwater), read in necessary extra fields
@@ -1954,7 +2003,9 @@ end subroutine land_driver_ini
                PLANTING,  HARVEST,SEASON_GDD,                               &
                   IDVEG, IOPT_CRS, IOPT_BTR, IOPT_RUN,  IOPT_SFC,   IOPT_FRZ, &
 	       IOPT_INF, IOPT_RAD, IOPT_ALB, IOPT_SNF, IOPT_TBOT,   IOPT_STC, &
-	       IOPT_GLA, IOPT_RSF, IZ0TLND, sf_urban_physics,                 &
+	       IOPT_GLA, IOPT_RSF,IOPT_SOIL,IOPT_PEDO,                        &
+               IZ0TLND, sf_urban_physics,                                     &
+	       SOILCOMP,  SOILCL1,  SOILCL2,   SOILCL3,  SOILCL4,             &
 		  T_PHY,  QV_CURR,    U_PHY,    V_PHY,    SWDOWN,        GLW, &
 		    P8W,   RAINBL,       SR,                                  &
 		    TSK,      HFX,      QFX,       LH,    GRDFLX,     SMSTAV, &

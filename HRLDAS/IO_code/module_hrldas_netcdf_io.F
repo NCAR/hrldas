@@ -856,6 +856,169 @@ contains
 
 !---------------------------------------------------------------------------------------------------------
 
+  subroutine read_soil_composition(spatial_filename,xstart, xend,ystart, yend,           &
+                                   nsoil,ivgtyp,isice,iswater,soilcomp)
+    implicit none
+    character(len=*),          intent(in)  :: spatial_filename
+    integer,                   intent(in)  :: xstart, xend, ystart, yend
+    integer,                   intent(in)  :: nsoil
+    integer, dimension(xstart:xend      ,ystart:yend), intent(in)  :: ivgtyp
+    integer,                   intent(in)  :: isice
+    integer,                   intent(in)  :: iswater
+    real,    dimension(xstart:xend,2*nsoil,ystart:yend), intent(out) :: soilcomp
+    
+    real,    dimension(xstart:xend,ystart:yend,2*nsoil) :: soilcomp_in
+    
+    character(len=24)  :: name
+    character(len=256) :: units
+    integer :: ierr,iret, varid,isoil
+    integer :: ncid
+
+    ierr = nf90_open(spatial_filename, NF90_NOWRITE, ncid)
+    if (ierr /= 0) then
+       write(*,'("read_soil_composition:  Problem opening soil composition file: ''", A, "''")') trim(spatial_filename)
+       stop
+    endif
+
+    name = "SOILCOMP"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "read_soil_composition:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, soilcomp_in, start=(/xstart,ystart,1,1/), count=(/xend-xstart+1,yend-ystart+1,2*nsoil,1/))
+    
+    ! Map values
+
+    do isoil = 1,2*nsoil
+      
+      soilcomp(:,isoil,:) = soilcomp_in(:,:,isoil)
+
+    end do
+
+    ! Remove any bad values
+
+    do isoil = 1,nsoil
+       
+      where(ivgtyp /= isice .and. ivgtyp /= iswater .and. (soilcomp(:,isoil  ,:) <= 0) ) &
+          soilcomp(:,isoil,:) = 41.0 
+      where(ivgtyp /= isice .and. ivgtyp /= iswater .and. (soilcomp(:,isoil+nsoil,:) <= 0) ) &
+          soilcomp(:,isoil+nsoil,:) = 18.0 
+
+    end do
+
+    ! Close the NetCDF file
+    ierr = nf90_close(ncid)
+    if (ierr /= 0) stop "MODULE_NOAHLSM_HRLDAS_INPUT:  read_soil_components:  NF90_CLOSE"
+
+
+  end subroutine read_soil_composition
+
+!---------------------------------------------------------------------------------------------------------
+
+  subroutine read_soil_texture(spatial_filename,xstart, xend,ystart, yend,           &
+                          nsoil,ivgtyp,soilcl1,soilcl2,soilcl3,soilcl4,isice,iswater)
+    implicit none
+    character(len=*),          intent(in)  :: spatial_filename
+    integer,                   intent(in)  :: xstart, xend, ystart, yend
+    integer,                   intent(in)  :: nsoil
+    integer, dimension(xstart:xend      ,ystart:yend), intent(in)    :: ivgtyp
+    real, dimension(xstart:xend,ystart:yend), intent(inout) :: soilcl1
+    real, dimension(xstart:xend,ystart:yend), intent(inout) :: soilcl2
+    real, dimension(xstart:xend,ystart:yend), intent(inout) :: soilcl3
+    real, dimension(xstart:xend,ystart:yend), intent(inout) :: soilcl4
+    integer,                   intent(in)  :: isice
+    integer,                   intent(in)  :: iswater
+
+    character(len=24)  :: name
+    character(len=256) :: units
+    integer :: ierr,iret, varid,isoil
+    integer :: ncid
+    
+    soilcl1 = -999.
+    soilcl2 = -999.
+    soilcl3 = -999.
+    soilcl4 = -999.
+
+    ierr = nf90_open(spatial_filename, NF90_NOWRITE, ncid)
+    if (ierr /= 0) then
+       write(*,'("read_soil_composition:  Problem opening soil level texture file: ''", A, "''")') trim(spatial_filename)
+       stop
+    endif
+
+    name = "SOILCL1"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "read_soil_composition:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, soilcl1, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,1/))
+    
+    where(soilcl1 < 0.5)  soilcl1 = 6.
+    where(soilcl1 > 12.5) soilcl1 = 6.
+    where(ivgtyp == isice   ) soilcl1 = 16. 
+    where(ivgtyp == iswater ) soilcl1 = 14. 
+
+    name = "SOILCL2"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "read_soil_composition:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, soilcl2, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,1/))
+    
+    where(soilcl2 < 0.5)  soilcl2 = 6.
+    where(soilcl2 > 12.5) soilcl2 = 6.
+    where(ivgtyp == isice   ) soilcl2 = 16. 
+    where(ivgtyp == iswater ) soilcl2 = 14. 
+    
+
+    name = "SOILCL3"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "read_soil_composition:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, soilcl3, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,1/))
+    
+    where(soilcl3 < 0.5)  soilcl3 = 6.
+    where(soilcl3 > 12.5) soilcl3 = 6.
+    where(ivgtyp == isice   ) soilcl3 = 16. 
+    where(ivgtyp == iswater ) soilcl3 = 14. 
+    
+
+    name = "SOILCL4"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "read_soil_composition:  Problem finding variable '"//trim(name)//"' in NetCDF file."
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, soilcl4, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,1/))
+    
+    where(soilcl4 < 0.5)  soilcl4 = 6.
+    where(soilcl4 > 12.5) soilcl4 = 6.
+    where(ivgtyp == isice   ) soilcl4 = 16. 
+    where(ivgtyp == iswater ) soilcl4 = 14. 
+            
+    ! Close the NetCDF file
+    ierr = nf90_close(ncid)
+    if (ierr /= 0) stop "MODULE_NOAHLSM_HRLDAS_INPUT:  read_soil_texture:  NF90_CLOSE"
+
+
+  end subroutine read_soil_texture
+
+!---------------------------------------------------------------------------------------------------------
+
   subroutine get_landuse_netcdf(ncid, array, units, xstart, xend, ystart, yend)
     implicit none
     integer, intent(in) :: ncid
