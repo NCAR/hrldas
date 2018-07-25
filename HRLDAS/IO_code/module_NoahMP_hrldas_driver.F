@@ -225,6 +225,7 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  CHUCXY    ! under canopy exchange coefficient 
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  CHV2XY    ! veg 2m exchange coefficient 
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  CHB2XY    ! bare 2m exchange coefficient 
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  RS        ! Total stomatal resistance (s/m)
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  Z0        ! roughness length output to WRF
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  ZNT       ! roughness length output to WRF
   INTEGER   ::  ids,ide, jds,jde, kds,kde,  &  ! d -> domain
@@ -1004,6 +1005,7 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( CHUCXY    (XSTART:XEND,YSTART:YEND) )  ! under canopy exchange coefficient 
   ALLOCATE ( CHV2XY    (XSTART:XEND,YSTART:YEND) )  ! veg 2m exchange coefficient 
   ALLOCATE ( CHB2XY    (XSTART:XEND,YSTART:YEND) )  ! bare 2m exchange coefficient 
+  ALLOCATE ( RS        (XSTART:XEND,YSTART:YEND) )  ! Total stomatal resistance (s/m)
   ALLOCATE ( Z0        (XSTART:XEND,YSTART:YEND) )  ! roughness length output to WRF 
   ALLOCATE ( ZNT       (XSTART:XEND,YSTART:YEND) )  ! roughness length output to WRF 
 
@@ -1327,6 +1329,7 @@ ENDIF
   CHUCXY     = undefined_real
   CHV2XY     = undefined_real
   CHB2XY     = undefined_real
+  RS         = undefined_real
   TERRAIN    = undefined_real
   GVFMIN     = undefined_real
   GVFMAX     = undefined_real
@@ -2026,7 +2029,7 @@ end subroutine land_driver_ini
                  BGAPXY,   WGAPXY,    TGVXY,    TGBXY,     CHVXY,      CHBXY, &
 		  SHGXY,    SHCXY,    SHBXY,    EVGXY,     EVBXY,      GHVXY, &
 		  GHBXY,    IRGXY,    IRCXY,    IRBXY,      TRXY,      EVCXY, &
-	       CHLEAFXY,   CHUCXY,   CHV2XY,   CHB2XY,                        &                          
+	       CHLEAFXY,   CHUCXY,   CHV2XY,   CHB2XY,        RS,             &                          
 !                 BEXP_3D,SMCDRY_3D,SMCWLT_3D,SMCREF_3D,SMCMAX_3D,             &
 !		 DKSAT_3D,DWSAT_3D,PSISAT_3D,QUARTZ_3D,                       &
 !		 REFDK_2D,REFKDT_2D,                                          &
