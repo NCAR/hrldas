@@ -2532,11 +2532,11 @@ contains
     integer, dimension(3) :: nstart
     integer, dimension(3) :: ncount
 
-!    where (vegtyp == ISWATER .and. .not. restart_flag)
-!       xdum = -1.E33
-!    elsewhere
+    where (vegtyp == ISWATER .and. .not. restart_flag)
+       xdum = -1.E33
+    elsewhere
        xdum = vardata
-!    endwhere
+    endwhere
 
     iret = nf90_inq_varid(ncid,  varname, varid)
     call error_handler(iret, "Subroutine PUT_VAR_2D:  Problem finding variable id for "//trim(varname)//".")
@@ -2607,9 +2607,9 @@ contains
     ncount = (/     ix , nsoil , jx ,            1 /)
 
     xdum = vardata
-!    do n = 1, nsoil
-!       where (vegtyp(:,:) == ISWATER) xdum(:,n,:) = -1.E33
-!    enddo
+    do n = 1, nsoil
+       where (vegtyp(:,:) == ISWATER) xdum(:,n,:) = -1.E33
+    enddo
 
     iret = nf90_inq_varid(ncid,  varname, varid)
     call error_handler(iret, "Subroutine PUT_VAR_3D:  Problem finding variable id for "//trim(varname)//".")
