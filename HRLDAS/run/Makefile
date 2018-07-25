@@ -26,6 +26,7 @@ OBJS = \
 	../phys/module_sf_noahmplsm.o \
 	../phys/module_sf_noahmp_glacier.o \
 	../phys/module_sf_noahmp_groundwater.o \
+	../phys/module_sf_gecros.o \
 	../phys/module_sf_urban.o \
 	../phys/module_sf_bep.o \
 	../phys/module_sf_bem.o \
