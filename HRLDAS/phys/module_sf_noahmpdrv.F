@@ -176,8 +176,6 @@ CONTAINS
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  ZNT       ! combined z0 sent to coupled model
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  RS        ! Total stomatal resistance (s/m)
 
-! INOUT (with no Noah LSM equivalent)
-
     INTEGER, DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  ISNOWXY   ! actual no. of snow layers
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  TVXY      ! vegetation leaf temperature
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  TGXY      ! bulk ground surface temperature
@@ -621,7 +619,7 @@ CONTAINS
        SMCEQ(       1:NSOIL) = SMOISEQ (I,       1:NSOIL,J)
        SMCWTD                = SMCWTDXY(I,J)
        RECH                  = 0.
-       DEEPRECH              = 0.
+       DEEPRECH              = 0.  
 
        SLOPETYP     = 1                               ! set underground runoff slope term
        IST          = 1                               ! MP surface type: 1 = land; 2 = lake
@@ -750,7 +748,7 @@ CONTAINS
          TAH    = undefined_value
          FWET   = undefined_value 
          WSLAKE = undefined_value 
-         ZWT    = undefined_value 
+!         ZWT    = undefined_value 
          WA     = undefined_value 
          WT     = undefined_value 
          LFMASS = undefined_value 
@@ -1332,7 +1330,7 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
        smoiseq  ,smcwtdxy ,rechxy   ,deeprechxy, areaxy, dx, dy, msftx, msfty,&     ! Optional groundwater
        wtddt    ,stepwtd  ,dt       ,qrfsxy     ,qspringsxy  , qslatxy    ,  &      ! Optional groundwater
        fdepthxy ,ht     ,riverbedxy ,eqzwt     ,rivercondxy ,pexpxy       ,  &      ! Optional groundwater
-       rechclim  ,rivermask ,nonriverxy                                        )    ! Optional groundwater
+       rechclim                                          )    ! Optional groundwater
 
   USE NOAHMP_TABLES
 
@@ -1426,8 +1424,6 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
     REAL, DIMENSION(ims:ime,jms:jme), INTENT(INOUT), OPTIONAL :: RIVERCONDXY !river conductance
     REAL, DIMENSION(ims:ime,jms:jme), INTENT(INOUT), OPTIONAL :: PEXPXY      !factor for river conductance
     REAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) , OPTIONAL :: rechclim
-    REAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) , OPTIONAL :: rivermask
-    REAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) , OPTIONAL :: nonriverxy
 
     INTEGER,  INTENT(OUT) , OPTIONAL :: STEPWTD
     REAL, INTENT(IN) , OPTIONAL :: DT, WTDDT
@@ -1542,7 +1538,7 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
 	      
               BEXP   =   BEXP_TABLE(ISLTYP(I,J))
               SMCMAX = SMCMAX_TABLE(ISLTYP(I,J))
-              PSISAT = PSISAT_TABLE(ISLTYP(I,J))
+              PSISAT = -1.0*PSISAT_TABLE(ISLTYP(I,J))
 
               DO NS=1, NSOIL
 	        IF ( SMOIS(I,NS,J) > SMCMAX )  SMOIS(I,NS,J) = SMCMAX
@@ -1712,21 +1708,10 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
             PRESENT(eqzwt)       .AND. &
             PRESENT(rivercondxy) .AND. &
             PRESENT(pexpxy)      .AND. &
-            PRESENT(rechclim)    .AND. &
-            PRESENT(rivermask)   .AND. &
-            PRESENT(nonriverxy)    ) THEN
+            PRESENT(rechclim)    ) THEN
 
              STEPWTD = nint(WTDDT*60./DT)
              STEPWTD = max(STEPWTD,1)
-
-              CALL groundwater_init ( & 
-      &       nsoil, zsoil , dzs  ,isltyp, ivgtyp,wtddt , &
-      &       fdepthxy, ht, riverbedxy, eqzwt, rivercondxy, pexpxy , areaxy, zwtxy,   &
-      &       smois,sh2o, smoiseq, smcwtdxy, deeprechxy, rechxy, qslatxy, qrfsxy, qspringsxy, &
-      &       rechclim  ,rivermask ,nonriverxy,             &
-      &       ids,ide, jds,jde, kds,kde,                    &
-      &       ims,ime, jms,jme, kms,kme,                    &
-      &       its,ite, jts,jte, kts,kte                     )
 
           ELSE
              CALL wrf_error_fatal ('Not enough fields to use groundwater option in Noah-MP')
@@ -1843,13 +1828,14 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
 ! ==================================================================================================
 ! ----------------------------------------------------------------------
     SUBROUTINE GROUNDWATER_INIT (   &
-            &            NSOIL , ZSOIL , DZS, ISLTYP, IVGTYP, WTDDT , &
+            &            NSOIL , DZS, ISLTYP, IVGTYP, WTDDT , &
             &            FDEPTH, TOPO, RIVERBED, EQWTD, RIVERCOND, PEXP , AREA ,WTD ,  &
             &            SMOIS,SH2O, SMOISEQ, SMCWTDXY, DEEPRECHXY, RECHXY ,  &
             &            QSLATXY, QRFSXY, QSPRINGSXY,                  &
-            &            rechclim  ,rivermask ,nonriverxy,             &
+            &            rechclim  ,                                   &
             &            ids,ide, jds,jde, kds,kde,                    &
             &            ims,ime, jms,jme, kms,kme,                    &
+            &            ips,ipe, jps,jpe, kps,kpe,                    &
             &            its,ite, jts,jte, kts,kte                     )
 
 
@@ -1863,13 +1849,14 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
 
     INTEGER,  INTENT(IN   )   ::     ids,ide, jds,jde, kds,kde,  &
          &                           ims,ime, jms,jme, kms,kme,  &
+         &                           ips,ipe, jps,jpe, kps,kpe,  &
          &                           its,ite, jts,jte, kts,kte
     INTEGER, INTENT(IN)                              :: NSOIL
     REAL,   INTENT(IN)                               ::     WTDDT
-    REAL,    INTENT(IN), DIMENSION(1:NSOIL)          :: ZSOIL,DZS
+    REAL,    INTENT(IN), DIMENSION(1:NSOIL)          :: DZS
     INTEGER, INTENT(IN), DIMENSION(ims:ime, jms:jme) :: ISLTYP, IVGTYP
     REAL,    INTENT(IN), DIMENSION(ims:ime, jms:jme) :: FDEPTH, TOPO , AREA
-    REAL,    INTENT(IN), DIMENSION(ims:ime, jms:jme) :: rechclim  ,rivermask ,nonriverxy
+    REAL,    INTENT(IN), DIMENSION(ims:ime, jms:jme) :: rechclim 
     REAL,    INTENT(OUT), DIMENSION(ims:ime, jms:jme) :: RIVERCOND
     REAL,    INTENT(INOUT), DIMENSION(ims:ime, jms:jme) :: WTD, RIVERBED, EQWTD, PEXP
     REAL,     DIMENSION( ims:ime , 1:nsoil, jms:jme ), &
@@ -1884,14 +1871,21 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
                                                            QRFSXY, &
                                                            QSPRINGSXY  
 ! local
-    INTEGER  :: I,J,K,ITER,itf,jtf, NITER, NCOUNT
+    INTEGER  :: I,J,K,ITER,itf,jtf, NITER, NCOUNT,NS
     REAL :: BEXP,SMCMAX,PSISAT,SMCWLT,DWSAT,DKSAT
     REAL :: FRLIQ,SMCEQDEEP
     REAL :: DELTAT,RCOND,TOTWATER
     REAL :: AA,BBB,CC,DD,DX,FUNC,DFUNC,DDZ,EXPON,SMC,FLUX
-    REAL, DIMENSION(1:NSOIL) :: SMCEQ
+    REAL, DIMENSION(1:NSOIL) :: SMCEQ,ZSOIL
     REAL,      DIMENSION( ims:ime, jms:jme )    :: QLAT, QRF
     INTEGER,   DIMENSION( ims:ime, jms:jme )    :: LANDMASK !-1 for water (ice or no ice) and glacial areas, 1 for land where the LSM does its soil moisture calculations
+
+       ! Given the soil layer thicknesses (in DZS), calculate the soil layer
+       ! depths from the surface.
+       ZSOIL(1)         = -DZS(1)          ! negative
+       DO NS=2, NSOIL
+          ZSOIL(NS)       = ZSOIL(NS-1) - DZS(NS)
+       END DO
 
 
        itf=min0(ite,ide-1)
@@ -1910,32 +1904,38 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
 
 !readjust the raw aggregated water table from hires, so that it is better compatible with topography
 
- DO NITER=1,500
+!use WTD here, to use the lateral communication routine
+    WTD=EQWTD
 
     NCOUNT=0
 
+ DO NITER=1,500
+
 !Calculate lateral flow
 
+IF(NCOUNT.GT.0.OR.NITER.eq.1)THEN
     QLAT = 0.
-    CALL LATERALFLOW(ISLTYP,EQWTD,QLAT,FDEPTH,TOPO,LANDMASK,DELTAT,AREA       &
+    CALL LATERALFLOW(ISLTYP,WTD,QLAT,FDEPTH,TOPO,LANDMASK,DELTAT,AREA       &
                         ,ids,ide,jds,jde,kds,kde                      & 
                         ,ims,ime,jms,jme,kms,kme                      &
                         ,its,ite,jts,jte,kts,kte                      )
 
+    NCOUNT=0
     DO J=jts,jtf
        DO I=its,itf
           IF(LANDMASK(I,J).GT.0)THEN
             IF(QLAT(i,j).GT.1.e-2)THEN
                  NCOUNT=NCOUNT+1
-                 EQWTD(i,j)=min(EQWTD(i,j)+0.25,0.)
+                 WTD(i,j)=min(WTD(i,j)+0.25,0.)
             ENDIF
           ENDIF
         ENDDO
      ENDDO
-
-   IF(NCOUNT.EQ.0)EXIT
+ENDIF
 
  ENDDO
+
+EQWTD=WTD
 
 !after adjusting, where qlat > 1cm/year now wtd is at the surface.
 !it may still happen that qlat + rech > 0 and eqwtd-rbed <0. There the wtd can
@@ -1972,11 +1972,6 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
 !make riverbed to be height down from the surface instead of above sea level
 
     RIVERBED = min( RIVERBED-TOPO, 0.)
-
-!now inititalize wtd
-
-    WTD = EQWTD
-
 
 !now recompute lateral flow and flow to rivers to initialize deep soil moisture
 

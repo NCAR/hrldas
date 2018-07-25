@@ -2,7 +2,7 @@ module module_NoahMP_hrldas_driver
 
   USE module_hrldas_netcdf_io
   USE module_sf_noahmp_groundwater
-  USE module_sf_noahmpdrv, only: noahmp_init, noahmplsm, noahmp_urban
+  USE module_sf_noahmpdrv, only: noahmp_init, noahmplsm, noahmp_urban, groundwater_init
   USE module_sf_urban, only: urban_param_init, urban_var_init
   USE module_date_utilities
   USE noahmp_tables, ONLY:  LOW_DENSITY_RESIDENTIAL_TABLE, HIGH_DENSITY_RESIDENTIAL_TABLE, &
@@ -1405,7 +1405,7 @@ ENDIF
 
   if (runoff_option == 5) then
     CALL READ_MMF_RUNOFF(HRLDAS_SETUP_FILE, XSTART, XEND, YSTART, YEND,&
-                         FDEPTHXY,EQZWT,RECHCLIM,RIVERMASK,RIVERBEDXY,NONRIVERXY)
+                         FDEPTHXY,EQZWT,RECHCLIM,RIVERBEDXY)
   end if
 
 !------------------------------------------------------------------------
@@ -1603,9 +1603,10 @@ ENDIF
                   its,ite, jts,jte, kts,kte                 &  ! tile
                      ,smoiseq  ,smcwtdxy ,rechxy   ,deeprechxy, areaxy ,dx, dy, msftx, msfty,&
                      wtddt    ,stepwtd  ,dtbl  ,qrfsxy ,qspringsxy  ,qslatxy,                  &
-                     fdepthxy ,terrain ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy,              &
-                     rechclim  ,rivermask ,nonriverxy                 &
+                     fdepthxy ,terrain       ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy,              &
+                     rechclim                  &
                      )
+
          IF(SF_URBAN_PHYSICS > 0 ) THEN  !urban
          
                 CALL urban_param_init(DZR,DZB,DZG,num_soil_layers,sf_urban_physics)
@@ -1734,9 +1735,23 @@ ENDIF
                   its,ite, jts,jte, kts,kte                 &  ! tile
                      ,smoiseq  ,smcwtdxy ,rechxy   ,deeprechxy, areaxy ,dx, dy, msftx, msfty,&
                      wtddt    ,stepwtd  ,dtbl  ,qrfsxy ,qspringsxy  ,qslatxy,                  &
-                     fdepthxy ,terrain ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy,              &
-                     rechclim  ,rivermask ,nonriverxy                 &
+                     fdepthxy ,terrain       ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy,              &
+                     rechclim                  &
                      )
+
+         if(iopt_run == 5) then
+              call groundwater_init (                                           &
+                 num_soil_layers, dzs, isltyp, ivgtyp, wtddt ,                  &
+                 fdepthxy   , terrain , riverbedxy, eqzwt     ,                 &
+                 rivercondxy, pexpxy  , areaxy    , zwtxy     ,                 &
+                 smois      , sh2o    , smoiseq   , smcwtdxy  , deeprechxy,     &
+                 rechxy     , qslatxy , qrfsxy    , qspringsxy,                 &
+                 rechclim   ,                                                   &
+                 ids,ide, jds,jde, kds,kde,                                     &
+                 ims,ime, jms,jme, kms,kme,                                     &
+                 ims,ime, jms,jme, kms,kme,                                     &
+                 its,ite, jts,jte, kts,kte )
+         endif
 
       TAUSSXY = 0.0   ! Need to be added to _INIT later
 

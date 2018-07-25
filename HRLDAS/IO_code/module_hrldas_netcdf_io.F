@@ -512,16 +512,14 @@ contains
   subroutine read_mmf_runoff(wrfinput_flnm,                            &
        xstart, xend,                                                   &
        ystart, yend,                                                   &
-       fdepth,eqzwt,rechclim,rivermask,riverbed,nonriver)
+       fdepth,eqzwt,rechclim,riverbed)
     implicit none
     character(len=*),          intent(in)  :: wrfinput_flnm
     integer,                   intent(in)  :: xstart, xend, ystart, yend
     real,    dimension(xstart:xend,ystart:yend), intent(out) :: fdepth
     real,    dimension(xstart:xend,ystart:yend), intent(out) :: eqzwt
     real,    dimension(xstart:xend,ystart:yend), intent(out) :: rechclim
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: rivermask
     real,    dimension(xstart:xend,ystart:yend), intent(out) :: riverbed
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: nonriver
     
     character(len=256) :: units
     integer :: ierr
@@ -562,14 +560,8 @@ contains
     ! Get water table depth (RECHCLIM)
     call get_2d_netcdf("RECHCLIM", ncid, rechclim,  units, xstart, xend, ystart, yend, FATAL, ierr)
 
-    ! Get equilibrium water table depth (RIVERMASK)
-    call get_2d_netcdf("RIVERMASK", ncid, rivermask,  units, xstart, xend, ystart, yend, FATAL, ierr)
-
     ! Get equilibrium water table depth (RIVERBED)
     call get_2d_netcdf("RIVERBED", ncid, riverbed,  units, xstart, xend, ystart, yend, FATAL, ierr)
-
-    ! Get equilibrium water table depth (NONRIVER)
-    call get_2d_netcdf("NONRIVER", ncid, nonriver,  units, xstart, xend, ystart, yend, FATAL, ierr)
 
     ! Close the NetCDF file
     ierr = nf90_close(ncid)
@@ -2540,11 +2532,11 @@ contains
     integer, dimension(3) :: nstart
     integer, dimension(3) :: ncount
 
-    where (vegtyp == ISWATER .and. .not. restart_flag)
-       xdum = -1.E33
-    elsewhere
+!    where (vegtyp == ISWATER .and. .not. restart_flag)
+!       xdum = -1.E33
+!    elsewhere
        xdum = vardata
-    endwhere
+!    endwhere
 
     iret = nf90_inq_varid(ncid,  varname, varid)
     call error_handler(iret, "Subroutine PUT_VAR_2D:  Problem finding variable id for "//trim(varname)//".")
@@ -2615,9 +2607,9 @@ contains
     ncount = (/     ix , nsoil , jx ,            1 /)
 
     xdum = vardata
-    do n = 1, nsoil
-       where (vegtyp(:,:) == ISWATER) xdum(:,n,:) = -1.E33
-    enddo
+!    do n = 1, nsoil
+!       where (vegtyp(:,:) == ISWATER) xdum(:,n,:) = -1.E33
+!    enddo
 
     iret = nf90_inq_varid(ncid,  varname, varid)
     call error_handler(iret, "Subroutine PUT_VAR_3D:  Problem finding variable id for "//trim(varname)//".")
