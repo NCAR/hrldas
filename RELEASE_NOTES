@@ -1,6 +1,48 @@
 
 
 =========================================================================
+======================= HRLDAS v4.0 Release Notes =======================
+=========================================================================
+
+LSM capabilities/enhancements
+----------------------------------
+
+- Add pedotransfer function option for soil propertis 
+    - add optional read for soil composition and multi-layer soil texture from setup/input file
+    - activated with opt_soil and opt_pedo
+    - update MPTABLE.TBL with pedotransfer function coefficients
+
+- Add Gecros crop model
+    - activated with opt_crop=2 (Liu et al. crop now opt_crop=1)
+    - some modifications for crop initialization
+
+- Groundwater module (opt_run=5) updates 
+    - move init to driver for parallel capability 
+    - remove rivermask/nonriver from input
+
+- EPA modifications to output total stomatal resistance
+
+
+LSM bug fixes
+----------------------------------
+
+- None
+
+
+Driver capabilities/enhancements
+----------------------------------
+
+-  Change some predefined defaults in user_build_options.compiler files based on some Cheyenne tests
+
+-  Add ISLAKE to the preprocessing and driver to accommodate WRF files that define a distinct lake category
+
+Driver bug fixes
+----------------------------------
+
+-  Change PGSXY and CROPCAT to be initialized undefined_int
+
+
+=========================================================================
 ======================= HRLDAS v3.9 Release Notes =======================
 =========================================================================
 
