@@ -743,7 +743,7 @@ module module_NoahMP_hrldas_driver
         write(*, *)
         write(*, '(" ***** Namelist error: ******************************************************")')
         write(*, '(" ***** ")')
-        write(*, '(" *****       SPATIAL_FILENAME must be provided when SOIL_DATA_OPTION == 4)')
+        write(*, '(" *****       SPATIAL_FILENAME must be provided when SOIL_DATA_OPTION == 4")')
         write(*, *)
         stop
   endif
