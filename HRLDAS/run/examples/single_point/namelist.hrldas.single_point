@@ -1,38 +1,40 @@
 &NOAHLSM_OFFLINE
 
- HRLDAS_SETUP_FILE = "/d1/barlage/data/NLDAS/single_point/LDASIN/HRLDAS_setup_2012060100_d1"
- MMF_RUNOFF_FILE = "/blah/WRF/wrfleafxyz_d01.nc"
- INDIR = "/d1/barlage/data/NLDAS/single_point/LDASIN"
- OUTDIR = "/d1/barlage/data/NLDAS/single_point/LDASOUT/"
+ HRLDAS_SETUP_FILE = "../HRLDAS_forcing/run/examples/single_point/hrldas_setup_single_point.nc"
+ INDIR = "../HRLDAS_forcing/run/examples/single_point/"
+ OUTDIR = "./"
 
- START_YEAR  = 2012
- START_MONTH = 06
+ START_YEAR  = 1998
+ START_MONTH = 01
  START_DAY   = 01
  START_HOUR  = 00
  START_MIN   = 00
 
-! RESTART_FILENAME_REQUESTED = "/d1/barlage/data/mptest/vector/LDASOUT/RESTART.2012020200_DOMAIN1"
+! RESTART_FILENAME_REQUESTED = "./RESTART.2010010200_DOMAIN1"
 
- KDAY = 2
+ KDAY = 365
 
  DYNAMIC_VEG_OPTION                = 4
  CANOPY_STOMATAL_RESISTANCE_OPTION = 1
  BTR_OPTION                        = 1
  RUNOFF_OPTION                     = 3
  SURFACE_DRAG_OPTION               = 1
- FROZEN_SOIL_OPTION                = 1
  SUPERCOOLED_WATER_OPTION          = 1
+ FROZEN_SOIL_OPTION                = 1
  RADIATIVE_TRANSFER_OPTION         = 3
  SNOW_ALBEDO_OPTION                = 2
  PCP_PARTITION_OPTION              = 1
  TBOT_OPTION                       = 2
  TEMP_TIME_SCHEME_OPTION           = 1
- GLACIER_OPTION                    = 1
  SURFACE_RESISTANCE_OPTION         = 1
+ GLACIER_OPTION                    = 1
+ SOIL_DATA_OPTION                  = 1
+ PEDOTRANSFER_OPTION               = 1
+ CROP_OPTION                       = 0
 
- FORCING_TIMESTEP = 3600
- NOAH_TIMESTEP    = 3600
- OUTPUT_TIMESTEP  = 3600
+ FORCING_TIMESTEP = 1800
+ NOAH_TIMESTEP    = 1800
+ OUTPUT_TIMESTEP  = 1800
 
  SPLIT_OUTPUT_COUNT = 0
  RESTART_FREQUENCY_HOURS = 0
@@ -48,11 +50,11 @@
  soil_thick_input(3) = 0.60
  soil_thick_input(4) = 1.00
 
- ZLVL = 10.0
+ ZLVL = 6.0
 
-/
+ SF_URBAN_PHYSICS = 0
+ URBAN_ATMOSPHERE_THICKNESS = 2.0
+ NUM_URBAN_LAYERS = 360
+ NUM_URBAN_HI     = 15
 
-&URBAN_OFFLINE
- UCMCALL = 0
- ZLVL_URBAN = 15.0
 /

@@ -1,138 +1,71 @@
 
-Steps for running a HRLDAS simulation using user-provided single- or multiple-point forcing.
+Steps for running a HRLDAS simulation using the example single-point Bondville forcing.
 
+The file ../HRLDAS_forcing/run/examples/single_point/bondville.dat can be modified for you location. If the format of the data in the file is changed, modification of the source code (create_point_data.f90) may be required.
 
-1. Compile HRLDAS
+1. Download HRLDAS and configure
 
-Place the HRLDAS tar file where you will be running the model. 
+git clone https://github.com/NCAR/hrldas-release.git
 
-tar xvf HRLDAS-v3.x.tar
+In the following, hrldas_root = /root_path/hrldas-release/HRLDAS
 
-I will refer to this location as /root_path/HRLDAS-v3.x
+In hrldas_root, run configure to get a sample user_build_options for your system.
 
-In /root_path/HRLDAS-v3.x, modify user_build_options to link to the proper compilers and paths.
+For this single point example, use a serial compile option.
 
- To compile with parallel version
-  edit the file 'user_build_options'
-  uncommment the compiler section with MPI (available for pgf90 and ifort compilers)
+Modify library paths and any other compiler flags necessary for your system.
 
- To compile with sequential version
-  edit the file 'user_build_options'
-  uncommment the compiler section without MPI
+--------------------------------------------------
+
+2. Compile HRLDAS
 
 type 'make'
 
 If successful, there should be two executables created
 
-HRLDAS_forcing/create_forcing.exe  (you won't need this for point-based forcing)
+/hrldas_root/HRLDAS_forcing/create_forcing.exe  (you won't need this for point-based forcing)
 
 and 
 
-run/hrldas.exe
+/hrldas_root/run/hrldas.exe
 
 --------------------------------------------------
 
 3. Prepare point-based forcing data.
 
-This step can be confusing for a first-time user. It involves converting text files to HRLDAS forcing files in NetCDF format. The scripts provided for you are in the /root_path/HRLDAS-v3.x/HRLDAS_forcing/run/examples/single_point/ directory. 
-Required programs and libraries:
+This step can be confusing for a first-time user. It involves converting text files to HRLDAS forcing files in NetCDF format. The scripts provided for you are in the /hrldas_root/HRLDAS_forcing/run/examples/single_point/ directory. There are three files in this directory:
 
-- ncl
+create_point_data.f90 : Fortran code to create the required setup file and forcing files
+bondville.dat         : The location information and forcing data in text format
+Makefile              : Makefile for compiling and cleaning
 
---------------------------------------------------
+The Fortran source code should compile using the user_build_options from Step 1 above:
 
-3.1 Create your point-based text files.
+type 'make'
 
-The example below uses the NLDAS forcing files and NCL to create the forcing files. To properly access the forcing variables within NCL, set the environment variable for the NLDAS grib table.
+Now the executable create_point_data.exe should be present.
 
-setenv NCL_GRIB_PTABLE_PATH gribtab.nldas (an NLDAS version is included here)
+To run: 
 
---------------------------------------------------
-
-3.2 create_ldasin_files.ncl: read the input files and write the NetCDF files
-
-Set the desired latitude and longitude
-
-Set the desired start time: yyyy_start, mm_start, dd_start, hh_start
-
-hh_spacing : sets the frequency of input files (current script only considers hours)
-
-total_timesteps = 49  ; set the number of times and stations, I recommend doing each year separately
-
-elevation_adjustment : if you know that the input data elevation is different than the location of interest,
-                       put the elevation different here and the temperature will be adjusted as
-			   T_out = T_in - 0.0065 * elevation_adjustment		      
-
-
-The forcing files need the following 8 fields in specified units:
-
-near-surface temperature:             T2D [K]
-near-surface specific humidity:       Q2D [kg/kg]
-near-surface u-wind component:        U2D [m/s]
-near-surface v-wind component:        V2D [m/s]
-near-surface surface pressure:        PSFC [Pa]
-surface precipitation rate:           RAINRATE [mm/s]
-surface solar downward radiation:     SWDOWN [W/m^2]
-surface longwave downward radiation:  LWDOWN [W/m^2]
-
-Running the script will produce a files named:
-
-yyyymmddhh.LDASIN_DOMAIN1
-
-You will need to specify their location in the HRLDAS namelist later.
-
---------------------------------------------------
-
-3.3 create_setup.ncl: create the file that contains the initial conditions and location information
-
-1. Modify the date of the simulation start (three locations)
-
-2. Go to the section titled "Set up the location-specific information"
-     
-     Here you will need to set the 
-               latitude 
-              longitude 
-              elevation 
-annual_mean_temperature   Note: will be used as deep soil temperature (if you don't feel this is a good
-                                assumption for your location, change it)
-    vegetation_fraction   Note: % vegetation cover
-        leaf_area_index   Note: will be used to initialize dynamic vegetation if active
-	vegetation_type   Note: vegetation class; confirm consistency with global attributes
-	      soil_type   Note: soil texture class
-
-2. Go to the section titled "State initialization here"
-     
-     This section is hard-coded to use NLDAS output; you may need to do substantial modifications to use other data.
-       
-3. Go to the section titled "Global attributes"
-
-     Here you will need to set the 
-       - land cover specific attributes (ISWATER,ISURBAN,ISICE,MMINLU) 
-
-Running the script will produce a file named:
-
-HRLDAS_setup_yyyymmddhh_d1
-
-You will need to specify its location in the HRLDAS namelist later.
+./create_point_data.exe
 
 --------------------------------------------------
 
 4. Run HRLDAS
 
-The hard part is over. Go to the HRLDAS Run directory:
+Go to the HRLDAS Run directory:
 
-cd /root_path/HRLDAS-v3.x/run
+cd /hrldas_root/run
 
-4.1 Modify the namelist
+4.1 Modify the namelist (if you want)
 
-There is an example namelist.hrldas in the examples/vector/ directory. Copy this to the Run directory
+There is an example namelist.hrldas in the examples/single_point/ directory. Copy this to the Run directory
 
-cp examples/vector/namelist.hrldas.vector namelist.hrldas
+cp examples/single_point/namelist.hrldas.single_point namelist.hrldas
 
 See the full documentation for a complete description of items, but these are the important modifications:
 
  HRLDAS_SETUP_FILE     = path and name of your grid/initial conditions file you created above
- MMF_RUNOFF_FILE       = special for OPT_RUN=5, which is unsupported, for now
  INDIR                 = where the LDASIN files you created above are located
  OUTDIR                = where the LDASOUT files will be located (must already exist)
 
@@ -159,16 +92,20 @@ See the full documentation for a complete description of items, but these are th
  PCP_PARTITION_OPTION              = 
  TBOT_OPTION                       = 
  TEMP_TIME_SCHEME_OPTION           = 
+ SURFACE_RESISTANCE_OPTION         = 
+ GLACIER_OPTION                    = 
+ SOIL_DATA_OPTION                  = 
+ PEDOTRANSFER_OPTION               = 
+ CROP_OPTION                       = 
 
-
- FORCING_TIMESTEP = time increment of available forcing (3600 for NARR)
+ FORCING_TIMESTEP = time increment of available forcing (1800 for this example)
  NOAH_TIMESTEP    = time increment for model (<= FORCING_TIMESTEP)
  OUTPUT_TIMESTEP  = time increment for output (>= NOAH_TIMESTEP)
 
  SPLIT_OUTPUT_COUNT = split output after this many writes, 0 = all in one file
  RESTART_FREQUENCY_HOURS = write restart files after this many hours
 
- XSTART = uncomment and set if you want to run a subset of your domain 
+ XSTART = uncomment and set if you want to run a subset of your domain (not applicable for single point runs)
  XEND   = 
  YSTART = 
  YEND   = 
