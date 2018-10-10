@@ -1,4 +1,37 @@
 
+=========================================================================
+======================= HRLDAS v4.0.1 Release Notes =====================
+=========================================================================
+
+LSM capabilities/enhancements
+----------------------------------
+
+- None
+
+LSM bug fixes
+----------------------------------
+
+- Noah-MP frozen soil initialization- An incorrect sign change was introduced in v4.0, impacting soil moisture and soil temperature initialization.
+
+- Array out of bounds Noah-MP - Fix possible/likely array out of bounds by assuming homogeneous soil with depth.Only applies to opt_run=2.
+
+- Noah-MP snow liquid water movement - prevent excessive gravitational water movement. Fixes unrealistic snow density values during melt season.
+
+- Noah-MP divide by zero - Bug fix in v4.0 introduced a possible divide by zero when LAI is zero.
+
+- Noah-MP leaf aerodynamic resistance - limit leaf aerodynamic resistance to prevent very large canopy exchange coefficients with high wind speed.
+
+Driver capabilities/enhancements
+----------------------------------
+
+-  Add new single point driver based on Bondville data
+
+Driver bug fixes
+----------------------------------
+
+-  Missing quotation mark in spatial_filename check print statement
+
+
 
 =========================================================================
 ======================= HRLDAS v4.0 Release Notes =======================
