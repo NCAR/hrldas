@@ -497,9 +497,27 @@ module module_NoahMP_hrldas_driver
   integer            :: spinup_loops
 
   integer            :: sf_urban_physics = 0
-  integer            :: num_urban_layers = 360
+  integer            :: num_urban_ndm    = 1
+  integer            :: num_urban_ng     = 1
+  integer            :: num_urban_nwr    = 1
+  integer            :: num_urban_ngb    = 1
+  integer            :: num_urban_nf     = 1
+  integer            :: num_urban_nz     = 1
+  integer            :: num_urban_nbui   = 1
   integer            :: num_urban_hi     = 15 
   real               :: urban_atmosphere_thickness = 2.0
+  
+  ! derived urban dimensions
+  
+  integer            :: urban_map_zrd
+  integer            :: urban_map_zwd
+  integer            :: urban_map_gd
+  integer            :: urban_map_zd
+  integer            :: urban_map_zdf
+  integer            :: urban_map_bd
+  integer            :: urban_map_wd
+  integer            :: urban_map_gbd
+  integer            :: urban_map_fbd
 
   character(len=256) :: forcing_name_T = "T2D"
   character(len=256) :: forcing_name_Q = "Q2D"
@@ -566,7 +584,10 @@ module module_NoahMP_hrldas_driver
 
        soil_data_option, pedotransfer_option, crop_option, &
 
-       sf_urban_physics,num_urban_layers,num_urban_hi,urban_atmosphere_thickness, &
+       sf_urban_physics,num_urban_hi,urban_atmosphere_thickness, &
+       num_urban_ndm,num_urban_ng,num_urban_nwr ,num_urban_ngb , &
+       num_urban_nf ,num_urban_nz,num_urban_nbui, &
+       
 
        split_output_count, & 
        khour, kday, zlvl, hrldas_setup_file, &
@@ -774,7 +795,24 @@ module module_NoahMP_hrldas_driver
 !---------------------------------------------------------------------
 !  NAMELIST check end
 !---------------------------------------------------------------------
+  
+  ! derived urban dimensions
+  
+      if (sf_urban_physics > 0 ) then
+      
+         urban_map_zrd = num_urban_ndm * num_urban_nwr * num_urban_nz
+         urban_map_zwd = num_urban_ndm * num_urban_nwr * num_urban_nz  * num_urban_nbui
+         urban_map_gd  = num_urban_ndm * num_urban_ng
+         urban_map_zd  = num_urban_ndm * num_urban_nz  * num_urban_nbui
+         urban_map_zdf = num_urban_ndm * num_urban_nz 
+         urban_map_bd  = num_urban_nz  * num_urban_nbui
+         urban_map_wd  = num_urban_ndm * num_urban_nz  * num_urban_nbui
+         urban_map_gbd = num_urban_ndm * num_urban_ngb * num_urban_nbui
+         urban_map_fbd = num_urban_ndm * (num_urban_nz - 1)  * &
+                         num_urban_nf  * num_urban_nbui
 
+      end if     
+      
 !----------------------------------------------------------------------
 ! Initialize gridded domain
 !----------------------------------------------------------------------
@@ -1137,14 +1175,14 @@ IF(SF_URBAN_PHYSICS > 0 )  THEN  ! any urban model
 
 !IF(SF_URBAN_PHYSICS == 2 .or. SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
          
-  ALLOCATE ( trb_urb4d      (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( tw1_urb4d      (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( tw2_urb4d      (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( tgb_urb4d      (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( sfw1_urb3d     (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( sfw2_urb3d     (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( sfr_urb3d      (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( sfg_urb3d      (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
+  ALLOCATE ( trb_urb4d      (XSTART:XEND,urban_map_zrd,YSTART:YEND) )  !
+  ALLOCATE ( tw1_urb4d      (XSTART:XEND,urban_map_zwd,YSTART:YEND) )  !
+  ALLOCATE ( tw2_urb4d      (XSTART:XEND,urban_map_zwd,YSTART:YEND) )  !
+  ALLOCATE ( tgb_urb4d      (XSTART:XEND,urban_map_gd ,YSTART:YEND) )  !
+  ALLOCATE ( sfw1_urb3d     (XSTART:XEND,urban_map_zd ,YSTART:YEND) )  !
+  ALLOCATE ( sfw2_urb3d     (XSTART:XEND,urban_map_zd ,YSTART:YEND) )  !
+  ALLOCATE ( sfr_urb3d      (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
+  ALLOCATE ( sfg_urb3d      (XSTART:XEND,num_urban_ndm,YSTART:YEND) )  !
 
   ALLOCATE ( hi_urb2d       (XSTART:XEND, num_urban_hi,   YSTART:YEND) )  !
 
@@ -1174,19 +1212,19 @@ IF(SF_URBAN_PHYSICS > 0 )  THEN  ! any urban model
 
 !IF(SF_URBAN_PHYSICS == 3) THEN  ! BEM urban model
          
-  ALLOCATE ( tlev_urb3d     (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( qlev_urb3d     (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( tw1lev_urb3d   (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( tw2lev_urb3d   (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( tglev_urb3d    (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( tflev_urb3d    (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( sf_ac_urb3d    (XSTART:XEND,                 YSTART:YEND) )  !
-  ALLOCATE ( lf_ac_urb3d    (XSTART:XEND,                 YSTART:YEND) )  !
-  ALLOCATE ( cm_ac_urb3d    (XSTART:XEND,                 YSTART:YEND) )  !
-  ALLOCATE ( sfvent_urb3d   (XSTART:XEND,                 YSTART:YEND) )  !
-  ALLOCATE ( lfvent_urb3d   (XSTART:XEND,                 YSTART:YEND) )  !
-  ALLOCATE ( sfwin1_urb3d   (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
-  ALLOCATE ( sfwin2_urb3d   (XSTART:XEND,num_urban_layers,YSTART:YEND) )  !
+  ALLOCATE ( tlev_urb3d     (XSTART:XEND,urban_map_bd ,YSTART:YEND) )  !
+  ALLOCATE ( qlev_urb3d     (XSTART:XEND,urban_map_bd ,YSTART:YEND) )  !
+  ALLOCATE ( tw1lev_urb3d   (XSTART:XEND,urban_map_wd ,YSTART:YEND) )  !
+  ALLOCATE ( tw2lev_urb3d   (XSTART:XEND,urban_map_wd ,YSTART:YEND) )  !
+  ALLOCATE ( tglev_urb3d    (XSTART:XEND,urban_map_gbd,YSTART:YEND) )  !
+  ALLOCATE ( tflev_urb3d    (XSTART:XEND,urban_map_fbd,YSTART:YEND) )  !
+  ALLOCATE ( sf_ac_urb3d    (XSTART:XEND,              YSTART:YEND) )  !
+  ALLOCATE ( lf_ac_urb3d    (XSTART:XEND,              YSTART:YEND) )  !
+  ALLOCATE ( cm_ac_urb3d    (XSTART:XEND,              YSTART:YEND) )  !
+  ALLOCATE ( sfvent_urb3d   (XSTART:XEND,              YSTART:YEND) )  !
+  ALLOCATE ( lfvent_urb3d   (XSTART:XEND,              YSTART:YEND) )  !
+  ALLOCATE ( sfwin1_urb3d   (XSTART:XEND,urban_map_wd ,YSTART:YEND) )  !
+  ALLOCATE ( sfwin2_urb3d   (XSTART:XEND,urban_map_wd ,YSTART:YEND) )  !
 
 ENDIF
 
@@ -1628,7 +1666,9 @@ ENDIF
                         TR_URB2D,      TB_URB2D,      TG_URB2D,  TC_URB2D, QC_URB2D,    & !urban
                        TRL_URB3D,     TBL_URB3D,     TGL_URB3D,                         & !urban
                         SH_URB2D,      LH_URB2D,       G_URB2D,  RN_URB2D, TS_URB2D,    & !urban
-                num_urban_layers,                                                       & !urban
+                   num_urban_ndm,  urban_map_zrd,  urban_map_zwd, urban_map_gd,          & !I multi-layer urban
+                    urban_map_zd,  urban_map_zdf,   urban_map_bd, urban_map_wd,          & !I multi-layer urban
+                   urban_map_gbd,  urban_map_fbd,                                        & !I multi-layer urban
                     num_urban_hi,                                                       & !urban
                        TRB_URB4D,     TW1_URB4D,     TW2_URB4D, TGB_URB4D,              & !urban
                       TLEV_URB3D,    QLEV_URB3D,                                        & !urban
@@ -1776,7 +1816,9 @@ ENDIF
                         TR_URB2D,      TB_URB2D,      TG_URB2D,  TC_URB2D, QC_URB2D,    & !urban
                        TRL_URB3D,     TBL_URB3D,     TGL_URB3D,                         & !urban
                         SH_URB2D,      LH_URB2D,       G_URB2D,  RN_URB2D, TS_URB2D,    & !urban
-                num_urban_layers,                                                       & !urban
+                   num_urban_ndm,  urban_map_zrd,  urban_map_zwd, urban_map_gd,          & !I multi-layer urban
+                    urban_map_zd,  urban_map_zdf,   urban_map_bd, urban_map_wd,          & !I multi-layer urban
+                   urban_map_gbd,  urban_map_fbd,                                        & !I multi-layer urban
                     num_urban_hi,                                                       & !urban
                        TRB_URB4D,     TW1_URB4D,     TW2_URB4D, TGB_URB4D,              & !urban
                       TLEV_URB3D,    QLEV_URB3D,                                        & !urban
@@ -2105,7 +2147,10 @@ end subroutine land_driver_ini
                              julday,             yr,                                        & !H urban
                           frc_urb2d,    utype_urb2d,                                        & !I urban
                                 chs,           chs2,           cqs2,                        & !H
-                   num_urban_layers,   num_urban_hi,                                        & !I multi-layer urban
+                      num_urban_ndm,  urban_map_zrd,  urban_map_zwd, urban_map_gd,          & !I multi-layer urban
+                       urban_map_zd,  urban_map_zdf,   urban_map_bd, urban_map_wd,          & !I multi-layer urban
+                      urban_map_gbd,  urban_map_fbd,                                        & !I multi-layer urban
+                       num_urban_hi,                                                        & !I multi-layer urban
                           trb_urb4d,      tw1_urb4d,      tw2_urb4d,  tgb_urb4d,            & !H multi-layer urban
                          tlev_urb3d,     qlev_urb3d,                                        & !H multi-layer urban
                        tw1lev_urb3d,   tw2lev_urb3d,                                        & !H multi-layer urban
@@ -2379,7 +2424,7 @@ subroutine lsm_restart()
 
   call prepare_restart_file (trim(outdir), version, igrid, llanduse, olddate, startdate, & 
        ixfull, jxfull, ixpar, jxpar, xstartpar, ystartpar,                               &
-       nsoil, nsnow, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1,   &
+       nsoil, nsnow, num_urban_hi, dx, dy, truelat1, truelat2, mapproj, lat1, lon1,   &
        cen_lon, iswater, ivgtyp)
   
   call add_to_restart(TSLB      , "SOIL_T", layers="SOIL")
