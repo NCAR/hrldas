@@ -1,5 +1,52 @@
 
 =========================================================================
+======================= HRLDAS WRFv4.1 Release Notes =====================
+=========================================================================
+
+LSM capabilities/enhancements
+----------------------------------
+
+- Consolidate NWM changes into WRF version (#18)
+    
+    * add unpopulated header required by NOAA
+    * add BATS parameters to data structure and output band snow albedo
+    * update MPTABLE for BATS albedo parameters
+    * add BATS albedo local variables to noahmpdrv
+    * transfer new BATS table values to parameters data structure in noahmpdrv
+    * add RSURF_EXP parameter to data structure and update MPTABLE
+    * change snow water equivalent limit to 5000mm
+    * assume LAI is stand LAI and doesn't need to be rescaled by FVEG
+    * conserve snow pack heat when layer melts completely
+    * change output messages and Fortran open/read unit numbers to WCOSS standard
+    * include a few missed changes from WRF
+
+LSM bug fixes
+----------------------------------
+
+- Define and declare a few variables in physics routines
+
+- Noah-MP bulk urban roughness length set to table values
+
+External modules capabilities/enhancements
+-------------------------------------------
+
+- Air conditioning fraction for BEM model
+
+- Improve urban memory by allowing different dimensions for urban variables
+
+Driver capabilities/enhancements
+----------------------------------
+
+- None
+
+Driver bug fixes
+----------------------------------
+
+- None
+
+
+
+=========================================================================
 ======================= HRLDAS v4.0.1 Release Notes =====================
 =========================================================================
 
