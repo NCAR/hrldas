@@ -36,6 +36,11 @@ call getarg(3,outfile2)
 ! READ IN DUMMY VARIABLE
 print *,"Working on infile: ",infile
 ierr = nf90_open(infile,nf90_nowrite, ncid)
+
+if (ierr /= 0) then 
+print *, "can't find input Wind file: ",infile
+call abort 
+else 
 ierr = nf90_inq_varid(ncid,WIND_NAME,wind_varid)
 ierr = nf90_get_var(ncid,wind_varid,wind_in)
 ierr = nf90_inq_varid(ncid,"lat",lat_varid)
@@ -45,7 +50,6 @@ ierr = nf90_get_var(ncid,lon_varid,lons)
 ierr = nf90_close(ncid)
 ! WRITE WIND SPEED to U component
 u_out = wind_in
-v_out = 0.0
 ! Create the file. 
 ierr = nf90_create(outfile1, nf90_clobber, ncid) 
 ! Define the dimensions. The record dimension is defined to have
@@ -93,10 +97,11 @@ do rec = 1, NRECS
 end do
 ierr = nf90_close(ncid)
 
-print *, "*** SUCCESS writing example file ", outfile1
+print *, "*** SUCCESS writing U file: ", outfile1
 
 ! Do the same for V component
 ! Create the file. 
+v_out = 0.0
 ierr = nf90_create(outfile2, nf90_clobber, ncid)
 ! the time dimension.
 ierr = nf90_def_dim(ncid, LAT_NAME, NLATS, lat_dimid)
@@ -121,6 +126,6 @@ do rec = 1, NRECS
                             count = count)
 end do
 ierr = nf90_close(ncid)
-
-print *, "*** SUCCESS writing example file ", outfile2
+print *, "*** SUCCESS writing V file: ", outfile2
+endif 
 end

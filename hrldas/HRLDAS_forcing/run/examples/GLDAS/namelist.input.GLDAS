@@ -29,7 +29,7 @@
  PCPfile_secondary  = "<DataDir>/Precip/GLDAS_Precip_<date>",
 
  WEASDfile_template = "<DataDir>/INIT/GLDAS_SWE_inst_<date>",
- CANWTfile_template = "<DataDir>/INIT/GLDAS_Canopint_inst_<date>",
+ CANWTfile_template = "<DataDir>/INIT/GLDAS_CanopInt_inst_<date>",
  SKINTfile_template = "<DataDir>/INIT/GLDAS_AvgSurfT_inst_<date>",
 
  STfile_template    = "<DataDir>/INIT/GLDAS_SoilTMP_000-010_<date>",

@@ -14,9 +14,9 @@ nums = ["00","01","02","03","04","05","06","07","08","09",
         "10","11","12","13","14","15","16","17","18","19",
         "20","21","22","23","24","25","26","27","28","29",
         "30","31"]
-yrs  = ["00"]
-day_start = 270 
-day_end   = 280
+yrs  = ["17"]
+day_start = 114 
+day_end   = 116
 hrs = ["00","03","06","09","12","15","18","21"]
 cc  = ["20"]   # Manually set the century
 
@@ -30,13 +30,15 @@ data_dir = "/glade/work/zhezhang/GLDAS/raw"
 results_dir = "/glade/work/zhezhang/GLDAS/extracted"
 
 for var in range(len(vars_name)):
+    if not os.path.exists(results_dir+"/"+vars_short[var]):
+        os.system("mkdir "+results_dir+"/"+vars_short[var])
     for yy in range(len(yrs)):
-        for julday in range(day_start,day_end,1):
-            modays = noleap_days
-            if (yrs[yy] == "92" or "96"):
-		modays = leap_days
-	    if (yrs[yy] == "00" or "04" or "08" or "12" or "16"):
-		modays = leap_days
+        modays = noleap_days
+        if (yrs[yy] == "92" or "96"):
+            modays = leap_days
+        if (yrs[yy] == "00" or "04" or "08" or "12" or "16"):
+            modays = leap_days
+        for julday in range(day_start+1,day_end+2,1):
             for mo in range(0,12,1):
                 if (julday>modays[mo] and julday<=modays[mo+1]):
 		    day = (julday - modays[mo])
@@ -52,16 +54,14 @@ for var in range(len(vars_name)):
 		    if (len(infiles)>0):
 			intime      = cc[0]+yrs[yy]+(mon)+(day) 
 			infile_list = infiles
-    if not os.path.exists(results_dir+"/"+vars_short[var]):
-        os.system("mkdir "+results_dir+"/"+vars_short[var])
-    for hr in range(0,8):
-        infile = infile_list[hr]
-	print "working on file: ",intime
-        outfile= results_dir+"/"+vars_short[var]+"/GLDAS_"+vars_name[var]+"_"+intime+hrs[hr]
-	if not os.path.exists(outfile):
-	    print "working on file: ",infile
-            os.system("ncks -v "+vars_name[var]+" "+infile+" "+outfile)
-        else:
-	    print "file exist, move to next one"
+            for hr in range(0,8):
+	        infile = infile_list[hr]
+		print "working on date: ",intime
+		outfile= results_dir+"/"+vars_short[var]+"/GLDAS_"+vars_name[var]+"_"+intime+hrs[hr]
+		if not os.path.exists(outfile):
+		    print "working on file: ",infile
+	            os.system("ncks -v "+vars_name[var]+" "+infile+" "+outfile)
+	        else:
+		    print "file exist, move to next one"
 
 print "Successfully extract necessary variables!"

@@ -8,10 +8,10 @@ system ("make");
 	 "20","21","22","23","24","25","26","27","28","29", 
 	 "30","31");
 	 
-@yrs = ("00");
+@yrs = ("17");
 
-$day_start = 275;
-$day_end = 275;
+$day_start = 114;
+$day_end = 116;
 
 @hrs = ("00","03","06","09","12","15","18","21");
 
@@ -48,7 +48,7 @@ for $hr (@hrs)
   $file1_in  =    "$data_dir/Rainf/GLDAS_Rainf_tavg_20$yy$nums[$mon]$nums[$day]$hr";
   $file2_in  =    "$data_dir/Snowf/GLDAS_Snowf_tavg_20$yy$nums[$mon]$nums[$day]$hr";
   $file_out  =  "$results_dir/Precip/GLDAS_Precip_20$yy$nums[$mon]$nums[$day]$hr";
-  print ("$file_out \n");
+#  print ("$file_out \n");
   system ("./$filename $file1_in $file2_in $file_out");
  }
  }

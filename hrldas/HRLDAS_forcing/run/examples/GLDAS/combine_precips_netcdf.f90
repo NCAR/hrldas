@@ -38,6 +38,10 @@ call getarg(3,outfile)
 ! READ IN RAIN VARIABLE
 print *,"Reading in infile: ",infile1
 ierr = nf90_open(infile1,nf90_nowrite, ncid)
+if (ierr/=0) then
+print *, "can't find Rain file: ",infile1
+call abort
+else
 ierr = nf90_inq_varid(ncid,RAIN_NAME,rain_varid)
 ierr = nf90_get_var(ncid,rain_varid,rain_in)
 ierr = nf90_inq_varid(ncid,"lat",lat_varid)
@@ -46,8 +50,13 @@ ierr = nf90_get_var(ncid,lat_varid,lats)
 ierr = nf90_get_var(ncid,lon_varid,lons)
 ierr = nf90_close(ncid)
 ! READ IN SNOW VARIABLE
+
 print *,"Reading in infile: ",infile2
 ierr = nf90_open(infile2,nf90_nowrite, ncid)
+if (ierr/=0) then
+print *, "can't find Snow file: ",infile2
+call abort
+else
 ierr = nf90_inq_varid(ncid,SNOW_NAME,snow_varid)
 ierr = nf90_get_var(ncid,snow_varid,snow_in)
 ierr = nf90_get_var(ncid,lat_varid,lats)
@@ -102,6 +111,8 @@ do rec = 1, NRECS
                             count = count) 
 end do
 ierr = nf90_close(ncid)
+endif 
+endif
 
 print *, "*** SUCCESS combining precipitation file ", outfile
 end

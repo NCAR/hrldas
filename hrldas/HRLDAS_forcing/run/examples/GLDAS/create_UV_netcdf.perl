@@ -8,10 +8,10 @@ system ("make");
 	 "20","21","22","23","24","25","26","27","28","29", 
 	 "30","31");
 	 
-@yrs = ("00");
+@yrs = ("17");
 
-$day_start = 275;
-$day_end = 275;
+$day_start = 114;
+$day_end = 116;
 
 @hrs = ("00","03","06","09","12","15","18","21");
 
@@ -51,9 +51,9 @@ for $hr (@hrs)
   $file1_out =  " $results_dir/U/GLDAS_U_f_inst_20$yy$nums[$mon]$nums[$day]$hr";
   $file2_out =  " $results_dir/V/GLDAS_V_f_inst_20$yy$nums[$mon]$nums[$day]$hr";
 
-  print ("$file_in \n");
-  print ("$file1_out \n");
-  print ("$file2_out \n");
+#  print ("$file_in \n");
+#  print ("$file1_out \n");
+#  print ("$file2_out \n");
   system ("./$filename $file_in $file1_out $file2_out");
  }
  }

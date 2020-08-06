@@ -9,7 +9,7 @@ import glob
 import numpy as np
 import sys,os
 
-date = "20001001" # Manually set the date
+date = "20170424" # Manually set the date
 data_dir = "/glade/work/zhezhang/GLDAS/raw"
 results_dir = "/glade/work/zhezhang/GLDAS/extracted/INIT"
 if not os.path.exists(results_dir):
