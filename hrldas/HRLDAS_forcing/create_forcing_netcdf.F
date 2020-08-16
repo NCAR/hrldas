@@ -927,8 +927,6 @@ contains
 
        return
     endif
-    print *, "I am here before calling grib_file_search_now for the first time"
-    print *, "current file name is: ", teststring 
     call grib_file_search_now(current, datastruct, ierr)
 
     if (ierr == 0) then
@@ -1579,7 +1577,6 @@ contains
         datastruct%field  = vtable(j)%name
         datastruct%desc   = vtable(j)%desc
         datastruct%units  = vtable(j)%units
-        print *, "Be able to retrieve variable name: ",VAR_NAME
         exit VARSEARCH 
     endif 
           if (j == vtable_count) then
@@ -1633,7 +1630,6 @@ contains
     else 
         print *, "Successfully read variable: ", VAR_NAME
     endif
-    !write(*, '(A, "  GRIB Editon 1")') datastruct%field
   end subroutine read_netcdf_unit
 
 !==============================================================================

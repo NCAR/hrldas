@@ -46,7 +46,7 @@ In GLDASV2.1 are in netCDF format. The preprocesse codes are written in python a
 
 They can be retrieved from here:
 
-https://disc.gsfc.nasa.gov/datasets/GLDAS_NOAH025_M_2.1/summary
+https://disc.gsfc.nasa.gov/datasets/GLDAS_NOAH025_3H_2.1/summary
 
 I put these "raw" GLDAS files in one directory (e.g., /raw_GLDAS_data_path)
 
