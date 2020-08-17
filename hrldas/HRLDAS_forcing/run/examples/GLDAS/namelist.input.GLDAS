@@ -1,47 +1,46 @@
 &files
- STARTDATE          = "2010-01-01_00"
- ENDDATE            = "2010-01-03_00"
- DataDir            = "/d1/barlage/data/GLDAS/extracted"
- OutputDir          = "/d1/barlage/data/GLDAS/LDASIN/"
+ STARTDATE          = "2000-10-01_00"
+ ENDDATE            = "2000-10-01_06"
+ DataDir            = "/glade/work/zhezhang/GLDAS/extracted"
+ OutputDir          = "/glade/work/zhezhang/GLDAS/LDASIN3/"
  FULL_IC_FRQ        = 0
  RAINFALL_INTERP    = 0
  RESCALE_SHORTWAVE  = .FALSE.
  UPDATE_SNOW        = .FALSE.
  FORCING_HEIGHT_2D  = .FALSE.
  TRUNCATE_SW        = .FALSE.
- EXPAND_LOOP        = 1
+ EXPAND_LOOP        = 30 
  INIT_LAI           = .TRUE.
  VARY_LAI           = .TRUE.
  MASK_WATER         = .TRUE.
 
- geo_em_flnm        = "/d1/barlage/data/mptest/geo_em.d01.nc"
+ geo_em_flnm        = "./geo_em.d01.nc"
+ Zfile_template     = "./GLDAS/GLDASp4_elevation_025d.nc4"
 
- Zfile_template     = "examples/GLDAS/GLDAS_ELEVATION.grb"
+ Tfile_template     = "<DataDir>/Tair/GLDAS_Tair_f_inst_<date>"
+ Ufile_template     = "<DataDir>/U/GLDAS_U_f_inst_<date>",
+ Vfile_template     = "<DataDir>/V/GLDAS_V_f_inst_<date>",
+ Pfile_template     = "<DataDir>/Psurf/GLDAS_Psurf_f_inst_<date>",
+ Qfile_template     = "<DataDir>/Qair/GLDAS_Qair_f_inst_<date>",
+ LWfile_template    = "<DataDir>/LWdown/GLDAS_LWdown_f_tavg_<date>",
+ SWfile_primary     = "<DataDir>/SWdown/GLDAS_SWdown_f_tavg_<date>",
+ SWfile_secondary   = "<DataDir>/SWdown/GLDAS_SWdown_f_tavg_<date>",
+ PCPfile_primary    = "<DataDir>/Precip/GLDAS_Precip_<date>"
+ PCPfile_secondary  = "<DataDir>/Precip/GLDAS_Precip_<date>",
 
- Tfile_template     = "<DataDir>/Tair/GLDAS_Tair.<date>.grb"
- Ufile_template     = "<DataDir>/U/GLDAS_U.<date>.grb",
- Vfile_template     = "<DataDir>/V/GLDAS_V.<date>.grb",
- Pfile_template     = "<DataDir>/Psurf/GLDAS_Psurf.<date>.grb",
- Qfile_template     = "<DataDir>/Qair/GLDAS_Qair.<date>.grb",
- LWfile_template    = "<DataDir>/LWdown/GLDAS_LWdown.<date>.grb",
- SWfile_primary     = "<DataDir>/SWdown24/GLDAS_SWdown.<date>.grb",
- SWfile_secondary   = "<DataDir>/SWdown24/GLDAS_SWdown.<date>.grb",
- PCPfile_primary    = "<DataDir>/Precip/GLDAS_Precip.<date>.grb"
- PCPfile_secondary  = "<DataDir>/Precip/GLDAS_Precip.<date>.grb",
+ WEASDfile_template = "<DataDir>/INIT/GLDAS_SWE_inst_<date>",
+ CANWTfile_template = "<DataDir>/INIT/GLDAS_CanopInt_inst_<date>",
+ SKINTfile_template = "<DataDir>/INIT/GLDAS_AvgSurfT_inst_<date>",
 
- WEASDfile_template = "<DataDir>/INIT/GLDAS_SWE.<date>.grb",
- CANWTfile_template = "<DataDir>/INIT/GLDAS_Canopint.<date>.grb",
- SKINTfile_template = "<DataDir>/INIT/GLDAS_AvgSurfT.<date>.grb",
+ STfile_template    = "<DataDir>/INIT/GLDAS_SoilTMP_000-010_<date>",
+                      "<DataDir>/INIT/GLDAS_SoilTMP_010-040_<date>",
+                      "<DataDir>/INIT/GLDAS_SoilTMP_040-100_<date>",
+                      "<DataDir>/INIT/GLDAS_SoilTMP_100-200_<date>",
 
- STfile_template    = "<DataDir>/INIT/GLDAS_TSoil_000-010.<date>.grb",
-                      "<DataDir>/INIT/GLDAS_TSoil_010-040.<date>.grb",
-                      "<DataDir>/INIT/GLDAS_TSoil_040-100.<date>.grb",
-                      "<DataDir>/INIT/GLDAS_TSoil_100-200.<date>.grb",
-
- SMfile_template    = "<DataDir>/INIT/GLDAS_SoilM_000-010.<date>.grb",
-                      "<DataDir>/INIT/GLDAS_SoilM_010-040.<date>.grb",
-                      "<DataDir>/INIT/GLDAS_SoilM_040-100.<date>.grb",
-                      "<DataDir>/INIT/GLDAS_SoilM_100-200.<date>.grb",
+ SMfile_template    = "<DataDir>/INIT/GLDAS_SoilMoi_000-010_<date>",
+                      "<DataDir>/INIT/GLDAS_SoilMoi_010-040_<date>",
+                      "<DataDir>/INIT/GLDAS_SoilMoi_040-100_<date>",
+                      "<DataDir>/INIT/GLDAS_SoilMoi_100-200_<date>",
 
 /
 

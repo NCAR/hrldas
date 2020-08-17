@@ -1,6 +1,10 @@
 
 Steps for running a HRLDAS simulation using GLDAS for forcing. 
 
+UPDATES in 2020-07-10, Zhe Zhang
+Reading GLDAS forcing from netcdf format
+Changes are associated with step 3, Prepare GLDAS-based forcing data
+
 1. Create your geo_em file through WPS. These are not needed until the end of Step 2, but there is no point in creating the forcing if you don't have the domain.
 
 --------------------------------------------------
@@ -36,59 +40,47 @@ run/hrldas.exe
 --------------------------------------------------
 
 3. Prepare GLDAS-based forcing data.
+In GLDASV2.1 are in netCDF format. The preprocesse codes are written in python and some modifications are added to create_forcing.F  
 
-This step can be quite involved for a first-time user. It involves converting GLDAS output in GRIB format to NetCDF forcing files in HRLDAS format. This will be done in the /root_path/HRLDAS-v3.x/HRLDAS_forcing/ directory. In that directory you will find another directory named examples/ that contains some useful scripts for doing the GLDAS steps below.
-
-Required programs and libraries:
-
-- wgrib
-- Perl
-- Fortran with w3 grib library (only needed if SW interpolation is done)
-    can be downloaded from NCEP: http://www.nco.ncep.noaa.gov/pmb/codes/GRIB2/w3lib-2.0.2.tar
-
---------------------------------------------------
-
-3.1 Get the GLDAS raw files. Use GLDAS version 1, GLDAS version 2 uses different assumptions (e.g., solar radiation) that will not work in the procedure below.
+3.1 Get the GLDAS raw files. GLDAS version 2.1 uses netcdf format.
 
 They can be retrieved from here:
 
-ftp://hydro1.sci.gsfc.nasa.gov/data/s4pa/GLDAS_V1/GLDAS_NOAH025SUBP_3H/
+https://disc.gsfc.nasa.gov/datasets/GLDAS_NOAH025_3H_2.1/summary
 
 I put these "raw" GLDAS files in one directory (e.g., /raw_GLDAS_data_path)
 
 --------------------------------------------------
 
-3.2 Set the environment for GLDAS reading in wgrib.
+3.3 extract_gldas.py: extract the individual variables from the GLDAS netcdf files
 
-GLDAS uses a funky, non-standard GRIB variable table, so use GRIB table specifically for GLDAS
-
-`setenv GRIBTAB gribtab_GLDAS_NOAH.gtb`
-
---------------------------------------------------
-
-3.3 extract_gldas.perl: extract the individual variables from the GLDAS GRIB files
-
-The current script uses wgrib to extract individual fields from the GLDAS files. It will process entire years or sections of one year. You can change this by modifying the Perl script.
+The current script uses nco(ncks) to extract individual fields from the GLDAS files. It will process entire years or sections of one year. You can change this by modifying the python script.
 
 Change these two paths for where raw GLDAS files are located and where separated(extracted) files will go. 
 
-$data_dir = "/raw_GLDAS_data_path";
-$results_dir = "/extracted_GLDAS_data_path";
+data_dir = "/raw_GLDAS_data_path";
+results_dir = "/extracted_GLDAS_data_path";
 
 For convenience, you may want to create directories in the results_dir for each variable and a few more for processed fields.
 
 `cd /extracted_GLDAS_data_path`
 `mkdir Rainf/ Snowf/ Wind/ Tair/ Qair/ Psurf/ SWdown/ LWdown/ SWdown24/ Precip/  U/  V/ INIT/`
 
+Run the python code:
+`python extract_glads.py`
+
 --------------------------------------------------
 
-3.4 extract_gldas_init.perl: extract the initial-only fields (SWE,Canopint,AvgSurfT,SoilM,TSoil) from the GLDAS GRIB output files
+3.4 extract_gldas_init.py: extract the initial-only fields (SWE_inst,Canopint_inst,AvgSurfT_inst,SoilMoi,SoilTMP) from the GLDAS NETCDF output files
 
 Change the date of initialization and run the script one time. The files should appear in the /extracted_GLDAS_data_path/INIT/ directory.
 
 Note: this step is not necessary unless you want to intialize using the GLDAS states
 
 Note: GLDAS soils are inverted (level 4 is actually level 1); this script takes care of that
+
+Run the python code:
+`python extract_glads_init.py`
 
 --------------------------------------------------
 
@@ -98,27 +90,27 @@ If you are space-limited, at this point you can remove the raw GLDAS files. You 
 
 --------------------------------------------------
 
-3.6 create_UV.perl: split Wind to U, V; just set V=0 (GLDAS has wind speed, HRLDAS wants components)
+3.6 create_UV_netcdf.perl: split Wind to U, V; just set V=0 (GLDAS has wind speed, HRLDAS wants components)
 
 Again, you will need to change the paths in the Perl script along with the year/day ranges that are appropriate for your application.
 
 --------------------------------------------------
 
-3.7 combine_precips.perl: combine precipitations to a total precipitation
+3.7 combine_precips_netcdf.perl: combine precipitations to a total precipitation
 
 Again, you will need to change the paths in the Perl script along with the year/day ranges that are appropriate for your application.
 
 --------------------------------------------------
 
-3.8 fill_SSRD.perl: do hourly interpolation of solar radiation via zenith angle
-
-  - note original data are instantaneous 3-hourly
-
-Again, you will need to change the paths in the Perl script along with the year/day ranges that are appropriate for your application.
-
-There is an NCL script (check_SW.ncl) if you want to see what the interpolation is doing.
-  
---------------------------------------------------
+# I didn't do this part, the forcing I used are 3-hourly
+#3.8 fill_SSRD.perl: do hourly interpolation of solar radiation via zenith angle
+#
+#  - note original data are instantaneous 3-hourly
+#
+#Again, you will need to change the paths in the Perl script along with the year/day ranges that are appropriate for your application.
+#
+#There is an NCL script (check_SW.ncl) if you want to see what the interpolation is doing.
+#--------------------------------------------------
 
 3.6 Run the HRLDAS pre-processor code.
 
@@ -133,7 +125,7 @@ cp examples/GLDAS/namelist.input.GLDAS .
 --------------------------------------------------
 
 3.9.1 Modify the namelist
-
+Note: I have made changes to this namelist here. Please see an updated version in /HRLDAS_forcing/run/example/GLDAS/namelist.input.GLDAS
 Modifying the namelist.input.GLDAS to your case. The following is a short description of each line in the file. A longer description is available in README.namelist
 
  STARTDATE         : start date of your simulation
@@ -175,9 +167,13 @@ Note: for GLDAS there will be no need to include a secondary SW and precipitatio
 
 3.9.2 Run the pre-processor
 
+Note: please use create_forcing_netcdf.F for this purpose. 
+`cp create_forcing_netcdf.F create_forcing.F`
+and compile again.
+
 Run the pre-processor with the GLDAS namelist
 
-../create_forcing.exe namelist.input.GLDAS
+./create_forcing.exe namelist.input.GLDAS
 
 In your OUTPUTDIR, you should now have all your LDASIN files.
 
