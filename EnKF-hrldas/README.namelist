@@ -1,0 +1,188 @@
+! This file give a brief description of all namelist.hrldas variables and their defaults
+! *** indicates required
+
+
+&NOAHLSM_OFFLINE
+
+ HRLDAS_SETUP_FILE = "/path/HRLDAS_setup_2010010100_d1"      !*** Path to wrfinput or HRLDAS setup file   [default = none]
+ INDIR             = "/path/LDASIN/"                         !*** Path to LDASIN files                    [default = none]
+ OUTDIR            = "/path/LDASOUT/"                        !    Path to output directory                [default = "." ]
+
+ START_YEAR  = 2010                                          !*** Year to start simulation                [default = none]
+ START_MONTH = 01                                            !*** Month to start simulation               [default = none]
+ START_DAY   = 01                                            !*** Day to start simulation                 [default = none]
+ START_HOUR  = 00                                            !*** Hour to start simulation                [default = none]
+ START_MIN   = 00                                            !*** Minute to start simulation              [default = none]
+
+ RESTART_FILENAME_REQUESTED = "RESTART.2010010200_DOMAIN1"   ! Path to restart file; required for restart [default = " " ]
+
+                                                             !*** Note: exactly one of the following are required
+ KDAY  = 1                                                   !    Number of days to run                   [default = none]
+ KHOUR = 1                                                   !    Number of hours to run                  [default = none]
+
+ SPINUP_LOOPS = 0                                            !    Number of spinup loops of khour/kday
+                                                             !     before simulation starts               [default = 0   ]
+
+                                                             !*** Note: NOAH_TIMESTEP must evenly divide both 
+							     !           FORCING_TIMESTEP and OUTPUT_TIMESTEP
+ FORCING_TIMESTEP = 3600                                     !    Seconds between forcing files           [default = none]
+ NOAH_TIMESTEP    = 3600                                     !    Seconds between model timesteps         [default = none]
+ OUTPUT_TIMESTEP  = 86400                                    !    Seconds between output times            [default = none]
+
+ SPLIT_OUTPUT_COUNT = 1                                      !    Number of times per output file         [default = 1   ]
+ SKIP_FIRST_OUTPUT = .false.                                 !    Skips first output file (initial fields)[default = .false.]
+ RESTART_FREQUENCY_HOURS = 0                                 !*** Number of hours between restart files   [default = none]
+                                                             !     If  0, do not write restart files
+                                                             !     If <0, write at beginning of the month
+
+                                                             ! Set these four to perform simulation over a sub-domain
+ XSTART = 20                                                 !    Defines start of sub-domain in x        [default = 1   ]
+ XEND   = 20                                                 !    Defines end of sub-domain in x          [default = 0   ]
+ YSTART = 203                                                !    Defines start of sub-domain in y        [default = 1   ]
+ YEND   = 203                                                !    Defines end of sub-domain in y          [default = 0   ]
+
+ NSOIL  = 4                                                  !*** Number of soil layers                   [default = none]
+
+ soil_thick_input(1) = 0.10                                  !*** Vector of soil layer thicknesses
+ soil_thick_input(2) = 0.30                                  !                            [in meters]     [default = none]
+ soil_thick_input(3) = 0.60                                  !     There is a hard-coded maximum of 10
+ soil_thick_input(4) = 1.00
+
+ ZLVL = 30.0                                                 !*** Height in meters of forcing level       [default = none]
+
+ SF_URBAN_PHYSICS = 0                                        !    Urban physics option                    [default = 0   ]
+                                                             ! **0 -> Bulk urban slab scheme
+                                                             !   1 -> Single-layer urban canopy model
+                                                             !   2 -> BEP Multi-layer urban canopy model
+                                                             !   3 -> BEP + Building Energy Model
+
+ URBAN_ATMOSPHERE_THICKNESS = 2.0                            !    Thickness of urban atmosphere layers
+                                                             !     only needed for urban options 2 and 3  [default = 2.0 ]
+							     !     must be less than zlvl/3
+
+ NUM_URBAN_LAYERS = 360                                      !    Number of urban building layers
+                                                             !     only needed for urban options 2 and 3  [default = 360 ]
+
+ NUM_URBAN_HI     = 15                                       !    Number of urban atmosphere layers
+                                                             !     only needed for urban options 2 and 3  [default = 15  ]
+
+ FORCING_NAME_T                                              !    Forcing variable name for temperature   [default = "T2D"]
+ FORCING_NAME_Q                                              !    Forcing variable name for spec humidity [default = "Q2D"]
+ FORCING_NAME_U                                              !    Forcing variable name for u-wind        [default = "U2D"]
+ FORCING_NAME_V                                              !    Forcing variable name for v-wind        [default = "V2D"]
+ FORCING_NAME_P                                              !    Forcing variable name for pressure      [default = "PSFC"]
+ FORCING_NAME_LW                                             !    Forcing variable name for LW radiation  [default = "LWDOWN"]
+ FORCING_NAME_SW                                             !    Forcing variable name for SW radiation  [default = "SWDOWN"]
+ FORCING_NAME_PR                                             !    Forcing variable name for total precip  [default = "RAINRATE"]
+ FORCING_NAME_SN                                             !    Forcing variable name for snow component[default = ""]
+                                                             !      if FORCING_NAME_SN is present, it is assumed to be
+							     !       <= total precipitation
+							     !      must set PCP_PARTITION_OPTION = 4
+
+ EXTERNAL_VEG_FILENAME_TEMPLATE                              ! defunct
+ EXTERNAL_LAI_FILENAME_TEMPLATE                              ! defunct
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Below is a brief description of all Noah-MP options, there are no defaults
+! *** all are required
+!  ** indicates default options in WRF
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+ DYNAMIC_VEG_OPTION                = 1                       ! options for dynamic vegetation:         [default = none]
+
+                                                             !   1 -> off (use table LAI; use FVEG = SHDFAC from input)
+                                                             !   2 -> on  (together with OPT_CRS = 1)
+                                                             !   3 -> off (use table LAI; calculate FVEG)
+                                                             ! **4 -> off (use table LAI; use maximum vegetation fraction)
+                                                             !   5 -> on  (use maximum vegetation fraction)
+                                                             !   6 -> on  (use FVEG = SHDFAC from input)
+                                                             !   7 -> off (use input LAI; use FVEG = SHDFAC from input)
+                                                             !   8 -> off (use input LAI; calculate FVEG)
+                                                             !   9 -> off (use input LAI; use maximum vegetation fraction)
+                                                             !  10 -> crop model on (use maximum vegetation fraction)
+
+ CANOPY_STOMATAL_RESISTANCE_OPTION = 2                       ! options for canopy stomatal resistance  [default = none]
+
+                                                             ! **1 -> Ball-Berry
+		                                             !   2 -> Jarvis
+
+ BTR_OPTION                        = 2                       ! options for soil moisture factor for 
+                                                                   stomatal resistance                    [default = none]
+
+                                                             ! **1 -> Noah (soil moisture) 
+                                                             !   2 -> CLM  (matric potential)
+                                                             !   3 -> SSiB (matric potential)
+
+ RUNOFF_OPTION                     = 1                       ! options for runoff and groundwater      [default = none]
+
+                                                             !   1 -> TOPMODEL with groundwater (Niu et al. 2007 JGR) ;
+                                                             !   2 -> TOPMODEL with an equilibrium water table (Niu et al. 2005 JGR) ;
+                                                             ! **3 -> original surface and subsurface runoff (free drainage)
+                                                             !   4 -> BATS surface and subsurface runoff (free drainage)
+                                                             !   5 -> Miguez-Macho&Fan groundwater scheme (Miguez-Macho et al. 2007 JGR; Fan et al. 2007 JGR)
+
+ SURFACE_DRAG_OPTION               = 1                       ! options for surface layer drag coeff    [default = none]
+
+                                                             ! **1 -> M-O
+		                                             !   2 -> original Noah (Chen97)
+
+ SUPERCOOLED_WATER_OPTION          = 1                       ! options for supercooled liquid water 
+                                                                   (or ice fraction)                      [default = none]
+
+                                                             ! **1 -> no iteration (Niu and Yang, 2006 JHM)
+		                                             !   2 -> Koren's iteration 
+
+ FROZEN_SOIL_OPTION                = 1                       ! options for frozen soil permeability    [default = none]
+
+                                                             ! **1 -> linear effects, more permeable (Niu and Yang, 2006, JHM)
+                                                             !   2 -> nonlinear effects, less permeable (old)
+
+ RADIATIVE_TRANSFER_OPTION         = 3                       ! options for radiation transfer          [default = none]
+
+                                                             !   1 -> modified two-stream (gap = F(solar angle, 3D structure ...)<1-FVEG)
+                                                             !   2 -> two-stream applied to grid-cell (gap = 0)
+                                                             ! **3 -> two-stream applied to vegetated fraction (gap=1-FVEG)
+
+ SNOW_ALBEDO_OPTION                = 2                       ! options for ground snow surface albedo  [default = none]
+
+                                                             !   1 -> BATS
+		                                             ! **2 -> CLASS
+
+ PCP_PARTITION_OPTION              = 2                       ! options for partitioning  precipitation 
+                                                                   into rainfall & snowfall               [default = none]
+
+                                                             ! **1 -> Jordan (1991)
+		                                             !   2 -> BATS: when SFCTMP<TFRZ+2.2 
+		                                             !   3 -> SFCTMP < TFRZ
+		                                             !   4 -> Use WRF microphysics output
+
+ TBOT_OPTION                       = 2                       ! options for lower boundary condition 
+                                                                   of soil temperature                    [default = none]
+
+                                                             !   1 -> zero heat flux from bottom (ZBOT and TBOT not used)
+                                                             ! **2 -> TBOT at ZBOT (8m) read from a file (original Noah)
+
+ TEMP_TIME_SCHEME_OPTION           = 2                       ! options for snow/soil temperature 
+                                                                   time scheme (only layer 1)             [default = none]
+
+                                                             ! **1 -> semi-implicit; flux top boundary condition
+		                                             !   2 -> full implicit (original Noah); temperature top boundary condition
+                                                             !   3 -> same as 1, but FSNO for TS calculation (generally improves snow; v3.7)
+
+ SURFACE_RESISTANCE_OPTION         = 1                       ! options for surface resistent to 
+                                                                   evaporation/sublimation                [default = none]
+
+                                                             ! **1 -> Sakaguchi and Zeng, 2009
+		                                             !   2 -> Sellers (1992)
+                                                             !   3 -> adjusted Sellers to decrease RSURF for wet soil
+		                                             !   4 -> option 1 for non-snow; rsurf = rsurf_snow for snow (set in MPTABLE); AD v3.8
+
+ GLACIER_OPTION                    = 1                       ! options for glacier treatment           [default = none]
+
+                                                             ! **1 -> include phase change of ice
+							     !   2 -> ice treatment more like original Noah
+
+
+/

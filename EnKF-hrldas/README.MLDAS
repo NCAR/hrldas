@@ -1,0 +1,69 @@
+! A Multi-pass Land Data Assimilation Scheme (MLDAS) based on Noah-MP-Crop model
+! The leaf area index (LAI), soil moisture, and solar-induced chlorophyll fluorescence (SIF) observations are simultaneously assimilated into the Noah-MP-Crop model based on the MLDAS to predict sensible (H) and latent (LE) heat fluxes as well as gross primary productivity (GPP).
+! The code demonstrates implementation of the MLDAS as proposed in paper "Improve the performance of the Noah-MP-Crop model by jointly assimilating soil moisture and vegetation phenology data"  published in *Journal of Advances in Modeling Earth Systems*. [[link to the paper]](https://)
+! Please refer to the file `License.txt` for the license governing this code.
+! If you have any questions or suggestions with the code, please let us know. Contact Tongren Xu at *xutr@bnu.edu.cn* and Xinlei He at *hxlbsd@mail.bnu.edu.cn*
+
+------
+! This file give a brief description of MP-Crop-MLDAS-draft-v1.0.py variables
+ err_soilm_1=0.05                                            !*** error in modeling of soil moisture (%)
+ err_soilm_2=0.05                                            !*** error in modeling of soil moisture (%)
+ err_soilm_3=0.05                                            !*** error in modeling of soil moisture (%)
+ err_soilm_4=0.05                                            !*** error in modeling of soil moisture (%)
+ err_lai=0.1                                                 !*** error in modeling of leaf area index (%)
+ err_lfmass=0.05                                             !*** error in modeling of leaf biomass (%)
+ err_vcmax25=0.2                                             !*** error in modeling of Vcmax (%)
+ err_BIO2LAI=0.1                                             !*** error in modeling of SLA (%)
+ 
+ err_soilm_o=0.05                                            !*** error in soil moisture observation (%)
+ err_lai_o=0.1                                               !*** error in leaf area index observation (%)
+ err_lfmass_o=0.02                                           !*** error in leaf biomass observation(%) 
+ err_sif_o=0.01                                              !*** error in sif observations (%)
+ 
+ en_numb=30                                                  !*** numbser of ensemble numbers                    
+
+ istep=153                                                   !*** time step to run the model                       
+ DA_LAI_1=True                                               !*** TRUE or FALSE to determine whether assimilate leaf area index or not   
+ DA_LAI_2=True                                               !*** TRUE or FALSE to determine whether assimilate leaf area index or not    
+ DA_SM=True                                                  !*** TRUE or FALSE to determine whether assimilate soil moisture or not    
+ DA_SIF=True                                                 !*** TRUE or FALSE to determine whether assimilate soil moisture or not
+ 
+ path_restart="./restart/"                                   !*** path to restart file directory
+ path_output="./output/"                                     !*** path to output directory
+ path_output_final="./output_final/"                         !*** path to final output directory
+ path_obs="./Audubon_obs_2001.dat"                           !*** path to observation data
+ path_namelist="./namelist.hrldas"                           !*** path to namelist file
+ path_MPTABLE="./MPTABLE.TBL"                                !*** path to MPTABLE file
+ initial_time_step="2001050100"                              !*** initial time of running period
+ 
+ 
+ ------
+
+## Quick Start
+
+Before that, you need to run the Noah-MP-Crop model normally.
+The code was tested with Python 3.7. To use this code, please do:
+
+1. Clone the repo:
+
+   ```shell
+   git clone https://github.com/NCAR/hrldas-release.git
+   cd hrldas-release/HRLDAS/run/
+   mkdir restart
+   mkdir output
+   mkdir output_final
+   
+   ```
+
+2. Install dependencies:
+
+   ```shell
+   module load python/3.7.5
+   pip install --user numpy
+   pip install --user pandas
+   pip install --user netCDF4
+   ```
+
+
+3. Start `Python` and run the `MP-Crop-MLDAS-draft-v1.0.py` locally.
+
