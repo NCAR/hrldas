@@ -497,6 +497,7 @@ module module_NoahMP_hrldas_driver
   integer            :: spinup_loops
 
   integer            :: sf_urban_physics = 0
+  integer            :: use_wudapt_lcz   = 0 ! C.He: add for LCZ urban
   integer            :: num_urban_ndm    = 1
   integer            :: num_urban_ng     = 1
   integer            :: num_urban_nwr    = 1
@@ -584,7 +585,7 @@ module module_NoahMP_hrldas_driver
 
        soil_data_option, pedotransfer_option, crop_option, &
 
-       sf_urban_physics,num_urban_hi,urban_atmosphere_thickness, &
+       sf_urban_physics,use_wudapt_lcz,num_urban_hi,urban_atmosphere_thickness, &
        num_urban_ndm,num_urban_ng,num_urban_nwr ,num_urban_ngb , &
        num_urban_nf ,num_urban_nz,num_urban_nbui, &
        
@@ -598,6 +599,9 @@ module module_NoahMP_hrldas_driver
   contains
 
   subroutine land_driver_ini(NTIME_out,wrfits,wrfite,wrfjts,wrfjte)
+
+     USE module_bep_bem_helper, ONLY: nurbm ! C.He 03/31/2021: add for bep_bem treatment in WRFv4.3
+
      implicit  none
      integer:: NTIME_out
 
@@ -660,6 +664,20 @@ module module_NoahMP_hrldas_driver
 !---------------------------------------------------------------------
 !  NAMELIST end
 !---------------------------------------------------------------------
+
+!C.He: add for urban update in WRFv4.3
+!-----------------------------------------------------------------------
+! Urban physics set up. If the run-time option for use_wudapt_lcz = 0,
+! then the number of urban classes is 3. Else, if the use_wudapt_lcz = 1, 
+! then the number increases to 11. The seemingly local variable 
+! assignment, "nurbm", is actually USE associated from the BEP BEM 
+! helper module.
+!-----------------------------------------------------------------------
+      IF      ( use_wudapt_lcz .EQ. 0 ) THEN
+         nurbm = 3
+      ELSE IF ( use_wudapt_lcz .EQ. 1 ) THEN
+         nurbm = 11
+      END IF
 
 !---------------------------------------------------------------------
 !  NAMELIST check begin
