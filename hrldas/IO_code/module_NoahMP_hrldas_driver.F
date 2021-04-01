@@ -1575,6 +1575,13 @@ ENDIF
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TS_URB2D"  ,     TS_URB2D  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "FRC_URB2D"  ,    FRC_URB2D  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "UTYPE_URB2D"  ,  UTYPE_URB2D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LP_URB2D"  ,     LP_URB2D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LB_URB2D"  ,     LB_URB2D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "HGT_URB2D"  ,    HGT_URB2D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "MH_URB2D"  ,     MH_URB2D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "STDH_URB2D"  ,   STDH_URB2D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "HI_URB2D"  ,     HI_URB2D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LF_URB2D"  ,     LF_URB2D  )
 
      ENDIF
          
@@ -2516,6 +2523,13 @@ subroutine lsm_restart()
       call add_to_restart(     TS_URB2D  ,      "TS_URB2D" )
       call add_to_restart(    FRC_URB2D  ,     "FRC_URB2D" )
       call add_to_restart(  UTYPE_URB2D  ,   "UTYPE_URB2D" )
+      call add_to_restart(     LP_URB2D  ,      "LP_URB2D" )
+      call add_to_restart(     LB_URB2D  ,      "LB_URB2D" )
+      call add_to_restart(    HGT_URB2D  ,     "HGT_URB2D" ) 
+      call add_to_restart(     MH_URB2D  ,      "MH_URB2D" )
+      call add_to_restart(   STDH_URB2D  ,    "STDH_URB2D" )
+      call add_to_restart(     HI_URB2D  ,      "HI_URB2D", layers="URBN")
+      call add_to_restart(     LF_URB2D  ,      "LF_URB2D", layers="URBN")
 
   ENDIF
          
