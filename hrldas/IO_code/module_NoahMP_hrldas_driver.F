@@ -1684,7 +1684,7 @@ ENDIF
 
          IF(SF_URBAN_PHYSICS > 0 ) THEN  !urban
          
-                CALL urban_param_init(DZR,DZB,DZG,num_soil_layers,sf_urban_physics)
+                CALL urban_param_init(DZR,DZB,DZG,num_soil_layers,sf_urban_physics,use_wudapt_lcz)
 
                 CALL urban_var_init(ISURBAN,TSK,TSLB,TMN,IVGTYP,                        & !urban
                       ims,ime,jms,jme,kms,kme,num_soil_layers,                          & !urban
@@ -1718,7 +1718,7 @@ ENDIF
                          A_E_BEP,       B_U_BEP,       B_V_BEP,                         & !multi-layer urban
                          B_T_BEP,       B_Q_BEP,       B_E_BEP,   DLG_BEP,              & !multi-layer urban
                         DL_U_BEP,        SF_BEP,        VL_BEP,                         & !multi-layer urban
-                       FRC_URB2D,   UTYPE_URB2D)                                          !urban
+                       FRC_URB2D,   UTYPE_URB2D, use_wudapt_lcz)                          !urban
 
                max_utype_urb2d = maxval(UTYPE_URB2D)*1.0
                IF (use_wudapt_lcz.eq.0 .and. max_utype_urb2d.gt.3.0) THEN  !new LCZ
@@ -1845,7 +1845,7 @@ ENDIF
 
          IF(SF_URBAN_PHYSICS > 0 ) THEN  !urban
 
-                 CALL urban_param_init(DZR,DZB,DZG,num_soil_layers,sf_urban_physics)
+                 CALL urban_param_init(DZR,DZB,DZG,num_soil_layers,sf_urban_physics,use_wudapt_lcz)
 
                 CALL urban_var_init(ISURBAN,TSK,TSLB,TMN,IVGTYP,                        & !urban
                       ims,ime,jms,jme,kms,kme,num_soil_layers,                          & !urban
@@ -1879,7 +1879,7 @@ ENDIF
                          A_E_BEP,       B_U_BEP,       B_V_BEP,                         & !multi-layer urban
                          B_T_BEP,       B_Q_BEP,       B_E_BEP,   DLG_BEP,              & !multi-layer urban
                         DL_U_BEP,        SF_BEP,        VL_BEP,                         & !multi-layer urban
-                       FRC_URB2D,   UTYPE_URB2D)                                          !urban
+                       FRC_URB2D,   UTYPE_URB2D, use_wudapt_lcz)                          !urban
 
                max_utype_urb2d = maxval(UTYPE_URB2D)*1.0
                IF (use_wudapt_lcz.eq.0 .and. max_utype_urb2d.gt.3.0) THEN  !new LCZ
@@ -2240,8 +2240,10 @@ end subroutine land_driver_ini
 !         IF(SF_URBAN_PHYSICS.eq.1) THEN
 !           DO j=jts,jte                                           !urban
 !             DO i=its,ite                                         !urban
-!              IF( IVGTYP(I,J) == ISURBAN .or. IVGTYP(I,J) == 31 .or. &  !urban
-!                  IVGTYP(I,J) == 32 .or. IVGTYP(I,J) == 33 ) THEN !urban
+!             IF( IVGTYP(I,J) == ISURBAN    .or. IVGTYP(I,J) == LCZ_1 .or. IVGTYP(I,J) == LCZ_2 .or. &
+!             IVGTYP(I,J) == LCZ_3      .or. IVGTYP(I,J) == LCZ_4 .or. IVGTYP(I,J) == LCZ_5 .or. &
+!             IVGTYP(I,J) == LCZ_6      .or. IVGTYP(I,J) == LCZ_7 .or. IVGTYP(I,J) == LCZ_8 .or. &
+!             IVGTYP(I,J) == LCZ_9      .or. IVGTYP(I,J) == LCZ_10 .or. IVGTYP(I,J) == LCZ_11 )THEN
 !                 Q2(I,J)  = (FVEGXY(I,J)*Q2MVXY(I,J) + (1.-FVEGXY(I,J))*Q2MBXY(I,J))*(1.-FRC_URB2D(I,J)) +   &
 !                             Q2_URB2D(I,J)*FRC_URB2D(I,J)
 !                 T2(I,J)  = (FVEGXY(I,J)*T2MVXY(I,J) + (1.-FVEGXY(I,J))*T2MBXY(I,J))*(1.-FRC_URB2D(I,J)) +   &
@@ -2262,8 +2264,10 @@ end subroutine land_driver_ini
 !         IF((SF_URBAN_PHYSICS.eq.2).OR.(SF_URBAN_PHYSICS.eq.3)) THEN
 !           DO j=j_start(ij),j_end(ij)                             !urban
 !             DO i=i_start(ij),i_end(ij)                           !urban
-!              IF( IVGTYP(I,J) == ISURBAN .or. IVGTYP(I,J) == 31 .or. &  !urban
-!                  IVGTYP(I,J) == 32 .or. IVGTYP(I,J) == 33 ) THEN !urban
+!             IF( IVGTYP(I,J) == ISURBAN    .or. IVGTYP(I,J) == LCZ_1 .or. IVGTYP(I,J) == LCZ_2 .or. &
+!             IVGTYP(I,J) == LCZ_3      .or. IVGTYP(I,J) == LCZ_4 .or. IVGTYP(I,J) == LCZ_5 .or. &
+!             IVGTYP(I,J) == LCZ_6      .or. IVGTYP(I,J) == LCZ_7 .or. IVGTYP(I,J) == LCZ_8 .or. &
+!             IVGTYP(I,J) == LCZ_9      .or. IVGTYP(I,J) == LCZ_10 .or. IVGTYP(I,J) == LCZ_11 )THEN
 !                T2(I,J)   = TH_PHY(i,1,j)/((1.E5/PSFC(I,J))**RCP) !urban
 !                TH2(I,J) = TH_PHY(i,1,j) !urban
 !                Q2(I,J)   = qv_curr(i,1,j)  !urban
