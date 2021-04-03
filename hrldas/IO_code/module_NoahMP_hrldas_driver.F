@@ -5,8 +5,8 @@ module module_NoahMP_hrldas_driver
   USE module_sf_noahmpdrv, only: noahmp_init, noahmplsm, noahmp_urban, groundwater_init
   USE module_sf_urban, only: urban_param_init, urban_var_init
   USE module_date_utilities
-  USE noahmp_tables, ONLY:  LOW_DENSITY_RESIDENTIAL_TABLE, HIGH_DENSITY_RESIDENTIAL_TABLE, &
-                            HIGH_INTENSITY_INDUSTRIAL_TABLE
+  USE noahmp_tables, ONLY:  LCZ_1_TABLE,LCZ_2_TABLE,LCZ_3_TABLE,LCZ_4_TABLE,LCZ_5_TABLE, &
+                 LCZ_6_TABLE,LCZ_7_TABLE,LCZ_8_TABLE,LCZ_9_TABLE,LCZ_10_TABLE,LCZ_11_TABLE
 #ifdef MPP_LAND
   use module_mpp_land, only: MPP_LAND_PAR_INI, mpp_land_init, getLocalXY, mpp_land_bcast_char
   use module_mpp_land, only: check_land, my_id , node_info
@@ -606,6 +606,7 @@ module module_NoahMP_hrldas_driver
      implicit  none
      integer:: NTIME_out
 
+     REAL :: max_utype_urb2d
 
     ! initilization for stand alone parallel code.
     integer, optional, intent(in) :: wrfits,wrfite,wrfjts,wrfjte
@@ -1687,17 +1688,17 @@ ENDIF
 
                 CALL urban_var_init(ISURBAN,TSK,TSLB,TMN,IVGTYP,                        & !urban
                       ims,ime,jms,jme,kms,kme,num_soil_layers,                          & !urban
-                      LOW_DENSITY_RESIDENTIAL_TABLE,                                    &
-		      HIGH_DENSITY_RESIDENTIAL_TABLE,                                   &
-		      HIGH_INTENSITY_INDUSTRIAL_TABLE,                                  &
+                      LCZ_1_TABLE,LCZ_2_TABLE,LCZ_3_TABLE,LCZ_4_TABLE,LCZ_5_TABLE,      & !urban
+		      LCZ_6_TABLE,LCZ_7_TABLE,LCZ_8_TABLE,LCZ_9_TABLE,LCZ_10_TABLE,     & !urban
+		      LCZ_11_TABLE,                                                     & !urban
                       .true.,sf_urban_physics,                                          & !urban
                       XXXR_URB2D,    XXXB_URB2D,    XXXG_URB2D,XXXC_URB2D,              & !urban
                         TR_URB2D,      TB_URB2D,      TG_URB2D,  TC_URB2D, QC_URB2D,    & !urban
                        TRL_URB3D,     TBL_URB3D,     TGL_URB3D,                         & !urban
                         SH_URB2D,      LH_URB2D,       G_URB2D,  RN_URB2D, TS_URB2D,    & !urban
-                   num_urban_ndm,  urban_map_zrd,  urban_map_zwd, urban_map_gd,          & !I multi-layer urban
-                    urban_map_zd,  urban_map_zdf,   urban_map_bd, urban_map_wd,          & !I multi-layer urban
-                   urban_map_gbd,  urban_map_fbd,                                        & !I multi-layer urban
+                   num_urban_ndm,  urban_map_zrd,  urban_map_zwd, urban_map_gd,         & !I multi-layer urban
+                    urban_map_zd,  urban_map_zdf,   urban_map_bd, urban_map_wd,         & !I multi-layer urban
+                   urban_map_gbd,  urban_map_fbd,                                       & !I multi-layer urban
                     num_urban_hi,                                                       & !urban
                        TRB_URB4D,     TW1_URB4D,     TW2_URB4D, TGB_URB4D,              & !urban
                       TLEV_URB3D,    QLEV_URB3D,                                        & !urban
@@ -1718,6 +1719,17 @@ ENDIF
                          B_T_BEP,       B_Q_BEP,       B_E_BEP,   DLG_BEP,              & !multi-layer urban
                         DL_U_BEP,        SF_BEP,        VL_BEP,                         & !multi-layer urban
                        FRC_URB2D,   UTYPE_URB2D)                                          !urban
+
+               max_utype_urb2d = maxval(UTYPE_URB2D)*1.0
+               IF (use_wudapt_lcz.eq.0 .and. max_utype_urb2d.gt.3.0) THEN  !new LCZ
+                 CALL wrf_error_fatal &
+                 ('USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1')
+               ENDIF
+               IF (use_wudapt_lcz.eq.1 .and. max_utype_urb2d.le.3.0) THEN  ! new LCZ
+                 CALL wrf_error_fatal &
+                 ('USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0')
+               ENDIF
+
 
           ENDIF
 
@@ -1837,17 +1849,17 @@ ENDIF
 
                 CALL urban_var_init(ISURBAN,TSK,TSLB,TMN,IVGTYP,                        & !urban
                       ims,ime,jms,jme,kms,kme,num_soil_layers,                          & !urban
-                      LOW_DENSITY_RESIDENTIAL_TABLE,                                    &
-		      HIGH_DENSITY_RESIDENTIAL_TABLE,                                   &
-		      HIGH_INTENSITY_INDUSTRIAL_TABLE,                                  &
-                      .false.,sf_urban_physics,                                          & !urban
+                      LCZ_1_TABLE,LCZ_2_TABLE,LCZ_3_TABLE,LCZ_4_TABLE,LCZ_5_TABLE,      & !urban
+                      LCZ_6_TABLE,LCZ_7_TABLE,LCZ_8_TABLE,LCZ_9_TABLE,LCZ_10_TABLE,     & !urban
+                      LCZ_11_TABLE,                                                     & !urban
+                      .false.,sf_urban_physics,                                         & !urban
                       XXXR_URB2D,    XXXB_URB2D,    XXXG_URB2D,XXXC_URB2D,              & !urban
                         TR_URB2D,      TB_URB2D,      TG_URB2D,  TC_URB2D, QC_URB2D,    & !urban
                        TRL_URB3D,     TBL_URB3D,     TGL_URB3D,                         & !urban
                         SH_URB2D,      LH_URB2D,       G_URB2D,  RN_URB2D, TS_URB2D,    & !urban
-                   num_urban_ndm,  urban_map_zrd,  urban_map_zwd, urban_map_gd,          & !I multi-layer urban
-                    urban_map_zd,  urban_map_zdf,   urban_map_bd, urban_map_wd,          & !I multi-layer urban
-                   urban_map_gbd,  urban_map_fbd,                                        & !I multi-layer urban
+                   num_urban_ndm,  urban_map_zrd,  urban_map_zwd, urban_map_gd,         & !I multi-layer urban
+                    urban_map_zd,  urban_map_zdf,   urban_map_bd, urban_map_wd,         & !I multi-layer urban
+                   urban_map_gbd,  urban_map_fbd,                                       & !I multi-layer urban
                     num_urban_hi,                                                       & !urban
                        TRB_URB4D,     TW1_URB4D,     TW2_URB4D, TGB_URB4D,              & !urban
                       TLEV_URB3D,    QLEV_URB3D,                                        & !urban
@@ -1868,6 +1880,16 @@ ENDIF
                          B_T_BEP,       B_Q_BEP,       B_E_BEP,   DLG_BEP,              & !multi-layer urban
                         DL_U_BEP,        SF_BEP,        VL_BEP,                         & !multi-layer urban
                        FRC_URB2D,   UTYPE_URB2D)                                          !urban
+
+               max_utype_urb2d = maxval(UTYPE_URB2D)*1.0
+               IF (use_wudapt_lcz.eq.0 .and. max_utype_urb2d.gt.3.0) THEN  !new LCZ
+                 CALL wrf_error_fatal &
+                 ('USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1')
+               ENDIF
+               IF (use_wudapt_lcz.eq.1 .and. max_utype_urb2d.le.3.0) THEN  ! new LCZ
+                 CALL wrf_error_fatal &
+                 ('USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0')
+               ENDIF
 
           ENDIF
 
