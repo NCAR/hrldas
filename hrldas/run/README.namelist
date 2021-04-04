@@ -56,7 +56,7 @@
                                                              !   2 -> BEP Multi-layer urban canopy model
                                                              !   3 -> BEP + Building Energy Model
 
- USE_WUDAPT_LCZ = 0,       				     ! Option to use WUDAPT LCZ urban landuse categories, along with standard
+ USE_WUDAPT_LCZ = 0       				     ! Option to use WUDAPT LCZ urban landuse categories, along with standard
                                                   		urban classes (31-33).
                                                   		= 0: use the traditional 33 landuse classes (31-33 for urban)
                                                   		= 1: use the WUDAPT LCZ urban landuse categories
@@ -89,6 +89,7 @@
 
  EXTERNAL_VEG_FILENAME_TEMPLATE                              ! defunct
  EXTERNAL_LAI_FILENAME_TEMPLATE                              ! defunct
+ AGDATA_FLNM                                                 ! 2D fields for spatially-varying irrigation parameters [default = ""]
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -98,7 +99,7 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
- DYNAMIC_VEG_OPTION                = 1                       ! options for dynamic vegetation:         [default = none]
+ DYNAMIC_VEG_OPTION                = 4                       ! options for dynamic vegetation:         [default = none]
 
                                                              !   1 -> off (use table LAI; use FVEG = SHDFAC from input)
                                                              !   2 -> on  (together with OPT_CRS = 1)
@@ -111,19 +112,19 @@
                                                              !   9 -> off (use input LAI; use maximum vegetation fraction)
                                                              !  10 -> crop model on (use maximum vegetation fraction)
 
- CANOPY_STOMATAL_RESISTANCE_OPTION = 2                       ! options for canopy stomatal resistance  [default = none]
+ CANOPY_STOMATAL_RESISTANCE_OPTION = 1                       ! options for canopy stomatal resistance  [default = none]
 
                                                              ! **1 -> Ball-Berry
 		                                             !   2 -> Jarvis
 
- BTR_OPTION                        = 2                       ! options for soil moisture factor for 
+ BTR_OPTION                        = 1                       ! options for soil moisture factor for 
                                                                    stomatal resistance                    [default = none]
 
                                                              ! **1 -> Noah (soil moisture) 
                                                              !   2 -> CLM  (matric potential)
                                                              !   3 -> SSiB (matric potential)
 
- RUNOFF_OPTION                     = 1                       ! options for runoff and groundwater      [default = none]
+ RUNOFF_OPTION                     = 3                       ! options for runoff and groundwater      [default = none]
 
                                                              !   1 -> TOPMODEL with groundwater (Niu et al. 2007 JGR) ;
                                                              !   2 -> TOPMODEL with an equilibrium water table (Niu et al. 2005 JGR) ;
@@ -153,12 +154,12 @@
                                                              !   2 -> two-stream applied to grid-cell (gap = 0)
                                                              ! **3 -> two-stream applied to vegetated fraction (gap=1-FVEG)
 
- SNOW_ALBEDO_OPTION                = 2                       ! options for ground snow surface albedo  [default = none]
+ SNOW_ALBEDO_OPTION                = 1                       ! options for ground snow surface albedo  [default = none]
 
                                                              !   1 -> BATS
 		                                             ! **2 -> CLASS
 
- PCP_PARTITION_OPTION              = 2                       ! options for partitioning  precipitation 
+ PCP_PARTITION_OPTION              = 1                       ! options for partitioning  precipitation 
                                                                    into rainfall & snowfall               [default = none]
 
                                                              ! **1 -> Jordan (1991)
@@ -173,7 +174,7 @@
                                                              !   1 -> zero heat flux from bottom (ZBOT and TBOT not used)
                                                              ! **2 -> TBOT at ZBOT (8m) read from a file (original Noah)
 
- TEMP_TIME_SCHEME_OPTION           = 2                       ! options for snow/soil temperature 
+ TEMP_TIME_SCHEME_OPTION           = 1                       ! options for snow/soil temperature 
                                                                    time scheme (only layer 1)             [default = none]
 
                                                              ! **1 -> semi-implicit; flux top boundary condition
@@ -193,31 +194,31 @@
                                                              ! **1 -> include phase change of ice
 							     !   2 -> ice treatment more like original Noah
 
- SOIL_DATA_OPTION                  = 1,                      ! Noah-MP options for defining soil properties
+ SOIL_DATA_OPTION                  = 1,                      ! Noah-MP options for defining soil properties    [default = 1]
                                                          	  geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
                                                      		1 -> use input dominant soil texture
                                                      		2 -> use input soil texture that varies with depth
                                                      		3 -> use soil composition (sand, clay, orgm) and pedotransfer functions (OPT_PEDO)
                                                      		4 -> use input soil properties (BEXP_3D, SMCMAX_3D, etc.) (not valid in WRF)
 
- PEDOTRANSFER_OPTION               = 1,    		     ! Noah-MP options for pedotransfer functions (used when OPT_SOIL = 3)
+ PEDOTRANSFER_OPTION               = 1,    		     ! Noah-MP options for pedotransfer functions (used when OPT_SOIL = 3) [default = 1]
                                                         	  geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
                                                   		1 -> Saxton and Rawls (2006)
 
- CROP_OPTION                       = 0,     		     !  options for crop model
+ CROP_OPTION                       = 0,     		     !  options for crop model   [default = 0]
                                                         	   geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
                                                  		0 -> No crop model, will run default dynamic vegetation
                                                      		1 -> Liu, et al. 2016
                                                      		2 -> Gecros (Genotype-by-Environment interaction on CROp growth Simulator) Yin and van Laar, 2005
 
- IRRIGATION_OPTION                 = 0,        		     !  options for irrigation scheme
+ IRRIGATION_OPTION                 = 0,        		     !  options for irrigation scheme  [default = 0]
                                                            	geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
                                                      		0 -> No irrigation
                                                      		1 -> Irrigation ON
                                                      		2 -> irrigation trigger based on crop season Planting and harvesting dates
                                                      		3 -> irrigation trigger based on LAI threshold
 
- IRRIGATION_METHOD                 = 0,        		     !  options for irrigation method (only if opt_irr > 0)
+ IRRIGATION_METHOD                 = 0,        		     !  options for irrigation method (only if opt_irr > 0)  [default = 0]
                                                            	geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
                                                      		0 -> method based on geo_em fractions (all three methods are ON)
                                                      		1 -> sprinkler method
