@@ -651,11 +651,13 @@ module module_NoahMP_hrldas_driver
   subroutine land_driver_ini(NTIME_out,wrfits,wrfite,wrfjts,wrfjte)
 
      USE module_bep_bem_helper, ONLY: nurbm ! C.He 03/31/2021: add for bep_bem treatment in WRFv4.3
+     USE module_domain, ONLY : domain ! for groundwater_init WRF
 
      implicit  none
      integer:: NTIME_out
 
      REAL :: max_utype_urb2d
+     TYPE (domain)          :: grid
 
     ! initilization for stand alone parallel code.
     integer, optional, intent(in) :: wrfits,wrfite,wrfjts,wrfjte
@@ -1942,6 +1944,9 @@ ENDIF
                 STMASSXY,   WOODXY, STBLCPXY, FASTCPXY,   XSAIXY, LAI,                    &
                  GRAINXY,    GDDXY,                                                   &
                 CROPTYPE,  CROPCAT,                                                   &
+                irnumsi  ,irnummi  ,irnumfi  ,irwatsi,    &
+                irwatmi  ,irwatfi  ,ireloss  ,irsivol,    &
+                irmivol  ,irfivol  ,irrsplh  ,            &
                   T2MVXY,   T2MBXY, CHSTARXY,                                         &
                    NSOIL,  .true.,                                                   &
                   .true.,runoff_option, crop_option, irrigation_option, irrigation_method,   &
@@ -2092,6 +2097,9 @@ ENDIF
                 STMASSXY,   WOODXY, STBLCPXY, FASTCPXY,   XSAIXY, LAI,                    &
                  GRAINXY,    GDDXY,                                                   &
                 CROPTYPE,  CROPCAT,                                                   &
+                irnumsi  ,irnummi  ,irnumfi  ,irwatsi,    &
+                irwatmi  ,irwatfi  ,ireloss  ,irsivol,    &
+                irmivol  ,irfivol  ,irrsplh  ,            &
                   T2MVXY,   T2MBXY, CHSTARXY,                                         &
                    NSOIL,  .false.,                                                   &
                   .true.,runoff_option, crop_option, irrigation_option, irrigation_method,  &
@@ -2106,7 +2114,7 @@ ENDIF
                      )
 
          if(iopt_run == 5) then
-              call groundwater_init (                                           &
+              call groundwater_init ( grid,                                     &
                  num_soil_layers, dzs, isltyp, ivgtyp, wtddt ,                  &
                  fdepthxy   , terrain , riverbedxy, eqzwt     ,                 &
                  rivercondxy, pexpxy  , areaxy    , zwtxy     ,                 &

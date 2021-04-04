@@ -37,7 +37,8 @@ OBJS = \
 	../Utility_routines/module_date_utilities.o \
 	../Utility_routines/kwm_string_utilities.o \
         ../Utility_routines/module_wrf_error.o \
-	../Utility_routines/module_ra_gfdleta.o
+	../Utility_routines/module_ra_gfdleta.o \
+        ../Utility_routines/module_domain.o
 
 CMD = hrldas.exe
 all:	$(CMD)
