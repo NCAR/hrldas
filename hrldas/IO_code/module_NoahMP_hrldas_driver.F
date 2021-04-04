@@ -422,6 +422,23 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  sf_bep
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  vl_bep
   REAL                                    ::  height_urban
+! new urban variables for green roof, PVP for BEP_BEM scheme=3, Zonato et al., 2021
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  EP_PV_URB3D
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QGR_URB3D
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  TGR_URB3D
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  DRAINGR_URB3D
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  T_PV_URB3D
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  TRV_URB4D
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  QR_URB4D
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  DRAIN_URB4D
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  SFRV_URB3D
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  LFRV_URB3D
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  DGR_URB3D
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  DG_URB3D
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  LFR_URB3D
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  LFG_URB3D
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  SWDDIR    ! solar down at surface [W m-2]
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  SWDDIF
 
 !------------------------------------------------------------------------
 ! 2D variables not used in WRF - should be removed?
@@ -527,7 +544,7 @@ module module_NoahMP_hrldas_driver
   integer            :: spinup_loops
 
   integer            :: sf_urban_physics = 0
-  integer            :: use_wudapt_lcz   = 0 ! C.He: add for LCZ urban
+  integer            :: use_wudapt_lcz   = 0 ! add for LCZ urban
   integer            :: num_urban_ndm    = 1
   integer            :: num_urban_ng     = 1
   integer            :: num_urban_nwr    = 1
@@ -537,7 +554,10 @@ module module_NoahMP_hrldas_driver
   integer            :: num_urban_nbui   = 1
   integer            :: num_urban_hi     = 15 
   real               :: urban_atmosphere_thickness = 2.0
-  
+! new urban var for green roof and solar panel
+  integer            :: num_urban_ngr    = 10 ! = ngr_u in bep_bem.F
+  integer            :: urban_map_zgrd   = 1
+
   ! derived urban dimensions
   
   integer            :: urban_map_zrd
@@ -863,6 +883,9 @@ module module_NoahMP_hrldas_driver
          urban_map_fbd = num_urban_ndm * (num_urban_nz - 1)  * &
                          num_urban_nf  * num_urban_nbui
 
+! new urban var
+        urban_map_zgrd = num_urban_ndm * num_urban_ngr * num_urban_nz
+
       end if     
       
 !----------------------------------------------------------------------
@@ -960,6 +983,8 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( U_PHY     (XSTART:XEND,KDS:KDE,YSTART:YEND) )  ! 3D U wind component [m/s]
   ALLOCATE ( V_PHY     (XSTART:XEND,KDS:KDE,YSTART:YEND) )  ! 3D V wind component [m/s]
   ALLOCATE ( SWDOWN    (XSTART:XEND,YSTART:YEND) )    ! solar down at surface [W m-2]
+  ALLOCATE ( SWDDIR    (XSTART:XEND,YSTART:YEND) )    ! solar down at surface [W m-2] for new urban solar panel
+  ALLOCATE ( SWDDIF    (XSTART:XEND,YSTART:YEND) )    ! solar down at surface [W m-2] for new urban solar panel
   ALLOCATE ( GLW       (XSTART:XEND,YSTART:YEND) )    ! longwave down at surface [W m-2]
   ALLOCATE ( P8W       (XSTART:XEND,KDS:KDE,YSTART:YEND) )  ! 3D pressure, valid at interface [Pa]
   ALLOCATE ( RAINBL    (XSTART:XEND,YSTART:YEND) )    ! total precipitation entering land model [mm]
@@ -1304,6 +1329,21 @@ IF(SF_URBAN_PHYSICS > 0 )  THEN  ! any urban model
   ALLOCATE ( lfvent_urb3d   (XSTART:XEND,              YSTART:YEND) )  !
   ALLOCATE ( sfwin1_urb3d   (XSTART:XEND,urban_map_wd ,YSTART:YEND) )  !
   ALLOCATE ( sfwin2_urb3d   (XSTART:XEND,urban_map_wd ,YSTART:YEND) )  !
+! new urban variables greenroof & solar panel for BEM
+  ALLOCATE ( ep_pv_urb3d    (XSTART:XEND,              YSTART:YEND) )  !
+  ALLOCATE ( t_pv_urb3d     (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
+  ALLOCATE ( trv_urb4d      (XSTART:XEND,urban_map_zgrd,YSTART:YEND) ) !
+  ALLOCATE ( qr_urb4d       (XSTART:XEND,urban_map_zgrd,YSTART:YEND) ) !
+  ALLOCATE ( qgr_urb3d      (XSTART:XEND,              YSTART:YEND) )  !
+  ALLOCATE ( tgr_urb3d      (XSTART:XEND,              YSTART:YEND) )  !
+  ALLOCATE ( drain_urb4d    (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
+  ALLOCATE ( draingr_urb3d  (XSTART:XEND,              YSTART:YEND) )  !
+  ALLOCATE ( sfrv_urb3d     (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
+  ALLOCATE ( lfrv_urb3d     (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
+  ALLOCATE ( dgr_urb3d      (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
+  ALLOCATE ( dg_urb3d       (XSTART:XEND,num_urban_ndm,YSTART:YEND) )  !
+  ALLOCATE ( lfr_urb3d      (XSTART:XEND,urban_map_zdf,YSTART:YEND) )  !
+  ALLOCATE ( lfg_urb3d      (XSTART:XEND,num_urban_ndm,YSTART:YEND) )  !
 
 ENDIF
 
@@ -1338,6 +1378,8 @@ ENDIF
   U_PHY      = undefined_real
   V_PHY      = undefined_real
   SWDOWN     = undefined_real
+  SWDDIR     = undefined_real
+  SWDDIF     = undefined_real
   GLW        = undefined_real
   P8W        = undefined_real
   RAINBL     = undefined_real
@@ -1501,6 +1543,125 @@ ENDIF
 IF(SF_URBAN_PHYSICS > 0 )  THEN  ! any urban model
   HRANG      = undefined_real
   DECLIN     = undefined_real
+  sh_urb2d   = undefined_real
+  lh_urb2d   = undefined_real
+  g_urb2d    = undefined_real
+  rn_urb2d   = undefined_real
+  ts_urb2d   = undefined_real
+  GMT        = undefined_real
+  JULDAY     = undefined_real
+  frc_urb2d  = undefined_real
+  utype_urb2d= undefined_real
+  lp_urb2d   = undefined_real
+  lb_urb2d   = undefined_real
+  hgt_urb2d  = undefined_real
+  ust        = undefined_real
+  cmr_sfcdif = undefined_real
+  chr_sfcdif = undefined_real
+  cmc_sfcdif = undefined_real
+  chc_sfcdif = undefined_real
+  cmgr_sfcdif= undefined_real
+  chgr_sfcdif= undefined_real
+  tr_urb2d   = undefined_real
+  tb_urb2d   = undefined_real
+  tg_urb2d   = undefined_real
+  tc_urb2d   = undefined_real
+  qc_urb2d   = undefined_real
+  uc_urb2d   = undefined_real
+  xxxr_urb2d = undefined_real
+  xxxb_urb2d = undefined_real
+  xxxg_urb2d = undefined_real
+  xxxc_urb2d = undefined_real
+  trl_urb3d  = undefined_real
+  tbl_urb3d  = undefined_real
+  tgl_urb3d  = undefined_real
+  psim_urb2d = undefined_real
+  psih_urb2d = undefined_real
+  u10_urb2d  = undefined_real
+  v10_urb2d  = undefined_real
+  GZ1OZ0_urb2d = undefined_real
+  AKMS_URB2D = undefined_real
+  th2_urb2d  = undefined_real
+  q2_urb2d   = undefined_real
+  ust_urb2d  = undefined_real
+  dzr        = undefined_real
+  dzb        = undefined_real
+  dzg        = undefined_real
+  cmcr_urb2d = undefined_real
+  tgr_urb2d  = undefined_real
+  tgrl_urb3d = undefined_real
+  smr_urb3d  = undefined_real
+  drelr_urb2d= undefined_real
+  drelb_urb2d= undefined_real
+  drelg_urb2d= undefined_real
+  flxhumr_urb2d = undefined_real
+  flxhumb_urb2d = undefined_real
+  flxhumg_urb2d = undefined_real
+  frc_urb2d  = undefined_real
+  utype_urb2d= undefined_real
+  chs        = undefined_real
+  chs2       = undefined_real
+  cqs2       = undefined_real
+  mh_urb2d   = undefined_real
+  stdh_urb2d = undefined_real
+  lf_urb2d   = undefined_real
+  trb_urb4d  = undefined_real
+  tw1_urb4d  = undefined_real
+  tw2_urb4d  = undefined_real
+  tgb_urb4d  = undefined_real
+  sfw1_urb3d = undefined_real
+  sfw2_urb3d = undefined_real
+  sfr_urb3d  = undefined_real
+  sfg_urb3d  = undefined_real
+  hi_urb2d   = undefined_real
+  theta_urban= undefined_real
+  u_urban    = undefined_real
+  v_urban    = undefined_real
+  dz_urban   = undefined_real
+  rho_urban  = undefined_real
+  p_urban    = undefined_real
+  a_u_bep    = undefined_real
+  a_v_bep    = undefined_real
+  a_t_bep    = undefined_real
+  a_q_bep    = undefined_real
+  a_e_bep    = undefined_real
+  b_u_bep    = undefined_real
+  b_v_bep    = undefined_real
+  b_t_bep    = undefined_real
+  b_q_bep    = undefined_real
+  b_e_bep    = undefined_real
+  dlg_bep    = undefined_real
+  dl_u_bep   = undefined_real
+  sf_bep     = undefined_real
+  vl_bep     = undefined_real
+  tlev_urb3d = undefined_real
+  qlev_urb3d = undefined_real
+  tw1lev_urb3d = undefined_real
+  tw2lev_urb3d = undefined_real
+  tglev_urb3d= undefined_real
+  tflev_urb3d= undefined_real
+  sf_ac_urb3d= undefined_real
+  lf_ac_urb3d= undefined_real
+  cm_ac_urb3d= undefined_real
+  sfvent_urb3d = undefined_real
+  lfvent_urb3d = undefined_real
+  sfwin1_urb3d = undefined_real
+  sfwin2_urb3d = undefined_real
+  ep_pv_urb3d= undefined_real
+  t_pv_urb3d = undefined_real
+  trv_urb4d  = undefined_real
+  qr_urb4d   = undefined_real
+  qgr_urb3d  = undefined_real
+  tgr_urb3d  = undefined_real
+  drain_urb4d= undefined_real
+  draingr_urb3d = undefined_real
+  sfrv_urb3d = undefined_real
+  lfrv_urb3d = undefined_real
+  dgr_urb3d  = undefined_real
+  dg_urb3d   = undefined_real
+  lfr_urb3d  = undefined_real
+  lfg_urb3d  = undefined_real
+
 ENDIF
 
   XLAND          = 1.0   ! water = 2.0, land = 1.0
@@ -1750,6 +1911,20 @@ ENDIF
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "LFVENT_URB3D"  , LFVENT_URB3D  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "SFWIN1_URB3D"  , SFWIN1_URB3D  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "SFWIN2_URB3D"  , SFWIN2_URB3D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "EP_PV_URB3D"  ,  EP_PV_URB3D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "T_PV_URB3D"  ,   T_PV_URB3D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TRV_URB4D"  ,    TRV_URB4D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "QR_URB4D"  ,     QR_URB4D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "QGR_URB3D"  ,    QGR_URB3D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGR_URB3D"  ,    TGR_URB3D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRAIN_URB4D"  ,  DRAIN_URB4D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DRAINGR_URB3D"  ,DRAINGR_URB3D  ) 
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "SFRV_URB3D"  ,   SFRV_URB3D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "LFRV_URB3D"  ,   LFRV_URB3D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "DGR_URB3D"  ,    DGR_URB3D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "DG_URB3D"  ,     DG_URB3D  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "LFR_URB3D"  ,    LFR_URB3D  ) 
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "LFG_URB3D"  ,    LFG_URB3D  )
 
      ENDIF
      
@@ -1796,7 +1971,7 @@ ENDIF
                         SH_URB2D,      LH_URB2D,       G_URB2D,  RN_URB2D, TS_URB2D,    & !urban
                    num_urban_ndm,  urban_map_zrd,  urban_map_zwd, urban_map_gd,         & !I multi-layer urban
                     urban_map_zd,  urban_map_zdf,   urban_map_bd, urban_map_wd,         & !I multi-layer urban
-                   urban_map_gbd,  urban_map_fbd,                                       & !I multi-layer urban
+                   urban_map_gbd,  urban_map_fbd, urban_map_zgrd,                       & !I multi-layer urban
                     num_urban_hi,                                                       & !urban
                        TRB_URB4D,     TW1_URB4D,     TW2_URB4D, TGB_URB4D,              & !urban
                       TLEV_URB3D,    QLEV_URB3D,                                        & !urban
@@ -1806,6 +1981,11 @@ ENDIF
                     SFVENT_URB3D,  LFVENT_URB3D,                                        & !urban
                     SFWIN1_URB3D,  SFWIN2_URB3D,                                        & !urban
                       SFW1_URB3D,    SFW2_URB3D,     SFR_URB3D, SFG_URB3D,              & !urban
+                     EP_PV_URB3D,    T_PV_URB3D,                                        & !GRZ
+                       TRV_URB4D,      QR_URB4D,     QGR_URB3D, TGR_URB3D,              & !GRZ
+                     DRAIN_URB4D, DRAINGR_URB3D,    SFRV_URB3D,                         & !GRZ
+                      LFRV_URB3D,     DGR_URB3D,      DG_URB3D, LFR_URB3D, LFG_URB3D,   & !GRZ
+                           SMOIS,                                                       & !GRZ
                         LP_URB2D,      HI_URB2D,      LB_URB2D,                         & !urban
                        HGT_URB2D,      MH_URB2D,    STDH_URB2D,                         & !urban
                         LF_URB2D,                                                       & !urban
@@ -1957,7 +2137,7 @@ ENDIF
                         SH_URB2D,      LH_URB2D,       G_URB2D,  RN_URB2D, TS_URB2D,    & !urban
                    num_urban_ndm,  urban_map_zrd,  urban_map_zwd, urban_map_gd,         & !I multi-layer urban
                     urban_map_zd,  urban_map_zdf,   urban_map_bd, urban_map_wd,         & !I multi-layer urban
-                   urban_map_gbd,  urban_map_fbd,                                       & !I multi-layer urban
+                   urban_map_gbd,  urban_map_fbd, urban_map_zgrd,                       & !I multi-layer urban
                     num_urban_hi,                                                       & !urban
                        TRB_URB4D,     TW1_URB4D,     TW2_URB4D, TGB_URB4D,              & !urban
                       TLEV_URB3D,    QLEV_URB3D,                                        & !urban
@@ -1967,6 +2147,11 @@ ENDIF
                     SFVENT_URB3D,  LFVENT_URB3D,                                        & !urban
                     SFWIN1_URB3D,  SFWIN2_URB3D,                                        & !urban
                       SFW1_URB3D,    SFW2_URB3D,     SFR_URB3D, SFG_URB3D,              & !urban
+                     EP_PV_URB3D,    T_PV_URB3D,                                        & !GRZ
+                       TRV_URB4D,      QR_URB4D,     QGR_URB3D, TGR_URB3D,              & !GRZ
+                     DRAIN_URB4D, DRAINGR_URB3D,    SFRV_URB3D,                         & !GRZ
+                      LFRV_URB3D,     DGR_URB3D,      DG_URB3D, LFR_URB3D, LFG_URB3D,   & !GRZ
+                           SMOIS,                                                       & !GRZ
                         LP_URB2D,      HI_URB2D,      LB_URB2D,                         & !urban
                        HGT_URB2D,      MH_URB2D,    STDH_URB2D,                         & !urban
                         LF_URB2D,                                                       & !urban
@@ -2142,6 +2327,9 @@ end subroutine land_driver_ini
      HAILNCV    = 0.0
      DZ8W = 2*ZLVL                    ! 2* to be consistent with WRF model level
 
+     SWDDIR = SWDOWN * 0.7  ! following noahmplsm ATM 70% direct radiation
+     SWDDIF = SWDOWN * 0.3  ! following noahmplsm ATM 30% diffuse radiation
+
      IF(SF_URBAN_PHYSICS == 2 .or. SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
        where(XLAND < 1.5)     p_urban(:,kde,:) = p8w(:,1,:)
        where(XLAND < 1.5)   rho_urban(:,kde,:) = p8w(:,1,:)/287.04/t_phy(:,1,:)
@@ -2225,7 +2413,8 @@ end subroutine land_driver_ini
 	       IOPT_GLA, IOPT_RSF,IOPT_SOIL,IOPT_PEDO,IOPT_CROP,    IOPT_IRR, &
                IOPT_IRRM,IZ0TLND, sf_urban_physics,                           &
 	       SOILCOMP,  SOILCL1,  SOILCL2,   SOILCL3,  SOILCL4,             &
-		  T_PHY,  QV_CURR,    U_PHY,    V_PHY,    SWDOWN,        GLW, &
+		  T_PHY,  QV_CURR,    U_PHY,    V_PHY,    SWDOWN,     SWDDIR, &
+                 SWDDIF,      GLW,                                            &
 		    P8W,   RAINBL,       SR,                                  &
                   IRFRACT, SIFRACT,   MIFRACT,  FIFRACT,                      & ! IN : Irrigation fractions
 		    TSK,      HFX,      QFX,       LH,    GRDFLX,     SMSTAV, &
@@ -2280,6 +2469,7 @@ end subroutine land_driver_ini
 	   call noahmp_urban (sf_urban_physics,     NUM_SOIL_LAYERS,     IVGTYP,ITIMESTEP,  & ! IN : Model configuration 
                                DTBL,         COSZEN,           XLAT,                        & ! IN : Time/Space-related
                               T_PHY,        QV_CURR,          U_PHY,      V_PHY,   SWDOWN,  & ! IN : Forcing
+                             SWDDIR,         SWDDIF,                                        &
 		                GLW,            P8W,         RAINBL,       DZ8W,      ZNT,  & ! IN : Forcing
                                 TSK,            HFX,            QFX,         LH,   GRDFLX,  & ! IN/OUT : LSM 
 		             ALBEDO,          EMISS,           QSFC,                        & ! IN/OUT : LSM 
@@ -2307,7 +2497,7 @@ end subroutine land_driver_ini
                                 chs,           chs2,           cqs2,                        & !H
                       num_urban_ndm,  urban_map_zrd,  urban_map_zwd, urban_map_gd,          & !I multi-layer urban
                        urban_map_zd,  urban_map_zdf,   urban_map_bd, urban_map_wd,          & !I multi-layer urban
-                      urban_map_gbd,  urban_map_fbd,                                        & !I multi-layer urban
+                      urban_map_gbd,  urban_map_fbd, urban_map_zgrd,                        & !I multi-layer urban
                        num_urban_hi,                                                        & !I multi-layer urban
                           trb_urb4d,      tw1_urb4d,      tw2_urb4d,  tgb_urb4d,            & !H multi-layer urban
                          tlev_urb3d,     qlev_urb3d,                                        & !H multi-layer urban
@@ -2317,6 +2507,10 @@ end subroutine land_driver_ini
                        sfvent_urb3d,   lfvent_urb3d,                                        & !H multi-layer urban
                        sfwin1_urb3d,   sfwin2_urb3d,                                        & !H multi-layer urban
                          sfw1_urb3d,     sfw2_urb3d,      sfr_urb3d,  sfg_urb3d,            & !H multi-layer urban
+                        ep_pv_urb3d,     t_pv_urb3d,                                        & !RMS
+                          trv_urb4d,       qr_urb4d,      qgr_urb3d,  tgr_urb3d,            & !RMS
+                        drain_urb4d,  draingr_urb3d,     sfrv_urb3d, lfrv_urb3d,            & !RMS
+                          dgr_urb3d,       dg_urb3d,      lfr_urb3d,  lfg_urb3d,            & !RMS
                            lp_urb2d,       hi_urb2d,       lb_urb2d,  hgt_urb2d,            & !H multi-layer urban
                            mh_urb2d,     stdh_urb2d,       lf_urb2d,                        & !SLUCM
                         theta_urban,      rho_urban,        p_urban,        ust,            & !I multi-layer urban
@@ -2529,6 +2723,7 @@ end subroutine land_driver_ini
               call add_to_output(QSPRINGSXY , "QSPRINGS" , "Mass of wood and woody roots"         , "g m{-2}"               )
               call add_to_output(QSLATXY    , "QSLAT"    , "Stable carbon in deep soil"           , "g m{-2}"               )
 	    ENDIF
+	! For now, no urban output variables included
 
            enddo DEFINE_MODE_LOOP
 
@@ -2756,6 +2951,20 @@ subroutine lsm_restart()
       call add_to_restart( LFVENT_URB3D  ,  "LFVENT_URB3D" )
       call add_to_restart( SFWIN1_URB3D  ,  "SFWIN1_URB3D", layers="URBN" )
       call add_to_restart( SFWIN2_URB3D  ,  "SFWIN2_URB3D", layers="URBN" )
+      call add_to_restart(  EP_PV_URB3D  ,   "EP_PV_URB3D" )
+      call add_to_restart(   T_PV_URB3D  ,    "T_PV_URB3D", layers="URBN" )
+      call add_to_restart(    TRV_URB4D  ,    "TRV_URB4D" , layers="URBN" )
+      call add_to_restart(    QR_URB4D   ,     "QR_URB4D" , layers="URBN" )
+      call add_to_restart(   QGR_URB3D   ,    "QGR_URB3D"  )
+      call add_to_restart(   TGR_URB3D   ,    "TGR_URB3D"  )
+      call add_to_restart(   DRAIN_URB4D ,   "DRAIN_URB4D", layers="URBN" )
+      call add_to_restart( DRAINGR_URB3D , "DRAINGR_URB3D" )
+      call add_to_restart(    SFRV_URB3D ,    "SFRV_URB3D", layers="URBN" )
+      call add_to_restart(    LFRV_URB3D ,    "LFRV_URB3D", layers="URBN" )
+      call add_to_restart(     DGR_URB3D ,     "DGR_URB3D", layers="URBN" )
+      call add_to_restart(      DG_URB3D ,      "DG_URB3D", layers="URBN" )
+      call add_to_restart(     LFR_URB3D ,     "LFR_URB3D", layers="URBN" )
+      call add_to_restart(     LFG_URB3D ,     "LFG_URB3D", layers="URBN" )
 
   ENDIF
 
