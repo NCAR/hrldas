@@ -27,6 +27,7 @@ OBJS = \
 	../../wrf/phys/module_sf_noahmp_glacier.o \
 	../../wrf/phys/module_sf_noahmp_groundwater.o \
 	../../wrf/phys/module_sf_gecros.o \
+        ../../wrf/phys/module_bep_bem_helper.o \
 	../../wrf/phys/module_sf_urban.o \
 	../../wrf/phys/module_sf_bep.o \
 	../../wrf/phys/module_sf_bem.o \
@@ -35,7 +36,9 @@ OBJS = \
 	../Utility_routines/module_model_constants.o \
 	../Utility_routines/module_date_utilities.o \
 	../Utility_routines/kwm_string_utilities.o \
-	../Utility_routines/module_ra_gfdleta.o
+        ../Utility_routines/module_wrf_error.o \
+	../Utility_routines/module_ra_gfdleta.o \
+        ../Utility_routines/module_domain.o
 
 CMD = hrldas.exe
 all:	$(CMD)
