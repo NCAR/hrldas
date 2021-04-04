@@ -77,9 +77,11 @@ module module_NoahMP_hrldas_driver
   INTEGER                                 ::  IOPT_GLA  ! glacier option (1->phase change; 2->simple)
   INTEGER                                 ::  IOPT_RSF  ! surface resistance option (1->Zeng; 2->simple)
   INTEGER                                 ::  IZ0TLND   ! option of Chen adjustment of Czil (not used)
-  INTEGER                                 ::  IOPT_SOIL  ! soil configuration option
-  INTEGER                                 ::  IOPT_PEDO  ! soil pedotransfer function option
+  INTEGER                                 ::  IOPT_SOIL ! soil configuration option
+  INTEGER                                 ::  IOPT_PEDO ! soil pedotransfer function option
   INTEGER                                 ::  IOPT_CROP ! crop model option (0->none; 1->Liu et al.; 2->Gecros)
+  INTEGER                                 ::  IOPT_IRR  ! irrigation scheme (0->none; >1 irrigation scheme ON)
+  INTEGER                                 ::  IOPT_IRRM ! irrigation method (0->dynamic; 1-> sprinkler; 2-> micro; 3-> flood)
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  T_PHY     ! 3D atmospheric temperature valid at mid-levels [K]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  QV_CURR   ! 3D water vapor mixing ratio [kg/kg_dry]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  U_PHY     ! 3D U wind component [m/s]
@@ -115,6 +117,15 @@ module module_NoahMP_hrldas_driver
   REAL, ALLOCATABLE, DIMENSION(:,:)       ::  soilcl2    ! Soil texture class with depth
   REAL, ALLOCATABLE, DIMENSION(:,:)       ::  soilcl3    ! Soil texture class with depth
   REAL, ALLOCATABLE, DIMENSION(:,:)       ::  soilcl4    ! Soil texture class with depth
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  irr_frac_2D! irrigation Fraction
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  irr_har_2D ! number of days before harvest date to stop irrigation 
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  irr_lai_2D ! Minimum lai to trigger irrigation
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  irr_mad_2D ! management allowable deficit (0-1)
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  filoss_2D  ! fraction of flood irrigation loss (0-1) 
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  sprir_rate_2D! mm/h, sprinkler irrigation rate
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  micir_rate_2D! mm/h, micro irrigation rate
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  firtfac_2D ! flood application rate factor
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  ir_rain_2D ! maximum precipitation to stop irrigation trigger
 
 ! INOUT (with generic LSM equivalent) (as defined in WRF)
 
@@ -182,6 +193,24 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  TAUSSXY   ! snow age factor
 
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  gecros_state   ! gecros crop model packed state vector
+
+!irrigation
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: IRFRACT    ! irrigation fraction
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: SIFRACT    ! sprinkler irrigation fraction
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: MIFRACT    ! micro irrigation fraction
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: FIFRACT    ! flood irrigation fraction   
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)    :: IRNUMSI    ! irrigation event number, Sprinkler
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)    :: IRNUMMI    ! irrigation event number, Micro
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)    :: IRNUMFI    ! irrigation event number, Flood 
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: IRWATSI    ! irrigation water amount [m] to be applied, Sprinkler
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: IRWATMI    ! irrigation water amount [m] to be applied, Micro
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: IRWATFI    ! irrigation water amount [m] to be applied, Flood
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: IRELOSS    ! loss of irrigation water to evaporation,sprinkler [m/timestep]
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: IRSIVOL    ! amount of irrigation by sprinkler (mm)
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: IRMIVOL    ! amount of irrigation by micro (mm)
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: IRFIVOL    ! amount of irrigation by micro (mm)  
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: IRRSPLH    ! latent heating from sprinkler evaporation (w/m2)
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    :: LOCTIM     ! local time
 
 ! OUT (with no Noah LSM equivalent) (as defined in WRF)
    
@@ -549,6 +578,8 @@ module module_NoahMP_hrldas_driver
   integer            :: soil_data_option = 1
   integer            :: pedotransfer_option = 1
   integer            :: crop_option = 0
+  integer            :: irrigation_option = 0
+  integer            :: irrigation_method = 0
 
   integer            :: split_output_count = 1
   logical            :: skip_first_output = .false.
@@ -556,9 +587,10 @@ module module_NoahMP_hrldas_driver
   integer            :: kday
   real               :: zlvl 
   character(len=256) :: hrldas_setup_file = " "
-  character(len=256) ::  spatial_filename = " "
+  character(len=256) :: spatial_filename = " "
   character(len=256) :: external_veg_filename_template = " "
   character(len=256) :: external_lai_filename_template = " "
+  character(len=256) :: agdata_flnm = " "
   integer            :: xstart = 1
   integer            :: ystart = 1
   integer            ::   xend = 0
@@ -583,17 +615,14 @@ module module_NoahMP_hrldas_driver
        frozen_soil_option, radiative_transfer_option, snow_albedo_option, &
        pcp_partition_option, tbot_option, temp_time_scheme_option, &
        glacier_option, surface_resistance_option, &
-
+       irrigation_option, irrigation_method, &
        soil_data_option, pedotransfer_option, crop_option, &
-
        sf_urban_physics,use_wudapt_lcz,num_urban_hi,urban_atmosphere_thickness, &
        num_urban_ndm,num_urban_ng,num_urban_nwr ,num_urban_ngb , &
        num_urban_nf ,num_urban_nz,num_urban_nbui, &
-       
-
        split_output_count, & 
        khour, kday, zlvl, hrldas_setup_file, &
-       spatial_filename, &
+       spatial_filename, agdata_flnm, &
        external_veg_filename_template, external_lai_filename_template, &
        xstart, xend, ystart, yend
 
@@ -663,6 +692,9 @@ module module_NoahMP_hrldas_driver
   IOPT_SOIL = soil_data_option
   IOPT_PEDO = pedotransfer_option
   IOPT_CROP = crop_option
+  IOPT_IRR  = irrigation_option
+  IOPT_IRRM = irrigation_method
+
 !---------------------------------------------------------------------
 !  NAMELIST end
 !---------------------------------------------------------------------
@@ -675,11 +707,11 @@ module module_NoahMP_hrldas_driver
 ! assignment, "nurbm", is actually USE associated from the BEP BEM 
 ! helper module.
 !-----------------------------------------------------------------------
-      IF      ( use_wudapt_lcz .EQ. 0 ) THEN
-         nurbm = 3
-      ELSE IF ( use_wudapt_lcz .EQ. 1 ) THEN
-         nurbm = 11
-      END IF
+   IF ( use_wudapt_lcz .EQ. 0 ) THEN
+      nurbm = 3
+   ELSE IF ( use_wudapt_lcz .EQ. 1 ) THEN
+      nurbm = 11
+   END IF
 
 !---------------------------------------------------------------------
 !  NAMELIST check begin
@@ -957,6 +989,15 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( soilcl2    (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
   ALLOCATE ( soilcl3    (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
   ALLOCATE ( soilcl4    (XSTART:XEND,YSTART:YEND) )            ! Soil texture class with depth
+  ALLOCATE ( irr_frac_2D(XSTART:XEND,YSTART:YEND) )            ! irrigation Fraction
+  ALLOCATE ( irr_har_2D (XSTART:XEND,YSTART:YEND) )            ! number of days before harvest date to stop irrigation 
+  ALLOCATE ( irr_lai_2D (XSTART:XEND,YSTART:YEND) )            ! Minimum lai to trigger irrigation
+  ALLOCATE ( irr_mad_2D (XSTART:XEND,YSTART:YEND) )            ! management allowable deficit (0-1)
+  ALLOCATE ( filoss_2D  (XSTART:XEND,YSTART:YEND) )            ! fraction of flood irrigation loss (0-1) 
+  ALLOCATE ( sprir_rate_2D(XSTART:XEND,YSTART:YEND) )          ! mm/h, sprinkler irrigation rate
+  ALLOCATE ( micir_rate_2D(XSTART:XEND,YSTART:YEND) )          ! mm/h, micro irrigation rate
+  ALLOCATE ( firtfac_2D (XSTART:XEND,YSTART:YEND) )            ! flood application rate factor
+  ALLOCATE ( ir_rain_2D (XSTART:XEND,YSTART:YEND) )            ! maximum precipitation to stop irrigation trigger
 
 ! INOUT (with generic LSM equivalent) (as defined in WRF)
 
@@ -1024,6 +1065,23 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( TAUSSXY   (XSTART:XEND,YSTART:YEND) )  ! snow age factor
 
   ALLOCATE ( gecros_state(XSTART:XEND,60,YSTART:YEND) )   ! gecros crop model packed state vector
+! irrigation
+  ALLOCATE ( IRFRACT   (XSTART:XEND,YSTART:YEND) )  ! irrigation fraction
+  ALLOCATE ( SIFRACT   (XSTART:XEND,YSTART:YEND) )  ! sprinkler irrigation fraction
+  ALLOCATE ( MIFRACT   (XSTART:XEND,YSTART:YEND) )  ! micro irrigation fraction
+  ALLOCATE ( FIFRACT   (XSTART:XEND,YSTART:YEND) )  ! flood irrigation fraction   
+  ALLOCATE ( IRNUMSI   (XSTART:XEND,YSTART:YEND) )  ! irrigation event number, Sprinkler
+  ALLOCATE ( IRNUMMI   (XSTART:XEND,YSTART:YEND) )  ! irrigation event number, Micro
+  ALLOCATE ( IRNUMFI   (XSTART:XEND,YSTART:YEND) )  ! irrigation event number, Flood 
+  ALLOCATE ( IRWATSI   (XSTART:XEND,YSTART:YEND) )  ! irrigation water amount [m] to be applied, Sprinkler
+  ALLOCATE ( IRWATMI   (XSTART:XEND,YSTART:YEND) )  ! irrigation water amount [m] to be applied, Micro
+  ALLOCATE ( IRWATFI   (XSTART:XEND,YSTART:YEND) )  ! irrigation water amount [m] to be applied, Flood
+  ALLOCATE ( IRELOSS   (XSTART:XEND,YSTART:YEND) )  ! loss of irrigation water to evaporation,sprinkler [mm]
+  ALLOCATE ( IRSIVOL   (XSTART:XEND,YSTART:YEND) )  ! amount of irrigation by sprinkler (mm)
+  ALLOCATE ( IRMIVOL   (XSTART:XEND,YSTART:YEND) )  ! amount of irrigation by micro (mm)
+  ALLOCATE ( IRFIVOL   (XSTART:XEND,YSTART:YEND) )  ! amount of irrigation by micro (mm)
+  ALLOCATE ( IRRSPLH   (XSTART:XEND,YSTART:YEND) )  ! latent heating from sprinkler evaporation (w/m2)
+  ALLOCATE ( LOCTIM    (XSTART:XEND,YSTART:YEND) )  ! local time
   
 ! OUT (with no Noah LSM equivalent) (as defined in WRF)
    
@@ -1422,7 +1480,24 @@ ENDIF
   HARVEST    = undefined_real
   SEASON_GDD = undefined_real
   CROPTYPE   = undefined_real
-  
+! irrigation
+  IRFRACT    = 0.0
+  SIFRACT    = 0.0
+  MIFRACT    = 0.0
+  FIFRACT    = 0.0
+  IRNUMSI    = 0
+  IRNUMMI    = 0
+  IRNUMFI    = 0
+  IRWATSI    = 0.0
+  IRWATMI    = 0.0
+  IRWATFI    = 0.0
+  IRELOSS    = 0.0
+  IRSIVOL    = 0.0
+  IRMIVOL    = 0.0
+  IRFIVOL    = 0.0
+  IRRSPLH    = 0.0
+  LOCTIM     = undefined_real
+ 
 IF(SF_URBAN_PHYSICS > 0 )  THEN  ! any urban model
   HRANG      = undefined_real
   DECLIN     = undefined_real
@@ -1462,7 +1537,18 @@ ENDIF
   if (soil_data_option == 4) then
     CALL READ_3D_SOIL(SPATIAL_FILENAME, XSTART, XEND, YSTART, YEND, &
                       NSOIL,BEXP_3D,SMCDRY_3D,SMCWLT_3D,SMCREF_3D,SMCMAX_3D,  &
-		      DKSAT_3D,DWSAT_3D,PSISAT_3D,QUARTZ_3D,REFDK_2D,REFKDT_2D)
+		      DKSAT_3D,DWSAT_3D,PSISAT_3D,QUARTZ_3D,REFDK_2D,REFKDT_2D,&
+          IRR_FRAC_2D,IRR_HAR_2D,IRR_LAI_2D,IRR_MAD_2D,FILOSS_2D,SPRIR_RATE_2D,&
+          MICIR_RATE_2D,FIRTFAC_2D,IR_RAIN_2D)
+  end if
+
+!----------------------------------------------------------------------
+! For spatially-varying irrigation parameters, read in necessary extra fields
+! only if IOPT_IRR >= 1
+!----------------------------------------------------------------------
+  if (irrigation_option >= 1) then
+      CALL READ_AGRICULTURE_DATA(AGDATA_FLNM, XSTART, XEND, YSTART, YEND, &
+                                 IRFRACT, SIFRACT, MIFRACT, FIFRACT)
   end if
   
 !------------------------------------------------------------------------
@@ -1554,6 +1640,18 @@ ENDIF
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSFC"    , QSFC     )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SFCRUNOFF",SFCRUNOFF   )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "UDRUNOFF" ,UDRUNOFF    )
+     ! below for irrigation scheme
+     IF (irrigation_option > 0) THEN
+        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMSI" , IRNUMSI  )
+        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMMI" , IRNUMMI  )
+        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMFI" , IRNUMFI  )
+        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRWATSI" , IRWATSI  )
+        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRWATMI" , IRWATMI  )
+        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRWATFI" , IRWATFI  )
+        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRSIVOL" , IRSIVOL  )
+        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRMIVOL" , IRMIVOL  )
+        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRFIVOL" , IRFIVOL  )
+     ENDIF
     ! below for opt_run = 5
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SMOISEQ"   , SMOISEQ    )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "AREAXY"    , AREAXY     )
@@ -1671,7 +1769,7 @@ ENDIF
                 CROPTYPE,  CROPCAT,                                                   &
                   T2MVXY,   T2MBXY, CHSTARXY,                                         &
                    NSOIL,  .true.,                                                   &
-                  .true.,runoff_option, crop_option,                                 &
+                  .true.,runoff_option, crop_option, irrigation_option, irrigation_method,   &
                   sf_urban_physics,                         &  ! urban scheme
                   ids,ide+1, jds,jde+1, kds,kde,                &  ! domain
                   ims,ime, jms,jme, kms,kme,                &  ! memory
@@ -1816,7 +1914,7 @@ ENDIF
                 CROPTYPE,  CROPCAT,                                                   &
                   T2MVXY,   T2MBXY, CHSTARXY,                                         &
                    NSOIL,  .false.,                                                   &
-                  .true.,runoff_option, crop_option,                                 &
+                  .true.,runoff_option, crop_option, irrigation_option, irrigation_method,  &
                   sf_urban_physics,                         &  ! urban scheme
                   ids,ide+1, jds,jde+1, kds,kde,                &  ! domain
                   ims,ime, jms,jme, kms,kme,                &  ! memory
@@ -2078,6 +2176,9 @@ end subroutine land_driver_ini
         CALL CALC_DECLIN(OLDDATE(1:19),XLAT(I,J), XLONG(I,J),COSZEN(I,J),JULIAN, &
                          HRANG(I,J), DECLIN, GMT, JULDAY)
       ENDIF
+      IF(IOPT_IRR > 0 ) THEN
+         CALL LOCAL_TIME(OLDDATE(1:19), XLONG(I,J), LOCTIM(I,J)) 
+      ENDIF
     END DO
     END DO
 
@@ -2121,16 +2222,19 @@ end subroutine land_driver_ini
                PLANTING,  HARVEST,SEASON_GDD,                               &
                   IDVEG, IOPT_CRS, IOPT_BTR, IOPT_RUN,  IOPT_SFC,   IOPT_FRZ, &
 	       IOPT_INF, IOPT_RAD, IOPT_ALB, IOPT_SNF, IOPT_TBOT,   IOPT_STC, &
-	       IOPT_GLA, IOPT_RSF,IOPT_SOIL,IOPT_PEDO,IOPT_CROP,              &
-               IZ0TLND, sf_urban_physics,                                     &
+	       IOPT_GLA, IOPT_RSF,IOPT_SOIL,IOPT_PEDO,IOPT_CROP,    IOPT_IRR, &
+               IOPT_IRRM,IZ0TLND, sf_urban_physics,                           &
 	       SOILCOMP,  SOILCL1,  SOILCL2,   SOILCL3,  SOILCL4,             &
 		  T_PHY,  QV_CURR,    U_PHY,    V_PHY,    SWDOWN,        GLW, &
 		    P8W,   RAINBL,       SR,                                  &
+                  IRFRACT, SIFRACT,   MIFRACT,  FIFRACT,                      & ! IN : Irrigation fractions
 		    TSK,      HFX,      QFX,       LH,    GRDFLX,     SMSTAV, &
 		 SMSTOT,SFCRUNOFF, UDRUNOFF,   ALBEDO,     SNOWC,      SMOIS, &
 		   SH2O,     TSLB,     SNOW,    SNOWH,    CANWAT,     ACSNOM, &
 		 ACSNOW,    EMISS,     QSFC,                                  &
  		     Z0,      ZNT,                                            & ! IN/OUT LSM eqv
+                IRNUMSI,  IRNUMMI,  IRNUMFI,   IRWATSI,  IRWATMI,    IRWATFI, & ! IN/OUT Irrigation
+                IRELOSS,  IRSIVOL,  IRMIVOL,   IRFIVOL,  IRRSPLH,   LLANDUSE, & ! IN/OUT Irrigation
 		ISNOWXY,     TVXY,     TGXY, CANICEXY,  CANLIQXY,      EAHXY, &
 		  TAHXY,     CMXY,     CHXY,   FWETXY,  SNEQVOXY,   ALBOLDXY, &
 		QSNOWXY,  QRAINXY, WSLAKEXY,    ZWTXY, WAXY,WTXY,     TSNOXY, &
@@ -2149,6 +2253,9 @@ end subroutine land_driver_ini
 !                 BEXP_3D,SMCDRY_3D,SMCWLT_3D,SMCREF_3D,SMCMAX_3D,             &
 !		 DKSAT_3D,DWSAT_3D,PSISAT_3D,QUARTZ_3D,                       &
 !		 REFDK_2D,REFKDT_2D,                                          &
+!                 IRR_FRAC_2D,IRR_HAR_2D,IRR_LAI_2D,IRR_MAD_2D,FILOSS_2D,      &
+!                 SPRIR_RATE_2D,MICIR_RATE_2D,FIRTFAC_2D,IR_RAIN_2D,           &
+
 #ifdef WRF_HYDRO
                  sfcheadrt,INFXSRT,soldrain,                          &    !O
 #endif
@@ -2403,7 +2510,17 @@ end subroutine land_driver_ini
               call add_to_output(NPPXY      , "NPP"     , "Net primary productivity"               , "g m{-2} s{-1} C"     )
               call add_to_output(PSNXY      , "PSN"     , "Total photosynthesis"                   , "umol CO@ m{-2} s{-1}")
               call add_to_output(APARXY     , "APAR"    , "Photosynthesis active energy by canopy" , "W m{-2}"             )
-
+        ! Irrigation
+            IF (irrigation_option > 0) THEN
+              call add_to_output(IRNUMSI    , "IRNUMSI" , "Sprinkler irrigation count"             , "-"                   )
+              call add_to_output(IRNUMMI    , "IRNUMMI" , "Micro irrigation count"                 , "-"                   )
+              call add_to_output(IRNUMFI    , "IRNUMFI" , "Flood irrigation count"                 , "-"                   )
+              call add_to_output(IRELOSS    , "IRELOSS" , "Sprinkler Evaporation"                  , "mm"                  )
+              call add_to_output(IRSIVOL    , "IRSIVOL" , "Sprinkler irrigation amount"            , "mm"                  )
+              call add_to_output(IRMIVOL    , "IRMIVOL" , "Micro irrigation amount"                , "mm"                  )
+              call add_to_output(IRFIVOL    , "IRFIVOL" , "Flood irrigation amount"                , "mm"                  )
+              call add_to_output(IRRSPLH    , "IRRSPLH" , "Latent heating due to sprinkler"        , "W m{-2}"             )
+            ENDIF
         ! Carbon allocation model
 	    IF(RUNOFF_OPTION == 5) THEN
               call add_to_output(SMCWTDXY   , "SMCWTD"   , "Leaf mass"                            , "g m{-2}"               )
@@ -2529,6 +2646,18 @@ subroutine lsm_restart()
   call add_to_restart(QSFC      , "QSFC"  )
   call add_to_restart(SFCRUNOFF , "SFCRUNOFF")
   call add_to_restart(UDRUNOFF  , "UDRUNOFF" )
+ ! irrigation scheme
+  IF (irrigation_option > 0) THEN
+     call add_to_restart(IRNUMSI   , "IRNUMSI")
+     call add_to_restart(IRNUMMI   , "IRNUMMI")
+     call add_to_restart(IRNUMFI   , "IRNUMFI")
+     call add_to_restart(IRWATSI   , "IRWATSI")
+     call add_to_restart(IRWATMI   , "IRWATMI")
+     call add_to_restart(IRWATFI   , "IRWATFI")
+     call add_to_restart(IRSIVOL   , "IRSIVOL") 
+     call add_to_restart(IRMIVOL   , "IRMIVOL")
+     call add_to_restart(IRFIVOL   , "IRFIVOL")
+  ENDIF
   ! below for opt_run = 5
   call add_to_restart(SMOISEQ   , "SMOISEQ"  , layers="SOIL"  )
   call add_to_restart(AREAXY    , "AREAXY"     )
@@ -2707,6 +2836,27 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
    IF (PRESENT(JULDAY_OUT)) JULDAY_OUT = JULDAY
 
  END SUBROUTINE CALC_DECLIN
+
+!---------------------------------------------------------------------
+ SUBROUTINE LOCAL_TIME(NOWDATE, LONGITUDE, TLOCTIM)
+!---------------------------------------------------------------------
+   IMPLICIT NONE
+!---------------------------------------------------------------------
+   CHARACTER(LEN=19), INTENT(IN)  :: NOWDATE    ! YYYY-MM-DD_HH:MM:SS
+   REAL,              INTENT(IN)  :: LONGITUDE
+   REAL,              INTENT(OUT) :: TLOCTIM
+   INTEGER                        :: IHOUR
+   INTEGER                        :: IMINUTE
+   INTEGER                        :: ISECOND
+
+   READ(NOWDATE(12:13), *) IHOUR
+   READ(NOWDATE(15:16), *) IMINUTE
+   READ(NOWDATE(18:19), *) ISECOND
+
+   TLOCTIM = REAL(IHOUR) + REAL(IMINUTE)/60.0 + REAL(ISECOND)/3600.0 + LONGITUDE/15.0 ! LOCAL TIME IN HOURS
+   TLOCTIM = AMOD(TLOCTIM+24.0, 24.0)
+
+ END SUBROUTINE LOCAL_TIME
 
 
 end module module_NoahMP_hrldas_driver

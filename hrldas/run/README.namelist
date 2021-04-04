@@ -56,6 +56,14 @@
                                                              !   2 -> BEP Multi-layer urban canopy model
                                                              !   3 -> BEP + Building Energy Model
 
+ USE_WUDAPT_LCZ = 0,       				     ! Option to use WUDAPT LCZ urban landuse categories, along with standard
+                                                  		urban classes (31-33).
+                                                  		= 0: use the traditional 33 landuse classes (31-33 for urban)
+                                                  		= 1: use the WUDAPT LCZ urban landuse categories
+                                                        	* Note: If the number of urban category in the input files is
+                                                          		inconsistent with the namelist option, error messages will occur.
+                                                          		The method to create the LCZ data is described here: http://www.wudapt.org/
+
  URBAN_ATMOSPHERE_THICKNESS = 2.0                            !    Thickness of urban atmosphere layers
                                                              !     only needed for urban options 2 and 3  [default = 2.0 ]
 							     !     must be less than zlvl/3
@@ -157,6 +165,7 @@
 		                                             !   2 -> BATS: when SFCTMP<TFRZ+2.2 
 		                                             !   3 -> SFCTMP < TFRZ
 		                                             !   4 -> Use WRF microphysics output
+                                                             !   5 -> Wet-bulb temperature-based (Wang et al., 2019 GRL)
 
  TBOT_OPTION                       = 2                       ! options for lower boundary condition 
                                                                    of soil temperature                    [default = none]
@@ -183,6 +192,37 @@
 
                                                              ! **1 -> include phase change of ice
 							     !   2 -> ice treatment more like original Noah
+
+ SOIL_DATA_OPTION                  = 1,                      ! Noah-MP options for defining soil properties
+                                                         	  geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
+                                                     		1 -> use input dominant soil texture
+                                                     		2 -> use input soil texture that varies with depth
+                                                     		3 -> use soil composition (sand, clay, orgm) and pedotransfer functions (OPT_PEDO)
+                                                     		4 -> use input soil properties (BEXP_3D, SMCMAX_3D, etc.) (not valid in WRF)
+
+ PEDOTRANSFER_OPTION               = 1,    		     ! Noah-MP options for pedotransfer functions (used when OPT_SOIL = 3)
+                                                        	  geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
+                                                  		1 -> Saxton and Rawls (2006)
+
+ CROP_OPTION                       = 0,     		     !  options for crop model
+                                                        	   geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
+                                                 		0 -> No crop model, will run default dynamic vegetation
+                                                     		1 -> Liu, et al. 2016
+                                                     		2 -> Gecros (Genotype-by-Environment interaction on CROp growth Simulator) Yin and van Laar, 2005
+
+ IRRIGATION_OPTION                 = 0,        		     !  options for irrigation scheme
+                                                           	geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
+                                                     		0 -> No irrigation
+                                                     		1 -> Irrigation ON
+                                                     		2 -> irrigation trigger based on crop season Planting and harvesting dates
+                                                     		3 -> irrigation trigger based on LAI threshold
+
+ IRRIGATION_METHOD                 = 0,        		     !  options for irrigation method (only if opt_irr > 0)
+                                                           	geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
+                                                     		0 -> method based on geo_em fractions (all three methods are ON)
+                                                     		1 -> sprinkler method
+                                                     		2 -> micro/drip irrigation
+                                                     		3 -> surface flooding
 
 
 /
