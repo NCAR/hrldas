@@ -1551,9 +1551,9 @@ IF(SF_URBAN_PHYSICS > 0 )  THEN  ! any urban model
   rn_urb2d   = undefined_real
   ts_urb2d   = undefined_real
   GMT        = undefined_real
-  JULDAY     = undefined_real
+  JULDAY     = undefined_int
   frc_urb2d  = undefined_real
-  utype_urb2d= undefined_real
+  utype_urb2d= undefined_int
   lp_urb2d   = undefined_real
   lb_urb2d   = undefined_real
   hgt_urb2d  = undefined_real
