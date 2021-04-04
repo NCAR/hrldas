@@ -15,6 +15,7 @@
 ! RESTART_FILENAME_REQUESTED = "/d1/barlage/data/NARR/LDASOUT/RESTART.2010010200_DOMAIN1"
 
  KDAY = 2
+ SPINUP_LOOPS = 0
 
  DYNAMIC_VEG_OPTION                = 4
  CANOPY_STOMATAL_RESISTANCE_OPTION = 1
@@ -24,18 +25,24 @@
  FROZEN_SOIL_OPTION                = 1
  SUPERCOOLED_WATER_OPTION          = 1
  RADIATIVE_TRANSFER_OPTION         = 3
- SNOW_ALBEDO_OPTION                = 2
+ SNOW_ALBEDO_OPTION                = 1
  PCP_PARTITION_OPTION              = 1
  TBOT_OPTION                       = 2
  TEMP_TIME_SCHEME_OPTION           = 1
  GLACIER_OPTION                    = 1
  SURFACE_RESISTANCE_OPTION         = 1
+ SOIL_DATA_OPTION                  = 1
+ PEDOTRANSFER_OPTION               = 1
+ CROP_OPTION                       = 0
+ IRRIGATION_OPTION                 = 0
+ IRRIGATION_METHOD                 = 0
 
  FORCING_TIMESTEP = 3600
- NOAH_TIMESTEP    = 3600
+ NOAH_TIMESTEP    = 1800
  OUTPUT_TIMESTEP  = 3600
 
  SPLIT_OUTPUT_COUNT = 1
+ SKIP_FIRST_OUTPUT = .false.
  RESTART_FREQUENCY_HOURS = 24
 
  ! XSTART = 20
@@ -49,11 +56,9 @@
  soil_thick_input(3) = 0.60
  soil_thick_input(4) = 1.00
 
- ZLVL = 30.0
+ ZLVL = 10.0
 
-/
+ SF_URBAN_PHYSICS = 0
+ USE_WUDAPT_LCZ = 0
 
-&URBAN_OFFLINE
- UCMCALL = 0
- ZLVL_URBAN = 15.0
 /
