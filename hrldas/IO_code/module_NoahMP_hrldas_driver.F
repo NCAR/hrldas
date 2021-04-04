@@ -1267,8 +1267,6 @@ IF(SF_URBAN_PHYSICS > 0 )  THEN  ! any urban model
   ALLOCATE ( flxhumb_urb2d  (XSTART:XEND,                 YSTART:YEND) )  ! 
   ALLOCATE ( flxhumg_urb2d  (XSTART:XEND,                 YSTART:YEND) )  ! 
 
-  ALLOCATE ( frc_urb2d      (XSTART:XEND,                 YSTART:YEND) )  ! 
-  ALLOCATE ( utype_urb2d    (XSTART:XEND,                 YSTART:YEND) )  ! 
   ALLOCATE ( chs            (XSTART:XEND,                 YSTART:YEND) )  ! 
   ALLOCATE ( chs2           (XSTART:XEND,                 YSTART:YEND) )  ! 
   ALLOCATE ( cqs2           (XSTART:XEND,                 YSTART:YEND) )  ! 
@@ -1599,8 +1597,6 @@ IF(SF_URBAN_PHYSICS > 0 )  THEN  ! any urban model
   flxhumr_urb2d = undefined_real
   flxhumb_urb2d = undefined_real
   flxhumg_urb2d = undefined_real
-  frc_urb2d  = undefined_real
-  utype_urb2d= undefined_real
   chs        = undefined_real
   chs2       = undefined_real
   cqs2       = undefined_real
