@@ -51,7 +51,7 @@ CONTAINS
 !		 REFDK_2D,REFKDT_2D,                                        &
 !                IRR_FRAC_2D,IRR_HAR_2D,IRR_LAI_2D,IRR_MAD_2D,FILOSS_2D,    &
 !                SPRIR_RATE_2D,MICIR_RATE_2D,FIRTFAC_2D,IR_RAIN_2D,         &
-!                BVIC_2D,                                                   &
+!                BVIC_2D,AXAJ_2D,BXAJ_2D,XXAJ_2D,                           &
 #ifdef WRF_HYDRO
                sfcheadrt,INFXSRT,soldrain,                                  &
 #endif
@@ -168,6 +168,9 @@ CONTAINS
 !    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  REFDK_2D  ! Reference Soil Conductivity
 !    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  REFKDT_2D ! Soil Infiltration Parameter
 !    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  BVIC_2D   ! VIC model infiltration parameter [-] for opt_run=6
+!    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  AXAJ_2D   ! Xinanjiang: Tension water distribution inflection parameter [-] for opt_run=7
+!    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  BXAJ_2D   ! Xinanjiang: Tension water distribution shape parameter [-] for opt_run=7
+!    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  XXAJ_2D   ! Xinanjiang: Free water distribution shape parameter [-] for opt_run=7
 
 ! placeholders for 2D irrigation parameters
 !    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  IRR_FRAC_2D   ! irrigation Fraction
@@ -779,6 +782,9 @@ CONTAINS
 !       parameters%refdk  = REFDK_2D (I,J)         ! Reference Soil Conductivity
 !       parameters%refkdt = REFKDT_2D(I,J)         ! Soil Infiltration Parameter
 !       parameters%BVIC   = BVIC_2D(I,J)           ! VIC model infiltration parameter [-]
+!       parameters%axaj   = AXAJ_2D(I,J)           ! Xinanjiang: Tension water distribution inflection parameter [-]
+!       parameters%bxaj   = BXAJ_2D(I,J)           ! Xinanjiang: Tension water distribution shape parameter [-]
+!       parameters%xxaj   = XXAJ_2D(I,J)           ! Xinanjiang: Free water distribution shape parameter [-]
 
 ! placeholders for 2D irrigation params
 !       parameters%IRR_FRAC   = IRR_FRAC_2D(I,J)   ! irrigation Fraction
@@ -1369,6 +1375,9 @@ SUBROUTINE TRANSFER_MP_PARAMETERS(VEGTYPE,SOILTYPE,SLOPETYPE,SOILCOLOR,CROPTYPE,
     parameters%REFDK  = REFDK_TABLE
     parameters%REFKDT = REFKDT_TABLE
     parameters%BVIC   = BVIC_TABLE(SOILTYPE(1))
+    parameters%AXAJ   = AXAJ_TABLE(SOILTYPE(1))
+    parameters%BXAJ   = BXAJ_TABLE(SOILTYPE(1))
+    parameters%XXAJ   = XXAJ_TABLE(SOILTYPE(1))
 
 !------------------------------------------------------------------------------------------!
 ! Transfer irrigation parameters
