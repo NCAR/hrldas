@@ -49,8 +49,9 @@ CONTAINS
 !                 BEXP_3D,SMCDRY_3D,SMCWLT_3D,SMCREF_3D,SMCMAX_3D,          & ! placeholders to activate 3D soil
 !		 DKSAT_3D,DWSAT_3D,PSISAT_3D,QUARTZ_3D,                     &
 !		 REFDK_2D,REFKDT_2D,                                        &
-!                IRR_FRAC_2D,IRR_HAR_2D,IRR_LAI_2D,IRR_MAD_2D,FILOSS_2D,      &
-!                SPRIR_RATE_2D,MICIR_RATE_2D,FIRTFAC_2D,IR_RAIN_2D,           &
+!                IRR_FRAC_2D,IRR_HAR_2D,IRR_LAI_2D,IRR_MAD_2D,FILOSS_2D,    &
+!                SPRIR_RATE_2D,MICIR_RATE_2D,FIRTFAC_2D,IR_RAIN_2D,         &
+!                BVIC_2D,                                                   &
 #ifdef WRF_HYDRO
                sfcheadrt,INFXSRT,soldrain,                                  &
 #endif
@@ -166,6 +167,7 @@ CONTAINS
 !    REAL,    DIMENSION( ims:ime, 1:nsoil, jms:jme ), INTENT(IN) ::  QUARTZ_3D ! Soil quartz content
 !    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  REFDK_2D  ! Reference Soil Conductivity
 !    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  REFKDT_2D ! Soil Infiltration Parameter
+!    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  BVIC_2D   ! VIC model infiltration parameter [-] for opt_run=6
 
 ! placeholders for 2D irrigation parameters
 !    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  IRR_FRAC_2D   ! irrigation Fraction
@@ -776,6 +778,7 @@ CONTAINS
 !       parameters%quartz = QUARTZ_3D(I,1:NSOIL,J) ! Soil quartz content
 !       parameters%refdk  = REFDK_2D (I,J)         ! Reference Soil Conductivity
 !       parameters%refkdt = REFKDT_2D(I,J)         ! Soil Infiltration Parameter
+!       parameters%BVIC   = BVIC_2D(I,J)           ! VIC model infiltration parameter [-]
 
 ! placeholders for 2D irrigation params
 !       parameters%IRR_FRAC   = IRR_FRAC_2D(I,J)   ! irrigation Fraction
@@ -1362,10 +1365,10 @@ SUBROUTINE TRANSFER_MP_PARAMETERS(VEGTYPE,SOILTYPE,SLOPETYPE,SOILCOLOR,CROPTYPE,
       parameters%SMCREF(isoil) = SMCREF_TABLE (SOILTYPE(isoil))
       parameters%SMCWLT(isoil) = SMCWLT_TABLE (SOILTYPE(isoil))
     end do
-    
     parameters%F1     = F1_TABLE(SOILTYPE(1))
     parameters%REFDK  = REFDK_TABLE
     parameters%REFKDT = REFKDT_TABLE
+    parameters%BVIC   = BVIC_TABLE(SOILTYPE(1))
 
 !------------------------------------------------------------------------------------------!
 ! Transfer irrigation parameters
