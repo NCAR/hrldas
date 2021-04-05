@@ -19,6 +19,7 @@
  CANOPY_STOMATAL_RESISTANCE_OPTION = 1
  BTR_OPTION                        = 1
  RUNOFF_OPTION                     = 3
+ DVIC_INFILTRATION_OPTION          = 1
  SURFACE_DRAG_OPTION               = 1
  FROZEN_SOIL_OPTION                = 1
  SUPERCOOLED_WATER_OPTION          = 1
