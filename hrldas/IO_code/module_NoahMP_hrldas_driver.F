@@ -82,6 +82,7 @@ module module_NoahMP_hrldas_driver
   INTEGER                                 ::  IOPT_CROP ! crop model option (0->none; 1->Liu et al.; 2->Gecros)
   INTEGER                                 ::  IOPT_IRR  ! irrigation scheme (0->none; >1 irrigation scheme ON)
   INTEGER                                 ::  IOPT_IRRM ! irrigation method (0->dynamic; 1-> sprinkler; 2-> micro; 3-> flood)
+  INTEGER                                 ::  IOPT_INFDV!infiltration options for dynamic VIC (1->Philip; 2-> Green-Ampt;3->Smith-Parlange)
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  T_PHY     ! 3D atmospheric temperature valid at mid-levels [K]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  QV_CURR   ! 3D water vapor mixing ratio [kg/kg_dry]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  U_PHY     ! 3D U wind component [m/s]
@@ -130,6 +131,9 @@ module module_NoahMP_hrldas_driver
   REAL, ALLOCATABLE, DIMENSION(:,:)       ::  axaj_2D    ! Tension water distribution inflection parameter [-] opt_run=7
   REAL, ALLOCATABLE, DIMENSION(:,:)       ::  bxaj_2D    ! Tension water distribution shape parameter [-] opt_run=7
   REAL, ALLOCATABLE, DIMENSION(:,:)       ::  xxaj_2D    ! Free water distribution shape parameter [-] opt_run=7
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  bdvic_2d   ! VIC model infiltration parameter [-] opt_run=8
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  gdvic_2d   ! Mean Capillary Drive (m) for infiltration models opt_run=8
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  bbvic_2d   ! DVIC heterogeniety parameter for infiltration [-] opt_run=8
 
 ! INOUT (with generic LSM equivalent) (as defined in WRF)
 
@@ -604,6 +608,7 @@ module module_NoahMP_hrldas_driver
   integer            :: crop_option = 0
   integer            :: irrigation_option = 0
   integer            :: irrigation_method = 0
+  integer            :: dvic_infiltration_option = 1
 
   integer            :: split_output_count = 1
   logical            :: skip_first_output = .false.
@@ -639,7 +644,7 @@ module module_NoahMP_hrldas_driver
        frozen_soil_option, radiative_transfer_option, snow_albedo_option, &
        pcp_partition_option, tbot_option, temp_time_scheme_option, &
        glacier_option, surface_resistance_option, &
-       irrigation_option, irrigation_method, &
+       irrigation_option, irrigation_method, dvic_infiltration_option, &
        soil_data_option, pedotransfer_option, crop_option, &
        sf_urban_physics,use_wudapt_lcz,num_urban_hi,urban_atmosphere_thickness, &
        num_urban_ndm,num_urban_ng,num_urban_nwr ,num_urban_ngb , &
@@ -720,6 +725,7 @@ module module_NoahMP_hrldas_driver
   IOPT_CROP = crop_option
   IOPT_IRR  = irrigation_option
   IOPT_IRRM = irrigation_method
+  IOPT_INFDV= dvic_infiltration_option
 
 !---------------------------------------------------------------------
 !  NAMELIST end
@@ -1033,6 +1039,9 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( axaj_2D    (XSTART:XEND,YSTART:YEND) )            ! Tension water distribution inflection parameter [-]
   ALLOCATE ( bxaj_2D    (XSTART:XEND,YSTART:YEND) )            ! Tension water distribution shape parameter [-]
   ALLOCATE ( xxaj_2D    (XSTART:XEND,YSTART:YEND) )            ! Free water distribution shape parameter [-]
+  ALLOCATE ( bdvic_2D   (XSTART:XEND,YSTART:YEND) )            ! DVIC model infiltration parameter [-]
+  ALLOCATE ( gdvic_2D   (XSTART:XEND,YSTART:YEND) )            ! Mean Capillary Drive (m) for infiltration models
+  ALLOCATE ( bbvic_2D   (XSTART:XEND,YSTART:YEND) )            ! DVIC heterogeniety parameter for infiltration [-]
 
 ! INOUT (with generic LSM equivalent) (as defined in WRF)
 
@@ -1706,7 +1715,8 @@ ENDIF
                       NSOIL,BEXP_3D,SMCDRY_3D,SMCWLT_3D,SMCREF_3D,SMCMAX_3D,  &
 		      DKSAT_3D,DWSAT_3D,PSISAT_3D,QUARTZ_3D,REFDK_2D,REFKDT_2D,&
           IRR_FRAC_2D,IRR_HAR_2D,IRR_LAI_2D,IRR_MAD_2D,FILOSS_2D,SPRIR_RATE_2D,&
-          MICIR_RATE_2D,FIRTFAC_2D,IR_RAIN_2D,BVIC_2D,AXAJ_2D,BXAJ_2D,XXAJ_2D)
+          MICIR_RATE_2D,FIRTFAC_2D,IR_RAIN_2D,BVIC_2D,AXAJ_2D,BXAJ_2D,XXAJ_2D,&
+          BDVIC_2D,GDVIC_2D,BBVIC_2D)
   end if
 
 !----------------------------------------------------------------------
@@ -2284,8 +2294,8 @@ end subroutine land_driver_ini
              XSTART, XEND, YSTART, YEND,                                  &
        forcing_name_T,forcing_name_Q,forcing_name_U,forcing_name_V,forcing_name_P, &
        forcing_name_LW,forcing_name_SW,forcing_name_PR,forcing_name_SN, &
-             T_PHY(:,1,:),QV_CURR(:,1,:),U_PHY(:,1,:),V_PHY(:,1,:),          &
-	       P8W(:,1,:), GLW       ,SWDOWN      ,RAINBL_tmp, SNOWBL, VEGFRA, update_veg, LAI, update_lai, reset_spinup_date, startdate)
+       T_PHY(:,1,:),QV_CURR(:,1,:),U_PHY(:,1,:),V_PHY(:,1,:),          &
+       P8W(:,1,:), GLW, SWDOWN, RAINBL_tmp, SNOWBL, VEGFRA, update_veg, LAI, update_lai, reset_spinup_date, startdate)
         VEGFRA = VEGFRA * 100.
      else
         if(olddate == forcDate) then
@@ -2305,8 +2315,8 @@ end subroutine land_driver_ini
           XSTART, XEND, YSTART, YEND,                                  &
        forcing_name_T,forcing_name_Q,forcing_name_U,forcing_name_V,forcing_name_P, &
        forcing_name_LW,forcing_name_SW,forcing_name_PR,forcing_name_SN, &
-          T_PHY(:,1,:),QV_CURR(:,1,:),U_PHY(:,1,:),V_PHY(:,1,:),          &
-	    P8W(:,1,:), GLW       ,SWDOWN      ,RAINBL_tmp, SNOWBL, VEGFRA, update_veg, LAI, update_lai, reset_spinup_date, startdate)
+       T_PHY(:,1,:),QV_CURR(:,1,:),U_PHY(:,1,:),V_PHY(:,1,:),          &
+       P8W(:,1,:), GLW, SWDOWN, RAINBL_tmp, SNOWBL, VEGFRA, update_veg, LAI, update_lai, reset_spinup_date, startdate)
 #endif
 
 991  continue
@@ -2423,7 +2433,7 @@ end subroutine land_driver_ini
                   IDVEG, IOPT_CRS, IOPT_BTR, IOPT_RUN,  IOPT_SFC,   IOPT_FRZ, &
 	       IOPT_INF, IOPT_RAD, IOPT_ALB, IOPT_SNF, IOPT_TBOT,   IOPT_STC, &
 	       IOPT_GLA, IOPT_RSF,IOPT_SOIL,IOPT_PEDO,IOPT_CROP,    IOPT_IRR, &
-               IOPT_IRRM,IZ0TLND, sf_urban_physics,                           &
+               IOPT_IRRM,IOPT_INFDV,IZ0TLND, sf_urban_physics,                &
 	       SOILCOMP,  SOILCL1,  SOILCL2,   SOILCL3,  SOILCL4,             &
 		  T_PHY,  QV_CURR,    U_PHY,    V_PHY,    SWDOWN,     SWDDIR, &
                  SWDDIF,      GLW,                                            &
@@ -2456,7 +2466,7 @@ end subroutine land_driver_ini
 !		 REFDK_2D,REFKDT_2D,                                          &
 !                IRR_FRAC_2D,IRR_HAR_2D,IRR_LAI_2D,IRR_MAD_2D,FILOSS_2D,      &
 !                SPRIR_RATE_2D,MICIR_RATE_2D,FIRTFAC_2D,IR_RAIN_2D,           &
-!		 BVIC_2D,AXAJ_2D,BXAJ_2D,XXAJ_2D,                             &
+!		 BVIC_2D,AXAJ_2D,BXAJ_2D,XXAJ_2D,BDVIC_2D,GDVIC_2D,BBVIC_2D,  &
 
 #ifdef WRF_HYDRO
                  sfcheadrt,INFXSRT,soldrain,                          &    !O

@@ -17,7 +17,7 @@ CONTAINS
                  IDVEG, IOPT_CRS,  IOPT_BTR, IOPT_RUN, IOPT_SFC, IOPT_FRZ,  & ! IN : User options
               IOPT_INF, IOPT_RAD,  IOPT_ALB, IOPT_SNF,IOPT_TBOT, IOPT_STC,  & ! IN : User options
               IOPT_GLA, IOPT_RSF, IOPT_SOIL,IOPT_PEDO,IOPT_CROP, IOPT_IRR,  & ! IN : User options
-             IOPT_IRRM,                                                     & ! IN : User options                 
+             IOPT_IRRM, IOPT_INFDV,                                         & ! IN : User options                 
               IZ0TLND, SF_URBAN_PHYSICS,                                    & ! IN : User options
 	      SOILCOMP,  SOILCL1,  SOILCL2,   SOILCL3,  SOILCL4,            & ! IN : User options
                    T3D,     QV3D,     U_PHY,    V_PHY,   SWDOWN,     SWDDIR,&
@@ -51,7 +51,7 @@ CONTAINS
 !		 REFDK_2D,REFKDT_2D,                                        &
 !                IRR_FRAC_2D,IRR_HAR_2D,IRR_LAI_2D,IRR_MAD_2D,FILOSS_2D,    &
 !                SPRIR_RATE_2D,MICIR_RATE_2D,FIRTFAC_2D,IR_RAIN_2D,         &
-!                BVIC_2D,AXAJ_2D,BXAJ_2D,XXAJ_2D,                           &
+!                BVIC_2D,AXAJ_2D,BXAJ_2D,XXAJ_2D,BDVIC_2D,GDVIC_2D,BBVIC_2D,&
 #ifdef WRF_HYDRO
                sfcheadrt,INFXSRT,soldrain,                                  &
 #endif
@@ -113,6 +113,7 @@ CONTAINS
     INTEGER,                                         INTENT(IN   ) ::  IOPT_CROP ! crop model option (0->none; 1->Liu et al.; 2->Gecros)
     INTEGER,                                         INTENT(IN   ) ::  IOPT_IRR  ! irrigation scheme (0->none; >1 irrigation scheme ON)
     INTEGER,                                         INTENT(IN   ) ::  IOPT_IRRM ! irrigation method
+    INTEGER,                                         INTENT(IN   ) ::  IOPT_INFDV! infiltration options for dynamic VIC infiltration (1->Philip; 2-> Green-Ampt;3->Smith-Parlange)
     INTEGER,                                         INTENT(IN   ) ::  IZ0TLND   ! option of Chen adjustment of Czil (not used)
     INTEGER,                                         INTENT(IN   ) ::  sf_urban_physics   ! urban physics option
     REAL,    DIMENSION( ims:ime,       8, jms:jme ), INTENT(IN   ) ::  SOILCOMP  ! soil sand and clay percentage
@@ -171,6 +172,9 @@ CONTAINS
 !    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  AXAJ_2D   ! Xinanjiang: Tension water distribution inflection parameter [-] for opt_run=7
 !    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  BXAJ_2D   ! Xinanjiang: Tension water distribution shape parameter [-] for opt_run=7
 !    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  XXAJ_2D   ! Xinanjiang: Free water distribution shape parameter [-] for opt_run=7
+!    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  BDVIC_2D  ! VIC model infiltration parameter [-]  
+!    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  GDVIC_2D  ! Mean Capillary Drive (m) for infiltration models
+!    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  BBVIC_2D  ! DVIC heterogeniety paramater [-]
 
 ! placeholders for 2D irrigation parameters
 !    REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN)          ::  IRR_FRAC_2D   ! irrigation Fraction
@@ -527,8 +531,8 @@ CONTAINS
 ! ----------------------------------------------------------------------
 
     CALL NOAHMP_OPTIONS(IDVEG  ,IOPT_CRS  ,IOPT_BTR  ,IOPT_RUN  ,IOPT_SFC  ,IOPT_FRZ , &
-                     IOPT_INF  ,IOPT_RAD  ,IOPT_ALB  ,IOPT_SNF  ,IOPT_TBOT, IOPT_STC , &
-		     IOPT_RSF  ,IOPT_SOIL ,IOPT_PEDO ,IOPT_CROP ,IOPT_IRR  ,IOPT_IRRM)
+                IOPT_INF  ,IOPT_RAD  ,IOPT_ALB  ,IOPT_SNF  ,IOPT_TBOT, IOPT_STC ,      &
+		IOPT_RSF  ,IOPT_SOIL ,IOPT_PEDO ,IOPT_CROP ,IOPT_IRR  ,IOPT_IRRM, IOPT_INFDV)
 
     IPRINT    =  .false.                     ! debug printout
 
@@ -785,6 +789,9 @@ CONTAINS
 !       parameters%axaj   = AXAJ_2D(I,J)           ! Xinanjiang: Tension water distribution inflection parameter [-]
 !       parameters%bxaj   = BXAJ_2D(I,J)           ! Xinanjiang: Tension water distribution shape parameter [-]
 !       parameters%xxaj   = XXAJ_2D(I,J)           ! Xinanjiang: Free water distribution shape parameter [-]
+!       parameters%BDVIC  = BDVIC_2D(I,J)          ! VIC model infiltration parameter [-]
+!       parameters%GDVIC  = GDVIC_2D(I,J)          ! Mean Capillary Drive for infiltration models [m]
+!       parameters%BBVIC  = BBVIC_2D(I,J)          ! DVIC heterogeniety parameter for infiltraton [-]
 
 ! placeholders for 2D irrigation params
 !       parameters%IRR_FRAC   = IRR_FRAC_2D(I,J)   ! irrigation Fraction
@@ -1378,6 +1385,9 @@ SUBROUTINE TRANSFER_MP_PARAMETERS(VEGTYPE,SOILTYPE,SLOPETYPE,SOILCOLOR,CROPTYPE,
     parameters%AXAJ   = AXAJ_TABLE(SOILTYPE(1))
     parameters%BXAJ   = BXAJ_TABLE(SOILTYPE(1))
     parameters%XXAJ   = XXAJ_TABLE(SOILTYPE(1))
+    parameters%BDVIC  = BDVIC_TABLE(SOILTYPE(1))
+    parameters%GDVIC  = GDVIC_TABLE(SOILTYPE(1))
+    parameters%BBVIC  = BBVIC_TABLE(SOILTYPE(1))
 
 !------------------------------------------------------------------------------------------!
 ! Transfer irrigation parameters

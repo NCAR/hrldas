@@ -757,7 +757,8 @@ contains
                           nsoil,bexp_3d,smcdry_3d,smcwlt_3d,smcref_3d,smcmax_3d,  &
 		          dksat_3d,dwsat_3d,psisat_3d,quartz_3d,refdk_2d,refkdt_2d,&
                irr_frac_2d,irr_har_2d,irr_lai_2d,irr_mad_2d,filoss_2d,sprir_rate_2d,&
-               micir_rate_2d,firtfac_2d,ir_rain_2d,bvic_2d,axaj_2d,bxaj_2d,xxaj_2d)
+               micir_rate_2d,firtfac_2d,ir_rain_2d,bvic_2d,axaj_2d,bxaj_2d,xxaj_2d,&
+               bdvic_2d,gdvic_2d,bbvic_2d)
 
     implicit none
     character(len=*),          intent(in)  :: spatial_filename
@@ -787,6 +788,9 @@ contains
     real,    dimension(xstart:xend,ystart:yend), intent(out)       :: axaj_2d
     real,    dimension(xstart:xend,ystart:yend), intent(out)       :: bxaj_2d
     real,    dimension(xstart:xend,ystart:yend), intent(out)       :: xxaj_2d
+    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: bdvic_2d
+    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: gdvic_2d
+    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: bbvic_2d
  
     character(len=24)  :: name
     character(len=256) :: units
@@ -1078,6 +1082,36 @@ contains
 
     iret = nf90_get_var(ncid, varid, xxaj_2d, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
 !
+    name = "BDVIC"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "FATAL ERROR: In read_3d_soil():  Problem finding variable '"//trim(name)//"' in NetCDF file: " // trim(spatial_filename)
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, bdvic_2d, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
+!
+    name = "GDVIC"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "FATAL ERROR: In read_3d_soil():  Problem finding variable '"//trim(name)//"' in NetCDF file: " // trim(spatial_filename)
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, gdvic_2d, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
+!
+    name = "BBVIC"
+    iret = nf90_inq_varid(ncid,  trim(name),  varid)
+    if (iret /= 0) then
+      print*, 'ncid = ', ncid
+      write(*,*) "FATAL ERROR: In read_3d_soil():  Problem finding variable '"//trim(name)//"' in NetCDF file: " // trim(spatial_filename)
+      stop
+    endif
+
+    iret = nf90_get_var(ncid, varid, bbvic_2d, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
+
  
     ! Close the NetCDF file
     ierr = nf90_close(ncid)
