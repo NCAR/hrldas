@@ -35,6 +35,7 @@
  CROP_OPTION                       = 0
  IRRIGATION_OPTION                 = 0
  IRRIGATION_METHOD                 = 0
+ TILE_DRAINAGE_OPTION              = 0
 
  FORCING_TIMESTEP = 3600
  NOAH_TIMESTEP    = 1800

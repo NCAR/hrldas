@@ -20,7 +20,7 @@ module module_NoahMP_hrldas_driver
 #endif
 
 #ifdef WRF_HYDRO
-   REAL,    allocatable, DIMENSION(:,:)   :: infxsrt,sfcheadrt, soldrain
+   REAL,    allocatable, DIMENSION(:,:)   :: infxsrt,sfcheadrt,soldrain,qtiledrain,ZWATBLE2D
    integer :: forc_typ, snow_assim, HRLDAS_ini_typ
    REAL,    allocatable, DIMENSION(:,:)   :: etpnd, greenfrac, prcp0
    real :: etpnd1
@@ -83,6 +83,7 @@ module module_NoahMP_hrldas_driver
   INTEGER                                 ::  IOPT_IRR  ! irrigation scheme (0->none; >1 irrigation scheme ON)
   INTEGER                                 ::  IOPT_IRRM ! irrigation method (0->dynamic; 1-> sprinkler; 2-> micro; 3-> flood)
   INTEGER                                 ::  IOPT_INFDV!infiltration options for dynamic VIC (1->Philip; 2-> Green-Ampt;3->Smith-Parlange)
+  INTEGER                                 ::  IOPT_TDRN ! drainage option (0->off; 1->simple scheme; 2->Hooghoudt's scheme)
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  T_PHY     ! 3D atmospheric temperature valid at mid-levels [K]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  QV_CURR   ! 3D water vapor mixing ratio [kg/kg_dry]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  U_PHY     ! 3D U wind component [m/s]
@@ -134,6 +135,13 @@ module module_NoahMP_hrldas_driver
   REAL, ALLOCATABLE, DIMENSION(:,:)       ::  bdvic_2d   ! VIC model infiltration parameter [-] opt_run=8
   REAL, ALLOCATABLE, DIMENSION(:,:)       ::  gdvic_2d   ! Mean Capillary Drive (m) for infiltration models opt_run=8
   REAL, ALLOCATABLE, DIMENSION(:,:)       ::  bbvic_2d   ! DVIC heterogeniety parameter for infiltration [-] opt_run=8
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  KLAT_FAC   ! factor multiplier to hydraulic conductivity
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  TDSMC_FAC  ! factor multiplier to field capacity
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  TD_DC      ! drainage coefficient for simple
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  TD_DCOEF   ! drainge coefficient for Hooghoudt 
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  TD_DDRAIN  ! depth of drain
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  TD_RADI    ! tile radius
+  REAL, ALLOCATABLE, DIMENSION(:,:)       ::  TD_SPAC    ! tile spacing
 
 ! INOUT (with generic LSM equivalent) (as defined in WRF)
 
@@ -269,6 +277,7 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  RS        ! Total stomatal resistance (s/m)
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  Z0        ! roughness length output to WRF
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  ZNT       ! roughness length output to WRF
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QTDRAIN   ! tile drain discharge (mm) 
   INTEGER   ::  ids,ide, jds,jde, kds,kde,  &  ! d -> domain
    &            ims,ime, jms,jme, kms,kme,  &  ! m -> memory
    &            its,ite, jts,jte, kts,kte      ! t -> tile
@@ -304,6 +313,11 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  NONRIVERXY
   REAL                                    ::  WTDDT  = 30.0    ! frequency of groundwater call [minutes]
   INTEGER                                 ::  STEPWTD          ! step of groundwater call
+
+!------------------------------------------------------------------------
+! Needed for TILE DRAINAGE IF IOPT_TDRN = 1 OR 2
+!------------------------------------------------------------------------
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  TD_FRACTION  
 
 !------------------------------------------------------------------------
 ! Needed for crop model (DVEG = 10)
@@ -609,6 +623,7 @@ module module_NoahMP_hrldas_driver
   integer            :: irrigation_option = 0
   integer            :: irrigation_method = 0
   integer            :: dvic_infiltration_option = 1
+  integer            :: tile_drainage_option = 0
 
   integer            :: split_output_count = 1
   logical            :: skip_first_output = .false.
@@ -620,6 +635,7 @@ module module_NoahMP_hrldas_driver
   character(len=256) :: external_veg_filename_template = " "
   character(len=256) :: external_lai_filename_template = " "
   character(len=256) :: agdata_flnm = " "
+  character(len=256) :: tdinput_flnm = " "
   integer            :: xstart = 1
   integer            :: ystart = 1
   integer            ::   xend = 0
@@ -645,13 +661,13 @@ module module_NoahMP_hrldas_driver
        pcp_partition_option, tbot_option, temp_time_scheme_option, &
        glacier_option, surface_resistance_option, &
        irrigation_option, irrigation_method, dvic_infiltration_option, &
-       soil_data_option, pedotransfer_option, crop_option, &
+       tile_drainage_option,soil_data_option, pedotransfer_option, crop_option, &
        sf_urban_physics,use_wudapt_lcz,num_urban_hi,urban_atmosphere_thickness, &
        num_urban_ndm,num_urban_ng,num_urban_nwr ,num_urban_ngb , &
        num_urban_nf ,num_urban_nz,num_urban_nbui, &
        split_output_count, & 
        khour, kday, zlvl, hrldas_setup_file, &
-       spatial_filename, agdata_flnm, &
+       spatial_filename, agdata_flnm, tdinput_flnm, &
        external_veg_filename_template, external_lai_filename_template, &
        xstart, xend, ystart, yend
 
@@ -726,6 +742,7 @@ module module_NoahMP_hrldas_driver
   IOPT_IRR  = irrigation_option
   IOPT_IRRM = irrigation_method
   IOPT_INFDV= dvic_infiltration_option
+  IOPT_TDRN = tile_drainage_option
 
 !---------------------------------------------------------------------
 !  NAMELIST end
@@ -1042,6 +1059,13 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( bdvic_2D   (XSTART:XEND,YSTART:YEND) )            ! DVIC model infiltration parameter [-]
   ALLOCATE ( gdvic_2D   (XSTART:XEND,YSTART:YEND) )            ! Mean Capillary Drive (m) for infiltration models
   ALLOCATE ( bbvic_2D   (XSTART:XEND,YSTART:YEND) )            ! DVIC heterogeniety parameter for infiltration [-]
+  ALLOCATE ( KLAT_FAC   (XSTART:XEND,YSTART:YEND) )            ! factor multiplier to hydraulic conductivity
+  ALLOCATE ( TDSMC_FAC  (XSTART:XEND,YSTART:YEND) )            ! factor multiplier to field capacity
+  ALLOCATE ( TD_DC      (XSTART:XEND,YSTART:YEND) )            ! drainage coefficient for simple
+  ALLOCATE ( TD_DCOEF   (XSTART:XEND,YSTART:YEND) )            ! drainge coefficient for Hooghoudt 
+  ALLOCATE ( TD_DDRAIN  (XSTART:XEND,YSTART:YEND) )            ! depth of drain
+  ALLOCATE ( TD_RADI    (XSTART:XEND,YSTART:YEND) )            ! tile radius
+  ALLOCATE ( TD_SPAC    (XSTART:XEND,YSTART:YEND) )            ! tile spacing
 
 ! INOUT (with generic LSM equivalent) (as defined in WRF)
 
@@ -1176,6 +1200,8 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( RS        (XSTART:XEND,YSTART:YEND) )  ! Total stomatal resistance (s/m)
   ALLOCATE ( Z0        (XSTART:XEND,YSTART:YEND) )  ! roughness length output to WRF 
   ALLOCATE ( ZNT       (XSTART:XEND,YSTART:YEND) )  ! roughness length output to WRF 
+  ALLOCATE ( QTDRAIN   (XSTART:XEND,YSTART:YEND) )  ! tile drainage (mm)
+  ALLOCATE ( TD_FRACTION (XSTART:XEND,YSTART:YEND) )! tile drainage fraction
 
   ALLOCATE ( XLONG     (XSTART:XEND,YSTART:YEND) )  ! longitude
   ALLOCATE ( TERRAIN   (XSTART:XEND,YSTART:YEND) )  ! terrain height
@@ -1539,6 +1565,9 @@ ENDIF
   HARVEST    = undefined_real
   SEASON_GDD = undefined_real
   CROPTYPE   = undefined_real
+! tile drainage
+  QTDRAIN    = undefined_real
+  TD_FRACTION= undefined_real
 ! irrigation
   IRFRACT    = 0.0
   SIFRACT    = 0.0
@@ -1716,7 +1745,8 @@ ENDIF
 		      DKSAT_3D,DWSAT_3D,PSISAT_3D,QUARTZ_3D,REFDK_2D,REFKDT_2D,&
           IRR_FRAC_2D,IRR_HAR_2D,IRR_LAI_2D,IRR_MAD_2D,FILOSS_2D,SPRIR_RATE_2D,&
           MICIR_RATE_2D,FIRTFAC_2D,IR_RAIN_2D,BVIC_2D,AXAJ_2D,BXAJ_2D,XXAJ_2D,&
-          BDVIC_2D,GDVIC_2D,BBVIC_2D)
+          BDVIC_2D,GDVIC_2D,BBVIC_2D,&
+          KLAT_FAC,TDSMC_FAC,TD_DC,TD_DCOEF,TD_DDRAIN,TD_RADI,TD_SPAC)
   end if
 
 !----------------------------------------------------------------------
@@ -1750,6 +1780,14 @@ ENDIF
     CALL READ_CROP_INPUT(HRLDAS_SETUP_FILE, XSTART, XEND, YSTART, YEND,&
                          CROPTYPE,PLANTING,HARVEST,SEASON_GDD)
   end if
+
+!------------------------------------------------------------------------
+! For IOPT_TDRN = 1 or 2 READ TILE DRAIN MAP
+!------------------------------------------------------------------------
+  TD_FRACTION = 0.
+  IF (IOPT_TDRN .GT. 0) THEN
+     CALL READ_TILE_DRAIN_MAP(TDINPUT_FLNM,XSTART,XEND,YSTART,YEND,TD_FRACTION)
+  ENDIF
 
 !----------------------------------------------------------------------
 ! Initialize Model State
@@ -1815,8 +1853,9 @@ ENDIF
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACSNOW"  , ACSNOW   )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "TAUSS"   , TAUSSXY  )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSFC"    , QSFC     )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SFCRUNOFF",SFCRUNOFF   )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "UDRUNOFF" ,UDRUNOFF    )
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SFCRUNOFF",SFCRUNOFF)
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "UDRUNOFF" ,UDRUNOFF )
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QTDRAIN"  ,QTDRAIN  )
      ! below for irrigation scheme
      IF (irrigation_option > 0) THEN
         call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMSI" , IRNUMSI  )
@@ -1968,7 +2007,7 @@ ENDIF
                   ids,ide+1, jds,jde+1, kds,kde,                &  ! domain
                   ims,ime, jms,jme, kms,kme,                &  ! memory
                   its,ite, jts,jte, kts,kte                 &  ! tile
-                     ,smoiseq  ,smcwtdxy ,rechxy   ,deeprechxy, areaxy ,dx, dy, msftx, msfty,&
+                     ,smoiseq  ,smcwtdxy ,rechxy, deeprechxy, qtdrain, areaxy ,dx, dy, msftx, msfty,&
                      wtddt    ,stepwtd  ,dtbl  ,qrfsxy ,qspringsxy  ,qslatxy,                  &
                      fdepthxy ,terrain       ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy,              &
                      rechclim ,gecros_state                 &
@@ -2121,7 +2160,7 @@ ENDIF
                   ids,ide+1, jds,jde+1, kds,kde,                &  ! domain
                   ims,ime, jms,jme, kms,kme,                &  ! memory
                   its,ite, jts,jte, kts,kte                 &  ! tile
-                     ,smoiseq  ,smcwtdxy ,rechxy   ,deeprechxy, areaxy ,dx, dy, msftx, msfty,&
+                     ,smoiseq  ,smcwtdxy ,rechxy, deeprechxy, qtdrain, areaxy ,dx, dy, msftx, msfty,&
                      wtddt    ,stepwtd  ,dtbl  ,qrfsxy ,qspringsxy  ,qslatxy,                  &
                      fdepthxy ,terrain       ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy,              &
                      rechclim ,gecros_state                 &
@@ -2224,12 +2263,16 @@ ENDIF
    allocate( soldrain  (ix,jx) )
    allocate( etpnd     (ix,jx) )
    allocate( prcp0     (ix,jx) )
+   allocate( qtiledrain(ix,jx) )
+   allocate( ZWATBLE2D (ix,jx) )
 
    prcp0     = 0
    sfcheadrt = 0.0
    infxsrt   = 0.0
    etpnd     = 0.0
    soldrain  = 0.0
+   qtiledrain= 0.0
+   ZWATBLE2D = 0.0
 
    allocate(zsoil (NSOIL))
    zsoil = 0
@@ -2242,7 +2285,7 @@ ENDIF
    print*, "zsoil/soil_thick_input = ", soil_thick_input(1:NSOIL) 
 
    call hrldas_drv_HYDRO_ini(TSLB(:,1:NSOIL,:),SMOIS(:,1:NSOIL,:),SH2O(:,1:NSOIL,:), &
-         infxsrt,sfcheadrt,soldrain,ix,jx,NSOIL, SMOIS,real(noah_timestep),          &
+         infxsrt,sfcheadrt,soldrain,qtiledrain,ZWATBLE2D,ix,jx,NSOIL, SMOIS,real(noah_timestep),&
          olddate,zsoil(1:NSOIL))
 
    if(finemesh .ne. 0 ) then
@@ -2429,11 +2472,11 @@ end subroutine land_driver_ini
 	           DZ8W,     DTBL,      DZS,     NUM_SOIL_LAYERS,         DX, &
 		 IVGTYP,   ISLTYP,   VEGFRA,   GVFMAX,       TMN,             &
 		  XLAND,     XICE,     XICE_THRESHOLD,   CROPCAT,             &
-               PLANTING,  HARVEST,SEASON_GDD,                               &
+               PLANTING,  HARVEST,SEASON_GDD,                                 &
                   IDVEG, IOPT_CRS, IOPT_BTR, IOPT_RUN,  IOPT_SFC,   IOPT_FRZ, &
 	       IOPT_INF, IOPT_RAD, IOPT_ALB, IOPT_SNF, IOPT_TBOT,   IOPT_STC, &
 	       IOPT_GLA, IOPT_RSF,IOPT_SOIL,IOPT_PEDO,IOPT_CROP,    IOPT_IRR, &
-               IOPT_IRRM,IOPT_INFDV,IZ0TLND, sf_urban_physics,                &
+               IOPT_IRRM,IOPT_INFDV,IOPT_TDRN,IZ0TLND, sf_urban_physics,      &
 	       SOILCOMP,  SOILCL1,  SOILCL2,   SOILCL3,  SOILCL4,             &
 		  T_PHY,  QV_CURR,    U_PHY,    V_PHY,    SWDOWN,     SWDDIR, &
                  SWDDIF,      GLW,                                            &
@@ -2452,7 +2495,8 @@ end subroutine land_driver_ini
 		ZSNSOXY,  SNICEXY,  SNLIQXY, LFMASSXY,  RTMASSXY,   STMASSXY, &
 		 WOODXY, STBLCPXY, FASTCPXY,      LAI,    XSAIXY,    TAUSSXY, &
 	        SMOISEQ, SMCWTDXY,DEEPRECHXY,  RECHXY,   GRAINXY,      GDDXY,PGSXY, & ! IN/OUT Noah MP only
-               GECROS_STATE,                                                  & ! IN/OUT gecros model
+                GECROS_STATE,                                                 & ! IN/OUT gecros model
+                QTDRAIN,   TD_FRACTION,                                       & ! IN/OUT tile drainage
 	         T2MVXY,   T2MBXY,   Q2MVXY,   Q2MBXY,                        &
                  TRADXY,    NEEXY,    GPPXY,    NPPXY,    FVEGXY,    RUNSFXY, &
 	        RUNSBXY,   ECANXY,   EDIRXY,  ETRANXY,     FSAXY,     FIRAXY, &
@@ -2469,7 +2513,7 @@ end subroutine land_driver_ini
 !		 BVIC_2D,AXAJ_2D,BXAJ_2D,XXAJ_2D,BDVIC_2D,GDVIC_2D,BBVIC_2D,  &
 
 #ifdef WRF_HYDRO
-                 sfcheadrt,INFXSRT,soldrain,                          &    !O
+                 sfcheadrt,INFXSRT,soldrain,qtiledrain,ZWATBLE2D,             &    !O
 #endif
                 ids,ide, jds,jde, kds,kde,                      &
                 ims,ime, jms,jme, kms,kme,                      &
@@ -2643,11 +2687,11 @@ end subroutine land_driver_ini
               call add_to_output(FIRAXY     , "FIRA"    , "Total net LW radiation to atmosphere" , "W m{-2}"               )
               call add_to_output(GRDFLX     , "GRDFLX"  , "Heat flux into the soil"              , "W m{-2}"               )
               call add_to_output(HFX        , "HFX"     , "Total sensible heat to atmosphere"    , "W m{-2}"               )
-              call add_to_output(LH         , "LH"      , "Total latent heat to atmosphere"    , "W m{-2}"               )
+              call add_to_output(LH         , "LH"      , "Total latent heat to atmosphere"      , "W m{-2}"               )
               call add_to_output(ECANXY     , "ECAN"    , "Canopy water evaporation rate"        , "kg m{-2} s{-1}"        )
               call add_to_output(ETRANXY    , "ETRAN"   , "Transpiration rate"                   , "kg m{-2} s{-1}"        )
               call add_to_output(EDIRXY     , "EDIR"    , "Direct from soil evaporation rate"    , "kg m{-2} s{-1}"        )
-              call add_to_output(ALBEDO     , "ALBEDO"  , "Surface albedo"                         , "-"                   )
+              call add_to_output(ALBEDO     , "ALBEDO"  , "Surface albedo"                       , "-"                     )
         ! Grid water budget terms - in addition to above
               call add_to_output(UDRUNOFF   , "UGDRNOFF", "Accumulated underground runoff"       , "mm"                    )
               call add_to_output(SFCRUNOFF  , "SFCRNOFF", "Accumulatetd surface runoff"          , "mm"                    )
@@ -2656,6 +2700,7 @@ end subroutine land_driver_ini
               call add_to_output(ZWTXY      , "ZWT"     , "Depth to water table"                 , "m"                     )
               call add_to_output(WAXY       , "WA"      , "Water in aquifer"                     , "kg m{-2}"              )
               call add_to_output(WTXY       , "WT"      , "Water in aquifer and saturated soil"  , "kg m{-2}"              )
+              call add_to_output(QTDRAIN    , "QTDRAIN" , "Accumulated tile drainage"            , "mm"                    )
         ! Additional needed to close the canopy energy budget
               call add_to_output(SAVXY      , "SAV"     , "Solar radiative heat flux absorbed by vegetation", "W m{-2}"    )
               call add_to_output(TRXY       , "TR"      , "Transpiration heat"                     , "W m{-2}"             )
@@ -2802,7 +2847,8 @@ end subroutine land_driver_ini
      clock_count_1 = clock_count_2
 
 #ifdef WRF_HYDRO
-      call hrldas_drv_HYDRO(TSLB(:,1:NSOIL,:),SMOIS(:,1:NSOIL,:),SH2O(:,1:NSOIL,:),infxsrt,sfcheadrt,soldrain,ix,jx,NSOIL) 
+      call hrldas_drv_HYDRO(TSLB(:,1:NSOIL,:),SMOIS(:,1:NSOIL,:),SH2O(:,1:NSOIL,:),infxsrt,&
+                            sfcheadrt,soldrain,qtiledrain,ZWATBLE2D,ix,jx,NSOIL) 
 #endif
 
 end subroutine land_driver_exe
@@ -2864,6 +2910,7 @@ subroutine lsm_restart()
   call add_to_restart(QSFC      , "QSFC"  )
   call add_to_restart(SFCRUNOFF , "SFCRUNOFF")
   call add_to_restart(UDRUNOFF  , "UDRUNOFF" )
+  call add_to_restart(QTDRAIN   , "QTDRAIN"  )
  ! irrigation scheme
   IF (irrigation_option > 0) THEN
      call add_to_restart(IRNUMSI   , "IRNUMSI")

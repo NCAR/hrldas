@@ -233,5 +233,10 @@
                                                      		2 -> micro/drip irrigation
                                                      		3 -> surface flooding
 
+ TILE_DRAINAGE_OPTION              = 0,                      ! options for tile drainage [default = 0] (currently only tested & works with opt_run=3)
+                                                                  geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
+                                                               0 -> No tile drainage
+                                                               1 -> Simple drainage
+                                                               2 -> Hooghoudt's equation based tile drainage
 
 /
