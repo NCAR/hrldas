@@ -5,7 +5,7 @@
 
  COMPILERF90    =       /opt/local/bin/gfortran-mp-4.8
  FREESOURCE     =       -ffree-form  -ffree-line-length-none
- F90FLAGS       =       -g -fconvert=big-endian -fbounds-check -fno-range-check -fno-underscoring
+ F90FLAGS       =       -g -fconvert=big-endian -fbounds-check -fno-range-check
  MODFLAG        =       -I
  LDFLAGS        =       
  CPP            =       /opt/local/bin/cpp-mp-4.8
