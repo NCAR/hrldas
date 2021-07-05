@@ -2360,6 +2360,10 @@ end subroutine land_driver_ini
        forcing_name_LW,forcing_name_SW,forcing_name_PR,forcing_name_SN, &
        T_PHY(:,1,:),QV_CURR(:,1,:),U_PHY(:,1,:),V_PHY(:,1,:),          &
        P8W(:,1,:), GLW, SWDOWN, RAINBL_tmp, SNOWBL, VEGFRA, update_veg, LAI, update_lai, reset_spinup_date, startdate)
+       if(maxval(VEGFRA) <= 1 ) then
+           VEGFRA = VEGFRA * 100.   ! added for input vegfra as a fraction (0~1)
+       endif
+
 #endif
 
 991  continue
