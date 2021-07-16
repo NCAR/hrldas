@@ -320,7 +320,7 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  TD_FRACTION  
 
 !------------------------------------------------------------------------
-! Needed for crop model (DVEG = 10)
+! Needed for crop model (OPT_CROP=1)
 !------------------------------------------------------------------------
 
   INTEGER, ALLOCATABLE, DIMENSION(:,:)   :: PGSXY
@@ -767,8 +767,9 @@ module module_NoahMP_hrldas_driver
 !---------------------------------------------------------------------
 
   update_lai = .true.   ! default: use LAI if present in forcing file
-  if (dynamic_veg_option == 2 .or. dynamic_veg_option == 5 .or. &
-      dynamic_veg_option == 6 .or. dynamic_veg_option == 10) &
+  if (dynamic_veg_option == 1 .or. dynamic_veg_option == 2 .or. &
+      dynamic_veg_option == 3 .or. dynamic_veg_option == 4 .or. &
+      dynamic_veg_option == 5 .or. dynamic_veg_option == 6) &    ! remove dveg=10 and add dveg=1,3,4 into the update_lai flag false condition
     update_lai = .false.
 
   update_veg = .false.  ! default: don't use VEGFRA if present in forcing file
@@ -1230,7 +1231,7 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( NONRIVERXY  (XSTART:XEND,YSTART:YEND) )  ! 
 
 !------------------------------------------------------------------------
-! Needed for crop model (DVEG = 10)
+! Needed for crop model (OPT_CROP=1)
 !------------------------------------------------------------------------
 
   ALLOCATE ( PGSXY       (XSTART:XEND,  YSTART:YEND) )
@@ -1769,14 +1770,14 @@ ENDIF
   end if
 
 !------------------------------------------------------------------------
-! For DVEG = 10 (crop model), read in necessary extra fields
+! For OPT_CROP=1 (crop model), read in necessary extra fields
 !------------------------------------------------------------------------
 
   CROPTYPE   = 0       ! make default 0% crops everywhere
   PLANTING   = 126     ! default planting date
   HARVEST    = 290     ! default harvest date
   SEASON_GDD = 1605    ! default total seasonal growing degree days
-  if (dynamic_veg_option == 10) then
+  if (crop_option == 1) then ! use crop_option=1 for reading crop extra fields
     CALL READ_CROP_INPUT(HRLDAS_SETUP_FILE, XSTART, XEND, YSTART, YEND,&
                          CROPTYPE,PLANTING,HARVEST,SEASON_GDD)
   end if
