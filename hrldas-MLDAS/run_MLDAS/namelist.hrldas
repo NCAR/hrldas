@@ -1,0 +1,59 @@
+&NOAHLSM_OFFLINE
+ HRLDAS_SETUP_FILE = "./Bondville_hrldas_setup.nc"
+ INDIR = "/public/home/xuziwei/project/Forcing_data/ameriflux_data/Bondville_input_xinlei/shift_2001/"
+ OUTDIR = "./output/"
+
+ START_YEAR  = 2001
+ START_MONTH  = 05
+ START_DAY  = 01
+ START_HOUR  = 00
+ START_MIN   = 00
+
+ RESTART_FILENAME_REQUESTED = "./restart/RESTART.2001050100_DOMAIN1"
+
+ KDAY = 1
+
+ DYNAMIC_VEG_OPTION                = 5
+ CANOPY_STOMATAL_RESISTANCE_OPTION = 1
+ BTR_OPTION                        = 1
+ RUNOFF_OPTION                     = 3
+ SURFACE_DRAG_OPTION               = 1
+ FROZEN_SOIL_OPTION                = 1
+ SUPERCOOLED_WATER_OPTION          = 1
+ RADIATIVE_TRANSFER_OPTION         = 3
+ SNOW_ALBEDO_OPTION                = 2
+ PCP_PARTITION_OPTION              = 1
+ TBOT_OPTION                       = 2
+ TEMP_TIME_SCHEME_OPTION           = 1
+ GLACIER_OPTION                    = 1
+ SURFACE_RESISTANCE_OPTION         = 1
+ SOIL_DATA_OPTION                  = 1
+ PEDOTRANSFER_OPTION               = 1
+ CROP_OPTION                       = 1
+
+ FORCING_TIMESTEP = 1800
+ NOAH_TIMESTEP    = 1800
+ OUTPUT_TIMESTEP  = 1800
+
+ SPLIT_OUTPUT_COUNT = 0
+ RESTART_FREQUENCY_HOURS = 24
+
+ ! XSTART = 20
+ ! XEND   = 20
+ ! YSTART = 203
+ ! YEND   = 203
+
+ NSOIL=4
+ soil_thick_input(1) = 0.10
+ soil_thick_input(2) = 0.30
+ soil_thick_input(3) = 0.60
+ soil_thick_input(4) = 1.00
+
+ ZLVL = 10.0
+
+/
+
+&URBAN_OFFLINE
+ UCMCALL = 0
+ ZLVL_URBAN = 15.0
+/
