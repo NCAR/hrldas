@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+
+  if($#ARGV == 0) {
+     $response = shift(@ARGV) ;
+     print("Configure HRLDAS: $response \n");
+  }else {
+     print "Please select from following supported architectures: \n\n";
+
+     print "   1. Linux PGI compiler serial \n";
+     print "   2. Linux PGI compiler MPI \n";
+     print "   3. Linux ifort compiler serial \n";
+     print "   4. Linux ifort compiler MPI      \n";
+     print "   5. Linux gfortran compiler serial \n";
+     print "   0. exit only \n";
+
+     printf "\nEnter selection [%d-%d] : ",1,5 ;
+
+     $response = <STDIN> ;
+     chop($response);
+  }
+
+  use Switch;
+  switch ($response) {
+     case 1 { 
+              # serial PGI 
+              system "cp arch/user_build_options.pgf90.serial user_build_options"; 
+            }
+
+     case 2 {
+              # MPI PGI 
+              system "cp arch/user_build_options.pgf90.mpi user_build_options"; 
+            }
+
+     case 3 {
+              # serial ifort
+              system "cp arch/user_build_options.ifort.serial user_build_options"; 
+            }
+
+     case 4 {
+              # MPI ifort
+              system "cp arch/user_build_options.ifort.mpi user_build_options"; 
+            }
+
+     case 5 {
+              # serial GFORTRAN
+              system "cp arch/user_build_options.gfortran.serial user_build_options"; 
+            }
+
+     else   {print "no selection $response\n"; last} 
+  }
