@@ -1,0 +1,211 @@
+
+Steps for running a HRLDAS simulation using user-provided single- or multiple-point forcing.
+
+
+1. Compile HRLDAS
+
+Place the HRLDAS tar file where you will be running the model. 
+
+tar xvf HRLDAS-v3.x.tar
+
+I will refer to this location as /root_path/HRLDAS-v3.x
+
+In /root_path/HRLDAS-v3.x, modify user_build_options to link to the proper compilers and paths.
+
+ To compile with parallel version
+  edit the file 'user_build_options'
+  uncommment the compiler section with MPI (available for pgf90 and ifort compilers)
+
+ To compile with sequential version
+  edit the file 'user_build_options'
+  uncommment the compiler section without MPI
+
+type 'make'
+
+If successful, there should be two executables created
+
+HRLDAS_forcing/create_forcing.exe  (you won't need this for point-based forcing)
+
+and 
+
+run/hrldas.exe
+
+--------------------------------------------------
+
+3. Prepare point-based forcing data.
+
+This step can be confusing for a first-time user. It involves converting text files to HRLDAS forcing files in NetCDF format. The scripts provided for you are in the /root_path/HRLDAS-v3.x/HRLDAS_forcing/run/examples/vector/ directory. 
+Required programs and libraries:
+
+- ncl
+
+--------------------------------------------------
+
+3.1 Create your point-based text files.
+
+There are three example files included here (location*.dat). The structure of these files is:
+
+- one time per line
+- each line contains: 
+	 1. year
+	 2. month
+	 3. day
+	 4. hour
+	 5. minute
+	 6. wind speed [m/s]
+	 7. wind direction (not used but it was in the original files)
+	 8. temperature [K]
+	 9. relative humidty (will need to be converted to specific humidity later)
+	10. surface pressure [hPa]
+	11. downward solar radiation [W/m^2]
+	12. downward longwave radiation [W/m^2]
+	13. precipitation [mm/s]
+
+Note that you can use the NCL script to convert units or convert fields (the script converts RH to specific humidity. You do not have to follow this structure exactly; you can adjust the script accordingly.
+
+--------------------------------------------------
+
+3.2 create_ldasin_files.ncl: read the text files and write the NetCDF files
+
+Set the desired start time: yyyy_start, mm_start, dd_start, hh_start
+
+hh_spacing : sets the frequency of input files (current script only considers hours)
+
+total_timesteps = 49  ; set the number of times and stations
+number_stations = 3
+
+The script is set up to read the three text files (location*.dat). You can add more or less locations and change the structure of the file (see the documentation on the readAsciiTable NCL function.
+
+The forcing files need the following 8 fields in specified units:
+
+near-surface temperature:             T2D [K]
+near-surface specific humidity:       Q2D [kg/kg]
+near-surface u-wind component:        U2D [m/s]
+near-surface v-wind component:        V2D [m/s]
+near-surface surface pressure:        PSFC [Pa]
+surface precipitation rate:           RAINRATE [mm/s]
+surface solar downward radiation:     SWDOWN [W/m^2]
+surface longwave downward radiation:  LWDOWN [W/m^2]
+
+RAINRATE, SWDOWN, LWDOWN, T2D, U2D don't need to be modified from the original files.
+
+PSFC units need to be adjusted from hPa to Pa
+
+relative humidty needs to be converted to U2D
+
+HRLDAS doesn't care about wind direction so U2D is set to wind speed and V2D is set to zero.
+
+Running the script will produce a files named:
+
+yyyymmddhh.LDASIN_DOMAIN1
+
+You will need to specify their location in the HRLDAS namelist later.
+
+--------------------------------------------------
+
+3.3 create_setup.ncl: create the file that contains the initial conditions and location information
+
+1. Set the date of the simulation start and the number of stations
+
+2. Go to the section titled "Set up the location-specific information"
+     
+     Here you will need to set the 
+       - latitude
+       - longitude
+       - deep soil temperature (annual average air temperature will work)
+       - elevation
+       - seaice, mapfac_mx, mapfac_my probably don't need to be changed
+       - annual maximum vegetation fraction (will be used for certain DVEG options)
+       - annual minimum vegetation fraction (not currently used)
+       - leaf area index (will be used to initialize dynamic vegetation)
+       - land mask (set to 1 for land points)
+       - vegetation type (use USGS or MODIS categories; need to set some global attribute below)
+       - soil texture type (check SOILPARM.TBL if you don't know the texture types)
+
+2. Go to the section titled "State initialization here"
+     
+     Here you will need to set the 
+       - snow water equivalent [kg/m^2]
+       - canopy water storage [kg/m^2]
+       - initial surface temperature [K] (has very little thermal inertia so can be approximate)
+       - soil layer thicknesses [m]
+       - soil layer calculation nodes [m]
+       - soil temperature in each layer [K]
+       - soil moisture in each layer [m^3/m^3]
+       
+3. Go to the section titled "Global attributes"
+
+     Here you will need to set the 
+       - land cover specific attributes (ISWATER,ISURBAN,ISICE,MMINLU) 
+
+Running the script will produce a file named:
+
+HRLDAS_setup_yyyymmddhh_d1
+
+You will need to specify its location in the HRLDAS namelist later.
+
+--------------------------------------------------
+
+4. Run HRLDAS
+
+The hard part is over. Go to the HRLDAS Run directory:
+
+cd /root_path/HRLDAS-v3.x/run
+
+4.1 Modify the namelist
+
+There is an example namelist.hrldas in the examples/vector/ directory. Copy this to the Run directory
+
+cp examples/vector/namelist.hrldas.vector namelist.hrldas
+
+See the full documentation for a complete description of items, but these are the important modifications:
+
+ HRLDAS_SETUP_FILE     = path and name of your grid/initial conditions file you created above
+ MMF_RUNOFF_FILE       = special for OPT_RUN=5, which is unsupported, for now
+ INDIR                 = where the LDASIN files you created above are located
+ OUTDIR                = where the LDASOUT files will be located (must already exist)
+
+ START_YEAR  = start year of your simulation
+ START_MONTH = start month of your simulation
+ START_DAY   = start day of your simulation
+ START_HOUR  = start hour of your simulation
+ START_MIN   = start minute of your simulation
+
+ RESTART_FILENAME_REQUESTED = uncomment for a restart
+
+ KHOUR = length of simulation in hours  (either KHOUR or KDAY must be set)
+ KDAY  = length of simulation in days
+
+ DYNAMIC_VEG_OPTION                = Noah-MP options
+ CANOPY_STOMATAL_RESISTANCE_OPTION = 
+ BTR_OPTION                        = 
+ RUNOFF_OPTION                     = 
+ SURFACE_DRAG_OPTION               = 
+ FROZEN_SOIL_OPTION                = 
+ SUPERCOOLED_WATER_OPTION          = 
+ RADIATIVE_TRANSFER_OPTION         = 
+ SNOW_ALBEDO_OPTION                = 
+ PCP_PARTITION_OPTION              = 
+ TBOT_OPTION                       = 
+ TEMP_TIME_SCHEME_OPTION           = 
+
+
+ FORCING_TIMESTEP = time increment of available forcing (3600 for NARR)
+ NOAH_TIMESTEP    = time increment for model (<= FORCING_TIMESTEP)
+ OUTPUT_TIMESTEP  = time increment for output (>= NOAH_TIMESTEP)
+
+ SPLIT_OUTPUT_COUNT = split output after this many writes, 0 = all in one file
+ RESTART_FREQUENCY_HOURS = write restart files after this many hours
+
+ XSTART = uncomment and set if you want to run a subset of your domain 
+ XEND   = 
+ YSTART = 
+ YEND   = 
+
+ ZLVL = forcing height (set to your wind forcing height)
+
+4.2 Run the HRLDAS
+
+./hrldas.exe
+
+The output will show up in the OUTDIR directory.

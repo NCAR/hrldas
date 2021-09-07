@@ -1,0 +1,23 @@
+
+#=============================================================================================
+#  Options for Linux with pgf90 serial
+#=============================================================================================
+
+ COMPILERF90	=	pgf90
+ FREESOURCE	=	-Mfree
+ F90FLAGS	=       -g -byteswapio -Kieee
+ MODFLAG	=	
+ HYDRO_LIB      =       
+ LDFLAGS	=	
+ CPP		=	cpp
+ CPPFLAGS	=	-P -traditional
+ LIBS		=	
+ LIBJASPER      =       -ljpeg -L/usr/lib -ljasper
+ INCJASPER      =       -I/usr/include
+ NETCDFMOD      =       -I/usr/local/netcdf4-pgi/include
+ NETCDFLIB      =       -L/usr/local/netcdf4-pgi/lib -lnetcdf -lnetcdff
+ BZIP2          =       NO
+ BZIP2_LIB      =       -lbz2
+ BZIP2_INCLUDE  =       -I/usr/include
+ RM             =       rm -f
+ CC             =       cc

@@ -1,0 +1,25 @@
+
+#=============================================================================================
+#  Options for Linux with pgf90 MPI
+#=============================================================================================
+
+ COMPILERF90    =	mpif90
+ MPPFLAG        =       YES
+ FREESOURCE     =	-Mfree
+ F90FLAGS       =      -g -byteswapio -Kieee
+ MODFLAG        =	-I ../MPP
+ HYDRO_LIB      =       ../MPP/mpp_land.o ../MPP/CPL_WRF.o
+ LDFLAGS        =	
+ CPP            =	cpp
+ CPPFLAGS       =	-P -traditional -DMPP_LAND
+ LIBS           =	
+ LIBJASPER      =      -ljpeg -L/usr/lib -ljasper
+ INCJASPER      =      -I/usr/include
+ NETCDFMOD      =      -I/usr/local/netcdf4-pgi/include
+ NETCDFLIB      =      -L/usr/local/netcdf4-pgi/lib -lnetcdf -lnetcdff
+ BZIP2          =      NO
+ BZIP2_LIB      =      -lbz2
+ BZIP2_INCLUDE  =      -I/usr/include
+ RM             =      rm -f
+ CC             =      cc
+

@@ -1,0 +1,242 @@
+
+Steps for running a HRLDAS simulation using GLDAS for forcing. 
+
+UPDATES in 2020-07-10, Zhe Zhang
+Reading GLDAS forcing from netcdf format
+Changes are associated with step 3, Prepare GLDAS-based forcing data
+
+1. Create your geo_em file through WPS. These are not needed until the end of Step 2, but there is no point in creating the forcing if you don't have the domain.
+
+--------------------------------------------------
+
+2. Compile HRLDAS
+
+Place the HRLDAS tar file where you will be running the model. 
+
+tar xvf HRLDAS-v3.x.tar
+
+I will refer to this location as /root_path/HRLDAS-v3.x
+
+In /root_path/HRLDAS-v3.x, modify user_build_options to link to the proper compilers and paths.
+
+ To compile with parallel version
+  edit the file 'user_build_options'
+  uncommment the compiler section with MPI (available for pgf90 and ifort compilers)
+
+ To compile with sequential version
+  edit the file 'user_build_options'
+  uncommment the compiler section without MPI
+
+type 'make'
+
+If successful, there should be two executables created
+
+HRLDAS_forcing/create_forcing.exe
+
+and 
+
+run/hrldas.exe
+
+--------------------------------------------------
+
+3. Prepare GLDAS-based forcing data.
+In GLDASV2.1 are in netCDF format. The preprocesse codes are written in python and some modifications are added to create_forcing.F  
+
+3.1 Get the GLDAS raw files. GLDAS version 2.1 uses netcdf format.
+
+They can be retrieved from here:
+
+https://disc.gsfc.nasa.gov/datasets/GLDAS_NOAH025_3H_2.1/summary
+
+I put these "raw" GLDAS files in one directory (e.g., /raw_GLDAS_data_path)
+
+--------------------------------------------------
+
+3.3 extract_gldas.py: extract the individual variables from the GLDAS netcdf files
+
+The current script uses nco(ncks) to extract individual fields from the GLDAS files. It will process entire years or sections of one year. You can change this by modifying the python script.
+
+Change these two paths for where raw GLDAS files are located and where separated(extracted) files will go. 
+
+data_dir = "/raw_GLDAS_data_path";
+results_dir = "/extracted_GLDAS_data_path";
+
+For convenience, you may want to create directories in the results_dir for each variable and a few more for processed fields.
+
+`cd /extracted_GLDAS_data_path`
+`mkdir Rainf/ Snowf/ Wind/ Tair/ Qair/ Psurf/ SWdown/ LWdown/ SWdown24/ Precip/  U/  V/ INIT/`
+
+Run the python code:
+`python extract_glads.py`
+
+--------------------------------------------------
+
+3.4 extract_gldas_init.py: extract the initial-only fields (SWE_inst,Canopint_inst,AvgSurfT_inst,SoilMoi,SoilTMP) from the GLDAS NETCDF output files
+
+Change the date of initialization and run the script one time. The files should appear in the /extracted_GLDAS_data_path/INIT/ directory.
+
+Note: this step is not necessary unless you want to intialize using the GLDAS states
+
+Note: GLDAS soils are inverted (level 4 is actually level 1); this script takes care of that
+
+Run the python code:
+`python extract_glads_init.py`
+
+--------------------------------------------------
+
+3.5 intermediate clean-up (optional)
+
+If you are space-limited, at this point you can remove the raw GLDAS files. You have extracted all you need and they are no longer needed.
+
+--------------------------------------------------
+
+3.6 create_UV_netcdf.perl: split Wind to U, V; just set V=0 (GLDAS has wind speed, HRLDAS wants components)
+
+Again, you will need to change the paths in the Perl script along with the year/day ranges that are appropriate for your application.
+
+--------------------------------------------------
+
+3.7 combine_precips_netcdf.perl: combine precipitations to a total precipitation
+
+Again, you will need to change the paths in the Perl script along with the year/day ranges that are appropriate for your application.
+
+--------------------------------------------------
+
+# I didn't do this part, the forcing I used are 3-hourly
+#3.8 fill_SSRD.perl: do hourly interpolation of solar radiation via zenith angle
+#
+#  - note original data are instantaneous 3-hourly
+#
+#Again, you will need to change the paths in the Perl script along with the year/day ranges that are appropriate for your application.
+#
+#There is an NCL script (check_SW.ncl) if you want to see what the interpolation is doing.
+#--------------------------------------------------
+
+3.6 Run the HRLDAS pre-processor code.
+
+At this point, you should have all the GLDAS output extracted into different directories at /extracted_GLDAS_data_path/. Now it's finally time to run the first step of the HRLDAS.
+
+cd /root_path/HRLDAS-v3.x/HRLDAS_COLLECT_DATA/run
+
+In the examples/GLDAS/ directory there is a namelist.input file that is consistent with the GLDAS procedure described above. You can modify this file for your case and place it in the pre-processor run directory:
+
+cp examples/GLDAS/namelist.input.GLDAS .
+
+--------------------------------------------------
+
+3.9.1 Modify the namelist
+Note: I have made changes to this namelist here. Please see an updated version in /HRLDAS_forcing/run/example/GLDAS/namelist.input.GLDAS
+Modifying the namelist.input.GLDAS to your case. The following is a short description of each line in the file. A longer description is available in README.namelist
+
+ STARTDATE         : start date of your simulation
+ ENDDATE           : end date of your simulation
+ DATADIR           : base directory for your GLDAS GRIB files (will be substituted in the paths below)
+ OUTPUTDIR         : where you want the forcing files to be placed
+ FULL_IC_FRQ       : set to 0 if you want initial conditions in the init file, -1 otherwise
+ RAINFALL_INTERP   : rainfall interpolation procedure ! 0=Nearest Neighbor; 1=more expensive, grid fill method
+ RESCALE_SHORTWAVE : set to .FALSE. for GLDAS
+ UPDATE_SNOW       : do you want to read in snow during the simulation?
+ FORCING_HEIGHT_2D : set to .FALSE. for GLDAS
+ TRUNCATE_SW       : set to .FALSE. for GLDAS
+ EXPAND_LOOP       : the number of loops to fill missing GLDAS data (e.g., soil over ocean). Set to at least 1 for GLDAS, may need to set higher if, for example, you have islands in your WRF grid that are not resolved by GLDAS.
+ INIT_LAI          : .true. to put LAI in the init file
+ VARY_LAI          : .true. to put time-varying LAI in the forcing files
+ MASK_WATER        : .true. to put missing values over water points (could reduce size if you compress later)
+
+ geo_em_flnm      = path and name of your geo_em file
+
+ Zfile_template     = template for your GLDAS terrain height file
+ LANDSfile_template = template for your GLDAS land-sea file
+ Tfile_template     = template for your GLDAS temperature file
+ Ufile_template     = template for your GLDAS u-wind file
+ Vfile_template     = template for your GLDAS v-wind file
+ Pfile_template     = template for your GLDAS pressure file
+ Qfile_template     = template for your GLDAS q file
+ LWfile_template    = template for your GLDAS longwave file
+ SWfile_primary     = template for your GLDAS primary shortwave file
+ SWfile_secondary   = template for your GLDAS secondary shortwave file
+ PCPfile_primary    = template for your GLDAS primary precipitation file
+ PCPfile_secondary  = template for your GLDAS secondary precipitation file
+ WEASDfile_template = template for your GLDAS SWE file (not necessary if you don't want initial conditions)
+ CANWTfile_template = template for your GLDAS canopy water file (not necessary if you don't want initial conditions)
+ SKINTfile_template = template for your GLDAS skin temperature file (not necessary if you don't want initial conditions)
+ STfile_template    = template for your GLDAS soil temperature file (not necessary if you don't want initial conditions)
+ SMfile_template    = template for your GLDAS soil moisture file (not necessary if you don't want initial conditions)
+
+Note: for GLDAS there will be no need to include a secondary SW and precipitation file, so just set them to be the same
+
+3.9.2 Run the pre-processor
+
+Note: please use create_forcing_netcdf.F for this purpose. 
+`cp create_forcing_netcdf.F create_forcing.F`
+and compile again.
+
+Run the pre-processor with the GLDAS namelist
+
+./create_forcing.exe namelist.input.GLDAS
+
+In your OUTPUTDIR, you should now have all your LDASIN files.
+
+4. Run HRLDAS
+
+The hard part is over. Go to the HRLDAS Run directory:
+
+cd /root_path/HRLDAS-v3.x/run
+
+4.1 Modify the namelist
+
+There is an example namelist.hrldas in the examples/GLDAS/ directory. Copy this to the run/ directory
+
+cp examples/GLDAS/namelist.hrldas.GLDAS namelist.hrldas
+
+See the full documentation for a complete description of items, but these are the important modifications:
+
+ HRLDAS_SETUP_FILE     = path and name of your grid/initial conditions file (can also be a wrfinput file)
+ MMF_RUNOFF_FILE       = special for OPT_RUN=5, which is unsupported, for now
+ INDIR                 = where the LDASIN files are located
+ OUTDIR                = where the LDASOUT files will be located
+
+ START_YEAR  = start year of your simulation
+ START_MONTH = start month of your simulation
+ START_DAY   = start day of your simulation
+ START_HOUR  = start hour of your simulation
+ START_MIN   = start minute of your simulation
+
+ RESTART_FILENAME_REQUESTED = uncomment for a restart
+
+ KHOUR = length of simulation in hours  (either KHOUR or KDAY must be set)
+ KDAY  = length of simulation in days
+
+ DYNAMIC_VEG_OPTION                = Noah-MP options
+ CANOPY_STOMATAL_RESISTANCE_OPTION = 
+ BTR_OPTION                        = 
+ RUNOFF_OPTION                     = 
+ SURFACE_DRAG_OPTION               = 
+ FROZEN_SOIL_OPTION                = 
+ SUPERCOOLED_WATER_OPTION          = 
+ RADIATIVE_TRANSFER_OPTION         = 
+ SNOW_ALBEDO_OPTION                = 
+ PCP_PARTITION_OPTION              = 
+ TBOT_OPTION                       = 
+ TEMP_TIME_SCHEME_OPTION           = 
+
+
+ FORCING_TIMESTEP = time increment of available forcing (3600 for GLDAS)
+ NOAH_TIMESTEP    = time increment for model (<= FORCING_TIMESTEP)
+ OUTPUT_TIMESTEP  = time increment for output (>= NOAH_TIMESTEP)
+
+ SPLIT_OUTPUT_COUNT = split output after this many writes, 0 = all in one file
+ RESTART_FREQUENCY_HOURS = write restart files after this many hours
+
+ XSTART = uncomment and set if you want to run a subset of your domain 
+ XEND   = 
+ YSTART = 
+ YEND   = 
+
+ ZLVL = forcing height (set to 10.0 for GLDAS; don't have two forcing heights now so use wind height)
+
+4.2 Run the HRLDAS
+
+./hrldas.exe
+
+The output will be saved to the OUTDIR directory.
