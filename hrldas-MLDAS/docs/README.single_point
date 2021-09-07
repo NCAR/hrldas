@@ -1,0 +1,119 @@
+
+Steps for running a HRLDAS simulation using the example single-point Bondville forcing.
+
+The file ../HRLDAS_forcing/run/examples/single_point/bondville.dat can be modified for you location. If the format of the data in the file is changed, modification of the source code (create_point_data.f90) may be required.
+
+1. Download HRLDAS and configure
+
+git clone https://github.com/NCAR/hrldas-release.git
+
+In the following, hrldas_root = /root_path/hrldas-release/HRLDAS
+
+In hrldas_root, run configure to get a sample user_build_options for your system.
+
+For this single point example, use a serial compile option.
+
+Modify library paths and any other compiler flags necessary for your system.
+
+--------------------------------------------------
+
+2. Compile HRLDAS
+
+type 'make'
+
+If successful, there should be two executables created
+
+/hrldas_root/HRLDAS_forcing/create_forcing.exe  (you won't need this for point-based forcing)
+
+and 
+
+/hrldas_root/run/hrldas.exe
+
+--------------------------------------------------
+
+3. Prepare point-based forcing data.
+
+This step can be confusing for a first-time user. It involves converting text files to HRLDAS forcing files in NetCDF format. The scripts provided for you are in the /hrldas_root/HRLDAS_forcing/run/examples/single_point/ directory. There are three files in this directory:
+
+create_point_data.f90 : Fortran code to create the required setup file and forcing files
+bondville.dat         : The location information and forcing data in text format
+Makefile              : Makefile for compiling and cleaning
+
+The Fortran source code should compile using the user_build_options from Step 1 above:
+
+type 'make'
+
+Now the executable create_point_data.exe should be present.
+
+To run: 
+
+./create_point_data.exe
+
+--------------------------------------------------
+
+4. Run HRLDAS
+
+Go to the HRLDAS Run directory:
+
+cd /hrldas_root/run
+
+4.1 Modify the namelist (if you want)
+
+There is an example namelist.hrldas in the examples/single_point/ directory. Copy this to the Run directory
+
+cp examples/single_point/namelist.hrldas.single_point namelist.hrldas
+
+See the full documentation for a complete description of items, but these are the important modifications:
+
+ HRLDAS_SETUP_FILE     = path and name of your grid/initial conditions file you created above
+ INDIR                 = where the LDASIN files you created above are located
+ OUTDIR                = where the LDASOUT files will be located (must already exist)
+
+ START_YEAR  = start year of your simulation
+ START_MONTH = start month of your simulation
+ START_DAY   = start day of your simulation
+ START_HOUR  = start hour of your simulation
+ START_MIN   = start minute of your simulation
+
+ RESTART_FILENAME_REQUESTED = uncomment for a restart
+
+ KHOUR = length of simulation in hours  (either KHOUR or KDAY must be set)
+ KDAY  = length of simulation in days
+
+ DYNAMIC_VEG_OPTION                = Noah-MP options
+ CANOPY_STOMATAL_RESISTANCE_OPTION = 
+ BTR_OPTION                        = 
+ RUNOFF_OPTION                     = 
+ SURFACE_DRAG_OPTION               = 
+ FROZEN_SOIL_OPTION                = 
+ SUPERCOOLED_WATER_OPTION          = 
+ RADIATIVE_TRANSFER_OPTION         = 
+ SNOW_ALBEDO_OPTION                = 
+ PCP_PARTITION_OPTION              = 
+ TBOT_OPTION                       = 
+ TEMP_TIME_SCHEME_OPTION           = 
+ SURFACE_RESISTANCE_OPTION         = 
+ GLACIER_OPTION                    = 
+ SOIL_DATA_OPTION                  = 
+ PEDOTRANSFER_OPTION               = 
+ CROP_OPTION                       = 
+
+ FORCING_TIMESTEP = time increment of available forcing (1800 for this example)
+ NOAH_TIMESTEP    = time increment for model (<= FORCING_TIMESTEP)
+ OUTPUT_TIMESTEP  = time increment for output (>= NOAH_TIMESTEP)
+
+ SPLIT_OUTPUT_COUNT = split output after this many writes, 0 = all in one file
+ RESTART_FREQUENCY_HOURS = write restart files after this many hours
+
+ XSTART = uncomment and set if you want to run a subset of your domain (not applicable for single point runs)
+ XEND   = 
+ YSTART = 
+ YEND   = 
+
+ ZLVL = forcing height (set to your wind forcing height)
+
+4.2 Run the HRLDAS
+
+./hrldas.exe
+
+The output will show up in the OUTDIR directory.
