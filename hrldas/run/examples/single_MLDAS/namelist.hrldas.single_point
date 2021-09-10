@@ -1,5 +1,5 @@
 &NOAHLSM_OFFLINE
- HRLDAS_SETUP_FILE = "../HRLDAS_forcing/run/examples/single_point/hrldas_setup_single_point.nc"
+ HRLDAS_SETUP_FILE = "../HRLDAS_forcing/run/examples/single_MLDAS/hrldas_setup_single_point.nc"
  INDIR = "../HRLDAS_forcing/run/examples/single_MLDAS/"
  OUTDIR = "./output/"
 
