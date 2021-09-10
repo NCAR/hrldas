@@ -1,6 +1,6 @@
 &NOAHLSM_OFFLINE
- HRLDAS_SETUP_FILE = "../HRLDAS_forcing/run/examples/single_MLDAS/hrldas_setup_single_point.nc"
- INDIR = "../HRLDAS_forcing/run/examples/single_MLDAS/"
+ HRLDAS_SETUP_FILE = "../HRLDAS_forcing/run/examples/single_point_MLDAS/hrldas_setup_single_point.nc"
+ INDIR = "../HRLDAS_forcing/run/examples/single_point_MLDAS/"
  OUTDIR = "./output/"
 
  START_YEAR  = 2001
