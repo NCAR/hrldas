@@ -1,6 +1,6 @@
 # hrldas
 
-This is the offical HRLDAS/Noah-MP unified Github repository for code downloading and contribution.
+This is the offical HRLDAS/Noah-MP unified Github repository for code downloading and contribution. Note that the HRLDAS/Noah-MP model is a community model contributed by the whole Noah-MP scientific community. For maintenance and release of this GitHub, please contact: Cenlin He (cenlinhe@ucar.edu) and Fei Chen (feichen@ucar.edu).
 
 HRLDAS (High Resolution Land Data Assimilation System) contains the Noah-MP Land Surface Model and can
 be executed in offline uncoupled mode for a 2-D gridded domain or a single point. 
