@@ -110,7 +110,6 @@
                                                              !   7 -> off (use input LAI; use FVEG = SHDFAC from input)
                                                              !   8 -> off (use input LAI; calculate FVEG)
                                                              !   9 -> off (use input LAI; use maximum vegetation fraction)
-                                                             !  10 -> crop model on (use maximum vegetation fraction)
 
  CANOPY_STOMATAL_RESISTANCE_OPTION = 1                       ! options for canopy stomatal resistance  [default = none]
 
