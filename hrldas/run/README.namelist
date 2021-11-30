@@ -110,7 +110,6 @@
                                                              !   7 -> off (use input LAI; use FVEG = SHDFAC from input)
                                                              !   8 -> off (use input LAI; calculate FVEG)
                                                              !   9 -> off (use input LAI; use maximum vegetation fraction)
-                                                             !  10 -> crop model on (use maximum vegetation fraction)
 
  CANOPY_STOMATAL_RESISTANCE_OPTION = 1                       ! options for canopy stomatal resistance  [default = none]
 
@@ -131,6 +130,14 @@
                                                              ! **3 -> original surface and subsurface runoff (free drainage)
                                                              !   4 -> BATS surface and subsurface runoff (free drainage)
                                                              !   5 -> Miguez-Macho&Fan groundwater scheme (Miguez-Macho et al. 2007 JGR; Fan et al. 2007 JGR)
+				                             !   6 -> Variable Infiltration Capacity Model surface runoff scheme (Wood et al., 1992, JGR) 
+                      					     !   7 -> Xiananjiang Infiltration and surface runoff scheme ((Jayawardena and Zhou, 2000)
+                      					     !   8 -> Dynamic VIC surface runoff scheme (Liang and Xie, 2001)
+
+ DVIC_INFILTRATION_OPTION          = 1                       ! options for infiltration in dynamic VIC runoff scheme (only works when RUNOFF_OPTION=8, default=1)
+                                                             ! **1 -> Philip scheme
+                      					     !   2 -> Green-Ampt scheme
+                      					     !   3 -> Smith-Parlange scheme
 
  SURFACE_DRAG_OPTION               = 1                       ! options for surface layer drag coeff    [default = none]
 
@@ -225,5 +232,10 @@
                                                      		2 -> micro/drip irrigation
                                                      		3 -> surface flooding
 
+ TILE_DRAINAGE_OPTION              = 0,                      ! options for tile drainage [default = 0] (currently only tested & works with opt_run=3)
+                                                                  geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
+                                                               0 -> No tile drainage
+                                                               1 -> Simple drainage
+                                                               2 -> Hooghoudt's equation based tile drainage
 
 /

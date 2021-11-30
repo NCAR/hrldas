@@ -1,0 +1,87 @@
+! A Multi-pass Land Data Assimilation Scheme (MLDAS) based on Noah-MP-Crop model
+! The leaf area index (LAI), soil moisture, and solar-induced chlorophyll fluorescence (SIF) observations are simultaneously assimilated into the Noah-MP-Crop model based on the MLDAS to predict sensible (H) and latent (LE) heat fluxes as well as gross primary productivity (GPP).
+! The code demonstrates implementation of the MLDAS as proposed in paper "Xu, T., Chen, F., He, X., Barlage, M., Zhang, Z., Liu, S., & He, X. (2021). Improve the performance of the Noah-MP-Crop model by jointly assimilating soil moisture and vegetation phenology data. Journal of Advances in Modeling Earth Systems, 13, e2020MS002394. https://doi.org/10.1029/2020MS002394". 
+! If you have any questions or suggestions with the code, please let us know. Contact Tongren Xu at *xutr@bnu.edu.cn* and Xinlei He at *hxlbsd@mail.bnu.edu.cn*
+
+------
+!This file give a brief description of MP-Crop-MLDAS-draft-v1.0.py variables
+#Set up data assimilation parameters
+#Model errors (This is the percentage)
+err_soilm_1=0.06                                       # model error of soil moisture,                     Adjustable!
+err_soilm_2=0.06                                       # model error of soil moisture,                     Adjustable!
+err_soilm_3=0.05                                       # model error of soil moisture,                     Adjustable!
+err_soilm_4=0.04                                       # model error of soil moisture,                     Adjustable!
+err_lfmass=0.1                                         # model error of leaf biomass,                      Adjustable!
+err_vcmax25=0.1                                        # model error of vcmax25,                           Adjustable!
+err_BIO2LAI=0.1                                        # model error of SLA,                               Adjustable!
+
+#Observation errors (This is the percentage)
+err_soilm_o=0.05                                       # observation error of soil moisture,               Adjustable!
+err_lai_o=0.05                                         # observation error of leaf area index,             Adjustable!
+err_sif_o=0.1                                          # observation error of sif,                         Adjustable!
+
+en_numb=30                                             # numbers of ensembles,                             Adjustable!
+istep=153                                              # time step to run the model,                       Adjustable!
+
+#DA_LAI_1: optimize SLA with assimilation of LAI observations
+#DA_LAI_2: update leaf biomass with assimilation of LAI observations
+#DA_SM: update four-layer soil moisture with assimilation of surface soil moisture observations
+#DA_SIF: optimize Vcmax with assimilation of SIF observations
+
+DA_LAI_1=True                                          # True or False to determine whether assimilate leaf area index or not     Adjustable!
+DA_LAI_2=True                                          # True or False to determine whether assimilate leaf area index or not     Adjustable!
+DA_SM=True                                             # True or False to determine whether assimilate soil moisture or not       Adjustable!
+DA_SIF=True                                            # True or False to determine whether assimilate SIF or not                 Adjustable!
+
+#Set file path
+path_restart="./restart/"                              # Include restart file                                                     Adjustable!
+path_output="./output/"                                # Contains the generated intermediate files                                Adjustable!
+path_output_final="./output_final/"                    # The output file of the data assimilation method                          Adjustable!
+path_obs="./Bondville_obs_2001.dat"                    # We need to prepare observation data                                      Adjustable!
+path_namelist="./namelist.hrldas"
+path_MPTABLE="./MPTABLE.TBL"
+ 
+ ------
+
+## Quick Start
+
+Before that, you need to run the Noah-MP-Crop model normally.
+These files from the example need to be copied to the run directory.
+You need to prepare the restart file and observation data in advance, and modify the namelist.hrldas file appropriately.
+It is worth noting that the restart file needs to be generated according to the current hrldas version (The example restart file may not be used directly).
+The code was tested with Python 3.7. To use this code, please do:
+
+1. Clone the repo:
+
+   ```shell
+   git clone --recurse-submodules https://github.com/NCAR/hrldas.git
+   cd hrldas/run/
+   cp ./examples/single_MLDAS/* ./
+   mkdir restart
+   mkdir output
+   mkdir output_final
+   ```
+
+2. Install dependencies:
+
+   ```shell
+   module load python/3.7.5
+   module load ncarenv (Only for cheyenne users)
+   module load ncar_pylib (Only for cheyenne users)
+   pip install --user numpy
+   pip install --user pandas
+   pip install --user netCDF4
+   ```
+3. Create single point forcing in the "../HRLDAS_forcing/run/examples/single_point_MLDAS/".
+
+   ```shell
+   make
+   ./run create_point_data.exe
+   ```
+
+4. Start `Python` and run the `MP-Crop-MLDAS-draft-v1.0.py` locally.
+
+   ```shell
+   python ./MP-Crop-MLDAS-draft-v1.0.py
+   ```
+

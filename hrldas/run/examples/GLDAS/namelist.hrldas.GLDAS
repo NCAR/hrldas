@@ -21,6 +21,7 @@
  CANOPY_STOMATAL_RESISTANCE_OPTION = 1
  BTR_OPTION                        = 1
  RUNOFF_OPTION                     = 3
+ DVIC_INFILTRATION_OPTION          = 1
  SURFACE_DRAG_OPTION               = 1
  FROZEN_SOIL_OPTION                = 1
  SUPERCOOLED_WATER_OPTION          = 1
@@ -36,6 +37,7 @@
  CROP_OPTION                       = 0
  IRRIGATION_OPTION                 = 0
  IRRIGATION_METHOD                 = 0
+ TILE_DRAINAGE_OPTION              = 0
 
  FORCING_TIMESTEP = 3600
  NOAH_TIMESTEP    = 1800
