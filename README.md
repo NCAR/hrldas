@@ -19,7 +19,7 @@ Model developers can make code development based on the develop branch and creat
 
 Branch structures of this Noah-MP repository:
 
-1. "master" branch: most stable & recent version, updated whenever there are bug fixes or major model update/release, automatically connected to the master branch of the Noah-MP core repository through git submodule;
+1. "master" branch: most stable & recent version (we suggest users to use this branch), updated whenever there are bug fixes or major model update/release, automatically connected to the master branch of the Noah-MP core repository through git submodule;
 
 2. "develop" branch: used for continuous HRLDAS/NoahMP development, keep being updated by including bug fixes and code updates (e.g., new physics options, processes, etc.), automatically connected to the master branch of the Noah-MP core repository through git submodule; 
 
