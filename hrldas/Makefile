@@ -6,14 +6,14 @@ ifdef MPPFLAG
 	(cd MPP; make -f Makefile.NoahMP)
 endif
 	(cd Utility_routines;		make)
-	(cd ../wrf/phys;		make)
+	(cd ../phys_wrf;		make)
 	(cd IO_code;			make)
 	(cd run;			make)
 	(cd HRLDAS_forcing;		make)
 
 clean:
 	(cd Utility_routines;		make clean)
-	(cd ../wrf/phys;		make clean)
+	(cd ../phys_wrf;		make clean)
 	(cd IO_code;			make clean)
 	(cd run;			make clean)
 	(cd HRLDAS_forcing;		make clean)
@@ -27,7 +27,7 @@ ifdef MPPFLAG
 	(cd MPP; make -f Makefile.NoahMP)
 endif
 	(cd Utility_routines;		make)
-	(cd ../wrf/phys;		make)
+	(cd ../phys_wrf;		make)
 	(cd IO_code;			make NoahMP MOD_OPT="-DNoahMP")
 	(cd run;			make -f Makefile NoahMP)
 	(cd HRLDAS_forcing;		make)
