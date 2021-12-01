@@ -3,7 +3,7 @@
 .SUFFIXES:
 .SUFFIXES: .o .F
 
-include ../../hrldas/user_build_options
+include ../hrldas/user_build_options
 
 OBJS = \
         module_bep_bem_helper.o \
@@ -21,10 +21,10 @@ CPPHRLDAS = -D_HRLDAS_OFFLINE_
 
 all:	$(OBJS)
 
-module_sf_noahmplsm.o: ../../noahmp/src/module_sf_noahmplsm.F
+module_sf_noahmplsm.o: ../noahmp/src/module_sf_noahmplsm.F
 	@echo ""
 	$(RM) module_sf_noahmplsm.f90
-	$(CPP) $(CPPFLAGS) $(CPPHRLDAS) ../../noahmp/src/module_sf_noahmplsm.F > module_sf_noahmplsm.f90
+	$(CPP) $(CPPFLAGS) $(CPPHRLDAS) ../noahmp/src/module_sf_noahmplsm.F > module_sf_noahmplsm.f90
 	$(COMPILERF90) -o $(@) -c $(F90FLAGS) $(FREESOURCE) module_sf_noahmplsm.f90
 	@echo ""
 
@@ -32,7 +32,7 @@ module_sf_noahmplsm.o: ../../noahmp/src/module_sf_noahmplsm.F
 	@echo ""
 	$(RM) $(*).f90
 	$(CPP) $(CPPFLAGS) $(CPPHRLDAS) $(*).F > $(*).f90
-	$(COMPILERF90) -o $(@) -c -I../../hrldas/Utility_routines $(F90FLAGS) $(FREESOURCE) $(*).f90
+	$(COMPILERF90) -o $(@) -c -I../hrldas/Utility_routines $(F90FLAGS) $(FREESOURCE) $(*).f90
 	@echo ""
 
 #
