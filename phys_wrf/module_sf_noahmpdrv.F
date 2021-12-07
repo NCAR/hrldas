@@ -1,1 +1,1 @@
-../noahmp/drv_WRF/module_sf_noahmpdrv.F
+../noahmp/drivers/wrf/module_sf_noahmpdrv.F
