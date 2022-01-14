@@ -238,4 +238,10 @@
                                                                1 -> Simple drainage
                                                                2 -> Hooghoudt's equation based tile drainage
 
+ SOIL_TIMESTEP_OPTION              = 0.0,                    ! Noah-MP soil process timestep (seconds) for solving soil water and temperature
+                                                               0 -> default, the same as main NoahMP model timestep
+                                                               N * dt_noahmp -> longer than main NoahMP model timestep (often used for WRF coupled run)
+ NOAHMP_OUTPUT                     = 0,                      ! NoahMP output level
+                                                               0 -> standard output
+                                                               1 -> standard output with additional water and energy budget term output
 /

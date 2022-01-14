@@ -84,6 +84,7 @@ module module_NoahMP_hrldas_driver
   INTEGER                                 ::  IOPT_IRRM ! irrigation method (0->dynamic; 1-> sprinkler; 2-> micro; 3-> flood)
   INTEGER                                 ::  IOPT_INFDV!infiltration options for dynamic VIC (1->Philip; 2-> Green-Ampt;3->Smith-Parlange)
   INTEGER                                 ::  IOPT_TDRN ! drainage option (0->off; 1->simple scheme; 2->Hooghoudt's scheme)
+  REAL                                    ::  soiltstep ! soil time step (s) control namelist option (default=0: same as main NoahMP timstep)
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  T_PHY     ! 3D atmospheric temperature valid at mid-levels [K]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  QV_CURR   ! 3D water vapor mixing ratio [kg/kg_dry]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  U_PHY     ! 3D U wind component [m/s]
@@ -278,6 +279,49 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  Z0        ! roughness length output to WRF
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  ZNT       ! roughness length output to WRF
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QTDRAIN   ! tile drain discharge (mm) 
+! additional output variables
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  PAHXY     ! precipitation advected heat
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  PAHGXY    ! precipitation advected heat
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  PAHBXY    ! precipitation advected heat 
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  PAHVXY    ! precipitation advected heat
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QINTSXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QINTRXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QDRIPSXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QDRIPRXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QTHROSXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QTHRORXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QSNSUBXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QSNFROXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QSUBCXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QFROCXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QEVACXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QDEWCXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QFRZCXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QMELTCXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QSNBOTXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  PONDINGXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  FPICEXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  RAINLSM
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  SNOWLSM
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  FORCTLSM
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  FORCQLSM
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  FORCPLSM
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  FORCZLSM
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  FORCWLSM
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  ACC_SSOILXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  ACC_QINSURXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  ACC_QSEVAXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  EFLXBXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  SOILENERGY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  SNOWENERGY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  CANHSXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  ACC_DWATERXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  ACC_PRCPXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  ACC_ECANXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  ACC_ETRANXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  ACC_EDIRXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  ACC_ETRANIXY
+
   INTEGER   ::  ids,ide, jds,jde, kds,kde,  &  ! d -> domain
    &            ims,ime, jms,jme, kms,kme,  &  ! m -> memory
    &            its,ite, jts,jte, kts,kte      ! t -> tile
@@ -308,6 +352,7 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QRFXY
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QSPRINGXY
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QSLATXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QLATXY
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  RECHCLIM
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  RIVERMASK
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  NONRIVERXY
@@ -624,6 +669,8 @@ module module_NoahMP_hrldas_driver
   integer            :: irrigation_method = 0
   integer            :: dvic_infiltration_option = 1
   integer            :: tile_drainage_option = 0
+  real               :: soil_timestep_option = 0.0
+  integer            :: noahmp_output = 0
 
   integer            :: split_output_count = 1
   logical            :: skip_first_output = .false.
@@ -661,7 +708,8 @@ module module_NoahMP_hrldas_driver
        pcp_partition_option, tbot_option, temp_time_scheme_option, &
        glacier_option, surface_resistance_option, &
        irrigation_option, irrigation_method, dvic_infiltration_option, &
-       tile_drainage_option,soil_data_option, pedotransfer_option, crop_option, &
+       tile_drainage_option,soil_timestep_option,noahmp_output,&
+       soil_data_option, pedotransfer_option, crop_option, &
        sf_urban_physics,use_wudapt_lcz,num_urban_hi,urban_atmosphere_thickness, &
        num_urban_ndm,num_urban_ng,num_urban_nwr ,num_urban_ngb , &
        num_urban_nf ,num_urban_nz,num_urban_nbui, &
@@ -743,6 +791,7 @@ module module_NoahMP_hrldas_driver
   IOPT_IRRM = irrigation_method
   IOPT_INFDV= dvic_infiltration_option
   IOPT_TDRN = tile_drainage_option
+  soiltstep = soil_timestep_option
 
 !---------------------------------------------------------------------
 !  NAMELIST end
@@ -1203,6 +1252,48 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( ZNT       (XSTART:XEND,YSTART:YEND) )  ! roughness length output to WRF 
   ALLOCATE ( QTDRAIN   (XSTART:XEND,YSTART:YEND) )  ! tile drainage (mm)
   ALLOCATE ( TD_FRACTION (XSTART:XEND,YSTART:YEND) )! tile drainage fraction
+! additional output variables
+  ALLOCATE ( PAHXY     (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( PAHGXY    (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( PAHBXY    (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( PAHVXY    (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QINTSXY   (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QINTRXY   (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QDRIPSXY  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QDRIPRXY  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QTHROSXY  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QTHRORXY  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QSNSUBXY  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QSNFROXY  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QSUBCXY   (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QFROCXY   (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QEVACXY   (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QDEWCXY   (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QFRZCXY   (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QMELTCXY  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QSNBOTXY  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( PONDINGXY (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( FPICEXY   (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( RAINLSM   (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( SNOWLSM   (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( FORCTLSM  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( FORCQLSM  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( FORCPLSM  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( FORCZLSM  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( FORCWLSM  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( ACC_SSOILXY (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( ACC_QINSURXY(XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( ACC_QSEVAXY (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( ACC_ETRANIXY(XSTART:XEND,1:NSOIL,YSTART:YEND) )
+  ALLOCATE ( EFLXBXY   (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( SOILENERGY(XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( SNOWENERGY(XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( CANHSXY   (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( ACC_DWATERXY(XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( ACC_PRCPXY(XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( ACC_ECANXY(XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( ACC_ETRANXY (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( ACC_EDIRXY(XSTART:XEND,YSTART:YEND) )
 
   ALLOCATE ( XLONG     (XSTART:XEND,YSTART:YEND) )  ! longitude
   ALLOCATE ( TERRAIN   (XSTART:XEND,YSTART:YEND) )  ! terrain height
@@ -1226,6 +1317,7 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( QRFXY       (XSTART:XEND,YSTART:YEND) )  ! 
   ALLOCATE ( QSPRINGXY   (XSTART:XEND,YSTART:YEND) )  ! 
   ALLOCATE ( QSLATXY     (XSTART:XEND,YSTART:YEND) )  ! 
+  ALLOCATE ( QLATXY      (XSTART:XEND,YSTART:YEND) )  !
   ALLOCATE ( RECHCLIM    (XSTART:XEND,YSTART:YEND) )  ! 
   ALLOCATE ( RIVERMASK   (XSTART:XEND,YSTART:YEND) )  ! 
   ALLOCATE ( NONRIVERXY  (XSTART:XEND,YSTART:YEND) )  ! 
@@ -1541,6 +1633,49 @@ ENDIF
   CHV2XY     = undefined_real
   CHB2XY     = undefined_real
   RS         = undefined_real
+! additional output
+  PAHXY      = undefined_real
+  PAHGXY     = undefined_real
+  PAHBXY     = undefined_real
+  PAHVXY     = undefined_real
+  QINTSXY    = undefined_real
+  QINTRXY    = undefined_real
+  QDRIPSXY   = undefined_real
+  QDRIPRXY   = undefined_real
+  QTHROSXY   = undefined_real
+  QTHRORXY   = undefined_real
+  QSNSUBXY   = undefined_real
+  QSNFROXY   = undefined_real
+  QSUBCXY    = undefined_real
+  QFROCXY    = undefined_real
+  QEVACXY    = undefined_real
+  QDEWCXY    = undefined_real
+  QFRZCXY    = undefined_real
+  QMELTCXY   = undefined_real
+  QSNBOTXY   = undefined_real
+  PONDINGXY  = 0.0
+  FPICEXY    = undefined_real
+  RAINLSM    = undefined_real
+  SNOWLSM    = undefined_real
+  FORCTLSM   = undefined_real
+  FORCQLSM   = undefined_real
+  FORCPLSM   = undefined_real
+  FORCZLSM   = undefined_real
+  FORCWLSM   = undefined_real
+  ACC_SSOILXY   = 0.0
+  ACC_QINSURXY  = 0.0
+  ACC_QSEVAXY   = 0.0
+  ACC_ETRANIXY  = 0.0
+  EFLXBXY    = undefined_real
+  SOILENERGY = 0.0
+  SNOWENERGY = 0.0
+  CANHSXY    = undefined_real
+  ACC_DWATERXY = 0.0
+  ACC_PRCPXY   = 0.0
+  ACC_ECANXY   = 0.0
+  ACC_ETRANXY  = 0.0
+  ACC_EDIRXY   = 0.0
+
   TERRAIN    = undefined_real
   GVFMIN     = undefined_real
   GVFMAX     = undefined_real
@@ -1557,6 +1692,7 @@ ENDIF
   QRFXY      = undefined_real
   QSPRINGXY  = undefined_real
   QSLATXY    = undefined_real
+  QLATXY     = undefined_real
   CHSTARXY   = undefined_real
   Z0         = undefined_real
   ZNT        = undefined_real
@@ -1857,6 +1993,17 @@ ENDIF
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SFCRUNOFF",SFCRUNOFF)
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "UDRUNOFF" ,UDRUNOFF )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QTDRAIN"  ,QTDRAIN  )
+! additional inout variable
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_SSOIL" , ACC_SSOILXY )
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_QINSUR", ACC_QINSURXY)
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_QSEVA" , ACC_QSEVAXY )
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_ETRANI", ACC_ETRANIXY)
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_DWATER", ACC_DWATERXY)
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_PRCP"  , ACC_PRCPXY  )
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_ECAN"  , ACC_ECANXY  )
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_ETRAN" , ACC_ETRANXY )
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_EDIR"  , ACC_EDIRXY  )
+
      ! below for irrigation scheme
      IF (irrigation_option > 0) THEN
         call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMSI" , IRNUMSI  )
@@ -2172,8 +2319,9 @@ ENDIF
                  num_soil_layers, dzs, isltyp, ivgtyp, wtddt ,                  &
                  fdepthxy   , terrain , riverbedxy, eqzwt     ,                 &
                  rivercondxy, pexpxy  , areaxy    , zwtxy     ,                 &
-                 smois      , sh2o    , smoiseq   , smcwtdxy  , deeprechxy,     &
-                 rechxy     , qslatxy , qrfsxy    , qspringsxy,                 &
+                 smois      , sh2o    , smoiseq   , smcwtdxy  ,                 &
+                 QLATXY     , qslatxy , QRFXY     , qrfsxy    ,                 &
+                 deeprechxy , rechxy  , QSPRINGXY , qspringsxy,                 &
                  rechclim   ,                                                   &
                  ids,ide, jds,jde, kds,kde,                                     &
                  ims,ime, jms,jme, kms,kme,                                     &
@@ -2247,7 +2395,7 @@ ENDIF
 	    print*, dz_urban(1,:,1)
 	  ENDIF
 
-  endif
+  endif  ! restart flag
 
   NTIME=(KHOUR)*3600./nint(dtbl)*(spinup_loops+1)
   spinup_loop = 0
@@ -2481,7 +2629,7 @@ end subroutine land_driver_ini
                   IDVEG, IOPT_CRS, IOPT_BTR, IOPT_RUN,  IOPT_SFC,   IOPT_FRZ, &
 	       IOPT_INF, IOPT_RAD, IOPT_ALB, IOPT_SNF, IOPT_TBOT,   IOPT_STC, &
 	       IOPT_GLA, IOPT_RSF,IOPT_SOIL,IOPT_PEDO,IOPT_CROP,    IOPT_IRR, &
-               IOPT_IRRM,IOPT_INFDV,IOPT_TDRN,IZ0TLND, sf_urban_physics,      &
+               IOPT_IRRM,IOPT_INFDV,IOPT_TDRN,soiltstep,IZ0TLND, sf_urban_physics,      &
 	       SOILCOMP,  SOILCL1,  SOILCL2,   SOILCL3,  SOILCL4,             &
 		  T_PHY,  QV_CURR,    U_PHY,    V_PHY,    SWDOWN,     SWDDIR, &
                  SWDDIF,      GLW,                                            &
@@ -2509,7 +2657,16 @@ end subroutine land_driver_ini
                  BGAPXY,   WGAPXY,    TGVXY,    TGBXY,     CHVXY,      CHBXY, &
 		  SHGXY,    SHCXY,    SHBXY,    EVGXY,     EVBXY,      GHVXY, &
 		  GHBXY,    IRGXY,    IRCXY,    IRBXY,      TRXY,      EVCXY, &
-	       CHLEAFXY,   CHUCXY,   CHV2XY,   CHB2XY,        RS,             &                          
+	        CHLEAFXY,   CHUCXY,   CHV2XY,   CHB2XY,        RS,             &
+                QINTSXY   ,QINTRXY   ,QDRIPSXY   ,&
+                QDRIPRXY  ,QTHROSXY  ,QTHRORXY   ,&
+                QSNSUBXY  ,QSNFROXY  ,QSUBCXY    ,&
+                QFROCXY   ,QEVACXY   ,QDEWCXY    ,QFRZCXY   ,QMELTCXY   ,&
+                QSNBOTXY  ,PONDINGXY ,PAHXY      ,PAHGXY, PAHVXY, PAHBXY,&
+                FPICEXY,RAINLSM,SNOWLSM,FORCTLSM ,FORCQLSM,FORCPLSM,FORCZLSM,FORCWLSM,&
+                ACC_SSOILXY, ACC_QINSURXY, ACC_QSEVAXY, ACC_ETRANIXY, EFLXBXY, &
+                SOILENERGY, SNOWENERGY, CANHSXY, &
+                ACC_DWATERXY, ACC_PRCPXY, ACC_ECANXY, ACC_ETRANXY, ACC_EDIRXY, &
 !                BEXP_3D,SMCDRY_3D,SMCWLT_3D,SMCREF_3D,SMCMAX_3D,             &
 !		 DKSAT_3D,DWSAT_3D,PSISAT_3D,QUARTZ_3D,                       &
 !		 REFDK_2D,REFKDT_2D,                                          &
@@ -2604,7 +2761,7 @@ end subroutine land_driver_ini
                FDEPTHXY,    AREAXY,     TERRAIN,    ISURBAN,    IVGTYP,   &
                RIVERCONDXY, RIVERBEDXY, EQZWT,      PEXPXY,               &
                SMOIS,       SH2O,       SMCWTDXY,   ZWTXY,                &
-	       QRFXY,       DEEPRECHXY, QSPRINGXY,                        &
+	       QLATXY, QRFXY, DEEPRECHXY, QSPRINGXY,                      &
                QSLATXY,     QRFSXY,     QSPRINGSXY, RECHXY,               &
                IDS,IDE, JDS,JDE, KDS,KDE,                                 &
                IMS,IME, JMS,JME, KMS,KME,                                 &
@@ -2777,6 +2934,53 @@ end subroutine land_driver_ini
               call add_to_output(NPPXY      , "NPP"     , "Net primary productivity"               , "g m{-2} s{-1} C"     )
               call add_to_output(PSNXY      , "PSN"     , "Total photosynthesis"                   , "umol CO@ m{-2} s{-1}")
               call add_to_output(APARXY     , "APAR"    , "Photosynthesis active energy by canopy" , "W m{-2}"             )
+        ! additional NoahMP output
+          if (noahmp_output > 0) then
+              ! additional water budget terms
+              call add_to_output(QINTSXY    , "QINTS"   , "canopy interception (loading) rate for snowfall", "mm s{-1}"    )
+              call add_to_output(QINTRXY    , "QINTR"   , "canopy interception rate for rain"              , "mm s{-1}"    )
+              call add_to_output(QDRIPSXY   , "QDRIPS"  , "drip (unloading) rate for intercepted snow"     , "mm s{-1}"    )
+              call add_to_output(QDRIPRXY   , "QDRIPR"  , "drip rate for canopy intercepted rain"          , "mm s{-1}"    )
+              call add_to_output(QTHROSXY   , "QTHROS"  , "throughfall of snowfall"                        , "mm s{-1}"    )
+              call add_to_output(QTHRORXY   , "QTHROR"  , "throughfall for rain"                           , "mm s{-1}"    )
+              call add_to_output(QSNSUBXY   , "QSNSUB"  , "snow surface sublimation rate"                  , "mm s{-1}"    )
+              call add_to_output(QSNFROXY   , "QSNFRO"  , "snow surface frost rate"                        , "mm s{-1}"    )
+              call add_to_output(QSUBCXY    , "QSUBC"   , "canopy snow sublimation rate"                   , "mm s{-1}"    )
+              call add_to_output(QFROCXY    , "QFROC"   , "canopy snow frost rate"                         , "mm s{-1}"    )
+              call add_to_output(QEVACXY    , "QEVAC"   , "canopy snow evaporation rate"                   , "mm s{-1}"    )
+              call add_to_output(QDEWCXY    , "QDEWC"   , "canopy snow dew rate"                           , "mm s{-1}"    )
+              call add_to_output(QFRZCXY    , "QFRZC"   , "refreezing rate of canopy liquid water"         , "mm s{-1}"    )
+              call add_to_output(QMELTCXY   , "QMELTC"  , "melting rate of canopy snow"                    , "mm s{-1}"    )
+              call add_to_output(QSNBOTXY   , "QSNBOT"  , "melting water out of snow bottom"               , "mm s{-1}"    )
+              call add_to_output(PONDINGXY  , "PONDING" , "total surface ponding per time step"            , "mm s{-1}"    )
+              call add_to_output(FPICEXY    , "FPICE"   , "snow fraction in precipitation"                 , ""            )
+              call add_to_output(ACC_QINSURXY,"ACC_QINSUR","accumuated water flux to soil within soil timestep","mm s{-1}" )
+              call add_to_output(ACC_QSEVAXY, "ACC_QSEVA" ,"accumulated soil surface evap rate within soil timestep","mm s{-1}")
+              call add_to_output(ACC_ETRANIXY,"ACC_ETRANI","accumualted transpiration rate within soil timestep", "mm s{-1}", "SOIL")
+              call add_to_output(ACC_DWATERXY,"ACC_DWATER","accumulated snow,soil,canopy water change within soil timestep", "mm")
+              call add_to_output(ACC_PRCPXY , "ACC_PRCP", "accumulated precipitation within soil timestep", "mm")
+              call add_to_output(ACC_ECANXY , "ACC_ECAN", "accumulated net canopy evaporation within soil timestep", "mm")
+              call add_to_output(ACC_ETRANXY, "ACC_ETRAN","accumulated transpiration within soil timestep", "mm")
+              call add_to_output(ACC_EDIRXY , "ACC_EDIR", "accumulated net soil/snow evaporation within soil timestep", "mm")
+              ! additional energy terms
+              call add_to_output(PAHXY      , "PAH"     , "Precipitation advected heat flux"                       , "W m{-2}" )
+              call add_to_output(PAHGXY     , "PAHG"    , "Precipitation advected heat flux to below-canopy ground", "W m{-2}" )
+              call add_to_output(PAHBXY     , "PAHB"    , "Precipitation advected heat flux to bare ground"        , "W m{-2}" )
+              call add_to_output(PAHVXY     , "PAHV"    , "Precipitation advected heat flux to canopy"             , "W m{-2}" )
+              call add_to_output(ACC_SSOILXY, "ACC_SSOIL","accumulated heat flux into snow and soil layers within soil timestep","W m{-2}" )
+              call add_to_output(EFLXBXY    , "EFLXB"   , "accumulated heat flux through soil bottom"              , "J m{-2}" )
+              call add_to_output(SOILENERGY , "SOILENERGY","energy content in soil relative to 273.16"             , "KJ m{-2}")
+              call add_to_output(SNOWENERGY , "SNOWENERGY","energy content in snow relative to 273.16"             , "KJ m{-2}")
+              call add_to_output(CANHSXY    , "CANHS"   , "canopy heat storage change"                             , "W m{-2}" )
+              ! additional forcing terms
+              call add_to_output(RAINLSM    , "RAINLSM" , "lowest model liquid precipitation into LSM"             , "mm s{-1}")
+              call add_to_output(SNOWLSM    , "SNOWLSM" , "lowest model snowfall into LSM"                         , "mm s{-1}")
+              call add_to_output(FORCTLSM   , "FORCTLSM", "lowest model T into LSM"                                , "K"       ) 
+              call add_to_output(FORCQLSM   , "FORCQLSM", "lowest model Q into LSM"                                , "kg kg{-1}")
+              call add_to_output(FORCPLSM   , "FORCPLSM", "lowest model P into LSM"                                , "Pa"      )
+              call add_to_output(FORCZLSM   , "FORCZLSM", "lowest model Z into LSM"                                , "m"       )
+              call add_to_output(FORCWLSM   , "FORCWLSM", "lowest model wind speed into LSM"                       , "m s{-1}" )
+          endif
         ! Irrigation
             IF (irrigation_option > 0) THEN
               call add_to_output(IRNUMSI    , "IRNUMSI" , "Sprinkler irrigation count"             , "-"                   )
@@ -2788,13 +2992,17 @@ end subroutine land_driver_ini
               call add_to_output(IRFIVOL    , "IRFIVOL" , "Flood irrigation amount"                , "mm"                  )
               call add_to_output(IRRSPLH    , "IRRSPLH" , "Latent heating due to sprinkler"        , "W m{-2}"             )
             ENDIF
-        ! Carbon allocation model
+        ! MMF groundwater  model
 	    IF(RUNOFF_OPTION == 5) THEN
-              call add_to_output(SMCWTDXY   , "SMCWTD"   , "Leaf mass"                            , "g m{-2}"               )
-              call add_to_output(RECHXY     , "RECH"     , "Mass of fine roots"                   , "g m{-2}"               )
-              call add_to_output(QRFSXY     , "QRFS"     , "Stem mass"                            , "g m{-2}"               )
-              call add_to_output(QSPRINGSXY , "QSPRINGS" , "Mass of wood and woody roots"         , "g m{-2}"               )
-              call add_to_output(QSLATXY    , "QSLAT"    , "Stable carbon in deep soil"           , "g m{-2}"               )
+              call add_to_output(SMCWTDXY   , "SMCWTD"   , "soil water content between bottom of the soil and water table", "m3 m{-3}")
+              call add_to_output(RECHXY     , "RECH"     , "recharge to or from the water table when shallow"             , "m"       )
+              call add_to_output(DEEPRECHXY , "DEEPRECH" , "recharge to or from the water table when deep"                , "m"       )
+              call add_to_output(QRFSXY     , "QRFS"     , "accumulated groundwater baselow"                              , "mm"      )
+              call add_to_output(QRFXY      , "QRF"      , "groundwater baseflow"                                         , "m"       )
+              call add_to_output(QSPRINGSXY , "QSPRINGS" , "accumulated seeping water"                                    , "mm"      )
+              call add_to_output(QSPRINGXY  , "QSPRING"  , "instantaneous seeping water"                                  , "m"       )
+              call add_to_output(QSLATXY    , "QSLAT"    , "accumulated lateral flow"                                     , "mm"      )
+              call add_to_output(QLATXY     , "QLAT"     , "instantaneous lateral flow"                                   , "m"       )
 	    ENDIF
 	! For now, no urban output variables included
 
@@ -2916,6 +3124,15 @@ subroutine lsm_restart()
   call add_to_restart(SFCRUNOFF , "SFCRUNOFF")
   call add_to_restart(UDRUNOFF  , "UDRUNOFF" )
   call add_to_restart(QTDRAIN   , "QTDRAIN"  )
+  call add_to_restart(ACC_SSOILXY ,"ACC_SSOIL" )
+  call add_to_restart(ACC_QINSURXY,"ACC_QINSUR")
+  call add_to_restart(ACC_QSEVAXY ,"ACC_QSEVA" )
+  call add_to_restart(ACC_ETRANIXY,"ACC_ETRANI", layers="SOIL")
+  call add_to_restart(ACC_DWATERXY,"ACC_DWATER")
+  call add_to_restart(ACC_PRCPXY  ,"ACC_PRCP"  )
+  call add_to_restart(ACC_ECANXY  ,"ACC_ECAN"  )
+  call add_to_restart(ACC_ETRANXY ,"ACC_ETRAN" )
+  call add_to_restart(ACC_EDIRXY  ,"ACC_EDIR"  )
  ! irrigation scheme
   IF (irrigation_option > 0) THEN
      call add_to_restart(IRNUMSI   , "IRNUMSI")
