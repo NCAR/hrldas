@@ -291,6 +291,7 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QTHROSXY
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QTHRORXY
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QSNSUBXY
+  REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QMELTXY
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QSNFROXY
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QSUBCXY
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  QFROCXY
@@ -1272,6 +1273,7 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( QFRZCXY   (XSTART:XEND,YSTART:YEND) )
   ALLOCATE ( QMELTCXY  (XSTART:XEND,YSTART:YEND) )
   ALLOCATE ( QSNBOTXY  (XSTART:XEND,YSTART:YEND) )
+  ALLOCATE ( QMELTXY   (XSTART:XEND,YSTART:YEND) )
   ALLOCATE ( PONDINGXY (XSTART:XEND,YSTART:YEND) )
   ALLOCATE ( FPICEXY   (XSTART:XEND,YSTART:YEND) )
   ALLOCATE ( RAINLSM   (XSTART:XEND,YSTART:YEND) )
@@ -1653,6 +1655,7 @@ ENDIF
   QFRZCXY    = undefined_real
   QMELTCXY   = undefined_real
   QSNBOTXY   = undefined_real
+  QMELTXY    = undefined_real
   PONDINGXY  = 0.0
   FPICEXY    = undefined_real
   RAINLSM    = undefined_real
@@ -2662,7 +2665,7 @@ end subroutine land_driver_ini
                 QDRIPRXY  ,QTHROSXY  ,QTHRORXY   ,&
                 QSNSUBXY  ,QSNFROXY  ,QSUBCXY    ,&
                 QFROCXY   ,QEVACXY   ,QDEWCXY    ,QFRZCXY   ,QMELTCXY   ,&
-                QSNBOTXY  ,PONDINGXY ,PAHXY      ,PAHGXY, PAHVXY, PAHBXY,&
+                QSNBOTXY  ,QMELTXY   ,PONDINGXY  ,PAHXY     ,PAHGXY, PAHVXY, PAHBXY,&
                 FPICEXY,RAINLSM,SNOWLSM,FORCTLSM ,FORCQLSM,FORCPLSM,FORCZLSM,FORCWLSM,&
                 ACC_SSOILXY, ACC_QINSURXY, ACC_QSEVAXY, ACC_ETRANIXY, EFLXBXY, &
                 SOILENERGY, SNOWENERGY, CANHSXY, &
@@ -2951,7 +2954,8 @@ end subroutine land_driver_ini
               call add_to_output(QDEWCXY    , "QDEWC"   , "canopy snow dew rate"                           , "mm s{-1}"    )
               call add_to_output(QFRZCXY    , "QFRZC"   , "refreezing rate of canopy liquid water"         , "mm s{-1}"    )
               call add_to_output(QMELTCXY   , "QMELTC"  , "melting rate of canopy snow"                    , "mm s{-1}"    )
-              call add_to_output(QSNBOTXY   , "QSNBOT"  , "melting water out of snow bottom"               , "mm s{-1}"    )
+              call add_to_output(QSNBOTXY   , "QSNBOT"  , "total liquid water (melt+rain through) out of snow bottom", "mm s{-1}"    )
+              call add_to_output(QMELTXY    , "QMELT"   , "snow melt due to phase change"                  , "mm s{-1}"    )
               call add_to_output(PONDINGXY  , "PONDING" , "total surface ponding per time step"            , "mm s{-1}"    )
               call add_to_output(FPICEXY    , "FPICE"   , "snow fraction in precipitation"                 , ""            )
               call add_to_output(ACC_QINSURXY,"ACC_QINSUR","accumuated water flux to soil within soil timestep","mm s{-1}" )
