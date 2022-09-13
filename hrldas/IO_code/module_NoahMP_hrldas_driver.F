@@ -2755,7 +2755,8 @@ end subroutine land_driver_ini
 	 
 	 ENDIF 
 
-  IF(RUNOFF_OPTION.EQ.5.AND.MOD(ITIME,STEPWTD).EQ.0)THEN
+  IF (RUNOFF_OPTION == 5) THEN
+    IF (MOD(ITIME,STEPWTD) ==0) THEN
            CALL wrf_message('calling WTABLE' )
 
 !gmm update wtable from lateral flow and shed water to rivers
@@ -2811,7 +2812,7 @@ end subroutine land_driver_ini
 !             ENDDO                                                !urban
 !           ENDDO                                                  !urban
 !         ENDIF
-
+    ENDIF
  ENDIF
 
 !------------------------------------------------------------------------
@@ -3326,8 +3327,8 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
 
 !-----CALCULATE LONGITUDE OF THE SUN FROM VERNAL EQUINOX:
 
-   IF(JULIAN.GE.80.)SXLONG=DPD*(JULIAN-80.)*DEGRAD
-   IF(JULIAN.LT.80.)SXLONG=DPD*(JULIAN+285.)*DEGRAD
+   IF(JULIAN .GE. 80.) SXLONG=DPD*(JULIAN-80.)*DEGRAD
+   IF(JULIAN .LT. 80.) SXLONG=DPD*(JULIAN+285.)*DEGRAD
    ARG=SINOB*SIN(SXLONG)
    DECLIN=ASIN(ARG)
 
