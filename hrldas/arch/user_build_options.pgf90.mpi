@@ -1,6 +1,7 @@
 
 #=============================================================================================
 #  Options for Linux with pgf90 MPI
+#  Please change the library paths according to your computer setup
 #=============================================================================================
 
  COMPILERF90    =	mpif90
@@ -15,10 +16,10 @@
  LIBS           =	
  LIBJASPER      =      -ljpeg -L/usr/lib -ljasper
  INCJASPER      =      -I/usr/include
- NETCDFMOD      =      -I/usr/local/netcdf4-pgi/include
- NETCDFLIB      =      -L/usr/local/netcdf4-pgi/lib -lnetcdf -lnetcdff
+ NETCDFMOD      =      -I/glade/u/apps/ch/opt/netcdf/4.7.3/pgi/19.3/include
+ NETCDFLIB      =      -L/glade/u/apps/ch/opt/netcdf/4.7.3/pgi/19.3/lib -lnetcdf -lnetcdff
  BZIP2          =      NO
- BZIP2_LIB      =      -lbz2
+ BZIP2_LIB      =       -L/usr/lib64 -lbz2
  BZIP2_INCLUDE  =      -I/usr/include
  RM             =      rm -f
  CC             =      cc
