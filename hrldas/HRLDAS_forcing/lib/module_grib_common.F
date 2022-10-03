@@ -2,8 +2,8 @@ module module_grib_common
   use module_mapinfo
   ! Low-level stuff used by both module_grib1 and module_grib2
   implicit none
-  integer, parameter :: string_sevens = Z"37373737" ! Encodes "7777", which marks the end of a GRIB record.
-  integer, parameter :: string_grib   = Z"47524942" ! Encodes "GRIB", which marks the beginning of a GRIB record
+  integer, parameter :: string_sevens = int(Z"37373737") ! Encodes "7777", which marks the end of a GRIB record.
+  integer, parameter :: string_grib   = int(Z"47524942") ! Encodes "GRIB", which marks the beginning of a GRIB record
 
   type G1Section1Struct
      integer :: isize

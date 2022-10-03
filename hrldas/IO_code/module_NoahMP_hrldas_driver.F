@@ -2755,7 +2755,8 @@ end subroutine land_driver_ini
 	 
 	 ENDIF 
 
-  IF(RUNOFF_OPTION.EQ.5.AND.MOD(ITIME,STEPWTD).EQ.0)THEN
+  IF (RUNOFF_OPTION == 5) THEN
+    IF (MOD(ITIME,STEPWTD) ==0) THEN
            CALL wrf_message('calling WTABLE' )
 
 !gmm update wtable from lateral flow and shed water to rivers
@@ -2811,7 +2812,7 @@ end subroutine land_driver_ini
 !             ENDDO                                                !urban
 !           ENDDO                                                  !urban
 !         ENDIF
-
+    ENDIF
  ENDIF
 
 !------------------------------------------------------------------------
@@ -2959,9 +2960,9 @@ end subroutine land_driver_ini
               call add_to_output(QMELTXY    , "QMELT"   , "snow melt due to phase change"                  , "mm s{-1}"    )
               call add_to_output(PONDINGXY  , "PONDING" , "total surface ponding per time step"            , "mm s{-1}"    )
               call add_to_output(FPICEXY    , "FPICE"   , "snow fraction in precipitation"                 , ""            )
-              call add_to_output(ACC_QINSURXY,"ACC_QINSUR","accumuated water flux to soil within soil timestep","mm s{-1}" )
-              call add_to_output(ACC_QSEVAXY, "ACC_QSEVA" ,"accumulated soil surface evap rate within soil timestep","mm s{-1}")
-              call add_to_output(ACC_ETRANIXY,"ACC_ETRANI","accumualted transpiration rate within soil timestep", "mm s{-1}", "SOIL")
+              call add_to_output(ACC_QINSURXY,"ACC_QINSUR","accumuated water flux to soil within soil timestep","m/s*dt_soil/dt_main" )
+              call add_to_output(ACC_QSEVAXY, "ACC_QSEVA" ,"accumulated soil surface evap rate within soil timestep","m/s*dt_soil/dt_main")
+              call add_to_output(ACC_ETRANIXY,"ACC_ETRANI","accumualted transpiration rate within soil timestep", "m/s*dt_soil/dt_main", "SOIL")
               call add_to_output(ACC_DWATERXY,"ACC_DWATER","accumulated snow,soil,canopy water change within soil timestep", "mm")
               call add_to_output(ACC_PRCPXY , "ACC_PRCP", "accumulated precipitation within soil timestep", "mm")
               call add_to_output(ACC_ECANXY , "ACC_ECAN", "accumulated net canopy evaporation within soil timestep", "mm")
@@ -3326,8 +3327,8 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
 
 !-----CALCULATE LONGITUDE OF THE SUN FROM VERNAL EQUINOX:
 
-   IF(JULIAN.GE.80.)SXLONG=DPD*(JULIAN-80.)*DEGRAD
-   IF(JULIAN.LT.80.)SXLONG=DPD*(JULIAN+285.)*DEGRAD
+   IF(JULIAN .GE. 80.) SXLONG=DPD*(JULIAN-80.)*DEGRAD
+   IF(JULIAN .LT. 80.) SXLONG=DPD*(JULIAN+285.)*DEGRAD
    ARG=SINOB*SIN(SXLONG)
    DECLIN=ASIN(ARG)
 

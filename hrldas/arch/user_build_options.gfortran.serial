@@ -1,23 +1,23 @@
 
 #=============================================================================================
-#  Options for Linux with gfortran (not fully tested)
+#  Options for Linux with gnu gfortran MPI
+#  Please change the library paths according to your computer setup
 #=============================================================================================
 
- COMPILERF90    =       /opt/local/bin/gfortran-mp-4.8
+ COMPILERF90    =       gfortran
  FREESOURCE     =       -ffree-form  -ffree-line-length-none
- F90FLAGS       =       -g -fconvert=big-endian -fbounds-check -fno-range-check
+ F90FLAGS       =       -g -fconvert=big-endian -fbounds-check -fno-range-check -fallow-argument-mismatch
  MODFLAG        =       -I
- LDFLAGS        =       
- CPP            =       /opt/local/bin/cpp-mp-4.8
- CPPFLAGS       =       -P -traditional -D_GFORTRAN_
- LIBS           =       
- LIBJASPER      =       -ljpeg -L/opt/local/lib -ljasper
- INCJASPER      =       -I/opt/local/include/jasper
- NETCDFMOD      =       -I/opt/local/include
- NETCDFLIB      =       -L/opt/local/lib -lnetcdf -lnetcdff
+ LDFLAGS        =
+ CPP            =       cpp
+ CPPFLAGS       =       -P -traditional -D_GFORTRAN_ # -DSPATIAL_SOIL
+ LIBS           =
+ LIBJASPER      =      -ljasper
+ INCJASPER      =      -I/usr/include/jasper
+ NETCDFMOD      =      -I/glade/u/apps/ch/opt/netcdf/4.8.1/gnu/10.1.0/include
+ NETCDFLIB      =      -L/glade/u/apps/ch/opt/netcdf/4.8.1/gnu/10.1.0/lib -lnetcdf -lnetcdff
  BZIP2          =       NO
- BZIP2_LIB      =       -lbz2
- BZIP2_INCLUDE  =       -I/opt/local/include
+ BZIP2_INCLUDE  =       -I/usr/include
+ BZIP2_LIB      =       -L/usr/lib64 -lbz2
  RM             =       rm -f
- CC             =       /opt/local/bin/gcc-mp-4.8
-
+ CC             =       cc
