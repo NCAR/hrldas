@@ -3,6 +3,7 @@
  ENDDATE            = "2000-10-01_06"
  DataDir            = "/glade/work/zhezhang/GLDAS/extracted"
  OutputDir          = "/glade/work/zhezhang/GLDAS/LDASIN3/"
+ FORCING_TYPE       = "GLDAS"
  FULL_IC_FRQ        = 0
  RAINFALL_INTERP    = 0
  RESCALE_SHORTWAVE  = .FALSE.

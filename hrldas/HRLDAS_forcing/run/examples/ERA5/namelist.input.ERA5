@@ -1,0 +1,82 @@
+&files
+ STARTDATE          = "2001-10-01_00"
+ ENDDATE            = "2001-10-02_00"
+ DataDir            = "/glade/scratch/zhezhang/ERA5/land/extract"
+ OutputDir          = "/glade/scratch/zhezhang/ERA5/land/LDASIN_adj/"
+ FULL_IC_FRQ        = -1
+ RAINFALL_INTERP    = 0
+ RESCALE_SHORTWAVE  = .FALSE.
+ UPDATE_SNOW        = .FALSE.
+ FORCING_HEIGHT_2D  = .FALSE.
+ TRUNCATE_SW        = .FALSE.
+ EXPAND_LOOP        = 10 
+ INIT_LAI           = .TRUE.
+ VARY_LAI           = .TRUE.
+ MASK_WATER         = .FALSE.
+
+ geo_em_flnm        = "/glade/work/zhezhang/PPR/geo_em.d01.nc_ppr"
+
+! Zfile_template     = "./ERA5_GPH.grb"
+! Zfile_template     = "./det.HRLDAS.sfc.20180101.0000.grib"
+! Zfile_template     = "/glade/scratch/zhezhang/ERA5/hrldas_era5/hrldas/HRLDAS_forcing/run/examples/GLDAS/GLDAS_ELEVATION.grb"
+! Zfile_template     = "./geo_1279l4_0.1x0.1.grib2"
+ Zfile_template     = "./geo_1279l4_0.1x0.1.grib2_v4_unpack.nc"
+ LANDSfile_template = "./run/examples/ERA5/ERA5_LANDSEA.grb" 
+ Tfile_template     = "<DataDir>/2T/ERA5_2T_<date>"
+ Ufile_template     = "<DataDir>/10U/ERA5_10U_<date>",
+ Vfile_template     = "<DataDir>/10V/ERA5_10V_<date>",
+ Pfile_template     = "<DataDir>/SP/ERA5_SP_<date>",
+ Qfile_template     = "<DataDir>/Q/ERA5_Q_<date>",
+ LWfile_template    = "<DataDir>/STRD/ERA5_STRD_<date>",
+ SWfile_primary     = "<DataDir>/SSRD/ERA5_SSRD_<date>",
+ SWfile_secondary   = "<DataDir>/SSRD/ERA5_SSRD_<date>",
+ PCPfile_primary    = "<DataDir>/TP/ERA5_TP_<date>"
+ PCPfile_secondary  = "<DataDir>/TP/ERA5_TP_<date>",
+
+ WEASDfile_template = "<DataDir>/INIT/ERA5_WEASD.<date>",
+ CANWTfile_template = "<DataDir>/INIT/ERA5_CNWAT.<date>",
+ SKINTfile_template = "<DataDir>/INIT/ERA5_AVSFT.<date>",
+
+ STfile_template    = "<DataDir>/INIT/ERA5_TSOIL_000-010.<date>",
+                      "<DataDir>/INIT/ERA5_TSOIL_010-040.<date>",
+                      "<DataDir>/INIT/ERA5_TSOIL_040-100.<date>",
+                      "<DataDir>/INIT/ERA5_TSOIL_100-200.<date>",
+
+ SMfile_template    = "<DataDir>/INIT/ERA5_SOILM_000-010.<date>",
+                      "<DataDir>/INIT/ERA5_SOILM_010-040.<date>",
+                      "<DataDir>/INIT/ERA5_SOILM_040-100.<date>",
+                      "<DataDir>/INIT/ERA5_SOILM_100-200.<date>",
+
+/
+
+<VTABLE>
+-----+------+------+------+----------+----------+------------------------------------------+-----------------------+
+GRIB1| Level| From |  To  |          |          |                                          |GRIB2|GRIB2|GRIB2|GRIB2|
+Param| Type |Level1|Level2| Name     | Units    | Description                              |Discp|Catgy|Param|Level|
+-----+------+------+------+----------+----------+------------------------------------------+-----------------------+
+ 134 |  1   |   0  |      | PSFC     | Pa       |                                          |  0  |  3  |  0  |  1  |
+ 129 |  1   |   0  |      | z        | m2 s-2   | Geopotential                             |  0  |  3  |  4  |  1  |
+ 172 |  1   |   0  |      | LANDSEA  | fraction | Land/Sea flag                            |  2  |  0  |  0  |  1  |
+ 157 | 109  |   0  |      | RH       | %        | Relative Humidity                        |  0  |  1  |  1  | 105 |
+ 165 |  1   |   0  |      | U2D      | m s-1    | U                                        |  0  |  2  |  2  | 103 |
+ 166 |  1   |   0  |      | V2D      | m s-1    | V                                        |  0  |  2  |  3  | 103 |
+ 167 |  1   |   0  |      | T2D      | K        | Temperature                              |  0  |  0  |  0  | 103 |
+ 133 |  1   |   0  |      | Q2D      | kg kg-1  |                                          |  0  |  1  |  0  |  1  |
+ 169 |  1   |   0  |      | SWDOWN   | J m-2    | Surface solar radiation downwards        |  0  |  4  |  7  |  1  |
+ 175 |  1   |   0  |      | LWDOWN   | J m-2    | Surface thermal radiation downwards      |  0  |  5  |  3  |  1  |
+ 198 |  1   |   0  |      | CANWAT   | m        | Skin reservoir content/Canopy water      | 192 | 128 | 198 |  1  |
+ 228 |  1   |   0  |      | RAINRATE | m        | Total Precipitation                      |  0  |  1  | 193 |  1  |
+ 235 |  1   |   0  |      | TSK      | K        | Sea-Surface Temperature                  |  0  |  0  | 17  |  1  |
+  34 |  1   |   0  |      | SST      | K        | Sea-Surface Temperature                  |  10 |  3  |  0  |  1  |
+  31 |  1   |   0  |      | SEAICE   | 0/1 Flag | Sea-Ice-Flag                             |  10 |  2  |   0 |  1  |
+ 141 |  1   |   0  |      | SNOW     | m        |Water Equivalent of Accumulated Snow Depth|  0  |  1  | 254 |  1  |
+ 139 | 112  |   0  |   7  | STEMP_1  | K        | T of 0-7 cm ground layer                 | 192 | 128 | 139 | 106 |
+ 170 | 112  |   7  |  28  | STEMP_2  | K        | T of 7-28 cm ground layer                | 192 | 128 | 170 | 106 |
+ 183 | 112  |  28  | 100  | STEMP_3  | K        | T of 28-100 cm ground layer              | 192 | 128 | 183 | 106 |
+ 236 | 112  | 100  |      | STEMP_4  | K        | T of 100-289 cm ground layer             | 192 | 128 | 236 | 106 |
+  39 | 112  |   0  |   7  | SMOIS_1  | fraction | Soil moisture of 0-7 cm ground layer     | 192 | 128 |  39 | 106 |
+  40 | 112  |   7  |  28  | SMOIS_2  | fraction | Soil moisture of 7-28 cm ground layer    | 192 | 128 |  40 | 106 |
+  41 | 112  |  28  | 100  | SMOIS_3  | fraction | Soil moisture of 28-100 cm ground layer  | 192 | 128 |  41 | 106 |
+  42 | 112  | 100  |      | SMOIS_4  | fraction | Soil moisture of 100-289 cm ground layer | 192 | 128 |  42 | 106 |
+-----+------+------+------+----------+----------+------------------------------------------+-----------------------+
+</VTABLE>
