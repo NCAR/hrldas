@@ -479,9 +479,7 @@ program create_forcing
            where (WEASDcurrent%field < 0) WEASDcurrent%field = 0
            call output_databuffer(ncid, WEASDcurrent)
            
-           if (forcing_type/="ERA5") then ! ERA5 doesn't have Canopy water for initial state
            call process(date, CANWTcurrent, CANWTprev, CANWTpost, geo_em, expand_loop);
-           endif 
            where (CANWTcurrent%field < 0) CANWTcurrent%field = 0
            call output_databuffer(ncid, CANWTcurrent)
            deallocate(CANWTprev%field, stat=ierr)
@@ -932,6 +930,7 @@ contains
     elseif(forcing_type=="GLDAS") then
       call netcdf_file_search_now(current, datastruct, ierr)
     endif
+
 
     if (ierr == 0) then
 
@@ -1391,7 +1390,7 @@ contains
 
     call get_single_datastruct_from_grib(trim(flnm), kdate, datastruct, ierr)
     current%units = datastruct%units
-
+  if (forcing_type/="ERA5") then
     if ( current%label /= datastruct%field ) then
        write(*,'(/,1x,80("*"))')
        write(*,'(" *****  PROBLEM:  Requested field name does not match the name in the Vtable entry.")')
@@ -1404,7 +1403,12 @@ contains
        write(*,'(1x,80("*"),/)')
        stop
     endif
-
+  else 
+    if (current%label=="CANWAT")then
+      datastruct%data = 0
+      write(*,*) "ERA5 doesn't provide canopy water for initialization, set CANWAT = 0"
+    endif 
+  endif
   end subroutine grib_file_search_now
 
 !==============================================================================

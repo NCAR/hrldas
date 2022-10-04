@@ -46,7 +46,7 @@ FORCING_TYPE
     Enter the the name of the forcing in use. Currently there are four options: "NLDAS", "GLDAS", "NARR", "ERA5"
     Type:     character string
     Default:  No valid default value
-    Example:  FORCING_TYPE "ERA5"
+    Example:  FORCING_TYPE = "ERA5"
 
 RAINFALL_INTERP
 

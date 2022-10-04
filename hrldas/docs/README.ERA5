@@ -133,6 +133,7 @@ Modifying the namelist.input.ERA5 to your case. The following is a short descrip
  ENDDATE           : end date of your simulation
  DATADIR           : base directory for your ERA5 GRIB files (will be substituted in the paths below)
  OUTPUTDIR         : where you want the forcing files to be placed
+ FORCING_TYPE      : input forcing type = "ERA5"
  FULL_IC_FRQ       : set to 0 if you want initial conditions in the init file, -1 otherwise
  RAINFALL_INTERP   : rainfall interpolation procedure ! 0=Nearest Neighbor; 1=more expensive, grid fill method
  RESCALE_SHORTWAVE : set to .FALSE. for ERA5
@@ -159,7 +160,7 @@ Modifying the namelist.input.ERA5 to your case. The following is a short descrip
  PCPfile_primary    = template for your ERA5 primary precipitation file
  PCPfile_secondary  = template for your ERA5 secondary precipitation file
  WEASDfile_template = template for your ERA5 SWE file (not necessary if you don't want initial conditions)
- CANWTfile_template = template for your ERA5 canopy water file (not necessary if you don't want initial conditions)
+ CANWTfile_template = ERA5 doesn't provide canopy water for initialization, here only provide a file name, will be set to 0 in the code
  SKINTfile_template = template for your ERA5 skin temperature file (not necessary if you don't want initial conditions)
  STfile_template    = template for your ERA5 soil temperature file (not necessary if you don't want initial conditions)
  SMfile_template    = template for your ERA5 soil moisture file (not necessary if you don't want initial conditions)
@@ -196,7 +197,6 @@ See the full documentation for a complete description of items, but these are th
  MMF_RUNOFF_FILE       = special for OPT_RUN=5, which is unsupported, for now
  INDIR                 = where the LDASIN files are located
  OUTDIR                = where the LDASOUT files will be located
- FORCING_TYPE          = "ERA5"
 
  START_YEAR  = start year of your simulation
  START_MONTH = start month of your simulation

@@ -2,8 +2,9 @@
  STARTDATE          = "2001-10-01_00"
  ENDDATE            = "2001-10-02_00"
  DataDir            = "/glade/scratch/zhezhang/ERA5/land/extract"
- OutputDir          = "/glade/scratch/zhezhang/ERA5/land/LDASIN_adj/"
- FULL_IC_FRQ        = -1
+ OutputDir          = "/glade/scratch/zhezhang/ERA5/land/LDASIN"
+ FORCING_TYPE       = "ERA5"
+ FULL_IC_FRQ        = 0 
  RAINFALL_INTERP    = 0
  RESCALE_SHORTWAVE  = .FALSE.
  UPDATE_SNOW        = .FALSE.
@@ -16,12 +17,8 @@
 
  geo_em_flnm        = "/glade/work/zhezhang/PPR/geo_em.d01.nc_ppr"
 
-! Zfile_template     = "./ERA5_GPH.grb"
-! Zfile_template     = "./det.HRLDAS.sfc.20180101.0000.grib"
-! Zfile_template     = "/glade/scratch/zhezhang/ERA5/hrldas_era5/hrldas/HRLDAS_forcing/run/examples/GLDAS/GLDAS_ELEVATION.grb"
-! Zfile_template     = "./geo_1279l4_0.1x0.1.grib2"
  Zfile_template     = "./geo_1279l4_0.1x0.1.grib2_v4_unpack.nc"
- LANDSfile_template = "./run/examples/ERA5/ERA5_LANDSEA.grb" 
+ LANDSfile_template = "./lsm_1279l4_0.1x0.1.grb_v4_unpack.nc" 
  Tfile_template     = "<DataDir>/2T/ERA5_2T_<date>"
  Ufile_template     = "<DataDir>/10U/ERA5_10U_<date>",
  Vfile_template     = "<DataDir>/10V/ERA5_10V_<date>",
@@ -33,19 +30,19 @@
  PCPfile_primary    = "<DataDir>/TP/ERA5_TP_<date>"
  PCPfile_secondary  = "<DataDir>/TP/ERA5_TP_<date>",
 
- WEASDfile_template = "<DataDir>/INIT/ERA5_WEASD.<date>",
- CANWTfile_template = "<DataDir>/INIT/ERA5_CNWAT.<date>",
- SKINTfile_template = "<DataDir>/INIT/ERA5_AVSFT.<date>",
+ WEASDfile_template = "<DataDir>/INIT/ERA5_SD_<date>",
+ CANWTfile_template = "<DataDir>/INIT/ERA5_SD_<date>", ! ERA5 doesn't provide canopy water for initialization, will be set to 0 in the code
+ SKINTfile_template = "<DataDir>/INIT/ERA5_SKT_<date>",
 
- STfile_template    = "<DataDir>/INIT/ERA5_TSOIL_000-010.<date>",
-                      "<DataDir>/INIT/ERA5_TSOIL_010-040.<date>",
-                      "<DataDir>/INIT/ERA5_TSOIL_040-100.<date>",
-                      "<DataDir>/INIT/ERA5_TSOIL_100-200.<date>",
+ STfile_template    = "<DataDir>/INIT/ERA5_STL1_<date>",
+                      "<DataDir>/INIT/ERA5_STL2_<date>",
+                      "<DataDir>/INIT/ERA5_STL3_<date>",
+                      "<DataDir>/INIT/ERA5_STL4_<date>",
 
- SMfile_template    = "<DataDir>/INIT/ERA5_SOILM_000-010.<date>",
-                      "<DataDir>/INIT/ERA5_SOILM_010-040.<date>",
-                      "<DataDir>/INIT/ERA5_SOILM_040-100.<date>",
-                      "<DataDir>/INIT/ERA5_SOILM_100-200.<date>",
+ SMfile_template    = "<DataDir>/INIT/ERA5_SWVL1_<date>",
+                      "<DataDir>/INIT/ERA5_SWVL2_<date>",
+                      "<DataDir>/INIT/ERA5_SWVL3_<date>",
+                      "<DataDir>/INIT/ERA5_SWVL4_<date>",
 
 /
 
