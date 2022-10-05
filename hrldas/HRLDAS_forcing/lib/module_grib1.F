@@ -268,10 +268,11 @@ contains
     integer,                               intent(inout) :: iskip
     type (G1Section1Struct),               intent(out)   :: sec1
 
-    integer :: yy
+    integer :: yy,iskip0!StS
     integer :: century
     integer :: gdsbms
 
+    iskip0=iskip!StS
     sec1%isize      = unpack_unsigned_integer(buffer, 3, iskip)
     sec1%ptvn       = unpack_unsigned_integer(buffer, 1, iskip)
     sec1%center     = unpack_unsigned_integer(buffer, 1, iskip)
@@ -322,6 +323,7 @@ contains
     century         = unpack_unsigned_integer(buffer, 1, iskip)
     sec1%subcenter  = unpack_unsigned_integer(buffer, 1, iskip)
     sec1%decimal_scale_factor  = unpack_signed_integer(buffer, 2, iskip)
+    iskip = iskip0+sec1%isize*8!StS
 
     select case (gdsbms)
     case default
@@ -363,15 +365,16 @@ contains
     character(len=1), dimension(buffsize), intent(in)    :: buffer
     integer,                               intent(inout) :: iskip
     type (G1Section2Struct),               intent(inout) :: sec2
-    integer :: idum
+    integer :: idum,iskip0!StS
 
+    iskip0=iskip!StS
     sec2%isize      = unpack_unsigned_integer(buffer, 3, iskip)
     sec2%nv         = unpack_unsigned_integer(buffer, 1, iskip)
     sec2%pv         = unpack_unsigned_integer(buffer, 1, iskip)
     sec2%drt        = unpack_unsigned_integer(buffer, 1, iskip)
 
     select case (sec2%drt)
-    case (0) ! Lat/Lon grid
+    case (0,1) ! Lat/Lon grid
 
        sec2%nx = unpack_unsigned_integer(buffer, 2, iskip)
        sec2%ny = unpack_unsigned_integer(buffer, 2, iskip)
@@ -526,6 +529,7 @@ contains
        stop
 
     end select
+    iskip=iskip0+sec2%isize*8!StS
 
   end subroutine grib1_unpack_sec2
 

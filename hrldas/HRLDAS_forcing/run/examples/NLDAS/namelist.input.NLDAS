@@ -3,6 +3,7 @@
  ENDDATE            = "2010-01-03_00"
  DataDir            = "/d1/barlage/data/NLDAS/extracted"
  OutputDir          = "/d1/barlage/data/NLDAS/LDASIN/"
+ FORCING_TYPE       = "NLDAS"
  FULL_IC_FRQ        = 0
  RAINFALL_INTERP    = 0
  RESCALE_SHORTWAVE  = .FALSE.
