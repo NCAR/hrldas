@@ -3,6 +3,7 @@
  ENDDATE            = "2010-01-03_00"
  DATADIR            = "/d1/barlage/data/NARR/extracted"
  OUTPUTDIR          = "/d1/barlage/data/NARR/LDASIN/"
+ FORCING_TYPE       = "NARR"
  FULL_IC_FRQ        = 0
  RAINFALL_INTERP    = 0
  RESCALE_SHORTWAVE  = .FALSE.
