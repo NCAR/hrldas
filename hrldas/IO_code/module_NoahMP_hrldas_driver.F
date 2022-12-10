@@ -2621,6 +2621,7 @@ end subroutine land_driver_ini
 ! Call to Noah-MP driver same as surface_driver
 !------------------------------------------------------------------------
      sflx_count_sum = 0 ! Timing
+     ITIMESTEP = ITIME  ! update time count
 
    ! Timing information for SFLX:
     call system_clock(count=count_before_sflx, count_rate=clock_rate)
