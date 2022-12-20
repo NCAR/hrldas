@@ -383,10 +383,10 @@ module module_NoahMP_hrldas_driver
 
   INTEGER                                 ::  num_urban_atmosphere ! atmospheric levels including ZLVL for BEP/BEM models
 
-  REAL,    ALLOCATABLE                    ::  GMT       ! Hour of day (fractional) (needed for urban)
-  INTEGER, ALLOCATABLE                    ::  JULDAY    ! Integer day (needed for urban)
+  REAL                                    ::  GMT       ! Hour of day (fractional) (needed for urban)
+  INTEGER                                 ::  JULDAY    ! Integer day (needed for urban)
   REAL,    ALLOCATABLE, DIMENSION(:,:)    ::  HRANG     ! hour angle (needed for urban)
-  REAL,    ALLOCATABLE                    ::  DECLIN    ! declination (needed for urban)
+  REAL                                    ::  DECLIN    ! declination (needed for urban)
   INTEGER                                 ::  num_roof_layers = 4
   INTEGER                                 ::  num_road_layers = 4
   INTEGER                                 ::  num_wall_layers = 4
@@ -614,18 +614,17 @@ module module_NoahMP_hrldas_driver
 
   integer            :: sf_urban_physics = 0
   integer            :: use_wudapt_lcz   = 0 ! add for LCZ urban
-  integer            :: num_urban_ndm    = 1
-  integer            :: num_urban_ng     = 1
-  integer            :: num_urban_nwr    = 1
-  integer            :: num_urban_ngb    = 1
-  integer            :: num_urban_nf     = 1
-  integer            :: num_urban_nz     = 1
-  integer            :: num_urban_nbui   = 1
+  integer            :: num_urban_ndm    = 2
+  integer            :: num_urban_ng     = 10
+  integer            :: num_urban_nwr    = 10
+  integer            :: num_urban_ngb    = 10
+  integer            :: num_urban_nf     = 10
+  integer            :: num_urban_nz     = 18
+  integer            :: num_urban_nbui   = 15
   integer            :: num_urban_hi     = 15 
   real               :: urban_atmosphere_thickness = 2.0
 ! new urban var for green roof and solar panel
   integer            :: num_urban_ngr    = 10 ! = ngr_u in bep_bem.F
-  integer            :: urban_map_zgrd   = 1
 
   ! derived urban dimensions
   
@@ -638,6 +637,7 @@ module module_NoahMP_hrldas_driver
   integer            :: urban_map_wd
   integer            :: urban_map_gbd
   integer            :: urban_map_fbd
+  integer            :: urban_map_zgrd
 
   character(len=256) :: forcing_name_T = "T2D"
   character(len=256) :: forcing_name_Q = "Q2D"
@@ -714,7 +714,7 @@ module module_NoahMP_hrldas_driver
        soil_data_option, pedotransfer_option, crop_option, &
        sf_urban_physics,use_wudapt_lcz,num_urban_hi,urban_atmosphere_thickness, &
        num_urban_ndm,num_urban_ng,num_urban_nwr ,num_urban_ngb , &
-       num_urban_nf ,num_urban_nz,num_urban_nbui, &
+       num_urban_nf ,num_urban_nz,num_urban_nbui, num_urban_ngr,&
        split_output_count, & 
        khour, kday, zlvl, hrldas_setup_file, &
        spatial_filename, agdata_flnm, tdinput_flnm, &
@@ -963,9 +963,7 @@ module module_NoahMP_hrldas_driver
          urban_map_gbd = num_urban_ndm * num_urban_ngb * num_urban_nbui
          urban_map_fbd = num_urban_ndm * (num_urban_nz - 1)  * &
                          num_urban_nf  * num_urban_nbui
-
-! new urban var
-        urban_map_zgrd = num_urban_ndm * num_urban_ngr * num_urban_nz
+        urban_map_zgrd = num_urban_ndm * num_urban_ngr * num_urban_nz  ! for green roof
 
       end if     
       
@@ -1348,9 +1346,6 @@ IF(SF_URBAN_PHYSICS > 0 )  THEN  ! any urban model
   ALLOCATE ( rn_urb2d       (XSTART:XEND,                 YSTART:YEND) )  ! 
   ALLOCATE ( ts_urb2d       (XSTART:XEND,                 YSTART:YEND) )  ! 
   ALLOCATE ( HRANG          (XSTART:XEND,                 YSTART:YEND) )  !
-  ALLOCATE ( DECLIN                                                    )  !
-  ALLOCATE ( GMT                                                       )  !
-  ALLOCATE ( JULDAY                                                    )  !
   ALLOCATE ( frc_urb2d      (XSTART:XEND,                 YSTART:YEND) )  ! 
   ALLOCATE ( utype_urb2d    (XSTART:XEND,                 YSTART:YEND) )  ! 
   ALLOCATE ( lp_urb2d       (XSTART:XEND,                 YSTART:YEND) )  !
@@ -2621,7 +2616,7 @@ end subroutine land_driver_ini
 ! Call to Noah-MP driver same as surface_driver
 !------------------------------------------------------------------------
      sflx_count_sum = 0 ! Timing
-     ITIMESTEP = ITIME  ! update time step count
+     ITIMESTEP = ITIME  ! update time count
 
    ! Timing information for SFLX:
     call system_clock(count=count_before_sflx, count_rate=clock_rate)
