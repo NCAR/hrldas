@@ -68,11 +68,33 @@
                                                              !     only needed for urban options 2 and 3  [default = 2.0 ]
 							     !     must be less than zlvl/3
 
- NUM_URBAN_LAYERS = 360                                      !    Number of urban building layers
-                                                             !     only needed for urban options 2 and 3  [default = 360 ]
+ NUM_URBAN_NDM    = 2                                        !    Maximum number of urban street dimensions 
+                                                             !     only needed for urban options 2 and 3  [default = 2   ]
+
+ NUM_URBAN_NWR    = 10                                       !    Number of urban grid levels in the walls or roof
+                                                             !     only needed for urban options 2 and 3  [default = 10  ]
+
+ NUM_URBAN_NZ     = 18                                       !    Maximum number of urban vertical levels
+                                                             !     only needed for urban options 2 and 3  [default = 18  ]
+
+ NUM_URBAN_NG     = 10                                       !    Number of urban grid levels in the ground
+                                                             !     only needed for urban options 2 and 3  [default = 10  ]
 
  NUM_URBAN_HI     = 15                                       !    Number of urban atmosphere layers
                                                              !     only needed for urban options 2 and 3  [default = 15  ]
+
+ NUM_URBAN_NGB    = 10                                       !    Number of urban grid levels in the ground below buildings
+                                                             !     only needed for urban option 3  [default = 10  ]
+
+ NUM_URBAN_NF     = 10                                       !    Number of urban grid levels in the floors
+                                                             !     only needed for urban option 3  [default = 10  ]
+
+ NUM_URBAN_NBUI   = 15                                       !    Maximum number of building types in an urban class
+                                                             !     only needed for urban option 3  [default = 15  ], must <= NUM_URBAN_NZ
+
+ NUM_URBAN_NGR    = 10                                       !    Number of urban grid levels in the green roof
+                                                             !     only needed for urban option 3  [default = 10  ]
+
 
  FORCING_NAME_T                                              !    Forcing variable name for temperature   [default = "T2D"]
  FORCING_NAME_Q                                              !    Forcing variable name for spec humidity [default = "Q2D"]
@@ -131,7 +153,7 @@
                                                              !   4 -> BATS surface and subsurface runoff (free drainage)
                                                              !   5 -> Miguez-Macho&Fan groundwater scheme (Miguez-Macho et al. 2007 JGR; Fan et al. 2007 JGR)
 				                             !   6 -> Variable Infiltration Capacity Model surface runoff scheme (Wood et al., 1992, JGR) 
-                      					     !   7 -> Xiananjiang Infiltration and surface runoff scheme ((Jayawardena and Zhou, 2000)
+                      					     !   7 -> Xinanjiang Infiltration and surface runoff scheme ((Jayawardena and Zhou, 2000)
                       					     !   8 -> Dynamic VIC surface runoff scheme (Liang and Xie, 2001)
 
  DVIC_INFILTRATION_OPTION          = 1                       ! options for infiltration in dynamic VIC runoff scheme (only works when RUNOFF_OPTION=8, default=1)

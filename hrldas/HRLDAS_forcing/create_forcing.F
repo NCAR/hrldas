@@ -1,9 +1,17 @@
+module variables
+  type string
+    character(len=:), allocatable :: str
+  end type string
+end module variables
+
 program create_forcing
+  use netcdf
   use module_grib
   use module_geo_em
   use kwm_grid_utilities
   use kwm_date_utilities
   use kwm_string_utilities
+  use variables
   implicit none
 
   character(len=9), parameter :: version = "v20150518"
@@ -97,6 +105,7 @@ program create_forcing
   character(len=256) :: OutputDir
   character(len=256) :: geo_em_flnm
   character(len=256) :: initial_flnm
+  character(len=256) :: forcing_type
   integer            :: rainfall_interp ! 0=Nearest Neighbor; 1=more expensive, grid fill method
   integer            :: full_ic_frq     ! How frequently (hours) to make full surface initial conditions.
                                         ! FULL_IC_FRC==0 means do this only at the startdate.
@@ -133,7 +142,7 @@ program create_forcing
 
 
   namelist /files/ startdate, enddate, DataDir, OutputDir, & 
-       geo_em_flnm,                                        &
+       geo_em_flnm, forcing_type,                          &
        rainfall_interp, full_ic_frq, rescale_shortwave,    &
        update_snow, forcing_height_2d,                     &
        truncate_sw, expand_loop,                           &
@@ -204,6 +213,7 @@ program create_forcing
   endif
   read(12,files) 
   close(12)
+  write(*,*) "Forcing type: ",forcing_type
 
 !--------------------------------------------------------------------------
 ! Read Vtable
@@ -343,7 +353,6 @@ program create_forcing
 ! Not certain why the following is necessary since we are simulating over the WRF points
 !    so they should have been filled properly already, commenting (Barlage 20140529)
 !     call fillsm(vegfra%field, (geo_em%use /= geo_em%iswater), geo_em%idim, geo_em%jdim)
-
      call process(date, Tcurrent, Tprev, Tpost, geo_em, expand_loop)
      call process(date, Qcurrent, Qprev, Qpost, geo_em, expand_loop)
      call process(date, Pcurrent, Pprev, Ppost, geo_em, expand_loop)
@@ -469,7 +478,7 @@ program create_forcing
            call process(date, WEASDcurrent, WEASDprev, WEASDpost, geo_em, expand_loop);
            where (WEASDcurrent%field < 0) WEASDcurrent%field = 0
            call output_databuffer(ncid, WEASDcurrent)
-
+           
            call process(date, CANWTcurrent, CANWTprev, CANWTpost, geo_em, expand_loop);
            where (CANWTcurrent%field < 0) CANWTcurrent%field = 0
            call output_databuffer(ncid, CANWTcurrent)
@@ -498,7 +507,7 @@ program create_forcing
            call output_to_netcdf_vector(ncid, "ZS", "m", 4, zs)
 
            unmatched = count(STcurrent(1)%field < -1.e30 .and. geo_em%use /= geo_em%iswater)
-           if(unmatched > 0) then
+           if(unmatched > 1) then
              print *, "You have this many undefined soil points over valid land points: ", unmatched
              print *, "This tends to happen around coastlines or for unresolved islands in your forcing data"
       	     print *, "===== Consider increasing expand_loop in namelist ====="
@@ -916,7 +925,12 @@ contains
        return
     endif
 
-    call grib_file_search_now(current, datastruct, ierr)
+    if (forcing_type=="ERA5" .or. forcing_type=="NARR" .or. forcing_type=="NLDAS") then
+      call grib_file_search_now(current, datastruct, ierr)
+    elseif(forcing_type=="GLDAS") then
+      call netcdf_file_search_now(current, datastruct, ierr)
+    endif
+
 
     if (ierr == 0) then
 
@@ -931,7 +945,11 @@ contains
        if (current%label == "T2D") then
           ! Get the source model terrain data file.
           Zcurrent%hdate = current%hdate
-          call grib_file_search_now(Zcurrent, Zdatastruct, ierr)
+          if (forcing_type=="NARR" .or. forcing_type=="NLDAS") then
+            call grib_file_search_now(Zcurrent, Zdatastruct, ierr)
+          elseif(forcing_type=="ERA5" .or. forcing_type=="GLDAS") then
+            call netcdf_file_search_now(Zcurrent, Zdatastruct, ierr)
+          endif
           if (ierr /= 0) then
              stop "Source model terrain data not found"
           endif
@@ -940,7 +958,11 @@ contains
              stop "1) Source model terrain dimensions do not match source model temperature dimensions"
           endif
 	  where(Zdatastruct%data < 0.0) Zdatastruct%data = 0.0   ! Barlage 20140529
-          datastruct%data = datastruct%data - ( -0.0065 * Zdatastruct%data )
+          if (forcing_type=="ERA5") then ! ERA5 only provides geopotential, will need to convert to height by dividing g0 (9.806)
+            datastruct%data = datastruct%data - ( -0.0065 * Zdatastruct%data/9.806 )
+          else
+            datastruct%data = datastruct%data - ( -0.0065 * Zdatastruct%data )
+          endif
           deallocate(Zdatastruct%data)
           nullify(Zdatastruct%data)
        endif
@@ -951,7 +973,11 @@ contains
        if ( (current%label(1:6) == "STEMP_") .or. (current%label(1:6) == "SMOIS_") ) then
           ! Get the source model Land/Sea mask data.
           LANDSEA%hdate = current%hdate
-          call grib_file_search_now(LANDSEA, LANDSEAdatastruct, ierr)
+            if (forcing_type=="NARR" .or. forcing_type=="NLDAS") then
+              call grib_file_search_now(LANDSEA, LANDSEAdatastruct, ierr)
+            elseif(forcing_type=="ERA5" .or. forcing_type=="GLDAS") then
+              call netcdf_file_search_now(LANDSEA, LANDSEAdatastruct, ierr)
+            endif
           if (ierr /= 0) then
              print*, "Source model land/sea data not found; assuming a bitmap exists"
 	     LANDSEAdatastruct%data = -1   ! Initialize LS mask to -1, if not available we assume bitmap Barlage
@@ -1083,7 +1109,11 @@ contains
 
     ! No post buffer, so we must read some new data into a post buffer
 
-    call grib_file_search_future(current, post, datastruct, ierr)
+    if (forcing_type=="ERA5" .or. forcing_type=="NARR" .or. forcing_type=="NLDAS") then
+      call grib_file_search_future(current, post, datastruct, ierr)
+    elseif(forcing_type=="GLDAS") then
+      call netcdf_file_search_future(current, post, datastruct, ierr)
+    endif
 
     if (ierr /= 0) then
 
@@ -1109,7 +1139,11 @@ contains
     if (current%label == "T2D") then
        ! Get the source model terrain data file.
        Zcurrent%hdate = post%hdate
-       call grib_file_search_now(Zcurrent, Zdatastruct, ierr)
+       if (forcing_type=="NARR" .or. forcing_type=="NLDAS") then
+         call grib_file_search_now(Zcurrent, Zdatastruct, ierr)
+       elseif(forcing_type=="ERA5" .or. forcing_type=="GLDAS") then
+         call netcdf_file_search_now(Zcurrent, Zdatastruct, ierr)
+       endif
        if (ierr /= 0) then
           stop "Source model terrain data not found"
        endif
@@ -1117,7 +1151,11 @@ contains
           stop "2) Source model terrain dimensions do not match source model temperature dimensions"
        endif
        where(Zdatastruct%data < 0.0) Zdatastruct%data = 0.0   ! Barlage 20140529
-       datastruct%data = datastruct%data - ( -0.0065 * Zdatastruct%data )
+       if (forcing_type=="ERA5") then
+         datastruct%data = datastruct%data - ( -0.0065 * Zdatastruct%data/9.806 )
+       else
+         datastruct%data = datastruct%data - ( -0.0065 * Zdatastruct%data )
+       endif
        deallocate(Zdatastruct%data)
        nullify(Zdatastruct%data)
     endif
@@ -1217,7 +1255,11 @@ contains
           endif
           call latlon_to_ij(datastruct%proj, geo_em%lat(i,j), east_longitude, etax(i,j), etay(i,j))
 #else
-          call latlon_to_ij(datastruct%proj, geo_em%lat(i,j), geo_em%lon(i,j), etax(i,j), etay(i,j))
+          if (forcing_type=="ERA5") then
+            call latlon_to_ij(datastruct%proj, geo_em%lat(i,j), geo_em%lon(i,j)+360., etax(i,j), etay(i,j))
+          else
+            call latlon_to_ij(datastruct%proj, geo_em%lat(i,j), geo_em%lon(i,j), etax(i,j), etay(i,j))
+          endif
 #endif
 
           if (buff%remap_type=="bint") then
@@ -1294,7 +1336,7 @@ contains
 
     ! If we haven't found any matching data yet, then get out of here.
     if (ierr == 1) return
-
+    
     call get_single_datastruct_from_grib(trim(flnm), kdate, datastruct, ierr)
     post%hdate = kdate//":00:00"
     post%units = datastruct%units
@@ -1348,7 +1390,7 @@ contains
 
     call get_single_datastruct_from_grib(trim(flnm), kdate, datastruct, ierr)
     current%units = datastruct%units
-
+  if (forcing_type/="ERA5") then
     if ( current%label /= datastruct%field ) then
        write(*,'(/,1x,80("*"))')
        write(*,'(" *****  PROBLEM:  Requested field name does not match the name in the Vtable entry.")')
@@ -1361,8 +1403,124 @@ contains
        write(*,'(1x,80("*"),/)')
        stop
     endif
-
+  else 
+    if (current%label=="CANWAT")then
+      datastruct%data = 0
+      write(*,*) "ERA5 doesn't provide canopy water for initialization, set CANWAT = 0"
+    endif 
+  endif
   end subroutine grib_file_search_now
+
+!==============================================================================
+!==============================================================================
+
+  subroutine netcdf_file_search_future(current, post, datastruct, ierr)
+    use module_input_data_structure
+    implicit none
+    type(DataBuffer), intent(inout) :: current
+    type(DataBuffer), intent(inout) :: post
+    type(input_data_type), intent(out) :: datastruct
+    integer, intent(out) :: ierr
+
+    character(len=13) :: kdate
+    integer :: i, j
+    character(len=256) :: flnm
+
+    logical :: lexist
+
+    nullify(datastruct%data)
+
+    ierr = 1
+    kdate = current%hdate(1:13)
+
+    DATE_SEEK_LOOP : do i = 1, 12
+
+       TEMPLATE_LOOP : do j = 1, MAXTEMPLATE
+          if (current%flnm_template(j) /= " ") then
+             flnm = current%flnm_template(j)
+
+             call fill_template(flnm, kdate)
+
+             write(*,'(A)') "             "//":  Checking for file '"//trim(flnm)//"'"
+
+             inquire(file=trim(flnm), exist=lexist)
+             if ( .not. lexist ) then
+                inquire(file=trim(flnm)//".bz2", exist=lexist)
+                if (lexist) then
+                   flnm = trim(flnm)//".bz2"
+                endif
+             endif
+
+             if (lexist) then
+                write(*,'(A)') "             "//":  Found file "//trim(flnm)
+                ierr = 0
+                exit DATE_SEEK_LOOP
+             endif
+          endif
+       enddo TEMPLATE_LOOP
+
+       call geth_newdate(kdate, kdate, 1)
+
+    enddo DATE_SEEK_LOOP
+
+    ! If we haven't found any matching data yet, then get out of here.
+    if (ierr == 1) return
+
+    call get_single_datastruct_from_netcdf(trim(flnm),kdate,datastruct, ierr, current)
+    post%hdate = kdate//":00:00"
+    post%units = datastruct%units
+
+  end subroutine netcdf_file_search_future
+
+!==============================================================================
+!==============================================================================
+
+  subroutine netcdf_file_search_now(current, datastruct, ierr)
+    use module_input_data_structure
+    implicit none
+    type(DataBuffer), intent(inout)  :: current
+    type(input_data_type), intent(out) :: datastruct
+    integer, intent(out) :: ierr
+    character(len=256) :: flnm
+    logical :: lexist
+    integer :: j
+    character(len=13) :: kdate
+
+    kdate = current%hdate(1:13)
+
+    ierr = 1
+
+    TEMPLATE_LOOP : do j = 1, MAXTEMPLATE
+       if (current%flnm_template(j) /= " ") then
+          flnm = current%flnm_template(j)
+
+          call fill_template(flnm, kdate)
+
+          write(*,'(A)') "             "//":  Checking for file '"//trim(flnm)//"'"
+
+          inquire(file=trim(flnm), exist=lexist)
+          if ( .not. lexist ) then
+             inquire(file=trim(flnm)//".bz2", exist=lexist)
+             if (lexist) then
+                flnm = trim(flnm)//".bz2"
+             endif
+          endif
+
+          if (lexist) then
+             write(*,'(A)') "             "//":  Found file "//trim(flnm)
+             ierr = 0
+             exit TEMPLATE_LOOP
+          endif
+       endif
+    enddo TEMPLATE_LOOP
+    if (ierr == 1) return
+
+    nullify(datastruct%data) 
+
+    call get_single_datastruct_from_netcdf(trim(flnm), kdate, datastruct, ierr, current)
+    current%units = datastruct%units
+
+  end subroutine netcdf_file_search_now
 
 !==============================================================================
 !==============================================================================
@@ -1659,6 +1817,12 @@ contains
        ! where (datastruct%data <= 0) datastruct%data = -1.E36 
     endif
 
+    if ((datastruct%field == "SNOW").and.(datastruct%units == "m")) then!StS
+       ! Convert SWE from m to kg m{-2} (that is, mm)!StS
+       datastruct%data = datastruct%data * 1.E3!StS
+       datastruct%units = "mm"!StS
+    endif!StS
+
 !MB: want mm units in v3.7
 !KWM    if (description == "Plant Canopy Surface Water") then
 !    if (datastruct%field == "CANWAT") then
@@ -1716,6 +1880,20 @@ contains
           else 
              stop "Precip Problem A?"
           endif
+       elseif ( (datastruct%units == "m") ) then!StS
+          if (processing(1:12) == "Accumulation") then!StS
+             oldmax = maxval(datastruct%data, mask=(datastruct%data > -1.E25))!StS
+             write(*,'(13x, "Maxval adjusted from ", F12.6)', advance="no") oldmax!StS
+             where (datastruct%data > -1.E25) !StS
+                datastruct%data = datastruct%data*1000. * (1.0 / float(p2_seconds - p1_seconds))!StS
+             endwhere!StS
+             newmax = maxval(datastruct%data, mask=(datastruct%data > -1.E25))!StS
+             write(*,'(" to ", F12.6, ":    factor of ", I8)') newmax, NINT(oldmax/newmax)!StS
+             ! Change the units to mm/s, reflecting the rescaling we just did.!StS
+             datastruct%units = "mm/s"!StS
+          else !StS
+             stop "Precip Problem A?"!StS
+          endif!StS
        elseif ( (datastruct%units == "kg/m^2/s") ) then ! For example, GLDAS; MB v3.7
           datastruct%units = "mm/s"
        else
@@ -1723,7 +1901,239 @@ contains
        endif
     endif
 
+    if ((datastruct%field == "LWDOWN") .or. (datastruct%field == "SWDOWN")) then!StS
+       if ( (datastruct%units == "J m-2") .and. (processing(1:12) == "Accumulation") ) then!StS
+             datastruct%data = datastruct%data * (1.0 / float(p2_seconds - p1_seconds))!StS
+             datastruct%units = "W/m^2 "!StS
+       endif
+    endif
+
   end subroutine read_grib_unit
+
+!==============================================================================
+!==============================================================================
+
+ subroutine get_single_datastruct_from_netcdf(ncflnm, kdate, datastruct, ierr, current)
+    use module_grib
+    use netcdf
+    use kwm_string_utilities
+    use module_input_data_structure
+    implicit none
+    character(len=*), intent(in) :: ncflnm, kdate
+    type(DataBuffer), intent(in) :: current
+    ! define some variables for reading ncfile 
+    integer :: ncid
+    
+    ! define data structure
+    type(input_data_type), intent(out) :: datastruct
+    integer, intent(out) :: ierr
+    character(len=256) :: flnm
+
+    !-------------------------------------------------------------------------
+    flnm = ncflnm
+
+    call fill_template(flnm, kdate)
+    ! Open the netcdf file and read data record
+    ierr = nf90_open(flnm,nf90_nowrite,ncid)
+    if (ierr /= 0) then
+      if (ierr ==2) then
+         write(*, '("File does not exist: ",A)') trim(flnm)
+      else
+          write(*, '("Undetermined problem opening file: ", A)') trim(flnm)
+      endif
+      return
+      stop "get_single_datastruct_from_netcdf"
+    endif 
+    if (associated(datastruct%data)) then
+       deallocate(datastruct%data)
+       nullify(datastruct%data)
+    endif
+    if (current%label=="TERRAIN" .or. current%label=="LANDSEA") then 
+      if (forcing_type=="ERA5") then
+        call read_era5_netcdf_unit(ncid,datastruct,ierr,current)
+      elseif (forcing_type=="GLDAS" .or. forcing_type=="NLDAS") then
+        call read_gldas_netcdf_unit(ncid,datastruct,ierr,current)
+      endif
+    else
+      call read_gldas_netcdf_unit(ncid,datastruct,ierr,current)
+    endif
+    
+    if (ierr /= 0) then
+       print*, 'Returning error flag from get_single_datastruct_from_netcdf (1)'
+       print*, 'flnm = ', trim(flnm)
+       print*, 'ierr = ', ierr
+       if (associated(datastruct%data)) then
+          deallocate(datastruct%data)
+          nullify(datastruct%data)
+       endif
+       return
+    endif
+    ierr = nf90_close(ncid)
+  end subroutine get_single_datastruct_from_netcdf
+
+!==============================================================================
+!==============================================================================
+
+  subroutine read_gldas_netcdf_unit(ncid, datastruct, ierr, current)
+    use netcdf 
+    use variables
+    use module_input_data_structure
+    implicit none
+    integer, intent(in)  :: ncid
+    type(string) :: array(21)
+    type(input_data_type), intent(out) :: datastruct
+    type(DataBuffer), intent(in) :: current
+    integer, parameter :: NDIMS = 3, NRECS = 1
+    integer, parameter :: NLATS = 600, NLONS = 1440
+    character (len = *), parameter :: LAT_NAME = "lat"
+    character (len = *), parameter :: LON_NAME = "lon"
+    character (len = *), parameter :: REC_NAME = "time"
+    integer :: lon_dimid, lat_dimid, rec_dimid
+    integer :: start(NDIMS), count(NDIMS)
+    real :: lats(NLATS), lons(NLONS)
+    integer :: ierr, lon_varid, lat_varid
+    integer :: astat
+    character (len = 256) :: VAR_NAME
+    integer :: varid
+    integer :: dimids(NDIMS)
+    ! Read the data into these arrays
+    real :: var_in(NLONS,NLATS)
+    integer :: ndims_in, nvars_in, ngatts_in, unlimdimid_in
+    integer :: lat, lon    
+    array = [string('Tair_f_inst'),string('Q_f_inst'),string('U_f_inst'),string("V_f_inst"),string("Psurf_f_inst"), & 
+             string("Precf_tavg"),string("SWdown_f_tavg"),string("LWdown_f_tavg"),string("GLDAS_elevation"),&
+             string("AvgSurfT_inst"),string("SWE_inst"),string("CanopInt_inst"),&
+             string("SoilMoi0_10cm_inst"),string("SoilMoi10_40cm_inst"),string("SoilMoi40_100cm_inst"),string("SoilMoi100_200cm_inst"),&
+             string("SoilTMP0_10cm_inst"),string("SoilTMP10_40cm_inst"),string("SoilTMP40_100cm_inst"),string("SoilTMP100_200cm_inst"),&
+             string("GLDAS_mask")]
+    nullify(datastruct%data)
+    ! Match the netcdf attribute with one of the Vtable entries
+    VARSEARCH : do j = 1, vtable_count 
+    if (current%label == vtable(j)%name) then 
+        VAR_NAME = array(j)%str
+        datastruct%field  = vtable(j)%name
+        datastruct%desc   = vtable(j)%desc
+        datastruct%units  = vtable(j)%units
+        exit VARSEARCH 
+    endif 
+          if (j == vtable_count) then
+             write(*,'(/," ***** ERROR *****")')
+             write(*,'(" *****       NetCDF data does not match a Vtable entry")')
+             stop "Edition 1"
+          endif
+    enddo VARSEARCH 
+    datastruct%nx = NLONS
+    datastruct%ny = NLATS
+    call map_set(PROJ_LATLON, datastruct%proj, lat1=-59.875, lon1=-179.875, &
+         latinc=0.25, loninc=0.25, knowni=1.0, knownj=1.0)
+    if (associated(datastruct%data)) then
+       deallocate(datastruct%data)
+       nullify(datastruct%data)
+    endif
+    allocate(datastruct%data(datastruct%nx,datastruct%ny), stat=astat)
+    if (astat /= 0) stop "Problem (A) allocating datastruct%data"
+    ierr = nf90_inq_varid(ncid, VAR_NAME, varid)
+    ierr = nf90_get_var(ncid, varid, var_in)
+    datastruct%data = var_in 
+! Some modification for SMOIS unit
+    if (datastruct%field(1:6) == "SMOIS_") then
+       ! If units are kg m{-2} (that is, mm), convert to volumetric
+     if ( (datastruct%units == "kg/m^2") .or. (datastruct%units == "mm") ) then
+       print *, "I am in this loop: if units == kg/m^2"
+       write(*,*) "Converting soil water content to volumetric using thickness[m]: ", &
+           (datastruct%layer2 - datastruct%layer1)
+       datastruct%data = datastruct%data * 1.E-3 / (datastruct%layer2 - datastruct%layer1)
+       datastruct%units = "m^3/m^3"
+     elseif (datastruct%units == "gldas") then  ! hack to take care of bad units in GLDAS MBv3.7
+       print *, "I am in this loop: if units == glads"
+       if(datastruct%field(1:7) == "SMOIS_1") datastruct%layer1 = 0
+       if(datastruct%field(1:7) == "SMOIS_1") datastruct%layer2 = 0.1
+       if(datastruct%field(1:7) == "SMOIS_2") datastruct%layer1 = 0.1
+       if(datastruct%field(1:7) == "SMOIS_2") datastruct%layer2 = 0.4
+       if(datastruct%field(1:7) == "SMOIS_3") datastruct%layer1 = 0.4
+       if(datastruct%field(1:7) == "SMOIS_3") datastruct%layer2 = 1.0
+       if(datastruct%field(1:7) == "SMOIS_4") datastruct%layer1 = 1.0
+       if(datastruct%field(1:7) == "SMOIS_4") datastruct%layer2 = 2.0
+       write(*,*) "Converting soil water content to volumetric using thickness[m]: ", &
+           (datastruct%layer2 - datastruct%layer1)
+       datastruct%data = datastruct%data * 1.E-3 / (datastruct%layer2 - datastruct%layer1)
+       datastruct%units = "m^3/m^3"
+     endif
+    endif
+
+    if (ierr /=0 ) then
+        print *, "Can't read variable: ", VAR_NAME
+    else 
+        print *, "Successfully read variable: ", VAR_NAME
+    endif
+  end subroutine read_gldas_netcdf_unit
+
+!==============================================================================
+!==============================================================================
+
+  subroutine read_era5_netcdf_unit(ncid, datastruct, ierr, current)
+    use netcdf 
+    use variables
+    use module_input_data_structure
+    implicit none
+    integer, intent(in)  :: ncid
+    type(string) :: array(3)
+    type(input_data_type), intent(out) :: datastruct
+    type(DataBuffer), intent(in) :: current
+    integer, parameter :: NDIMS = 3, NRECS = 1
+    integer, parameter :: NLATS = 1801, NLONS = 3600
+    character (len = *), parameter :: LAT_NAME = "lat"
+    character (len = *), parameter :: LON_NAME = "lon"
+    character (len = *), parameter :: REC_NAME = "time"
+    integer :: lon_dimid, lat_dimid, rec_dimid
+    integer :: start(NDIMS), count(NDIMS)
+    real :: lats(NLATS), lons(NLONS)
+    integer :: ierr, lon_varid, lat_varid
+    integer :: astat
+    character (len = 256) :: VAR_NAME
+    integer :: varid
+    integer :: dimids(NDIMS)
+    ! Read the data into these arrays
+    real :: var_in(NLONS,NLATS)
+    integer :: ndims_in, nvars_in, ngatts_in, unlimdimid_in
+    integer :: lat, lon    
+    array = [string('Tair_f_inst'),string('z'),string('lsm')] ! Only z (for geopotential) and lsm (for land-sea mask) are needed 
+    nullify(datastruct%data)
+    ! Match the netcdf attribute with one of the Vtable entries
+    VARSEARCH : do j = 0, vtable_count 
+    if (current%label == vtable(j)%name) then 
+        VAR_NAME = array(j)%str
+        datastruct%field  = vtable(j)%name
+        datastruct%desc   = vtable(j)%desc
+        datastruct%units  = vtable(j)%units
+        exit VARSEARCH 
+    endif 
+          if (j == vtable_count) then
+             write(*,'(/," ***** ERROR *****")')
+             write(*,'(" *****       NetCDF data does not match a Vtable entry")')
+             stop "Edition 1"
+          endif
+    enddo VARSEARCH 
+    datastruct%nx = NLONS
+    datastruct%ny = NLATS
+    call map_set(PROJ_LATLON, datastruct%proj, lat1=90.00, lon1=0.00, &
+         latinc=-0.1, loninc=0.1, knowni=1.0, knownj=1.0)
+    if (associated(datastruct%data)) then
+       deallocate(datastruct%data)
+       nullify(datastruct%data)
+    endif
+    allocate(datastruct%data(datastruct%nx,datastruct%ny), stat=astat)
+    if (astat /= 0) stop "Problem (A) allocating datastruct%data"
+    ierr = nf90_inq_varid(ncid, VAR_NAME, varid)
+    ierr = nf90_get_var(ncid, varid, var_in)
+    datastruct%data = var_in 
+
+    if (ierr /=0 ) then
+        print *, "Can't read variable: ", VAR_NAME
+    else 
+        print *, "Successfully read variable: ", VAR_NAME
+    endif
+  end subroutine read_era5_netcdf_unit
 
 !==============================================================================
 !==============================================================================
