@@ -638,6 +638,7 @@ module module_NoahMP_hrldas_driver
   integer            :: urban_map_gbd
   integer            :: urban_map_fbd
   integer            :: urban_map_zgrd
+  integer            :: max_urban_dim  ! C. He: maximum urban dimension for urban variable
 
   character(len=256) :: forcing_name_T = "T2D"
   character(len=256) :: forcing_name_Q = "Q2D"
@@ -963,7 +964,11 @@ module module_NoahMP_hrldas_driver
          urban_map_gbd = num_urban_ndm * num_urban_ngb * num_urban_nbui
          urban_map_fbd = num_urban_ndm * (num_urban_nz - 1)  * &
                          num_urban_nf  * num_urban_nbui
-        urban_map_zgrd = num_urban_ndm * num_urban_ngr * num_urban_nz  ! for green roof
+         urban_map_zgrd = num_urban_ndm * num_urban_ngr * num_urban_nz  ! for green roof
+         ! C. He: compute maximum urban dimension
+         max_urban_dim = max(num_urban_hi,urban_map_zrd,urban_map_zwd,urban_map_gd,&
+                             urban_map_zd,urban_map_zdf,urban_map_bd,urban_map_wd, &
+                             urban_map_gbd,urban_map_fbd,urban_map_zgrd)
 
       end if     
       
@@ -2049,9 +2054,9 @@ ENDIF
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "HI_URB2D"  ,     HI_URB2D  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LF_URB2D"  ,     LF_URB2D  )
 
-     ENDIF
+!     ENDIF
          
-     IF(SF_URBAN_PHYSICS == 1 ) THEN  ! single layer urban model
+!     IF(SF_URBAN_PHYSICS == 1 ) THEN  ! single layer urban model
          
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CMR_SFCDIF" ,    CMR_SFCDIF )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CHR_SFCDIF" ,    CHR_SFCDIF )
@@ -2083,9 +2088,9 @@ ENDIF
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FLXHUMB_URB2D"  ,FLXHUMB_URB2D  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FLXHUMG_URB2D"  ,FLXHUMG_URB2D  )
 
-     ENDIF
+!     ENDIF
 
-     IF(SF_URBAN_PHYSICS == 2 .or. SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
+!     IF(SF_URBAN_PHYSICS == 2 .or. SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
          
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TRB_URB4D"  ,    TRB_URB4D  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TW1_URB4D"  ,    TW1_URB4D  )
@@ -2096,9 +2101,9 @@ ENDIF
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "SFR_URB3D"  ,    SFR_URB3D  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "SFG_URB3D"  ,    SFG_URB3D  )
 
-     ENDIF
+!     ENDIF
 
-     IF(SF_URBAN_PHYSICS == 3) THEN  ! BEM urban model
+!     IF(SF_URBAN_PHYSICS == 3) THEN  ! BEM urban model
          
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "TLEV_URB3D"  ,   TLEV_URB3D  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "QLEV_URB3D"  ,   QLEV_URB3D  )
@@ -3076,7 +3081,7 @@ subroutine lsm_restart()
 
   call prepare_restart_file (trim(outdir), version, igrid, llanduse, olddate, startdate, & 
        ixfull, jxfull, ixpar, jxpar, xstartpar, ystartpar,                               &
-       nsoil, nsnow, num_urban_hi, dx, dy, truelat1, truelat2, mapproj, lat1, lon1,   &
+       nsoil, nsnow, max_urban_dim, dx, dy, truelat1, truelat2, mapproj, lat1, lon1,   &
        cen_lon, iswater, ivgtyp)
   
   call add_to_restart(TSLB      , "SOIL_T", layers="SOIL")
@@ -3181,9 +3186,9 @@ subroutine lsm_restart()
       call add_to_restart(     HI_URB2D  ,      "HI_URB2D", layers="URBN")
       call add_to_restart(     LF_URB2D  ,      "LF_URB2D", layers="URBN")
 
-  ENDIF
+!  ENDIF
          
-  IF(SF_URBAN_PHYSICS == 1 ) THEN  ! single layer urban model
+!  IF(SF_URBAN_PHYSICS == 1 ) THEN  ! single layer urban model
          
       call add_to_restart(    CMR_SFCDIF ,     "CMR_SFCDIF" )
       call add_to_restart(    CHR_SFCDIF ,     "CHR_SFCDIF" )
@@ -3215,9 +3220,9 @@ subroutine lsm_restart()
       call add_to_restart(FLXHUMB_URB2D  , "FLXHUMB_URB2D" )
       call add_to_restart(FLXHUMG_URB2D  , "FLXHUMG_URB2D" )
 
-  ENDIF
+!  ENDIF
 
-  IF(SF_URBAN_PHYSICS == 2 .or. SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
+!  IF(SF_URBAN_PHYSICS == 2 .or. SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
          
       call add_to_restart(    TRB_URB4D  ,     "TRB_URB4D", layers="URBN" )
       call add_to_restart(    TW1_URB4D  ,     "TW1_URB4D", layers="URBN" )
@@ -3228,9 +3233,9 @@ subroutine lsm_restart()
       call add_to_restart(    SFR_URB3D  ,     "SFR_URB3D", layers="URBN" )
       call add_to_restart(    SFG_URB3D  ,     "SFG_URB3D", layers="URBN" )
 
-  ENDIF
+!  ENDIF
 
-  IF(SF_URBAN_PHYSICS == 3) THEN  ! BEM urban model
+!  IF(SF_URBAN_PHYSICS == 3) THEN  ! BEM urban model
          
       call add_to_restart(   TLEV_URB3D  ,    "TLEV_URB3D", layers="URBN" )
       call add_to_restart(   QLEV_URB3D  ,    "QLEV_URB3D", layers="URBN" )
