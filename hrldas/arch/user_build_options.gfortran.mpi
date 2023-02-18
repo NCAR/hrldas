@@ -1,16 +1,18 @@
 
 #=============================================================================================
-#  Options for Linux with gnu gfortran serial
+#  Options for Linux with gnu gfortran MPI
 #  Please change the library paths according to your computer setup
 #=============================================================================================
 
- COMPILERF90    =       gfortran
+ COMPILERF90    =       mpif90
+ MPPFLAG        =       YES
  FREESOURCE     =       -ffree-form  -ffree-line-length-none
  F90FLAGS       =       -g -fconvert=big-endian -fbounds-check -fno-range-check -fallow-argument-mismatch
- MODFLAG        =       -I
+ MODFLAG        =       -I ../MPP
+ HYDRO_LIB      =       ../MPP/mpp_land.o ../MPP/CPL_WRF.o
  LDFLAGS        =
  CPP            =       cpp
- CPPFLAGS       =       -P -traditional -D_GFORTRAN_ # -DSPATIAL_SOIL
+ CPPFLAGS       =       -P -traditional -DMPP_LAND -D_GFORTRAN_ # -DSPATIAL_SOIL
  LIBS           =
  LIBJASPER      =      -ljasper
  INCJASPER      =      -I/usr/include/jasper
