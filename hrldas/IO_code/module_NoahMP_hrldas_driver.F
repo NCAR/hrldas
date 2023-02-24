@@ -2327,7 +2327,7 @@ ENDIF
                  QLATXY     , qslatxy , QRFXY     , qrfsxy    ,                 &
                  deeprechxy , rechxy  , QSPRINGXY , qspringsxy,                 &
                  rechclim   ,                                                   &
-                 ids,ide, jds,jde, kds,kde,                                     &
+                 ids,ide+1, jds,jde+1, kds,kde,                                 &
                  ims,ime, jms,jme, kms,kme,                                     &
                  ims,ime, jms,jme, kms,kme,                                     &
                  its,ite, jts,jte, kts,kte )
