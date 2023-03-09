@@ -376,7 +376,7 @@ use module_wrf_error
 
    REAL, INTENT(IN)    :: XLAT ! latitude                               [deg]
    REAL, INTENT(IN)    :: DELT ! time step                              [s]
-   REAL, INTENT(IN)    :: CHS,CHS2 ! CH*U at za and 2 m             [m/s]
+   REAL, INTENT(INOUT) :: CHS,CHS2 ! CH*U at za and 2 m             [m/s]
 
    REAL, INTENT(INOUT) :: SSGD ! downward direct short wave radiation   [W/m/m]
    REAL, INTENT(INOUT) :: SSGQ ! downward diffuse short wave radiation  [W/m/m]
@@ -1534,7 +1534,7 @@ ENDIF
    CD = 0.4**2./(ALOG(Z/Z0)-PSIM)**2.
 !
 !m   CH = 0.4**2./(ALOG(Z/Z0)-PSIM)/(ALOG(Z/Z0H)-PSIH)
-!m   CHS = 0.4*UST/(ALOG(Z/Z0H)-PSIH)
+   CHS = 0.4*UST/(ALOG(Z/Z0H)-PSIH) !cenlin: uncomment to allow CHS2 calc for offline hrldas-urban
 !m   TS = TA + FLXTH/CH/UA    ! surface potential temp (flux temp)
 !m   QS = QA + FLXHUM/CH/UA   ! surface humidity
 !
@@ -1558,7 +1558,7 @@ ENDIF
       PSIH2 = 2.*ALOG((1.+X*X)/2.)
    END IF
 !
-!m   CHS2 = 0.4*UST/(ALOG(2./Z0H)-PSIH2)
+   CHS2 = 0.4*UST/(ALOG(2./Z0H)-PSIH2) !cenlin: uncomment to allow CHS2 calc for offline hrldas-urban
 !
 
    XXX10 = (10./Z)*XXX
