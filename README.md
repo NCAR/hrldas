@@ -1,3 +1,3 @@
-# hrldas
+# HRLDAS/Noah-MP version 4.2 release
 
-This is an old version consistent with the WRF version 4.2.
+This branch is to archive the HRLDAS/Noah-MP version 4.2 release, which is consistent with the Noah-MP code released in WRF version 4.2.
