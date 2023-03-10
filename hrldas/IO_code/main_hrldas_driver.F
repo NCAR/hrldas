@@ -10,8 +10,8 @@ program Noah_hrldas_driver
 #endif
 
    implicit none
-   integer :: ITIME, NTIME
-
+   integer :: ITIME,NTIME
+   
    call land_driver_ini(NTIME)
    
    do ITIME = 0, NTIME
