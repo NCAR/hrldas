@@ -1534,7 +1534,7 @@ ENDIF
    CD = 0.4**2./(ALOG(Z/Z0)-PSIM)**2.
 !
 !m   CH = 0.4**2./(ALOG(Z/Z0)-PSIM)/(ALOG(Z/Z0H)-PSIH)
-   CHS = 0.4*UST/(ALOG(Z/Z0H)-PSIH) !cenlin: uncomment to allow CHS2 calc for offline hrldas-urban
+   CHS = 0.4*UST/(ALOG(Z/Z0H)-PSIH) ! cenlin 03/09/2023: uncomment to allow CHS calc for offline hrldas-urban
 !m   TS = TA + FLXTH/CH/UA    ! surface potential temp (flux temp)
 !m   QS = QA + FLXHUM/CH/UA   ! surface humidity
 !
@@ -1558,7 +1558,7 @@ ENDIF
       PSIH2 = 2.*ALOG((1.+X*X)/2.)
    END IF
 !
-   CHS2 = 0.4*UST/(ALOG(2./Z0H)-PSIH2) !cenlin: uncomment to allow CHS2 calc for offline hrldas-urban
+   CHS2 = 0.4*UST/(ALOG(2./Z0H)-PSIH2) ! cenlin 03/09/2023: uncomment to allow CHS2 calc for offline hrldas-urban
 !
 
    XXX10 = (10./Z)*XXX
@@ -1947,7 +1947,7 @@ ENDIF
 !
 !===============================================================================
    SUBROUTINE urban_param_init(DZR,DZB,DZG,num_soil_layers, &
-                               sf_urban_physics,use_wudapt_lcz)
+                               sf_urban_physics,use_wudapt_lcz,IRI_URBAN) ! cenlin: added for use in noahmp driver
 !                              num_roof_layers,num_wall_layers,num_road_layers)
 
    IMPLICIT NONE
@@ -1962,6 +1962,7 @@ ENDIF
    REAL, DIMENSION(1:num_soil_layers), INTENT(INOUT) :: DZG
    INTEGER,                            INTENT(IN)    :: SF_URBAN_PHYSICS
    INTEGER,                            INTENT(IN)    :: USE_WUDAPT_LCZ !AndreaLCZ
+   INTEGER,                            INTENT(INOUT) :: IRI_URBAN ! cenlin added
 
    INTEGER :: LC, K
    INTEGER :: IOSTATUS, ALLOCATE_STATUS
@@ -2375,6 +2376,9 @@ ENDIF
    enddo READLOOP
 
    CLOSE(11)
+
+   ! cenlin: pass IRI_SCHEME value to NoahmpIO variable IRI_URBAN
+   IRI_URBAN = IRI_SCHEME
 
    ! Assign a few table values that do not need to come from URBPARM.TBL
 

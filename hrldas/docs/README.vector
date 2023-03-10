@@ -120,7 +120,7 @@ You will need to specify their location in the HRLDAS namelist later.
        - leaf area index (will be used to initialize dynamic vegetation)
        - land mask (set to 1 for land points)
        - vegetation type (use USGS or MODIS categories; need to set some global attribute below)
-       - soil texture type (check SOILPARM.TBL if you don't know the texture types)
+       - soil texture type (check NoahmpTable.TBL if you don't know the texture types)
 
 2. Go to the section titled "State initialization here"
      
