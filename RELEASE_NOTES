@@ -1,4 +1,124 @@
 =========================================================================
+======================= HRLDAS version 5.0 Release Notes ================
+=========================================================================
+
+LSM capabilities/enhancements
+----------------------------------
+
+(1) Modernization/refactoring:
+
+- Major re-structure/refactoring of the entire HRLDAS/Noah-MP code with modern Fortran standards without physics changes.
+
+
+LSM bug fixes
+----------------------------------
+
+- None
+
+External modules capabilities/enhancements
+-------------------------------------------
+
+- None
+
+Driver capabilities/enhancements
+----------------------------------
+
+- Refactored driver to work with the modernized Noah-MP version 5.0
+
+Driver bug fixes
+----------------------------------
+
+- None
+
+=========================================================================
+======================= HRLDAS WRFv4.5 Release Notes =====================
+=========================================================================
+
+LSM capabilities/enhancements
+----------------------------------
+
+(1) Urban modeling:
+
+- Update the local climate zone numbers
+
+(2) Canopy heat storage:
+
+- bring hard-coded tunable canopy heat capacity parameter to MPTABLE
+
+LSM bug fixes
+----------------------------------
+
+- Several bug fixes in urban, runoff, canopy, crop processes
+
+External modules capabilities/enhancements
+-------------------------------------------
+
+- None
+
+Driver capabilities/enhancements
+----------------------------------
+
+- None
+
+Driver bug fixes
+----------------------------------
+
+- None
+
+
+=========================================================================
+======================= HRLDAS WRFv4.4 Release Notes =====================
+=========================================================================
+
+LSM capabilities/enhancements
+----------------------------------
+
+(1) Tile drainage:
+
+- Add new tile drainage physics and options
+
+(2) Snowpack process enhancement:
+
+- Improved snow viscosity to enhance snowpack compaction
+
+(3) Canopy heat storage:
+
+- add canopy heat storage in vegetation temperature calculation
+
+(4) Runoff scheme:
+
+- Updated formulation in runoff option =1 (TOPMODEL with groundwater)
+
+(5) Soil processes:
+
+- Add new capabilities to allow using a different soil timestep with main Noah-MP timestep using namelist control
+
+(6) Input/output:
+
+- Add new capabilities to output additional detailed Noah-MP water budget terms using namelist control
+
+LSM bug fixes
+----------------------------------
+
+- Several bug fixes in inout variables, energy, water, and canopy processes
+
+External modules capabilities/enhancements
+-------------------------------------------
+
+- None
+
+Driver capabilities/enhancements
+----------------------------------
+
+- None
+
+Driver bug fixes
+----------------------------------
+
+- None
+
+
+=========================================================================
 ======================= HRLDAS WRFv4.3 Release Notes =====================
 =========================================================================
 
