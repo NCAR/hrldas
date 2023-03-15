@@ -2000,7 +2000,7 @@ contains
     real :: var_in(NLONS,NLATS)
     integer :: ndims_in, nvars_in, ngatts_in, unlimdimid_in
     integer :: lat, lon    
-    array = [string('Tair_f_inst'),string('Q_f_inst'),string('U_f_inst'),string("V_f_inst"),string("Psurf_f_inst"), & 
+    array = [string('Tair_f_inst'),string('Qair_f_inst'),string('U_f_inst'),string("V_f_inst"),string("Psurf_f_inst"), & 
              string("Precf_tavg"),string("SWdown_f_tavg"),string("LWdown_f_tavg"),string("GLDAS_elevation"),&
              string("AvgSurfT_inst"),string("SWE_inst"),string("CanopInt_inst"),&
              string("SoilMoi0_10cm_inst"),string("SoilMoi10_40cm_inst"),string("SoilMoi40_100cm_inst"),string("SoilMoi100_200cm_inst"),&
