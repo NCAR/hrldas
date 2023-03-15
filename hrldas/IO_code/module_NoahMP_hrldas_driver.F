@@ -1,17 +1,17 @@
 module module_NoahMP_hrldas_driver
 
-  USE NoahmpIOVarType
-  USE NoahmpIOVarInitMod
-  USE NoahmpReadNamelistMod
-  USE NoahmpReadTableMod
-  USE module_hrldas_netcdf_io
-  USE NoahmpInitMainMod
-  USE NoahmpGroundwaterInitMod
-  USE NoahmpDriverMainMod
-  USE GroundWaterMmfMod, only : WTABLE_mmf_noahmp, LATERALFLOW, UPDATEWTD
-  USE NoahmpUrbanDriverMainMod, only : noahmp_urban
-  USE module_sf_urban,     only : urban_param_init, urban_var_init
-  USE module_date_utilities
+  use NoahmpIOVarType
+  use NoahmpIOVarInitMod
+  use NoahmpReadNamelistMod
+  use NoahmpReadTableMod
+  use module_hrldas_netcdf_io
+  use NoahmpInitMainMod
+  use NoahmpGroundwaterInitMod
+  use NoahmpDriverMainMod
+  use GroundWaterMmfMod,        only : WTABLE_mmf_noahmp, LATERALFLOW, UPDATEWTD
+  use NoahmpUrbanDriverMainMod, only : noahmp_urban
+  use module_sf_urban,          only : urban_param_init, urban_var_init
+  use module_date_utilities
 
 #ifdef MPP_LAND
   use module_mpp_land, only: MPP_LAND_PAR_INI, mpp_land_init, getLocalXY, mpp_land_bcast_char
@@ -19,7 +19,7 @@ module module_NoahMP_hrldas_driver
   use module_cpl_land, only: cpl_land_init
 #endif
 
-  IMPLICIT NONE
+  implicit none
 
 #ifdef MPP_LAND
   include "mpif.h"
@@ -27,7 +27,7 @@ module module_NoahMP_hrldas_driver
 
 #ifdef WRF_HYDRO
    integer :: forc_typ, snow_assim, HRLDAS_ini_typ
-   REAL,    allocatable, DIMENSION(:,:)   :: etpnd, greenfrac, prcp0
+   real,    allocatable, dimension(:,:)   :: etpnd, greenfrac, prcp0
    real :: etpnd1
    character(len=19) :: forcDate
    character(len = 256):: GEO_STATIC_FLNM
@@ -53,15 +53,14 @@ contains
 
   subroutine land_driver_ini(NTIME_out,wrfits,wrfite,wrfjts,wrfjte)
 
-     USE module_bep_bem_helper, ONLY: nurbm ! C.He 03/31/2021: add for bep_bem treatment in WRFv4.3
-     USE module_domain, ONLY : domain ! for groundwater_init WRF
+    use module_bep_bem_helper, only: nurbm ! C.He 03/31/2021: add for bep_bem treatment in WRFv4.3
+    use module_domain,         only : domain ! for groundwater_init WRF
 
-     implicit  none
-     integer:: NTIME_out
+    implicit none
 
-     REAL :: max_utype_urb2d
-     TYPE (domain)          :: grid
-
+    integer      :: NTIME_out
+    real         :: max_utype_urb2d
+    type(domain) :: grid
     ! initilization for stand alone parallel code.
     integer, optional, intent(in) :: wrfits,wrfite,wrfjts,wrfjte
     
@@ -87,35 +86,32 @@ contains
 ! assignment, "nurbm", is actually USE associated from the BEP BEM 
 ! helper module.
 !-----------------------------------------------------------------------
-   IF ( NoahmpIO%use_wudapt_lcz .EQ. 0 ) THEN
+    if ( NoahmpIO%use_wudapt_lcz == 0 ) then
       nurbm = 3
-   ELSE IF ( NoahmpIO%use_wudapt_lcz .EQ. 1 ) THEN
+    elseif ( NoahmpIO%use_wudapt_lcz == 1 ) then
       nurbm = 11
-   END IF
+    endif
  
-  ! derived urban dimensions
-  
-      if (NoahmpIO%sf_urban_physics > 0 ) then
-      
-         NoahmpIO%urban_map_zrd  = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_nwr * NoahmpIO%num_urban_nz
-         NoahmpIO%urban_map_zwd  = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_nwr * NoahmpIO%num_urban_nz * &
-                                   NoahmpIO%num_urban_nbui
-         NoahmpIO%urban_map_gd   = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_ng
-         NoahmpIO%urban_map_zd   = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_nz  * NoahmpIO%num_urban_nbui
-         NoahmpIO%urban_map_zdf  = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_nz 
-         NoahmpIO%urban_map_bd   = NoahmpIO%num_urban_nz  * NoahmpIO%num_urban_nbui
-         NoahmpIO%urban_map_wd   = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_nz  * NoahmpIO%num_urban_nbui
-         NoahmpIO%urban_map_gbd  = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_ngb * NoahmpIO%num_urban_nbui
-         NoahmpIO%urban_map_fbd  = NoahmpIO%num_urban_ndm * (NoahmpIO%num_urban_nz - 1)  * &
-                                   NoahmpIO%num_urban_nf  * NoahmpIO%num_urban_nbui
-         NoahmpIO%urban_map_zgrd = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_ngr * NoahmpIO%num_urban_nz  ! for green roof
-         ! C. He: compute maximum urban dimension
-         NoahmpIO%max_urban_dim  = max(NoahmpIO%num_urban_hi, NoahmpIO%urban_map_zrd, NoahmpIO%urban_map_zwd, &
-                                       NoahmpIO%urban_map_gd, NoahmpIO%urban_map_zd,  NoahmpIO%urban_map_zdf, &
-                                       NoahmpIO%urban_map_bd, NoahmpIO%urban_map_wd,  NoahmpIO%urban_map_gbd, &
-                                       NoahmpIO%urban_map_fbd,NoahmpIO%urban_map_zgrd)
-
-      end if     
+  ! derived urban dimensions 
+    if (NoahmpIO%sf_urban_physics > 0 ) then
+       NoahmpIO%urban_map_zrd  = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_nwr * NoahmpIO%num_urban_nz
+       NoahmpIO%urban_map_zwd  = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_nwr * NoahmpIO%num_urban_nz * &
+                                 NoahmpIO%num_urban_nbui
+       NoahmpIO%urban_map_gd   = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_ng
+       NoahmpIO%urban_map_zd   = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_nz  * NoahmpIO%num_urban_nbui
+       NoahmpIO%urban_map_zdf  = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_nz 
+       NoahmpIO%urban_map_bd   = NoahmpIO%num_urban_nz  * NoahmpIO%num_urban_nbui
+       NoahmpIO%urban_map_wd   = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_nz  * NoahmpIO%num_urban_nbui
+       NoahmpIO%urban_map_gbd  = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_ngb * NoahmpIO%num_urban_nbui
+       NoahmpIO%urban_map_fbd  = NoahmpIO%num_urban_ndm * (NoahmpIO%num_urban_nz - 1)  * &
+                                 NoahmpIO%num_urban_nf  * NoahmpIO%num_urban_nbui
+       NoahmpIO%urban_map_zgrd = NoahmpIO%num_urban_ndm * NoahmpIO%num_urban_ngr * NoahmpIO%num_urban_nz  ! for green roof
+       ! C. He: compute maximum urban dimension
+       NoahmpIO%max_urban_dim  = max(NoahmpIO%num_urban_hi, NoahmpIO%urban_map_zrd, NoahmpIO%urban_map_zwd, &
+                                     NoahmpIO%urban_map_gd, NoahmpIO%urban_map_zd,  NoahmpIO%urban_map_zdf, &
+                                     NoahmpIO%urban_map_bd, NoahmpIO%urban_map_wd,  NoahmpIO%urban_map_gbd, &
+                                     NoahmpIO%urban_map_fbd,NoahmpIO%urban_map_zgrd)
+    endif     
       
 !----------------------------------------------------------------------
 ! Initialize gridded domain
@@ -123,7 +119,7 @@ contains
 
 #ifdef MPP_LAND
 #ifdef WRF_HYDRO
-    if(finemesh .ne. 0) then
+    if ( finemesh /= 0 ) then
          NoahmpIO%xstart = (wrfits-1)*finemesh_factor + 1
          NoahmpIO%xend   = (wrfite-1)*finemesh_factor
          NoahmpIO%ystart = (wrfjts-1)*finemesh_factor + 1
@@ -141,603 +137,591 @@ contains
 #endif
 #endif
 
-  call read_hrldas_hdrinfo(NoahmpIO%hrldas_setup_file, NoahmpIO%ix, NoahmpIO%jx,        &
-                           NoahmpIO%xstart, NoahmpIO%xend, NoahmpIO%ystart, NoahmpIO%yend, &
-                           NoahmpIO%iswater, NoahmpIO%islake, NoahmpIO%isurban,         &
-                           NoahmpIO%isice, NoahmpIO%llanduse, NoahmpIO%dx, NoahmpIO%dy,    &
-                           NoahmpIO%truelat1, NoahmpIO%truelat2, NoahmpIO%cen_lon,      &
-                           NoahmpIO%lat1, NoahmpIO%lon1, NoahmpIO%igrid, NoahmpIO%mapproj  &
-                          )
+    call read_hrldas_hdrinfo(NoahmpIO%hrldas_setup_file, NoahmpIO%ix, NoahmpIO%jx,           &
+                             NoahmpIO%xstart, NoahmpIO%xend, NoahmpIO%ystart, NoahmpIO%yend, &
+                             NoahmpIO%iswater, NoahmpIO%islake, NoahmpIO%isurban,            &
+                             NoahmpIO%isice, NoahmpIO%llanduse, NoahmpIO%dx, NoahmpIO%dy,    &
+                             NoahmpIO%truelat1, NoahmpIO%truelat2, NoahmpIO%cen_lon,         &
+                             NoahmpIO%lat1, NoahmpIO%lon1, NoahmpIO%igrid, NoahmpIO%mapproj  &
+                            )
                           
-  write(NoahmpIO%hgrid,'(I1)') NoahmpIO%igrid
+    write (NoahmpIO%hgrid,'(I1)') NoahmpIO%igrid
+    write (NoahmpIO%olddate,'(I4.4,"-",I2.2,"-",I2.2,"_",I2.2,":",I2.2,":",I2.2)') &
+           NoahmpIO%start_year, NoahmpIO%start_month, NoahmpIO%start_day, NoahmpIO%start_hour, NoahmpIO%start_min, 0
 
-  write(NoahmpIO%olddate,'(I4.4,"-",I2.2,"-",I2.2,"_",I2.2,":",I2.2,":",I2.2)') &
-       NoahmpIO%start_year, NoahmpIO%start_month, NoahmpIO%start_day, NoahmpIO%start_hour, NoahmpIO%start_min, 0
-
-  NoahmpIO%startdate = NoahmpIO%olddate
+    NoahmpIO%startdate = NoahmpIO%olddate
 
 #ifdef MPP_LAND
-   NoahmpIO%ix = ix_tmp
-   NoahmpIO%jx = jx_tmp
+    NoahmpIO%ix = ix_tmp
+    NoahmpIO%jx = jx_tmp
 #endif
 
 #ifdef WRF_HYDRO
     forcdate = NoahmpIO%olddate
 #endif
   
-  NoahmpIO%ids = NoahmpIO%xstart
-  NoahmpIO%ide = NoahmpIO%xend
-  NoahmpIO%jds = NoahmpIO%ystart
-  NoahmpIO%jde = NoahmpIO%yend
-  NoahmpIO%kds = 1
-  NoahmpIO%kde = 2
-  NoahmpIO%its = NoahmpIO%xstart
-  NoahmpIO%ite = NoahmpIO%xend
-  NoahmpIO%jts = NoahmpIO%ystart
-  NoahmpIO%jte = NoahmpIO%yend
-  NoahmpIO%kts = 1
-  NoahmpIO%kte = 2
-  NoahmpIO%ims = NoahmpIO%xstart
-  NoahmpIO%ime = NoahmpIO%xend
-  NoahmpIO%jms = NoahmpIO%ystart
-  NoahmpIO%jme = NoahmpIO%yend
-  NoahmpIO%kms = 1
-  NoahmpIO%kme = 2
+    NoahmpIO%ids = NoahmpIO%xstart
+    NoahmpIO%ide = NoahmpIO%xend
+    NoahmpIO%jds = NoahmpIO%ystart
+    NoahmpIO%jde = NoahmpIO%yend
+    NoahmpIO%kds = 1
+    NoahmpIO%kde = 2
+    NoahmpIO%its = NoahmpIO%xstart
+    NoahmpIO%ite = NoahmpIO%xend
+    NoahmpIO%jts = NoahmpIO%ystart
+    NoahmpIO%jte = NoahmpIO%yend
+    NoahmpIO%kts = 1
+    NoahmpIO%kte = 2
+    NoahmpIO%ims = NoahmpIO%xstart
+    NoahmpIO%ime = NoahmpIO%xend
+    NoahmpIO%jms = NoahmpIO%ystart
+    NoahmpIO%jme = NoahmpIO%yend
+    NoahmpIO%kms = 1
+    NoahmpIO%kme = 2
   
-  if (NoahmpIO%sf_urban_physics == 2 .or. NoahmpIO%sf_urban_physics == 3) then
-    NoahmpIO%kde = NoahmpIO%num_urban_atmosphere
-    NoahmpIO%kte = NoahmpIO%num_urban_atmosphere
-    NoahmpIO%kme = NoahmpIO%num_urban_atmosphere
-  endif
+    if ( (NoahmpIO%sf_urban_physics == 2) .or. (NoahmpIO%sf_urban_physics == 3) ) then
+       NoahmpIO%kde = NoahmpIO%num_urban_atmosphere
+       NoahmpIO%kte = NoahmpIO%num_urban_atmosphere
+       NoahmpIO%kme = NoahmpIO%num_urban_atmosphere
+    endif
 
 !---------------------------------------------------------------------
 !  Allocate multi-dimension fields for subwindow calculation
 !---------------------------------------------------------------------
 
-  NoahmpIO%ixfull    = NoahmpIO%xend - NoahmpIO%xstart+1
-  NoahmpIO%jxfull    = NoahmpIO%yend - NoahmpIO%ystart+1
-
-  NoahmpIO%ixpar     = NoahmpIO%ixfull
-  NoahmpIO%jxpar     = NoahmpIO%jxfull
-  NoahmpIO%xstartpar = 1
-  NoahmpIO%ystartpar = 1
+    NoahmpIO%ixfull    = NoahmpIO%xend - NoahmpIO%xstart+1
+    NoahmpIO%jxfull    = NoahmpIO%yend - NoahmpIO%ystart+1
+    NoahmpIO%ixpar     = NoahmpIO%ixfull
+    NoahmpIO%jxpar     = NoahmpIO%jxfull
+    NoahmpIO%xstartpar = 1
+    NoahmpIO%ystartpar = 1
 
 !---------------------------------------------------------------------
 !  initialize NoahmpIOVarType data type and variables
 !---------------------------------------------------------------------
 
-  call NoahmpIOVarInitDefault(NoahmpIO)
+    call NoahmpIOVarInitDefault(NoahmpIO)
 
 !---------------------------------------------------------------------
 !  read in Noah-MP Parameters from MPTABLE
 !---------------------------------------------------------------------
 
-  call NoahmpReadTable(NoahmpIO)
+    call NoahmpReadTable(NoahmpIO)
 
 #ifdef WRF_HYDRO
-   allocate( greenfrac   (NoahmpIO%XSTART:NoahmpIO%XEND,NoahmpIO%YSTART:NoahmpIO%YEND))
-   greenfrac = 0
+    allocate( greenfrac   (NoahmpIO%XSTART:NoahmpIO%XEND,NoahmpIO%YSTART:NoahmpIO%YEND))
+    greenfrac = 0
 #endif
-
 
 !----------------------------------------------------------------------
 ! Read Landuse Type and Soil Texture and Other Information
 !----------------------------------------------------------------------
  
-  CALL READLAND_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,      &
-                      NoahmpIO%ISWATER, NoahmpIO%ISLAKE, NoahmpIO%IVGTYP, NoahmpIO%ISLTYP, NoahmpIO%TERRAIN, NoahmpIO%TMN, &
-                      NoahmpIO%XLAT, NoahmpIO%XLONG, NoahmpIO%XLAND, NoahmpIO%SEAICE, NoahmpIO%MSFTX, NoahmpIO%MSFTY)
+    call READLAND_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,          &
+                         NoahmpIO%ISWATER, NoahmpIO%ISLAKE, NoahmpIO%IVGTYP, NoahmpIO%ISLTYP, NoahmpIO%TERRAIN, NoahmpIO%TMN, &
+                         NoahmpIO%XLAT, NoahmpIO%XLONG, NoahmpIO%XLAND, NoahmpIO%SEAICE, NoahmpIO%MSFTX, NoahmpIO%MSFTY)
   
-  WHERE(NoahmpIO%SEAICE > 0.0) NoahmpIO%XICE = 1.0
+    where (NoahmpIO%SEAICE > 0.0) NoahmpIO%XICE = 1.0
 
 !------------------------------------------------------------------------
 ! For spatially-varying soil parameters, read in necessary extra fields
 !------------------------------------------------------------------------
 
-  if (NoahmpIO%IOPT_SOIL == 2) then
-    CALL READ_SOIL_TEXTURE(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, &
-                           NoahmpIO%NSOIL, NoahmpIO%IVGTYP, NoahmpIO%SOILCL1, NoahmpIO%SOILCL2, NoahmpIO%SOILCL3,      &
-                           NoahmpIO%SOILCL4, NoahmpIO%ISICE, NoahmpIO%ISWATER)
-
-    NoahmpIO%ISLTYP = nint(NoahmpIO%SOILCL1(:,:))
-
-  end if
+    if ( NoahmpIO%IOPT_SOIL == 2 ) then
+       call READ_SOIL_TEXTURE(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, &
+                              NoahmpIO%NSOIL, NoahmpIO%IVGTYP, NoahmpIO%SOILCL1, NoahmpIO%SOILCL2, NoahmpIO%SOILCL3,      &
+                              NoahmpIO%SOILCL4, NoahmpIO%ISICE, NoahmpIO%ISWATER)
+       NoahmpIO%ISLTYP = nint(NoahmpIO%SOILCL1(:,:))
+    endif
   
-  if (NoahmpIO%IOPT_SOIL == 3) then
-    CALL READ_SOIL_COMPOSITION(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, &
-                               NoahmpIO%NSOIL, NoahmpIO%IVGTYP, NoahmpIO%ISICE, NoahmpIO%ISWATER, NoahmpIO%SOILCOMP)
-  end if
+    if ( NoahmpIO%IOPT_SOIL == 3 ) then
+       call READ_SOIL_COMPOSITION(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, &
+                                  NoahmpIO%NSOIL, NoahmpIO%IVGTYP, NoahmpIO%ISICE, NoahmpIO%ISWATER, NoahmpIO%SOILCOMP)
+    endif
   
-  if (NoahmpIO%IOPT_SOIL == 4) then
-    CALL READ_3D_SOIL(NoahmpIO%SPATIAL_FILENAME, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,        &
-                      NoahmpIO%NSOIL, NoahmpIO%BEXP_3D, NoahmpIO%SMCDRY_3D, NoahmpIO%SMCWLT_3D, NoahmpIO%SMCREF_3D,     &
-                      NoahmpIO%SMCMAX_3D, NoahmpIO%DKSAT_3D, NoahmpIO%DWSAT_3D, NoahmpIO%PSISAT_3D, NoahmpIO%QUARTZ_3D, &
-                      NoahmpIO%REFDK_2D, NoahmpIO%REFKDT_2D, NoahmpIO%IRR_FRAC_2D, NoahmpIO%IRR_HAR_2D,              &
-                      NoahmpIO%IRR_LAI_2D, NoahmpIO%IRR_MAD_2D, NoahmpIO%FILOSS_2D, NoahmpIO%SPRIR_RATE_2D,          &
-                      NoahmpIO%MICIR_RATE_2D, NoahmpIO%FIRTFAC_2D, NoahmpIO%IR_RAIN_2D, NoahmpIO%BVIC_2D,            &
-                      NoahmpIO%AXAJ_2D, NoahmpIO%BXAJ_2D, NoahmpIO%XXAJ_2D, NoahmpIO%BDVIC_2D, NoahmpIO%GDVIC_2D,       &
-                      NoahmpIO%BBVIC_2D, NoahmpIO%KLAT_FAC, NoahmpIO%TDSMC_FAC, NoahmpIO%TD_DC, NoahmpIO%TD_DCOEF,      &
-                      NoahmpIO%TD_DDRAIN, NoahmpIO%TD_RADI, NoahmpIO%TD_SPAC)
-  end if
+    if ( NoahmpIO%IOPT_SOIL == 4 ) then
+       call READ_3D_SOIL(NoahmpIO%SPATIAL_FILENAME, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,       &
+                        NoahmpIO%NSOIL, NoahmpIO%BEXP_3D, NoahmpIO%SMCDRY_3D, NoahmpIO%SMCWLT_3D, NoahmpIO%SMCREF_3D,     &
+                        NoahmpIO%SMCMAX_3D, NoahmpIO%DKSAT_3D, NoahmpIO%DWSAT_3D, NoahmpIO%PSISAT_3D, NoahmpIO%QUARTZ_3D, &
+                        NoahmpIO%REFDK_2D, NoahmpIO%REFKDT_2D, NoahmpIO%IRR_FRAC_2D, NoahmpIO%IRR_HAR_2D,                 &
+                        NoahmpIO%IRR_LAI_2D, NoahmpIO%IRR_MAD_2D, NoahmpIO%FILOSS_2D, NoahmpIO%SPRIR_RATE_2D,             &
+                        NoahmpIO%MICIR_RATE_2D, NoahmpIO%FIRTFAC_2D, NoahmpIO%IR_RAIN_2D, NoahmpIO%BVIC_2D,               &
+                        NoahmpIO%AXAJ_2D, NoahmpIO%BXAJ_2D, NoahmpIO%XXAJ_2D, NoahmpIO%BDVIC_2D, NoahmpIO%GDVIC_2D,       &
+                        NoahmpIO%BBVIC_2D, NoahmpIO%KLAT_FAC, NoahmpIO%TDSMC_FAC, NoahmpIO%TD_DC, NoahmpIO%TD_DCOEF,      &
+                        NoahmpIO%TD_DDRAIN, NoahmpIO%TD_RADI, NoahmpIO%TD_SPAC)
+    endif
 
 !----------------------------------------------------------------------
 ! For spatially-varying irrigation parameters, read in necessary extra fields
 ! only if IOPT_IRR >= 1
 !----------------------------------------------------------------------
-  if (NoahmpIO%IOPT_IRR >= 1) then
-      CALL READ_AGRICULTURE_DATA(NoahmpIO%AGDATA_FLNM, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, &
-                                 NoahmpIO%IRFRACT, NoahmpIO%SIFRACT, NoahmpIO%MIFRACT, NoahmpIO%FIFRACT)
-  end if
+    if ( NoahmpIO%IOPT_IRR >= 1 ) then
+       call READ_AGRICULTURE_DATA(NoahmpIO%AGDATA_FLNM, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, &
+                                  NoahmpIO%IRFRACT, NoahmpIO%SIFRACT, NoahmpIO%MIFRACT, NoahmpIO%FIFRACT)
+    endif
   
 !------------------------------------------------------------------------
 ! For IOPT_RUNSUB = 5 (MMF groundwater), read in necessary extra fields
 ! This option is not tested for parallel use in the offline driver
 !------------------------------------------------------------------------
 
-  if (NoahmpIO%IOPT_RUNSUB == 5) then
-    CALL READ_MMF_RUNOFF(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
-                         NoahmpIO%FDEPTHXY, NoahmpIO%EQZWT, NoahmpIO%RECHCLIM, NoahmpIO%RIVERBEDXY)
-  end if
+    if (NoahmpIO%IOPT_RUNSUB == 5) then
+       call READ_MMF_RUNOFF(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
+                            NoahmpIO%FDEPTHXY, NoahmpIO%EQZWT, NoahmpIO%RECHCLIM, NoahmpIO%RIVERBEDXY)
+    endif
 
 !------------------------------------------------------------------------
 ! For OPT_CROP=1 (crop model), read in necessary extra fields
 !------------------------------------------------------------------------
 
-  NoahmpIO%CROPTYPE   = 0       ! make default 0% crops everywhere
-  NoahmpIO%PLANTING   = 126     ! default planting date
-  NoahmpIO%HARVEST    = 290     ! default harvest date
-  NoahmpIO%SEASON_GDD = 1605    ! default total seasonal growing degree days
-  if (NoahmpIO%IOPT_CROP == 1) then ! use crop_option=1 for reading crop extra fields
-    CALL READ_CROP_INPUT(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
-                         NoahmpIO%CROPTYPE, NoahmpIO%PLANTING, NoahmpIO%HARVEST, NoahmpIO%SEASON_GDD)
-  end if
+    NoahmpIO%CROPTYPE   = 0       ! make default 0% crops everywhere
+    NoahmpIO%PLANTING   = 126     ! default planting date
+    NoahmpIO%HARVEST    = 290     ! default harvest date
+    NoahmpIO%SEASON_GDD = 1605    ! default total seasonal growing degree days
+    if (NoahmpIO%IOPT_CROP == 1) then ! use crop_option=1 for reading crop extra fields
+       call READ_CROP_INPUT(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
+                            NoahmpIO%CROPTYPE, NoahmpIO%PLANTING, NoahmpIO%HARVEST, NoahmpIO%SEASON_GDD)
+    endif
 
 !------------------------------------------------------------------------
 ! For IOPT_TDRN = 1 or 2 READ TILE DRAIN MAP
 !------------------------------------------------------------------------
-  NoahmpIO%TD_FRACTION = 0.
-  IF (NoahmpIO%IOPT_TDRN .GT. 0) THEN
-     CALL READ_TILE_DRAIN_MAP(NoahmpIO%TDINPUT_FLNM, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, NoahmpIO%TD_FRACTION)
-  ENDIF
+
+    NoahmpIO%TD_FRACTION = 0.0
+    if (NoahmpIO%IOPT_TDRN > 0) then
+       call READ_TILE_DRAIN_MAP(NoahmpIO%TDINPUT_FLNM, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, NoahmpIO%TD_FRACTION)
+    endif
 
 !----------------------------------------------------------------------
 ! Initialize Model State
 !----------------------------------------------------------------------
-  NoahmpIO%SLOPETYP  =  1 ! it was 2 here and 1 in the noahmpdrv- pvk
-  NoahmpIO%DZS       =  NoahmpIO%SOIL_THICK_INPUT(1:NoahmpIO%NSOIL)
 
-  NoahmpIO%ITIMESTEP = 1
+    NoahmpIO%SLOPETYP  =  1 ! it was 2 here and 1 in the noahmpdrv- pvk
+    NoahmpIO%DZS       =  NoahmpIO%SOIL_THICK_INPUT(1:NoahmpIO%NSOIL)
+    NoahmpIO%ITIMESTEP = 1
+    xstart = NoahmpIO%xstart
+    xend   = NoahmpIO%xend
+    ystart = NoahmpIO%ystart
+    yend   = NoahmpIO%yend
+    ixfull = NoahmpIO%ixfull
+    jxfull = NoahmpIO%jxfull 
 
-  xstart = NoahmpIO%xstart
-  xend   = NoahmpIO%xend
-  ystart = NoahmpIO%ystart
-  yend   = NoahmpIO%yend
-  ixfull = NoahmpIO%ixfull
-  jxfull = NoahmpIO%jxfull 
+    if (NoahmpIO%restart_filename_requested /= " ") then
+       NoahmpIO%restart_flag = .true.
 
-  if (NoahmpIO%restart_filename_requested /= " ") then
-     NoahmpIO%restart_flag = .true.
+       call find_restart_file(NoahmpIO%rank, trim(NoahmpIO%restart_filename_requested), NoahmpIO%startdate, &
+                              NoahmpIO%khour, NoahmpIO%olddate, NoahmpIO%restart_flnm)
 
-     call find_restart_file(NoahmpIO%rank, trim(NoahmpIO%restart_filename_requested), NoahmpIO%startdate, &
-                            NoahmpIO%khour, NoahmpIO%olddate, NoahmpIO%restart_flnm)
-
-     call read_restart(trim(NoahmpIO%restart_flnm), xstart, xend, xstart, ixfull, jxfull, NoahmpIO%NSOIL, NoahmpIO%olddate)
+       call read_restart(trim(NoahmpIO%restart_flnm), xstart, xend, xstart, ixfull, jxfull, NoahmpIO%NSOIL, NoahmpIO%olddate)
 
 #ifdef MPP_LAND
-     call mpp_land_bcast_char(19,NoahmpIO%OLDDATE(1:19))
+       call mpp_land_bcast_char(19,NoahmpIO%OLDDATE(1:19))
 #endif
 
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SOIL_T"  , NoahmpIO%TSLB     )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNOW_T"  , NoahmpIO%TSNOXY   )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SMC"     , NoahmpIO%SMOIS    )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SH2O"    , NoahmpIO%SH2O     )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ZSNSO"   , NoahmpIO%ZSNSOXY  )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNICE"   , NoahmpIO%SNICEXY  )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNLIQ"   , NoahmpIO%SNLIQXY  )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FWET"    , NoahmpIO%FWETXY   )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNEQVO"  , NoahmpIO%SNEQVOXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "EAH"     , NoahmpIO%EAHXY    )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "TAH"     , NoahmpIO%TAHXY    )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ALBOLD"  , NoahmpIO%ALBOLDXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CM"      , NoahmpIO%CMXY     )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CH"      , NoahmpIO%CHXY     )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ISNOW"   , NoahmpIO%ISNOWXY  )                                            
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CANLIQ"  , NoahmpIO%CANLIQXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CANICE"  , NoahmpIO%CANICEXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNEQV"   , NoahmpIO%SNOW     )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNOWH"   , NoahmpIO%SNOWH    )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "TV"      , NoahmpIO%TVXY     )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "TG"      , NoahmpIO%TGXY     )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ZWT"     , NoahmpIO%ZWTXY    )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "WA"      , NoahmpIO%WAXY     )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "WT"      , NoahmpIO%WTXY     )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "WSLAKE"  , NoahmpIO%WSLAKEXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "LFMASS"  , NoahmpIO%LFMASSXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "RTMASS"  , NoahmpIO%RTMASSXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "STMASS"  , NoahmpIO%STMASSXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CROPCAT" , NoahmpIO%CROPCAT  )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "WOOD"    , NoahmpIO%WOODXY   )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "GRAIN"   , NoahmpIO%GRAINXY  )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "GDD"     , NoahmpIO%GDDXY    )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "STBLCP"  , NoahmpIO%STBLCPXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FASTCP"  , NoahmpIO%FASTCPXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "LAI"     , NoahmpIO%LAI      )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SAI"     , NoahmpIO%XSAIXY   )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "VEGFRA"  , NoahmpIO%VEGFRA   )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "GVFMIN"  , NoahmpIO%GVFMIN   )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "GVFMAX"  , NoahmpIO%GVFMAX   )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACMELT"  , NoahmpIO%ACSNOM   )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACSNOW"  , NoahmpIO%ACSNOW   )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "TAUSS"   , NoahmpIO%TAUSSXY  )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSFC"    , NoahmpIO%QSFC     )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SFCRUNOFF",NoahmpIO%SFCRUNOFF)
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "UDRUNOFF" ,NoahmpIO%UDRUNOFF )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QTDRAIN"  ,NoahmpIO%QTDRAIN  )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_SSOIL" , NoahmpIO%ACC_SSOILXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_QINSUR", NoahmpIO%ACC_QINSURXY)
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_QSEVA" , NoahmpIO%ACC_QSEVAXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_ETRANI", NoahmpIO%ACC_ETRANIXY)
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_DWATER", NoahmpIO%ACC_DWATERXY)
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_PRCP"  , NoahmpIO%ACC_PRCPXY  )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_ECAN"  , NoahmpIO%ACC_ECANXY  )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_ETRAN" , NoahmpIO%ACC_ETRANXY )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_EDIR"  , NoahmpIO%ACC_EDIRXY  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SOIL_T"  , NoahmpIO%TSLB     )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNOW_T"  , NoahmpIO%TSNOXY   )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SMC"     , NoahmpIO%SMOIS    )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SH2O"    , NoahmpIO%SH2O     )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ZSNSO"   , NoahmpIO%ZSNSOXY  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNICE"   , NoahmpIO%SNICEXY  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNLIQ"   , NoahmpIO%SNLIQXY  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FWET"    , NoahmpIO%FWETXY   )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNEQVO"  , NoahmpIO%SNEQVOXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "EAH"     , NoahmpIO%EAHXY    )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "TAH"     , NoahmpIO%TAHXY    )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ALBOLD"  , NoahmpIO%ALBOLDXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CM"      , NoahmpIO%CMXY     )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CH"      , NoahmpIO%CHXY     )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ISNOW"   , NoahmpIO%ISNOWXY  )                                            
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CANLIQ"  , NoahmpIO%CANLIQXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CANICE"  , NoahmpIO%CANICEXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNEQV"   , NoahmpIO%SNOW     )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNOWH"   , NoahmpIO%SNOWH    )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "TV"      , NoahmpIO%TVXY     )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "TG"      , NoahmpIO%TGXY     )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ZWT"     , NoahmpIO%ZWTXY    )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "WA"      , NoahmpIO%WAXY     )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "WT"      , NoahmpIO%WTXY     )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "WSLAKE"  , NoahmpIO%WSLAKEXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "LFMASS"  , NoahmpIO%LFMASSXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "RTMASS"  , NoahmpIO%RTMASSXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "STMASS"  , NoahmpIO%STMASSXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CROPCAT" , NoahmpIO%CROPCAT  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "WOOD"    , NoahmpIO%WOODXY   )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "GRAIN"   , NoahmpIO%GRAINXY  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "GDD"     , NoahmpIO%GDDXY    )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "STBLCP"  , NoahmpIO%STBLCPXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FASTCP"  , NoahmpIO%FASTCPXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "LAI"     , NoahmpIO%LAI      )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SAI"     , NoahmpIO%XSAIXY   )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "VEGFRA"  , NoahmpIO%VEGFRA   )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "GVFMIN"  , NoahmpIO%GVFMIN   )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "GVFMAX"  , NoahmpIO%GVFMAX   )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACMELT"  , NoahmpIO%ACSNOM   )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACSNOW"  , NoahmpIO%ACSNOW   )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "TAUSS"   , NoahmpIO%TAUSSXY  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSFC"    , NoahmpIO%QSFC     )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SFCRUNOFF",NoahmpIO%SFCRUNOFF)
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "UDRUNOFF" ,NoahmpIO%UDRUNOFF )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QTDRAIN"  ,NoahmpIO%QTDRAIN  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_SSOIL" , NoahmpIO%ACC_SSOILXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_QINSUR", NoahmpIO%ACC_QINSURXY)
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_QSEVA" , NoahmpIO%ACC_QSEVAXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_ETRANI", NoahmpIO%ACC_ETRANIXY)
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_DWATER", NoahmpIO%ACC_DWATERXY)
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_PRCP"  , NoahmpIO%ACC_PRCPXY  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_ECAN"  , NoahmpIO%ACC_ECANXY  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_ETRAN" , NoahmpIO%ACC_ETRANXY )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_EDIR"  , NoahmpIO%ACC_EDIRXY  )
 
-     ! below for irrigation scheme
-     if ( NoahmpIO%IOPT_IRR > 0 ) then
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMSI" , NoahmpIO%IRNUMSI  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMMI" , NoahmpIO%IRNUMMI  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMFI" , NoahmpIO%IRNUMFI  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRWATSI" , NoahmpIO%IRWATSI  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRWATMI" , NoahmpIO%IRWATMI  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRWATFI" , NoahmpIO%IRWATFI  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRSIVOL" , NoahmpIO%IRSIVOL  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRMIVOL" , NoahmpIO%IRMIVOL  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRFIVOL" , NoahmpIO%IRFIVOL  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRELOSS" , NoahmpIO%IRELOSS  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRRSPLH" , NoahmpIO%IRRSPLH  )
-     endif
+       ! below for irrigation scheme
+       if ( NoahmpIO%IOPT_IRR > 0 ) then
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMSI" , NoahmpIO%IRNUMSI  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMMI" , NoahmpIO%IRNUMMI  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRNUMFI" , NoahmpIO%IRNUMFI  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRWATSI" , NoahmpIO%IRWATSI  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRWATMI" , NoahmpIO%IRWATMI  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRWATFI" , NoahmpIO%IRWATFI  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRSIVOL" , NoahmpIO%IRSIVOL  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRMIVOL" , NoahmpIO%IRMIVOL  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRFIVOL" , NoahmpIO%IRFIVOL  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRELOSS" , NoahmpIO%IRELOSS  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRRSPLH" , NoahmpIO%IRRSPLH  )
+       endif
 
-     ! below for MMF groundwater scheme
-     if ( NoahmpIO%IOPT_RUNSUB == 5 ) then
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SMOISEQ"   , NoahmpIO%SMOISEQ    )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "AREAXY"    , NoahmpIO%AREAXY     )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SMCWTDXY"  , NoahmpIO%SMCWTDXY   )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QRFXY"     , NoahmpIO%QRFXY      )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DEEPRECHXY", NoahmpIO%DEEPRECHXY )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSPRINGXY" , NoahmpIO%QSPRINGXY  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSLATXY"   , NoahmpIO%QSLATXY    )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QRFSXY"    , NoahmpIO%QRFSXY     )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSPRINGSXY", NoahmpIO%QSPRINGSXY )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "RECHXY"    , NoahmpIO%RECHXY     )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FDEPTHXY"   ,NoahmpIO%FDEPTHXY   )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "RIVERCONDXY",NoahmpIO%RIVERCONDXY)
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "RIVERBEDXY" ,NoahmpIO%RIVERBEDXY )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "EQZWT"      ,NoahmpIO%EQZWT      )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "PEXPXY"     ,NoahmpIO%PEXPXY     )
-     endif
+       ! below for MMF groundwater scheme
+       if ( NoahmpIO%IOPT_RUNSUB == 5 ) then
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SMOISEQ"   , NoahmpIO%SMOISEQ    )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "AREAXY"    , NoahmpIO%AREAXY     )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SMCWTDXY"  , NoahmpIO%SMCWTDXY   )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QRFXY"     , NoahmpIO%QRFXY      )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DEEPRECHXY", NoahmpIO%DEEPRECHXY )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSPRINGXY" , NoahmpIO%QSPRINGXY  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSLATXY"   , NoahmpIO%QSLATXY    )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QRFSXY"    , NoahmpIO%QRFSXY     )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSPRINGSXY", NoahmpIO%QSPRINGSXY )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "RECHXY"    , NoahmpIO%RECHXY     )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FDEPTHXY"   ,NoahmpIO%FDEPTHXY   )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "RIVERCONDXY",NoahmpIO%RIVERCONDXY)
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "RIVERBEDXY" ,NoahmpIO%RIVERBEDXY )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "EQZWT"      ,NoahmpIO%EQZWT      )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "PEXPXY"     ,NoahmpIO%PEXPXY     )
+       endif
 
-     ! below for urban model
-     if ( NoahmpIO%SF_URBAN_PHYSICS > 0 ) then
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "SH_URB2D"  ,     NoahmpIO%SH_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LH_URB2D"  ,     NoahmpIO%LH_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,       "G_URB2D"  ,      NoahmpIO%G_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "RN_URB2D"  ,     NoahmpIO%RN_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TS_URB2D"  ,     NoahmpIO%TS_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "FRC_URB2D"  ,    NoahmpIO%FRC_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "UTYPE_URB2D"  ,  NoahmpIO%UTYPE_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LP_URB2D"  ,     NoahmpIO%LP_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LB_URB2D"  ,     NoahmpIO%LB_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "HGT_URB2D"  ,    NoahmpIO%HGT_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "MH_URB2D"  ,     NoahmpIO%MH_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "STDH_URB2D"  ,   NoahmpIO%STDH_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "HI_URB2D"  ,     NoahmpIO%HI_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LF_URB2D"  ,     NoahmpIO%LF_URB2D  )
+       ! below for urban model
+       if ( NoahmpIO%SF_URBAN_PHYSICS > 0 ) then
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "SH_URB2D"  ,     NoahmpIO%SH_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LH_URB2D"  ,     NoahmpIO%LH_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,       "G_URB2D"  ,      NoahmpIO%G_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "RN_URB2D"  ,     NoahmpIO%RN_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TS_URB2D"  ,     NoahmpIO%TS_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "FRC_URB2D"  ,    NoahmpIO%FRC_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "UTYPE_URB2D"  ,  NoahmpIO%UTYPE_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LP_URB2D"  ,     NoahmpIO%LP_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LB_URB2D"  ,     NoahmpIO%LB_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "HGT_URB2D"  ,    NoahmpIO%HGT_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "MH_URB2D"  ,     NoahmpIO%MH_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "STDH_URB2D"  ,   NoahmpIO%STDH_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "HI_URB2D"  ,     NoahmpIO%HI_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LF_URB2D"  ,     NoahmpIO%LF_URB2D  )
 
-        !IF(NoahmpIO%SF_URBAN_PHYSICS == 1 ) THEN  ! single layer urban model
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CMR_SFCDIF" ,    NoahmpIO%CMR_SFCDIF )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CHR_SFCDIF" ,    NoahmpIO%CHR_SFCDIF )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CMC_SFCDIF" ,    NoahmpIO%CMC_SFCDIF )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CHC_SFCDIF" ,    NoahmpIO%CHC_SFCDIF )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "CMGR_SFCDIF" ,   NoahmpIO%CMGR_SFCDIF )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "CHGR_SFCDIF" ,   NoahmpIO%CHGR_SFCDIF )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TR_URB2D"  ,     NoahmpIO%TR_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TB_URB2D"  ,     NoahmpIO%TB_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TG_URB2D"  ,     NoahmpIO%TG_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TC_URB2D"  ,     NoahmpIO%TC_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "QC_URB2D"  ,     NoahmpIO%QC_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "UC_URB2D"  ,     NoahmpIO%UC_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "XXXR_URB2D"  ,   NoahmpIO%XXXR_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "XXXB_URB2D"  ,   NoahmpIO%XXXB_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "XXXG_URB2D"  ,   NoahmpIO%XXXG_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "XXXC_URB2D"  ,   NoahmpIO%XXXC_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TRL_URB3D"  ,    NoahmpIO%TRL_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TBL_URB3D"  ,    NoahmpIO%TBL_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGL_URB3D"  ,    NoahmpIO%TGL_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "CMCR_URB2D"  ,   NoahmpIO%CMCR_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGR_URB2D"  ,    NoahmpIO%TGR_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "TGRL_URB3D"  ,   NoahmpIO%TGRL_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "SMR_URB3D"  ,    NoahmpIO%SMR_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRELR_URB2D"  ,  NoahmpIO%DRELR_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRELB_URB2D"  ,  NoahmpIO%DRELB_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRELG_URB2D"  ,  NoahmpIO%DRELG_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FLXHUMR_URB2D"  ,NoahmpIO%FLXHUMR_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FLXHUMB_URB2D"  ,NoahmpIO%FLXHUMB_URB2D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FLXHUMG_URB2D"  ,NoahmpIO%FLXHUMG_URB2D  )
-        !ENDIF
+          if ( NoahmpIO%SF_URBAN_PHYSICS == 1 ) then  ! single layer urban model
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CMR_SFCDIF" ,    NoahmpIO%CMR_SFCDIF )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CHR_SFCDIF" ,    NoahmpIO%CHR_SFCDIF )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CMC_SFCDIF" ,    NoahmpIO%CMC_SFCDIF )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CHC_SFCDIF" ,    NoahmpIO%CHC_SFCDIF )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "CMGR_SFCDIF" ,   NoahmpIO%CMGR_SFCDIF )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "CHGR_SFCDIF" ,   NoahmpIO%CHGR_SFCDIF )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TR_URB2D"  ,     NoahmpIO%TR_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TB_URB2D"  ,     NoahmpIO%TB_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TG_URB2D"  ,     NoahmpIO%TG_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TC_URB2D"  ,     NoahmpIO%TC_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "QC_URB2D"  ,     NoahmpIO%QC_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "UC_URB2D"  ,     NoahmpIO%UC_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "XXXR_URB2D"  ,   NoahmpIO%XXXR_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "XXXB_URB2D"  ,   NoahmpIO%XXXB_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "XXXG_URB2D"  ,   NoahmpIO%XXXG_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "XXXC_URB2D"  ,   NoahmpIO%XXXC_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TRL_URB3D"  ,    NoahmpIO%TRL_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TBL_URB3D"  ,    NoahmpIO%TBL_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGL_URB3D"  ,    NoahmpIO%TGL_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "CMCR_URB2D"  ,   NoahmpIO%CMCR_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGR_URB2D"  ,    NoahmpIO%TGR_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "TGRL_URB3D"  ,   NoahmpIO%TGRL_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "SMR_URB3D"  ,    NoahmpIO%SMR_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRELR_URB2D"  ,  NoahmpIO%DRELR_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRELB_URB2D"  ,  NoahmpIO%DRELB_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRELG_URB2D"  ,  NoahmpIO%DRELG_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FLXHUMR_URB2D"  ,NoahmpIO%FLXHUMR_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FLXHUMB_URB2D"  ,NoahmpIO%FLXHUMB_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FLXHUMG_URB2D"  ,NoahmpIO%FLXHUMG_URB2D  )
+          endif
 
-        !IF(NoahmpIO%SF_URBAN_PHYSICS == 2 .or. NoahmpIO%SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TRB_URB4D"  ,    NoahmpIO%TRB_URB4D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TW1_URB4D"  ,    NoahmpIO%TW1_URB4D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TW2_URB4D"  ,    NoahmpIO%TW2_URB4D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGB_URB4D"  ,    NoahmpIO%TGB_URB4D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "SFW1_URB3D"  ,   NoahmpIO%SFW1_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "SFW2_URB3D"  ,   NoahmpIO%SFW2_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "SFR_URB3D"  ,    NoahmpIO%SFR_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "SFG_URB3D"  ,    NoahmpIO%SFG_URB3D  )
-        !ENDIF
+          if ( (NoahmpIO%SF_URBAN_PHYSICS == 2) .or. (NoahmpIO%SF_URBAN_PHYSICS == 3) ) then  ! BEP or BEM urban models
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TRB_URB4D"  ,    NoahmpIO%TRB_URB4D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TW1_URB4D"  ,    NoahmpIO%TW1_URB4D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TW2_URB4D"  ,    NoahmpIO%TW2_URB4D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGB_URB4D"  ,    NoahmpIO%TGB_URB4D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "SFW1_URB3D"  ,   NoahmpIO%SFW1_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "SFW2_URB3D"  ,   NoahmpIO%SFW2_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "SFR_URB3D"  ,    NoahmpIO%SFR_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "SFG_URB3D"  ,    NoahmpIO%SFG_URB3D  )
+          endif
 
-        !IF(NoahmpIO%SF_URBAN_PHYSICS == 3) THEN  ! BEM urban model        
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "TLEV_URB3D"  ,   NoahmpIO%TLEV_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "QLEV_URB3D"  ,   NoahmpIO%QLEV_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "TW1LEV_URB3D"  , NoahmpIO%TW1LEV_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "TW2LEV_URB3D"  , NoahmpIO%TW2LEV_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "TGLEV_URB3D"  ,  NoahmpIO%TGLEV_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "TFLEV_URB3D"  ,  NoahmpIO%TFLEV_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "SF_AC_URB3D"  ,  NoahmpIO%SF_AC_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "LF_AC_URB3D"  ,  NoahmpIO%LF_AC_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "CM_AC_URB3D"  ,  NoahmpIO%CM_AC_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "SFVENT_URB3D"  , NoahmpIO%SFVENT_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "LFVENT_URB3D"  , NoahmpIO%LFVENT_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "SFWIN1_URB3D"  , NoahmpIO%SFWIN1_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "SFWIN2_URB3D"  , NoahmpIO%SFWIN2_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "EP_PV_URB3D"  ,  NoahmpIO%EP_PV_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "T_PV_URB3D"  ,   NoahmpIO%T_PV_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TRV_URB4D"  ,    NoahmpIO%TRV_URB4D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "QR_URB4D"  ,     NoahmpIO%QR_URB4D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "QGR_URB3D"  ,    NoahmpIO%QGR_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGR_URB3D"  ,    NoahmpIO%TGR_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRAIN_URB4D"  ,  NoahmpIO%DRAIN_URB4D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DRAINGR_URB3D"  ,NoahmpIO%DRAINGR_URB3D  ) 
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "SFRV_URB3D"  ,   NoahmpIO%SFRV_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "LFRV_URB3D"  ,   NoahmpIO%LFRV_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "DGR_URB3D"  ,    NoahmpIO%DGR_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "DG_URB3D"  ,     NoahmpIO%DG_URB3D  )
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "LFR_URB3D"  ,    NoahmpIO%LFR_URB3D  ) 
-        call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "LFG_URB3D"  ,    NoahmpIO%LFG_URB3D  )
-
-     endif
+          if ( NoahmpIO%SF_URBAN_PHYSICS == 3 ) then  ! BEM urban model        
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "TLEV_URB3D"  ,   NoahmpIO%TLEV_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "QLEV_URB3D"  ,   NoahmpIO%QLEV_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "TW1LEV_URB3D"  , NoahmpIO%TW1LEV_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "TW2LEV_URB3D"  , NoahmpIO%TW2LEV_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "TGLEV_URB3D"  ,  NoahmpIO%TGLEV_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "TFLEV_URB3D"  ,  NoahmpIO%TFLEV_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "SF_AC_URB3D"  ,  NoahmpIO%SF_AC_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "LF_AC_URB3D"  ,  NoahmpIO%LF_AC_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "CM_AC_URB3D"  ,  NoahmpIO%CM_AC_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "SFVENT_URB3D"  , NoahmpIO%SFVENT_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "LFVENT_URB3D"  , NoahmpIO%LFVENT_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "SFWIN1_URB3D"  , NoahmpIO%SFWIN1_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "SFWIN2_URB3D"  , NoahmpIO%SFWIN2_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "EP_PV_URB3D"  ,  NoahmpIO%EP_PV_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "T_PV_URB3D"  ,   NoahmpIO%T_PV_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TRV_URB4D"  ,    NoahmpIO%TRV_URB4D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "QR_URB4D"  ,     NoahmpIO%QR_URB4D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "QGR_URB3D"  ,    NoahmpIO%QGR_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGR_URB3D"  ,    NoahmpIO%TGR_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRAIN_URB4D"  ,  NoahmpIO%DRAIN_URB4D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DRAINGR_URB3D"  ,NoahmpIO%DRAINGR_URB3D  ) 
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "SFRV_URB3D"  ,   NoahmpIO%SFRV_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "LFRV_URB3D"  ,   NoahmpIO%LFRV_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "DGR_URB3D"  ,    NoahmpIO%DGR_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "DG_URB3D"  ,     NoahmpIO%DG_URB3D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "LFR_URB3D"  ,    NoahmpIO%LFR_URB3D  ) 
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "LFG_URB3D"  ,    NoahmpIO%LFG_URB3D  )
+          endif
+       endif
      
-     NoahmpIO%STEPWTD = nint(NoahmpIO%WTDDT*60./NoahmpIO%DTBL)
-     NoahmpIO%STEPWTD = max(NoahmpIO%STEPWTD,1)
+       NoahmpIO%STEPWTD = nint(NoahmpIO%WTDDT*60.0/NoahmpIO%DTBL)
+       NoahmpIO%STEPWTD = max(NoahmpIO%STEPWTD,1)
 
 ! Must still call NoahmpInitMain even in restart to set up parameter arrays (also done in WRF)
 
 !------------------------------------------------------------------------------------------
 !    Initialize Noah-MP states and variables
 !------------------------------------------------------------------------------------------
-     CALL NoahmpInitMain(NoahmpIO)
+       call NoahmpInitMain(NoahmpIO)
 
-     IF(NoahmpIO%SF_URBAN_PHYSICS > 0 ) THEN  !urban
+       if ( NoahmpIO%SF_URBAN_PHYSICS > 0 ) then  !urban
         
-        CALL urban_param_init(NoahmpIO%DZR, NoahmpIO%DZB, NoahmpIO%DZG, NoahmpIO%NSOIL, &
-                              NoahmpIO%sf_urban_physics, NoahmpIO%use_wudapt_lcz, NoahmpIO%IRI_URBAN) ! cenlin added
+          call urban_param_init(NoahmpIO%DZR, NoahmpIO%DZB, NoahmpIO%DZG, NoahmpIO%NSOIL, &
+                                NoahmpIO%sf_urban_physics, NoahmpIO%use_wudapt_lcz, NoahmpIO%IRI_URBAN) ! cenlin added
 
-        CALL urban_var_init(NoahmpIO%ISURBAN, NoahmpIO%TSK, NoahmpIO%TSLB, NoahmpIO%TMN,                              & !urban
-                            NoahmpIO%IVGTYP, NoahmpIO%ims,NoahmpIO%ime,NoahmpIO%jms,NoahmpIO%jme,                        & !urban
-                            NoahmpIO%kms,NoahmpIO%kme,NoahmpIO%NSOIL, NoahmpIO%LCZ_1_TABLE,                 & !urban  
-                            NoahmpIO%LCZ_2_TABLE,NoahmpIO%LCZ_3_TABLE,NoahmpIO%LCZ_4_TABLE,NoahmpIO%LCZ_5_TABLE,      & !urban
-                            NoahmpIO%LCZ_6_TABLE,NoahmpIO%LCZ_7_TABLE,NoahmpIO%LCZ_8_TABLE,NoahmpIO%LCZ_9_TABLE,      & !urban
-                            NoahmpIO%LCZ_10_TABLE, NoahmpIO%LCZ_11_TABLE,.true.,NoahmpIO%sf_urban_physics,         & !urban
-                            NoahmpIO%XXXR_URB2D, NoahmpIO%XXXB_URB2D, NoahmpIO%XXXG_URB2D, NoahmpIO%XXXC_URB2D,       & !urban
-                            NoahmpIO%TR_URB2D, NoahmpIO%TB_URB2D, NoahmpIO%TG_URB2D, NoahmpIO%TC_URB2D,NoahmpIO%QC_URB2D,& !urban
-                            NoahmpIO%TRL_URB3D, NoahmpIO%TBL_URB3D, NoahmpIO%TGL_URB3D, NoahmpIO%SH_URB2D,            & !urban
-                            NoahmpIO%LH_URB2D, NoahmpIO%G_URB2D, NoahmpIO%RN_URB2D, NoahmpIO%TS_URB2D,                & !urban
-                            NoahmpIO%num_urban_ndm,  NoahmpIO%urban_map_zrd,  NoahmpIO%urban_map_zwd,              & !urban
-                            NoahmpIO%urban_map_gd,                                                           & !I multi-layer urban
-                            NoahmpIO%urban_map_zd,  NoahmpIO%urban_map_zdf, NoahmpIO%urban_map_bd,                 & !I multi-layer urban   
-                            NoahmpIO%urban_map_wd, NoahmpIO%urban_map_gbd,  NoahmpIO%urban_map_fbd,                & !I multi-layer urban
-                            NoahmpIO%urban_map_zgrd,                                                         & !I multi-layer urban
-                            NoahmpIO%num_urban_hi,                                                           & !urban
-                            NoahmpIO%TRB_URB4D, NoahmpIO%TW1_URB4D, NoahmpIO%TW2_URB4D, NoahmpIO%TGB_URB4D,           & !urban
-                            NoahmpIO%TLEV_URB3D, NoahmpIO%QLEV_URB3D,                                           & !urban
-                            NoahmpIO%TW1LEV_URB3D,NoahmpIO%TW2LEV_URB3D,                                        & !urban
-                            NoahmpIO%TGLEV_URB3D, NoahmpIO%TFLEV_URB3D,                                         & !urban
-                            NoahmpIO%SF_AC_URB3D, NoahmpIO%LF_AC_URB3D, NoahmpIO%CM_AC_URB3D,                      & !urban
-                            NoahmpIO%SFVENT_URB3D, NoahmpIO%LFVENT_URB3D,                                       & !urban
-                            NoahmpIO%SFWIN1_URB3D, NoahmpIO%SFWIN2_URB3D,                                       & !urban
-                            NoahmpIO%SFW1_URB3D, NoahmpIO%SFW2_URB3D, NoahmpIO%SFR_URB3D, NoahmpIO%SFG_URB3D,         & !urban
-                            NoahmpIO%EP_PV_URB3D, NoahmpIO%T_PV_URB3D,                                          & !GRZ
-                            NoahmpIO%TRV_URB4D, NoahmpIO%QR_URB4D, NoahmpIO%QGR_URB3D, NoahmpIO%TGR_URB3D,            & !GRZ
-                            NoahmpIO%DRAIN_URB4D, NoahmpIO%DRAINGR_URB3D, NoahmpIO%SFRV_URB3D,                     & !GRZ
-                            NoahmpIO%LFRV_URB3D, NoahmpIO%DGR_URB3D, NoahmpIO%DG_URB3D, NoahmpIO%LFR_URB3D,           & !GRZ   
-                            NoahmpIO%LFG_URB3D, NoahmpIO%SMOIS,                                                 & !GRZ
-                            NoahmpIO%LP_URB2D, NoahmpIO%HI_URB2D, NoahmpIO%LB_URB2D,                               & !urban
-                            NoahmpIO%HGT_URB2D, NoahmpIO%MH_URB2D, NoahmpIO%STDH_URB2D,                            & !urban
-                            NoahmpIO%LF_URB2D,                                                               & !urban
-                            NoahmpIO%CMCR_URB2D, NoahmpIO%TGR_URB2D, NoahmpIO%TGRL_URB3D, NoahmpIO%SMR_URB3D,         & !urban
-                            NoahmpIO%DRELR_URB2D, NoahmpIO%DRELB_URB2D, NoahmpIO%DRELG_URB2D,                      & !urban
-                            NoahmpIO%FLXHUMR_URB2D, NoahmpIO%FLXHUMB_URB2D, NoahmpIO%FLXHUMG_URB2D,                & !urban
-                            NoahmpIO%A_U_BEP, NoahmpIO%A_V_BEP, NoahmpIO%A_T_BEP, NoahmpIO%A_Q_BEP,                   & !multi-layer urban
-                            NoahmpIO%A_E_BEP, NoahmpIO%B_U_BEP, NoahmpIO%B_V_BEP,                                  & !multi-layer urban
-                            NoahmpIO%B_T_BEP, NoahmpIO%B_Q_BEP, NoahmpIO%B_E_BEP, NoahmpIO%DLG_BEP,                   & !multi-layer urban
-                            NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                   & !multi-layer urban
-                            NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                       !urban
+          call urban_var_init(NoahmpIO%ISURBAN, NoahmpIO%TSK, NoahmpIO%TSLB, NoahmpIO%TMN,                                  & !urban
+                              NoahmpIO%IVGTYP, NoahmpIO%ims,NoahmpIO%ime,NoahmpIO%jms,NoahmpIO%jme,                         & !urban
+                              NoahmpIO%kms,NoahmpIO%kme,NoahmpIO%NSOIL, NoahmpIO%LCZ_1_TABLE,                               & !urban  
+                              NoahmpIO%LCZ_2_TABLE,NoahmpIO%LCZ_3_TABLE,NoahmpIO%LCZ_4_TABLE,NoahmpIO%LCZ_5_TABLE,          & !urban
+                              NoahmpIO%LCZ_6_TABLE,NoahmpIO%LCZ_7_TABLE,NoahmpIO%LCZ_8_TABLE,NoahmpIO%LCZ_9_TABLE,          & !urban
+                              NoahmpIO%LCZ_10_TABLE, NoahmpIO%LCZ_11_TABLE,.true.,NoahmpIO%sf_urban_physics,                & !urban
+                              NoahmpIO%XXXR_URB2D, NoahmpIO%XXXB_URB2D, NoahmpIO%XXXG_URB2D, NoahmpIO%XXXC_URB2D,           & !urban
+                              NoahmpIO%TR_URB2D, NoahmpIO%TB_URB2D, NoahmpIO%TG_URB2D, NoahmpIO%TC_URB2D,NoahmpIO%QC_URB2D, & !urban
+                              NoahmpIO%TRL_URB3D, NoahmpIO%TBL_URB3D, NoahmpIO%TGL_URB3D, NoahmpIO%SH_URB2D,                & !urban
+                              NoahmpIO%LH_URB2D, NoahmpIO%G_URB2D, NoahmpIO%RN_URB2D, NoahmpIO%TS_URB2D,                    & !urban
+                              NoahmpIO%num_urban_ndm,  NoahmpIO%urban_map_zrd,  NoahmpIO%urban_map_zwd,                     & !urban
+                              NoahmpIO%urban_map_gd,                                                                        & !I multi-layer urban
+                              NoahmpIO%urban_map_zd,  NoahmpIO%urban_map_zdf, NoahmpIO%urban_map_bd,                        & !I multi-layer urban   
+                              NoahmpIO%urban_map_wd, NoahmpIO%urban_map_gbd,  NoahmpIO%urban_map_fbd,                       & !I multi-layer urban
+                              NoahmpIO%urban_map_zgrd,                                                                      & !I multi-layer urban
+                              NoahmpIO%num_urban_hi,                                                                        & !urban
+                              NoahmpIO%TRB_URB4D, NoahmpIO%TW1_URB4D, NoahmpIO%TW2_URB4D, NoahmpIO%TGB_URB4D,               & !urban
+                              NoahmpIO%TLEV_URB3D, NoahmpIO%QLEV_URB3D,                                                     & !urban
+                              NoahmpIO%TW1LEV_URB3D,NoahmpIO%TW2LEV_URB3D,                                                  & !urban
+                              NoahmpIO%TGLEV_URB3D, NoahmpIO%TFLEV_URB3D,                                                   & !urban
+                              NoahmpIO%SF_AC_URB3D, NoahmpIO%LF_AC_URB3D, NoahmpIO%CM_AC_URB3D,                             & !urban
+                              NoahmpIO%SFVENT_URB3D, NoahmpIO%LFVENT_URB3D,                                                 & !urban
+                              NoahmpIO%SFWIN1_URB3D, NoahmpIO%SFWIN2_URB3D,                                                 & !urban
+                              NoahmpIO%SFW1_URB3D, NoahmpIO%SFW2_URB3D, NoahmpIO%SFR_URB3D, NoahmpIO%SFG_URB3D,             & !urban
+                              NoahmpIO%EP_PV_URB3D, NoahmpIO%T_PV_URB3D,                                                    & !GRZ
+                              NoahmpIO%TRV_URB4D, NoahmpIO%QR_URB4D, NoahmpIO%QGR_URB3D, NoahmpIO%TGR_URB3D,                & !GRZ
+                              NoahmpIO%DRAIN_URB4D, NoahmpIO%DRAINGR_URB3D, NoahmpIO%SFRV_URB3D,                            & !GRZ
+                              NoahmpIO%LFRV_URB3D, NoahmpIO%DGR_URB3D, NoahmpIO%DG_URB3D, NoahmpIO%LFR_URB3D,               & !GRZ   
+                              NoahmpIO%LFG_URB3D, NoahmpIO%SMOIS,                                                           & !GRZ
+                              NoahmpIO%LP_URB2D, NoahmpIO%HI_URB2D, NoahmpIO%LB_URB2D,                                      & !urban
+                              NoahmpIO%HGT_URB2D, NoahmpIO%MH_URB2D, NoahmpIO%STDH_URB2D,                                   & !urban
+                              NoahmpIO%LF_URB2D,                                                                            & !urban
+                              NoahmpIO%CMCR_URB2D, NoahmpIO%TGR_URB2D, NoahmpIO%TGRL_URB3D, NoahmpIO%SMR_URB3D,             & !urban
+                              NoahmpIO%DRELR_URB2D, NoahmpIO%DRELB_URB2D, NoahmpIO%DRELG_URB2D,                             & !urban
+                              NoahmpIO%FLXHUMR_URB2D, NoahmpIO%FLXHUMB_URB2D, NoahmpIO%FLXHUMG_URB2D,                       & !urban
+                              NoahmpIO%A_U_BEP, NoahmpIO%A_V_BEP, NoahmpIO%A_T_BEP, NoahmpIO%A_Q_BEP,                       & !multi-layer urban
+                              NoahmpIO%A_E_BEP, NoahmpIO%B_U_BEP, NoahmpIO%B_V_BEP,                                         & !multi-layer urban
+                              NoahmpIO%B_T_BEP, NoahmpIO%B_Q_BEP, NoahmpIO%B_E_BEP, NoahmpIO%DLG_BEP,                       & !multi-layer urban
+                              NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                          & !multi-layer urban
+                              NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                              !urban
 
-        max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
-        IF (NoahmpIO%use_wudapt_lcz.eq.0 .and. max_utype_urb2d.gt.3.0) THEN  !new LCZ
-            CALL wrf_error_fatal &
-                 ('USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1')
-        ENDIF
-        IF (NoahmpIO%use_wudapt_lcz.eq.1 .and. max_utype_urb2d.le.3.0) THEN  ! new LCZ
-            CALL wrf_error_fatal &
-                 ('USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0')
-        ENDIF
+          max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
 
+          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_utype_urb2d > 3.0) ) then  !new LCZ
+             stop "USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1"
+          endif
+          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_utype_urb2d <= 3.0) ) then  ! new LCZ
+             stop "USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0"
+          endif
 
-     ENDIF
+       endif ! NoahmpIO%SF_URBAN_PHYSICS
 
-  else
+    else
 
-     NoahmpIO%restart_flag = .false.
-     NoahmpIO%SMOIS        =  huge(1.0)
-     NoahmpIO%TSLB         =  huge(1.0)
-     NoahmpIO%SH2O         =  huge(1.0)
-     NoahmpIO%CANLIQXY     =  huge(1.0)
-     NoahmpIO%TSK          =  huge(1.0)
-     NoahmpIO%SNOW         =  huge(1.0)
-     NoahmpIO%SNOWH        =  huge(1.0)
+       NoahmpIO%restart_flag = .false.
+       NoahmpIO%SMOIS        =  huge(1.0)
+       NoahmpIO%TSLB         =  huge(1.0)
+       NoahmpIO%SH2O         =  huge(1.0)
+       NoahmpIO%CANLIQXY     =  huge(1.0)
+       NoahmpIO%TSK          =  huge(1.0)
+       NoahmpIO%SNOW         =  huge(1.0)
+       NoahmpIO%SNOWH        =  huge(1.0)
 
 #ifdef WRF_HYDRO
-  if((forc_typ .gt. 2) .and. (forc_typ .ne. 6) ) HRLDAS_ini_typ = 0
+       if ( (forc_typ > 2) .and. (forc_typ /= 6) ) HRLDAS_ini_typ = 0
 
-  if(HRLDAS_ini_typ .eq. 1) then
-     ! read initial parameters and conditions from the HRLDAS forcing data
-     if(forc_typ .eq. 2) then
-          NoahmpIO%inflnm = trim(indir)//"/"//&
-          NoahmpIO%startdate(1:4)//NoahmpIO%startdate(6:7)//NoahmpIO%startdate(9:10)//NoahmpIO%startdate(12:13)//&
-          NoahmpIO%startdate(15:16)//".LDASIN_DOMAIN"//NoahmpIO%hgrid
-     else
+       if (HRLDAS_ini_typ == 1) then
+       ! read initial parameters and conditions from the HRLDAS forcing data
+          if (forc_typ == 2) then
+             NoahmpIO%inflnm = trim(indir)//"/"//&
+             NoahmpIO%startdate(1:4)//NoahmpIO%startdate(6:7)//NoahmpIO%startdate(9:10)//NoahmpIO%startdate(12:13)//&
+             NoahmpIO%startdate(15:16)//".LDASIN_DOMAIN"//NoahmpIO%hgrid
+          else
+             NoahmpIO%inflnm = trim(NoahmpIO%indir)//"/"//&
+             NoahmpIO%startdate(1:4)//NoahmpIO%startdate(6:7)//NoahmpIO%startdate(9:10)//NoahmpIO%startdate(12:13)//&
+             ".LDASIN_DOMAIN"//NoahmpIO%hgrid
+          endif
+#else
           NoahmpIO%inflnm = trim(NoahmpIO%indir)//"/"//&
           NoahmpIO%startdate(1:4)//NoahmpIO%startdate(6:7)//NoahmpIO%startdate(9:10)//NoahmpIO%startdate(12:13)//&
           ".LDASIN_DOMAIN"//NoahmpIO%hgrid
-     endif
-
-#else
-
-     NoahmpIO%inflnm = trim(NoahmpIO%indir)//"/"//&
-          NoahmpIO%startdate(1:4)//NoahmpIO%startdate(6:7)//NoahmpIO%startdate(9:10)//NoahmpIO%startdate(12:13)//&
-          ".LDASIN_DOMAIN"//NoahmpIO%hgrid
 #endif
 
-     CALL READINIT_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend, &
-                          NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%NSOIL, NoahmpIO%DZS,  &
-                          NoahmpIO%OLDDATE, LDASIN_VERSION, NoahmpIO%SMOIS,  &
-                          NoahmpIO%TSLB, NoahmpIO%CANWAT, NoahmpIO%TSK, NoahmpIO%SNOW,   &
-                          NoahmpIO%SNOWH, NoahmpIO%FNDSNOWH)
+          call READINIT_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend,    &
+                              NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%NSOIL, NoahmpIO%DZS,  &
+                              NoahmpIO%OLDDATE, LDASIN_VERSION, NoahmpIO%SMOIS,              &
+                              NoahmpIO%TSLB, NoahmpIO%CANWAT, NoahmpIO%TSK, NoahmpIO%SNOW,   &
+                              NoahmpIO%SNOWH, NoahmpIO%FNDSNOWH)
 
-     NoahmpIO%VEGFRA    =  huge(1.0)
-     NoahmpIO%LAI       =  huge(1.0)
-     NoahmpIO%GVFMIN    =  huge(1.0)
-     NoahmpIO%GVFMAX    =  huge(1.0)
+          NoahmpIO%VEGFRA =  huge(1.0)
+          NoahmpIO%LAI    =  huge(1.0)
+          NoahmpIO%GVFMIN =  huge(1.0)
+          NoahmpIO%GVFMAX =  huge(1.0)
 
-     CALL READVEG_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend,     &
-                         NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%OLDDATE, NoahmpIO%IVGTYP, &
-                         NoahmpIO%VEGFRA, NoahmpIO%LAI, NoahmpIO%GVFMIN, NoahmpIO%GVFMAX)
+          call READVEG_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend,        &
+                              NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%OLDDATE, NoahmpIO%IVGTYP, &
+                              NoahmpIO%VEGFRA, NoahmpIO%LAI, NoahmpIO%GVFMIN, NoahmpIO%GVFMAX)
 
 #ifdef WRF_HYDRO
-  else   !  HRLDAS_ini_typ        
+       else   !  HRLDAS_ini_typ        
 
 #ifdef MPP_LAND
-    call HYDRO_HRLDAS_ini_mpp   &
+          call HYDRO_HRLDAS_ini_mpp   &
 #else
-    call HYDRO_HRLDAS_ini   &
+          call HYDRO_HRLDAS_ini   &
 #endif
-       (trim(NoahmpIO%hrldas_setup_file), NoahmpIO%xend-NoahmpIO%xstart+1,NoahmpIO%yend-NoahmpIO%ystart+1,     & 
-       NoahmpIO%NSOIL,NoahmpIO%SMOIS(:,1:NoahmpIO%NSOIL,:),NoahmpIO%TSLB(:,1:NoahmpIO%NSOIL,:),NoahmpIO%SH2O(:,1:NoahmpIO%NSOIL,:),    &
-       NoahmpIO%CANWAT, NoahmpIO%TSK, NoahmpIO%SNOW, NoahmpIO%SNOWH, NoahmpIO%lai, NoahmpIO%VEGFRA, NoahmpIO%IVGTYP, &
-       NoahmpIO%FNDSNOWH)
+          (trim(NoahmpIO%hrldas_setup_file), NoahmpIO%xend-NoahmpIO%xstart+1,NoahmpIO%yend-NoahmpIO%ystart+1,                          & 
+          NoahmpIO%NSOIL,NoahmpIO%SMOIS(:,1:NoahmpIO%NSOIL,:),NoahmpIO%TSLB(:,1:NoahmpIO%NSOIL,:),NoahmpIO%SH2O(:,1:NoahmpIO%NSOIL,:), &
+          NoahmpIO%CANWAT, NoahmpIO%TSK, NoahmpIO%SNOW, NoahmpIO%SNOWH, NoahmpIO%lai, NoahmpIO%VEGFRA, NoahmpIO%IVGTYP,                &
+          NoahmpIO%FNDSNOWH)
 
-       NoahmpIO%greenfrac = 0.0
+          NoahmpIO%greenfrac = 0.0
 #ifdef MPP_LAND
-       call get_greenfrac_mpp &
+          call get_greenfrac_mpp &
 #else
-       call get_greenfrac &
+          call get_greenfrac &
 #endif
-        (trim(NoahmpIO%GEO_STATIC_FLNM),NoahmpIO%greenfrac, NoahmpIO%ix, NoahmpIO%jx, NoahmpIO%olddate, NoahmpIO%SHDMAX)
-       !yw GVFMAX = maxval(greenfrac)
-  endif
+          (trim(NoahmpIO%GEO_STATIC_FLNM),NoahmpIO%greenfrac, NoahmpIO%ix, NoahmpIO%jx, NoahmpIO%olddate, NoahmpIO%SHDMAX)
+          !yw GVFMAX = maxval(greenfrac)
+       endif
 #endif
 
-        !----------------------------------------------------------------------------------
-        !   Initialize Noah-MP variables
-        !----------------------------------------------------------------------------------
-        call NoahmpInitMain(NoahmpIO)
+       !----------------------------------------------------------------------------------
+       !   Initialize Noah-MP variables
+       !----------------------------------------------------------------------------------
+       call NoahmpInitMain(NoahmpIO)
 
-        !----------------------------------------------------------------------------------
-        !   Initialize MMF Groundwater variables
-        !----------------------------------------------------------------------------------
-        if ( NoahmpIO%IOPT_RUNSUB == 5 ) then
-            call NoahmpGroundwaterInitMain(grid, NoahmpIO)
-        endif
+       !----------------------------------------------------------------------------------
+       !   Initialize MMF Groundwater variables
+       !----------------------------------------------------------------------------------
+       if ( NoahmpIO%IOPT_RUNSUB == 5 ) then
+          call NoahmpGroundwaterInitMain(grid, NoahmpIO)
+       endif
 
-        if (NoahmpIO%SF_URBAN_PHYSICS > 0 ) then  !urban
+       if (NoahmpIO%SF_URBAN_PHYSICS > 0 ) then  !urban
 
-                 CALL urban_param_init(NoahmpIO%DZR,NoahmpIO%DZB,NoahmpIO%DZG,NoahmpIO%NSOIL,    &
-                                       NoahmpIO%sf_urban_physics,NoahmpIO%use_wudapt_lcz,NoahmpIO%IRI_URBAN) ! cenlin added
+          call urban_param_init(NoahmpIO%DZR,NoahmpIO%DZB,NoahmpIO%DZG,NoahmpIO%NSOIL,    &
+                                NoahmpIO%sf_urban_physics,NoahmpIO%use_wudapt_lcz,NoahmpIO%IRI_URBAN) ! cenlin added
 
-                 CALL urban_var_init(NoahmpIO%ISURBAN, NoahmpIO%TSK, NoahmpIO%TSLB, NoahmpIO%TMN,                                & !urban
-                                    NoahmpIO%IVGTYP, NoahmpIO%ims,NoahmpIO%ime,NoahmpIO%jms,NoahmpIO%jme,                        & !urban
-                                    NoahmpIO%kms,NoahmpIO%kme,NoahmpIO%NSOIL, NoahmpIO%LCZ_1_TABLE,                              & !urban  
-                                    NoahmpIO%LCZ_2_TABLE,NoahmpIO%LCZ_3_TABLE,NoahmpIO%LCZ_4_TABLE,NoahmpIO%LCZ_5_TABLE,         & !urban
-                                    NoahmpIO%LCZ_6_TABLE,NoahmpIO%LCZ_7_TABLE,NoahmpIO%LCZ_8_TABLE,NoahmpIO%LCZ_9_TABLE,         & !urban
-                                    NoahmpIO%LCZ_10_TABLE, NoahmpIO%LCZ_11_TABLE,.true.,NoahmpIO%sf_urban_physics,               & !urban
-                                    NoahmpIO%XXXR_URB2D, NoahmpIO%XXXB_URB2D, NoahmpIO%XXXG_URB2D, NoahmpIO%XXXC_URB2D,          & !urban
-                                    NoahmpIO%TR_URB2D, NoahmpIO%TB_URB2D, NoahmpIO%TG_URB2D, NoahmpIO%TC_URB2D,NoahmpIO%QC_URB2D,& !urban
-                                    NoahmpIO%TRL_URB3D, NoahmpIO%TBL_URB3D, NoahmpIO%TGL_URB3D, NoahmpIO%SH_URB2D,               & !urban
-                                    NoahmpIO%LH_URB2D, NoahmpIO%G_URB2D, NoahmpIO%RN_URB2D, NoahmpIO%TS_URB2D,                   & !urban
-                                    NoahmpIO%num_urban_ndm,  NoahmpIO%urban_map_zrd,  NoahmpIO%urban_map_zwd,                    & !urban
-                                    NoahmpIO%urban_map_gd,                                                                       & !I multi-layer urban
-                                    NoahmpIO%urban_map_zd,  NoahmpIO%urban_map_zdf, NoahmpIO%urban_map_bd,                       & !I multi-layer urban   
-                                    NoahmpIO%urban_map_wd, NoahmpIO%urban_map_gbd,  NoahmpIO%urban_map_fbd,                      & !I multi-layer urban
-                                    NoahmpIO%urban_map_zgrd,                                                                     & !I multi-layer urban
-                                    NoahmpIO%num_urban_hi,                                                                       & !urban
-                                    NoahmpIO%TRB_URB4D, NoahmpIO%TW1_URB4D, NoahmpIO%TW2_URB4D, NoahmpIO%TGB_URB4D,              & !urban
-                                    NoahmpIO%TLEV_URB3D, NoahmpIO%QLEV_URB3D,                                                    & !urban
-                                    NoahmpIO%TW1LEV_URB3D,NoahmpIO%TW2LEV_URB3D,                                                 & !urban
-                                    NoahmpIO%TGLEV_URB3D, NoahmpIO%TFLEV_URB3D,                                                  & !urban
-                                    NoahmpIO%SF_AC_URB3D, NoahmpIO%LF_AC_URB3D, NoahmpIO%CM_AC_URB3D,                            & !urban
-                                    NoahmpIO%SFVENT_URB3D, NoahmpIO%LFVENT_URB3D,                                                & !urban
-                                    NoahmpIO%SFWIN1_URB3D, NoahmpIO%SFWIN2_URB3D,                                                & !urban
-                                    NoahmpIO%SFW1_URB3D, NoahmpIO%SFW2_URB3D, NoahmpIO%SFR_URB3D, NoahmpIO%SFG_URB3D,            & !urban
-                                    NoahmpIO%EP_PV_URB3D, NoahmpIO%T_PV_URB3D,                                                   & !GRZ
-                                    NoahmpIO%TRV_URB4D, NoahmpIO%QR_URB4D, NoahmpIO%QGR_URB3D, NoahmpIO%TGR_URB3D,               & !GRZ
-                                    NoahmpIO%DRAIN_URB4D, NoahmpIO%DRAINGR_URB3D, NoahmpIO%SFRV_URB3D,                           & !GRZ
-                                    NoahmpIO%LFRV_URB3D, NoahmpIO%DGR_URB3D, NoahmpIO%DG_URB3D, NoahmpIO%LFR_URB3D,              & !GRZ   
-                                    NoahmpIO%LFG_URB3D, NoahmpIO%SMOIS,                                                          & !GRZ
-                                    NoahmpIO%LP_URB2D, NoahmpIO%HI_URB2D, NoahmpIO%LB_URB2D,                                     & !urban
-                                    NoahmpIO%HGT_URB2D, NoahmpIO%MH_URB2D, NoahmpIO%STDH_URB2D,                                  & !urban
-                                    NoahmpIO%LF_URB2D,                                                                           & !urban
-                                    NoahmpIO%CMCR_URB2D, NoahmpIO%TGR_URB2D, NoahmpIO%TGRL_URB3D, NoahmpIO%SMR_URB3D,            & !urban
-                                    NoahmpIO%DRELR_URB2D, NoahmpIO%DRELB_URB2D, NoahmpIO%DRELG_URB2D,                            & !urban
-                                    NoahmpIO%FLXHUMR_URB2D, NoahmpIO%FLXHUMB_URB2D, NoahmpIO%FLXHUMG_URB2D,                      & !urban
-                                    NoahmpIO%A_U_BEP, NoahmpIO%A_V_BEP, NoahmpIO%A_T_BEP, NoahmpIO%A_Q_BEP,                      & !multi-layer urban
-                                    NoahmpIO%A_E_BEP, NoahmpIO%B_U_BEP, NoahmpIO%B_V_BEP,                                        & !multi-layer urban
-                                    NoahmpIO%B_T_BEP, NoahmpIO%B_Q_BEP, NoahmpIO%B_E_BEP, NoahmpIO%DLG_BEP,                      & !multi-layer urban
-                                    NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                         & !multi-layer urban
-                                    NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                             !urban
+          call urban_var_init(NoahmpIO%ISURBAN, NoahmpIO%TSK, NoahmpIO%TSLB, NoahmpIO%TMN,                                 & !urban
+                              NoahmpIO%IVGTYP, NoahmpIO%ims,NoahmpIO%ime,NoahmpIO%jms,NoahmpIO%jme,                        & !urban
+                              NoahmpIO%kms,NoahmpIO%kme,NoahmpIO%NSOIL, NoahmpIO%LCZ_1_TABLE,                              & !urban  
+                              NoahmpIO%LCZ_2_TABLE,NoahmpIO%LCZ_3_TABLE,NoahmpIO%LCZ_4_TABLE,NoahmpIO%LCZ_5_TABLE,         & !urban
+                              NoahmpIO%LCZ_6_TABLE,NoahmpIO%LCZ_7_TABLE,NoahmpIO%LCZ_8_TABLE,NoahmpIO%LCZ_9_TABLE,         & !urban
+                              NoahmpIO%LCZ_10_TABLE, NoahmpIO%LCZ_11_TABLE,.true.,NoahmpIO%sf_urban_physics,               & !urban
+                              NoahmpIO%XXXR_URB2D, NoahmpIO%XXXB_URB2D, NoahmpIO%XXXG_URB2D, NoahmpIO%XXXC_URB2D,          & !urban
+                              NoahmpIO%TR_URB2D, NoahmpIO%TB_URB2D, NoahmpIO%TG_URB2D, NoahmpIO%TC_URB2D,NoahmpIO%QC_URB2D,& !urban
+                              NoahmpIO%TRL_URB3D, NoahmpIO%TBL_URB3D, NoahmpIO%TGL_URB3D, NoahmpIO%SH_URB2D,               & !urban
+                              NoahmpIO%LH_URB2D, NoahmpIO%G_URB2D, NoahmpIO%RN_URB2D, NoahmpIO%TS_URB2D,                   & !urban
+                              NoahmpIO%num_urban_ndm,  NoahmpIO%urban_map_zrd,  NoahmpIO%urban_map_zwd,                    & !urban
+                              NoahmpIO%urban_map_gd,                                                                       & !I multi-layer urban
+                              NoahmpIO%urban_map_zd,  NoahmpIO%urban_map_zdf, NoahmpIO%urban_map_bd,                       & !I multi-layer urban   
+                              NoahmpIO%urban_map_wd, NoahmpIO%urban_map_gbd,  NoahmpIO%urban_map_fbd,                      & !I multi-layer urban
+                              NoahmpIO%urban_map_zgrd,                                                                     & !I multi-layer urban
+                              NoahmpIO%num_urban_hi,                                                                       & !urban
+                              NoahmpIO%TRB_URB4D, NoahmpIO%TW1_URB4D, NoahmpIO%TW2_URB4D, NoahmpIO%TGB_URB4D,              & !urban
+                              NoahmpIO%TLEV_URB3D, NoahmpIO%QLEV_URB3D,                                                    & !urban
+                              NoahmpIO%TW1LEV_URB3D,NoahmpIO%TW2LEV_URB3D,                                                 & !urban
+                              NoahmpIO%TGLEV_URB3D, NoahmpIO%TFLEV_URB3D,                                                  & !urban
+                              NoahmpIO%SF_AC_URB3D, NoahmpIO%LF_AC_URB3D, NoahmpIO%CM_AC_URB3D,                            & !urban
+                              NoahmpIO%SFVENT_URB3D, NoahmpIO%LFVENT_URB3D,                                                & !urban
+                              NoahmpIO%SFWIN1_URB3D, NoahmpIO%SFWIN2_URB3D,                                                & !urban
+                              NoahmpIO%SFW1_URB3D, NoahmpIO%SFW2_URB3D, NoahmpIO%SFR_URB3D, NoahmpIO%SFG_URB3D,            & !urban
+                              NoahmpIO%EP_PV_URB3D, NoahmpIO%T_PV_URB3D,                                                   & !GRZ
+                              NoahmpIO%TRV_URB4D, NoahmpIO%QR_URB4D, NoahmpIO%QGR_URB3D, NoahmpIO%TGR_URB3D,               & !GRZ
+                              NoahmpIO%DRAIN_URB4D, NoahmpIO%DRAINGR_URB3D, NoahmpIO%SFRV_URB3D,                           & !GRZ
+                              NoahmpIO%LFRV_URB3D, NoahmpIO%DGR_URB3D, NoahmpIO%DG_URB3D, NoahmpIO%LFR_URB3D,              & !GRZ   
+                              NoahmpIO%LFG_URB3D, NoahmpIO%SMOIS,                                                          & !GRZ
+                              NoahmpIO%LP_URB2D, NoahmpIO%HI_URB2D, NoahmpIO%LB_URB2D,                                     & !urban
+                              NoahmpIO%HGT_URB2D, NoahmpIO%MH_URB2D, NoahmpIO%STDH_URB2D,                                  & !urban
+                              NoahmpIO%LF_URB2D,                                                                           & !urban
+                              NoahmpIO%CMCR_URB2D, NoahmpIO%TGR_URB2D, NoahmpIO%TGRL_URB3D, NoahmpIO%SMR_URB3D,            & !urban
+                              NoahmpIO%DRELR_URB2D, NoahmpIO%DRELB_URB2D, NoahmpIO%DRELG_URB2D,                            & !urban
+                              NoahmpIO%FLXHUMR_URB2D, NoahmpIO%FLXHUMB_URB2D, NoahmpIO%FLXHUMG_URB2D,                      & !urban
+                              NoahmpIO%A_U_BEP, NoahmpIO%A_V_BEP, NoahmpIO%A_T_BEP, NoahmpIO%A_Q_BEP,                      & !multi-layer urban
+                              NoahmpIO%A_E_BEP, NoahmpIO%B_U_BEP, NoahmpIO%B_V_BEP,                                        & !multi-layer urban
+                              NoahmpIO%B_T_BEP, NoahmpIO%B_Q_BEP, NoahmpIO%B_E_BEP, NoahmpIO%DLG_BEP,                      & !multi-layer urban
+                              NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                         & !multi-layer urban
+                              NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                             !urban
 
-               max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
+          max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
                
-               IF (NoahmpIO%use_wudapt_lcz.eq.0 .and. max_utype_urb2d.gt.3.0) THEN  !new LCZ
-                 CALL wrf_error_fatal &
-                 ('USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1')
-               ENDIF
-               IF (NoahmpIO%use_wudapt_lcz.eq.1 .and. max_utype_urb2d.le.3.0) THEN  ! new LCZ
-                 CALL wrf_error_fatal &
-                 ('USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0')
-               ENDIF
+          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_utype_urb2d > 3.0) ) then  !new LCZ
+             stop "USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1"
+          endif
+          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_utype_urb2d <= 3.0) ) then  ! new LCZ
+             stop "USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0"
+          endif
+       endif !urban
 
-          endif !urban
+       if ( NoahmpIO%SF_URBAN_PHYSICS > 1 ) then  !urban
+          do i = 1, NoahmpIO%num_urban_atmosphere-1
+             NoahmpIO%dz_urban(:,i,:) = NoahmpIO%urban_atmosphere_thickness  ! thickness of full levels
+          enddo
+          NoahmpIO%dz_urban(:,NoahmpIO%num_urban_atmosphere,:) =                                   &
+                       2*(NoahmpIO%zlvl - NoahmpIO%urban_atmosphere_thickness*(NoahmpIO%num_urban_atmosphere-1))
+          print*, NoahmpIO%dz_urban(1,:,1)
+       endif
 
-          IF(NoahmpIO%SF_URBAN_PHYSICS > 1 ) THEN  !urban
-            do i = 1, NoahmpIO%num_urban_atmosphere-1
-              NoahmpIO%dz_urban(:,i,:) = NoahmpIO%urban_atmosphere_thickness  ! thickness of full levels
-            end do
-            NoahmpIO%dz_urban(:,NoahmpIO%num_urban_atmosphere,:) =                                   &
-                  2*(NoahmpIO%zlvl - NoahmpIO%urban_atmosphere_thickness*(NoahmpIO%num_urban_atmosphere-1))
-            print*, NoahmpIO%dz_urban(1,:,1)
-          ENDIF
+    endif  ! restart flag
 
-  endif  ! restart flag
+    NoahmpIO%NTIME       = (NoahmpIO%KHOUR)*3600.0/nint(NoahmpIO%dtbl)*(NoahmpIO%spinup_loops+1)
+    NoahmpIO%spinup_loop = 0
+    NoahmpIO%reset_spinup_date = .false.
 
-  NoahmpIO%NTIME       = (NoahmpIO%KHOUR)*3600.0/nint(NoahmpIO%dtbl)*(NoahmpIO%spinup_loops+1)
-  NoahmpIO%spinup_loop = 0
-  NoahmpIO%reset_spinup_date = .false.
-
-  print*, "NTIME = ", NoahmpIO%NTIME , "KHOUR=",NoahmpIO%KHOUR,"dtbl = ", NoahmpIO%dtbl
+    print*, "NTIME = ", NoahmpIO%NTIME , "KHOUR=",NoahmpIO%KHOUR,"dtbl = ", NoahmpIO%dtbl
   
-  call system_clock(count=NoahmpIO%clock_count_1)   ! Start a timer
+    call system_clock(count=NoahmpIO%clock_count_1)   ! Start a timer
 
 
 #ifdef WRF_HYDRO
@@ -747,33 +731,33 @@ contains
     etpnd     = 0.0
     prcp0     = 0
 
-   allocate(zsoil (NoahmpIO%NSOIL))
-   zsoil = 0
+    allocate(zsoil (NoahmpIO%NSOIL))
+    zsoil = 0
 
-   zsoil(1) = -1*NoahmpIO%soil_thick_input(1)
-   do kk = 2, NoahmpIO%NSOIL
-      zsoil(kk) = zsoil(kk-1)-NoahmpIO%soil_thick_input(kk)
-   end do
+    zsoil(1) = -1*NoahmpIO%soil_thick_input(1)
+    do kk = 2, NoahmpIO%NSOIL
+       zsoil(kk) = zsoil(kk-1)-NoahmpIO%soil_thick_input(kk)
+    enddo
    
-   print*, "zsoil/soil_thick_input = ", NoahmpIO%soil_thick_input(1:NoahmpIO%NSOIL) 
+    print*, "zsoil/soil_thick_input = ", NoahmpIO%soil_thick_input(1:NoahmpIO%NSOIL) 
 
-   call hrldas_drv_HYDRO_ini(NoahmpIO%TSLB(:,1:NoahmpIO%NSOIL,:),NoahmpIO%SMOIS(:,1:NoahmpIO%NSOIL,:),    &
-                            NoahmpIO%SH2O(:,1:NoahmpIO%NSOIL,:), NoahmpIO%infxsrt,NoahmpIO%sfcheadrt,     &
-                            NoahmpIO%soldrain,NoahmpIO%qtiledrain,NoahmpIO%ZWATBLE2D,                     &
-                            NoahmpIO%ix,NoahmpIO%jx,NoahmpIO%NSOIL, NoahmpIO%SMOIS,                       &
-                            real(NoahmpIO%noah_timestep),NoahmpIO%olddate,zsoil(1:NoahmpIO%NSOIL))
+    call hrldas_drv_HYDRO_ini(NoahmpIO%TSLB(:,1:NoahmpIO%NSOIL,:),NoahmpIO%SMOIS(:,1:NoahmpIO%NSOIL,:),     &
+                              NoahmpIO%SH2O(:,1:NoahmpIO%NSOIL,:), NoahmpIO%infxsrt,NoahmpIO%sfcheadrt,     &
+                              NoahmpIO%soldrain,NoahmpIO%qtiledrain,NoahmpIO%ZWATBLE2D,                     &
+                              NoahmpIO%ix,NoahmpIO%jx,NoahmpIO%NSOIL, NoahmpIO%SMOIS,                       &
+                              real(NoahmpIO%noah_timestep),NoahmpIO%olddate,zsoil(1:NoahmpIO%NSOIL))
 
-   if(finemesh .ne. 0 ) then
-       if(NoahmpIO%restart_flag) then
+    if ( finemesh /= 0 ) then
+       if ( NoahmpIO%restart_flag .eqv. .true. ) then
           NTIME_out =  10
        else
           NTIME_out =  1 
        endif
        return
-   endif
+    endif
 #endif
 
-   NTIME_out = NoahmpIO%NTIME 
+    NTIME_out = NoahmpIO%NTIME 
    
   end subroutine land_driver_ini
 
@@ -808,7 +792,7 @@ contains
      if(finemesh .ne. 0) goto 991
 
      if(forc_typ .eq. 0) then
-        CALL READFORC_HRLDAS(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,    &
+        call READFORC_HRLDAS(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,    &
                              NoahmpIO%OLDDATE,NoahmpIO%XSTART, NoahmpIO%XEND,        &
                              NoahmpIO%YSTART, NoahmpIO%YEND,                         &
                              NoahmpIO%forcing_name_T, NoahmpIO%forcing_name_Q,       &
@@ -823,10 +807,10 @@ contains
                              NoahmpIO%update_lai, NoahmpIO%reset_spinup_date,        &
                              NoahmpIO%startdate)
                              
-             NoahmpIO%VEGFRA = NoahmpIO%VEGFRA * 100.
+             NoahmpIO%VEGFRA = NoahmpIO%VEGFRA * 100.0
      else
         if(NoahmpIO%olddate == forcDate) then
-           CALL HYDRO_frocing_drv(trim(NoahmpIO%indir), NoahmpIO%forc_typ,NoahmpIO%snow_assim,NoahmpIO%olddate, &
+           call HYDRO_frocing_drv(trim(NoahmpIO%indir), NoahmpIO%forc_typ,NoahmpIO%snow_assim,NoahmpIO%olddate, &
                                        NoahmpIO%xstart, NoahmpIO%xend, NoahmpIO%ystart, NoahmpIO%yend,          &
                                        NoahmpIO%T_PHY(:,1,:),NoahmpIO%QV_CURR(:,1,:),NoahmpIO%U_PHY(:,1,:),     &
                                        NoahmpIO%V_PHY(:,1,:),NoahmpIO%P8W(:,1,:), NoahmpIO%GLW,                 &   
@@ -839,7 +823,7 @@ contains
      endif
 
 #else
-     CALL READFORC_HRLDAS(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,                               &
+     call READFORC_HRLDAS(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,                               &
                           NoahmpIO%OLDDATE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,  &
                           NoahmpIO%forcing_name_T,NoahmpIO%forcing_name_Q,NoahmpIO%forcing_name_U,           &
                           NoahmpIO%forcing_name_V,NoahmpIO%forcing_name_P,NoahmpIO%forcing_name_LW,          &
@@ -924,15 +908,15 @@ contains
     DO J = NoahmpIO%YSTART,NoahmpIO%YEND
     DO I = NoahmpIO%XSTART,NoahmpIO%XEND
       IF(NoahmpIO%SF_URBAN_PHYSICS == 0) THEN
-        CALL CALC_DECLIN(NoahmpIO%OLDDATE(1:19),NoahmpIO%XLAT(I,J), NoahmpIO%XLONG(I,J), &
+        call CALC_DECLIN(NoahmpIO%OLDDATE(1:19),NoahmpIO%XLAT(I,J), NoahmpIO%XLONG(I,J), &
                          NoahmpIO%COSZEN(I,J),NoahmpIO%JULIAN)
       ELSE
-        CALL CALC_DECLIN(NoahmpIO%OLDDATE(1:19),NoahmpIO%XLAT(I,J), NoahmpIO%XLONG(I,J), &
+        call CALC_DECLIN(NoahmpIO%OLDDATE(1:19),NoahmpIO%XLAT(I,J), NoahmpIO%XLONG(I,J), &
                          NoahmpIO%COSZEN(I,J),NoahmpIO%JULIAN,NoahmpIO%HRANG(I,J),       &
                          NoahmpIO%DECLIN, NoahmpIO%GMT, NoahmpIO%JULDAY)
       ENDIF
       IF(NoahmpIO%IOPT_IRR > 0 ) THEN
-         CALL LOCAL_TIME(NoahmpIO%OLDDATE(1:19), NoahmpIO%XLONG(I,J), NoahmpIO%LOCTIM(I,J)) 
+         call LOCAL_TIME(NoahmpIO%OLDDATE(1:19), NoahmpIO%XLONG(I,J), NoahmpIO%LOCTIM(I,J)) 
       ENDIF
     END DO
     END DO
@@ -1054,10 +1038,10 @@ contains
 
          if ( NoahmpIO%IOPT_RUNSUB == 5 ) then
             if ( mod(ITIME,NoahmpIO%STEPWTD) == 0 ) then
-               CALL wrf_message('calling WTABLE' )
+               call wrf_message('calling WTABLE')
 
                !gmm update wtable from lateral flow and shed water to rivers
-               CALL WTABLE_MMF_NOAHMP(NoahmpIO,                                             &
+               call WTABLE_MMF_NOAHMP(NoahmpIO,                                             &
                                   NoahmpIO%NSOIL, NoahmpIO%XLAND, NoahmpIO%XICE,            & 
                                   NoahmpIO%XICE_THRESHOLD, NoahmpIO%ISICE,                  &
                                   NoahmpIO%ISLTYP, NoahmpIO%SMOISEQ, NoahmpIO%DZS,          &       
@@ -1418,7 +1402,7 @@ subroutine lsm_restart()
   call add_to_restart(NoahmpIO%ACC_ETRANXY ,"ACC_ETRAN" )
   call add_to_restart(NoahmpIO%ACC_EDIRXY  ,"ACC_EDIR"  )
  ! irrigation scheme
-  IF (NoahmpIO%IOPT_IRR > 0) THEN
+  if ( NoahmpIO%IOPT_IRR > 0 ) then
      call add_to_restart(NoahmpIO%IRNUMSI   , "IRNUMSI")
      call add_to_restart(NoahmpIO%IRNUMMI   , "IRNUMMI")
      call add_to_restart(NoahmpIO%IRNUMFI   , "IRNUMFI")
@@ -1430,7 +1414,7 @@ subroutine lsm_restart()
      call add_to_restart(NoahmpIO%IRFIVOL   , "IRFIVOL")
      call add_to_restart(NoahmpIO%IRELOSS   , "IRELOSS")
      call add_to_restart(NoahmpIO%IRRSPLH   , "IRRSPLH")
-  ENDIF
+  endif
   ! below for MMF groundwater scheme
   if ( NoahmpIO%IOPT_RUNSUB == 5 ) then
      call add_to_restart(NoahmpIO%SMOISEQ     , "SMOISEQ"  , layers="SOIL"  )
@@ -1466,78 +1450,78 @@ subroutine lsm_restart()
       call add_to_restart(     NoahmpIO%HI_URB2D  ,      "HI_URB2D", layers="URBN")
       call add_to_restart(     NoahmpIO%LF_URB2D  ,      "LF_URB2D", layers="URBN")
          
-      !IF(NoahmpIO%SF_URBAN_PHYSICS == 1 ) THEN  ! single layer urban model  
-      call add_to_restart(    NoahmpIO%CMR_SFCDIF ,     "CMR_SFCDIF" )
-      call add_to_restart(    NoahmpIO%CHR_SFCDIF ,     "CHR_SFCDIF" )
-      call add_to_restart(    NoahmpIO%CMC_SFCDIF ,     "CMC_SFCDIF" )
-      call add_to_restart(    NoahmpIO%CHC_SFCDIF ,     "CHC_SFCDIF" )
-      call add_to_restart(   NoahmpIO%CMGR_SFCDIF ,    "CMGR_SFCDIF" )
-      call add_to_restart(   NoahmpIO%CHGR_SFCDIF ,    "CHGR_SFCDIF" )
-      call add_to_restart(     NoahmpIO%TR_URB2D  ,      "TR_URB2D" )
-      call add_to_restart(     NoahmpIO%TB_URB2D  ,      "TB_URB2D" )
-      call add_to_restart(     NoahmpIO%TG_URB2D  ,      "TG_URB2D" )
-      call add_to_restart(     NoahmpIO%TC_URB2D  ,      "TC_URB2D" )
-      call add_to_restart(     NoahmpIO%QC_URB2D  ,      "QC_URB2D" )
-      call add_to_restart(     NoahmpIO%UC_URB2D  ,      "UC_URB2D" )
-      call add_to_restart(   NoahmpIO%XXXR_URB2D  ,    "XXXR_URB2D" )
-      call add_to_restart(   NoahmpIO%XXXB_URB2D  ,    "XXXB_URB2D" )
-      call add_to_restart(   NoahmpIO%XXXG_URB2D  ,    "XXXG_URB2D" )
-      call add_to_restart(   NoahmpIO%XXXC_URB2D  ,    "XXXC_URB2D" )
-      call add_to_restart(    NoahmpIO%TRL_URB3D  ,     "TRL_URB3D", layers="SOIL" )
-      call add_to_restart(    NoahmpIO%TBL_URB3D  ,     "TBL_URB3D", layers="SOIL" )
-      call add_to_restart(    NoahmpIO%TGL_URB3D  ,     "TGL_URB3D", layers="SOIL" )
-      call add_to_restart(   NoahmpIO%CMCR_URB2D  ,    "CMCR_URB2D" )
-      call add_to_restart(    NoahmpIO%TGR_URB2D  ,     "TGR_URB2D" )
-      call add_to_restart(   NoahmpIO%TGRL_URB3D  ,    "TGRL_URB3D", layers="SOIL" )
-      call add_to_restart(    NoahmpIO%SMR_URB3D  ,     "SMR_URB3D", layers="SOIL" )
-      call add_to_restart(  NoahmpIO%DRELR_URB2D  ,   "DRELR_URB2D" )
-      call add_to_restart(  NoahmpIO%DRELB_URB2D  ,   "DRELB_URB2D" )
-      call add_to_restart(  NoahmpIO%DRELG_URB2D  ,   "DRELG_URB2D" )
-      call add_to_restart(NoahmpIO%FLXHUMR_URB2D  , "FLXHUMR_URB2D" )
-      call add_to_restart(NoahmpIO%FLXHUMB_URB2D  , "FLXHUMB_URB2D" )
-      call add_to_restart(NoahmpIO%FLXHUMG_URB2D  , "FLXHUMG_URB2D" )
-      !ENDIF
+      if ( NoahmpIO%SF_URBAN_PHYSICS == 1 ) then  ! single layer urban model  
+         call add_to_restart(    NoahmpIO%CMR_SFCDIF ,     "CMR_SFCDIF" )
+         call add_to_restart(    NoahmpIO%CHR_SFCDIF ,     "CHR_SFCDIF" )
+         call add_to_restart(    NoahmpIO%CMC_SFCDIF ,     "CMC_SFCDIF" )
+         call add_to_restart(    NoahmpIO%CHC_SFCDIF ,     "CHC_SFCDIF" )
+         call add_to_restart(   NoahmpIO%CMGR_SFCDIF ,    "CMGR_SFCDIF" )
+         call add_to_restart(   NoahmpIO%CHGR_SFCDIF ,    "CHGR_SFCDIF" )
+         call add_to_restart(     NoahmpIO%TR_URB2D  ,      "TR_URB2D" )
+         call add_to_restart(     NoahmpIO%TB_URB2D  ,      "TB_URB2D" )
+         call add_to_restart(     NoahmpIO%TG_URB2D  ,      "TG_URB2D" )
+         call add_to_restart(     NoahmpIO%TC_URB2D  ,      "TC_URB2D" )
+         call add_to_restart(     NoahmpIO%QC_URB2D  ,      "QC_URB2D" )
+         call add_to_restart(     NoahmpIO%UC_URB2D  ,      "UC_URB2D" )
+         call add_to_restart(   NoahmpIO%XXXR_URB2D  ,    "XXXR_URB2D" )
+         call add_to_restart(   NoahmpIO%XXXB_URB2D  ,    "XXXB_URB2D" )
+         call add_to_restart(   NoahmpIO%XXXG_URB2D  ,    "XXXG_URB2D" )
+         call add_to_restart(   NoahmpIO%XXXC_URB2D  ,    "XXXC_URB2D" )
+         call add_to_restart(    NoahmpIO%TRL_URB3D  ,     "TRL_URB3D", layers="SOIL" )
+         call add_to_restart(    NoahmpIO%TBL_URB3D  ,     "TBL_URB3D", layers="SOIL" )
+         call add_to_restart(    NoahmpIO%TGL_URB3D  ,     "TGL_URB3D", layers="SOIL" )
+         call add_to_restart(   NoahmpIO%CMCR_URB2D  ,    "CMCR_URB2D" )
+         call add_to_restart(    NoahmpIO%TGR_URB2D  ,     "TGR_URB2D" )
+         call add_to_restart(   NoahmpIO%TGRL_URB3D  ,    "TGRL_URB3D", layers="SOIL" )
+         call add_to_restart(    NoahmpIO%SMR_URB3D  ,     "SMR_URB3D", layers="SOIL" )
+         call add_to_restart(  NoahmpIO%DRELR_URB2D  ,   "DRELR_URB2D" )
+         call add_to_restart(  NoahmpIO%DRELB_URB2D  ,   "DRELB_URB2D" )
+         call add_to_restart(  NoahmpIO%DRELG_URB2D  ,   "DRELG_URB2D" )
+         call add_to_restart(NoahmpIO%FLXHUMR_URB2D  , "FLXHUMR_URB2D" )
+         call add_to_restart(NoahmpIO%FLXHUMB_URB2D  , "FLXHUMB_URB2D" )
+         call add_to_restart(NoahmpIO%FLXHUMG_URB2D  , "FLXHUMG_URB2D" )
+      endif
 
-      !IF(NoahmpIO%SF_URBAN_PHYSICS == 2 .or. NoahmpIO%SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models  
-      call add_to_restart(    NoahmpIO%TRB_URB4D  ,     "TRB_URB4D", layers="URBN" )
-      call add_to_restart(    NoahmpIO%TW1_URB4D  ,     "TW1_URB4D", layers="URBN" )
-      call add_to_restart(    NoahmpIO%TW2_URB4D  ,     "TW2_URB4D", layers="URBN" )
-      call add_to_restart(    NoahmpIO%TGB_URB4D  ,     "TGB_URB4D", layers="URBN" )
-      call add_to_restart(   NoahmpIO%SFW1_URB3D  ,    "SFW1_URB3D", layers="URBN" )
-      call add_to_restart(   NoahmpIO%SFW2_URB3D  ,    "SFW2_URB3D", layers="URBN" )
-      call add_to_restart(    NoahmpIO%SFR_URB3D  ,     "SFR_URB3D", layers="URBN" )
-      call add_to_restart(    NoahmpIO%SFG_URB3D  ,     "SFG_URB3D", layers="URBN" )
-      !ENDIF
+      if ( (NoahmpIO%SF_URBAN_PHYSICS == 2) .or. (NoahmpIO%SF_URBAN_PHYSICS == 3) ) then ! BEP or BEM urban models  
+         call add_to_restart(    NoahmpIO%TRB_URB4D  ,     "TRB_URB4D", layers="URBN" )
+         call add_to_restart(    NoahmpIO%TW1_URB4D  ,     "TW1_URB4D", layers="URBN" )
+         call add_to_restart(    NoahmpIO%TW2_URB4D  ,     "TW2_URB4D", layers="URBN" )
+         call add_to_restart(    NoahmpIO%TGB_URB4D  ,     "TGB_URB4D", layers="URBN" )
+         call add_to_restart(   NoahmpIO%SFW1_URB3D  ,    "SFW1_URB3D", layers="URBN" )
+         call add_to_restart(   NoahmpIO%SFW2_URB3D  ,    "SFW2_URB3D", layers="URBN" )
+         call add_to_restart(    NoahmpIO%SFR_URB3D  ,     "SFR_URB3D", layers="URBN" )
+         call add_to_restart(    NoahmpIO%SFG_URB3D  ,     "SFG_URB3D", layers="URBN" )
+      endif
 
-      !IF(NoahmpIO%SF_URBAN_PHYSICS == 3) THEN  ! BEM urban model  
-      call add_to_restart(   NoahmpIO%TLEV_URB3D  ,    "TLEV_URB3D", layers="URBN" )
-      call add_to_restart(   NoahmpIO%QLEV_URB3D  ,    "QLEV_URB3D", layers="URBN" )
-      call add_to_restart( NoahmpIO%TW1LEV_URB3D  ,  "TW1LEV_URB3D", layers="URBN" )
-      call add_to_restart( NoahmpIO%TW2LEV_URB3D  ,  "TW2LEV_URB3D", layers="URBN" )
-      call add_to_restart(  NoahmpIO%TGLEV_URB3D  ,   "TGLEV_URB3D", layers="URBN" )
-      call add_to_restart(  NoahmpIO%TFLEV_URB3D  ,   "TFLEV_URB3D", layers="URBN" )
-      call add_to_restart(  NoahmpIO%SF_AC_URB3D  ,   "SF_AC_URB3D" )
-      call add_to_restart(  NoahmpIO%LF_AC_URB3D  ,   "LF_AC_URB3D" )
-      call add_to_restart(  NoahmpIO%CM_AC_URB3D  ,   "CM_AC_URB3D" )
-      call add_to_restart( NoahmpIO%SFVENT_URB3D  ,  "SFVENT_URB3D" )
-      call add_to_restart( NoahmpIO%LFVENT_URB3D  ,  "LFVENT_URB3D" )
-      call add_to_restart( NoahmpIO%SFWIN1_URB3D  ,  "SFWIN1_URB3D", layers="URBN" )
-      call add_to_restart( NoahmpIO%SFWIN2_URB3D  ,  "SFWIN2_URB3D", layers="URBN" )
-      call add_to_restart(  NoahmpIO%EP_PV_URB3D  ,   "EP_PV_URB3D" )
-      call add_to_restart(   NoahmpIO%T_PV_URB3D  ,    "T_PV_URB3D", layers="URBN" )
-      call add_to_restart(    NoahmpIO%TRV_URB4D  ,    "TRV_URB4D" , layers="URBN" )
-      call add_to_restart(    NoahmpIO%QR_URB4D   ,     "QR_URB4D" , layers="URBN" )
-      call add_to_restart(   NoahmpIO%QGR_URB3D   ,    "QGR_URB3D"  )
-      call add_to_restart(   NoahmpIO%TGR_URB3D   ,    "TGR_URB3D"  )
-      call add_to_restart(   NoahmpIO%DRAIN_URB4D ,   "DRAIN_URB4D", layers="URBN" )
-      call add_to_restart( NoahmpIO%DRAINGR_URB3D , "DRAINGR_URB3D" )
-      call add_to_restart(    NoahmpIO%SFRV_URB3D ,    "SFRV_URB3D", layers="URBN" )
-      call add_to_restart(    NoahmpIO%LFRV_URB3D ,    "LFRV_URB3D", layers="URBN" )
-      call add_to_restart(     NoahmpIO%DGR_URB3D ,     "DGR_URB3D", layers="URBN" )
-      call add_to_restart(      NoahmpIO%DG_URB3D ,      "DG_URB3D", layers="URBN" )
-      call add_to_restart(     NoahmpIO%LFR_URB3D ,     "LFR_URB3D", layers="URBN" )
-      call add_to_restart(     NoahmpIO%LFG_URB3D ,     "LFG_URB3D", layers="URBN" )
-
+      if ( NoahmpIO%SF_URBAN_PHYSICS == 3 ) then  ! BEM urban model  
+         call add_to_restart(   NoahmpIO%TLEV_URB3D  ,    "TLEV_URB3D", layers="URBN" )
+         call add_to_restart(   NoahmpIO%QLEV_URB3D  ,    "QLEV_URB3D", layers="URBN" )
+         call add_to_restart( NoahmpIO%TW1LEV_URB3D  ,  "TW1LEV_URB3D", layers="URBN" )
+         call add_to_restart( NoahmpIO%TW2LEV_URB3D  ,  "TW2LEV_URB3D", layers="URBN" )
+         call add_to_restart(  NoahmpIO%TGLEV_URB3D  ,   "TGLEV_URB3D", layers="URBN" )
+         call add_to_restart(  NoahmpIO%TFLEV_URB3D  ,   "TFLEV_URB3D", layers="URBN" )
+         call add_to_restart(  NoahmpIO%SF_AC_URB3D  ,   "SF_AC_URB3D" )
+         call add_to_restart(  NoahmpIO%LF_AC_URB3D  ,   "LF_AC_URB3D" )
+         call add_to_restart(  NoahmpIO%CM_AC_URB3D  ,   "CM_AC_URB3D" )
+         call add_to_restart( NoahmpIO%SFVENT_URB3D  ,  "SFVENT_URB3D" )
+         call add_to_restart( NoahmpIO%LFVENT_URB3D  ,  "LFVENT_URB3D" )
+         call add_to_restart( NoahmpIO%SFWIN1_URB3D  ,  "SFWIN1_URB3D", layers="URBN" )
+         call add_to_restart( NoahmpIO%SFWIN2_URB3D  ,  "SFWIN2_URB3D", layers="URBN" )
+         call add_to_restart(  NoahmpIO%EP_PV_URB3D  ,   "EP_PV_URB3D" )
+         call add_to_restart(   NoahmpIO%T_PV_URB3D  ,    "T_PV_URB3D", layers="URBN" )
+         call add_to_restart(    NoahmpIO%TRV_URB4D  ,    "TRV_URB4D" , layers="URBN" )
+         call add_to_restart(    NoahmpIO%QR_URB4D   ,     "QR_URB4D" , layers="URBN" )
+         call add_to_restart(   NoahmpIO%QGR_URB3D   ,    "QGR_URB3D"  )
+         call add_to_restart(   NoahmpIO%TGR_URB3D   ,    "TGR_URB3D"  )
+         call add_to_restart(   NoahmpIO%DRAIN_URB4D ,   "DRAIN_URB4D", layers="URBN" )
+         call add_to_restart( NoahmpIO%DRAINGR_URB3D , "DRAINGR_URB3D" )
+         call add_to_restart(    NoahmpIO%SFRV_URB3D ,    "SFRV_URB3D", layers="URBN" )
+         call add_to_restart(    NoahmpIO%LFRV_URB3D ,    "LFRV_URB3D", layers="URBN" )
+         call add_to_restart(     NoahmpIO%DGR_URB3D ,     "DGR_URB3D", layers="URBN" )
+         call add_to_restart(      NoahmpIO%DG_URB3D ,      "DG_URB3D", layers="URBN" )
+         call add_to_restart(     NoahmpIO%LFR_URB3D ,     "LFR_URB3D", layers="URBN" )
+         call add_to_restart(     NoahmpIO%LFG_URB3D ,     "LFG_URB3D", layers="URBN" )
+      endif
   endif
 
   call finalize_restart_file()
@@ -1581,7 +1565,7 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
    REAL, PARAMETER :: DEGRAD = 3.14159265/180.
    REAL, PARAMETER :: DPD    = 360./365.
 
-   CALL GETH_IDTS(NOWDATE(1:10), NOWDATE(1:4)//"-01-01", IDAY)
+   call GETH_IDTS(NOWDATE(1:10), NOWDATE(1:4)//"-01-01", IDAY)
    READ(NOWDATE(12:13), *) IHOUR
    READ(NOWDATE(15:16), *) IMINUTE
    READ(NOWDATE(18:19), *) ISECOND
