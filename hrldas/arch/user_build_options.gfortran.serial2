@@ -1,0 +1,23 @@
+
+#=============================================================================================
+#  Options for Linux with gnu gfortran serial
+#  Please change the library paths according to your computer setup
+#=============================================================================================
+
+ COMPILERF90    =       gfortran
+ FREESOURCE     =       -ffree-form  -ffree-line-length-none
+ F90FLAGS       =       -g -fconvert=big-endian -fbounds-check -fno-range-check -fallow-argument-mismatch -O -fbacktrace -Wall -fcheck=all -Wuninitialized
+ MODFLAG        =       -I
+ LDFLAGS        =
+ CPP            =       cpp
+ CPPFLAGS       =       -P -traditional -D_GFORTRAN_
+ LIBS           =
+ LIBJASPER      =      -L/home/xue/Build_WRF/LIBRARIES/grib2/lib -ljasper -ljpeg
+ INCJASPER      =      -I/home/xue/Build_WRF/LIBRARIES/grib2/include
+ NETCDFMOD      =      -I/usr/include/
+ NETCDFLIB      =      -L/usr/lib -lnetcdf -lnetcdff
+ BZIP2          =       NO
+ BZIP2_INCLUDE  =       -I/usr/include
+ BZIP2_LIB      =       -L/usr/x86_64-linux-gnu -lbz2
+ RM             =       rm -f
+ CC             =       cc
