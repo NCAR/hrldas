@@ -1115,6 +1115,9 @@ contains
       call netcdf_file_search_future(current, post, datastruct, ierr)
     endif
 
+    ! Also call expand_9pt_input in future file
+    if (expand_loop > 0) call expand_9pt_input(datastruct%data,datastruct%nx, datastruct%ny, expand_loop)
+
     if (ierr /= 0) then
 
        if (current%fatality == 2) then
@@ -1203,14 +1206,14 @@ contains
        hold = data
        do i = 1, nx
           do k = 1, ny
-             if (hold(i,k) < -1e10 ) then
+             if (hold(i,k) < -1e3 ) then ! Zhe: change -1e10 to -1e3 for GLDAS
                 ilo = max( 1,i-1)
                 ihi = min(nx,i+1)
                 klo = max( 1,k-1)
                 khi = min(ny,k+1)
-                testnum = count(hold(ilo:ihi,klo:khi) > -1e10)
+                testnum = count(hold(ilo:ihi,klo:khi) > -1e3)
                 if(testnum > 0) then
-                   data(i,k) = sum(hold(ilo:ihi,klo:khi), hold(ilo:ihi,klo:khi) > -1e10)/testnum
+                   data(i,k) = sum(hold(ilo:ihi,klo:khi), hold(ilo:ihi,klo:khi) > -1e3)/testnum
                 endif
              endif
           enddo
