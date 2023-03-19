@@ -11,9 +11,10 @@
      print "   3. Linux ifort compiler serial \n";
      print "   4. Linux ifort compiler MPI      \n";
      print "   5. Linux gfortran compiler serial \n";
+     print "   6. Linux gfortran compiler MPI \n";
      print "   0. exit only \n";
 
-     printf "\nEnter selection [%d-%d] : ",1,5 ;
+     printf "\nEnter selection [%d-%d] : ",1,6 ;
 
      $response = <STDIN> ;
      chop($response);
@@ -23,12 +24,12 @@
   switch ($response) {
      case 1 { 
               # serial PGI 
-              system "cp arch/user_build_options.pgf90.serial user_build_options"; 
+              system "cp arch/user_build_options.pgi.serial user_build_options"; 
             }
 
      case 2 {
               # MPI PGI 
-              system "cp arch/user_build_options.pgf90.mpi user_build_options"; 
+              system "cp arch/user_build_options.pgi.mpi user_build_options"; 
             }
 
      case 3 {
@@ -46,5 +47,12 @@
               system "cp arch/user_build_options.gfortran.serial user_build_options"; 
             }
 
+     case 6 {
+              # MPI GFORTRAN
+              system "cp arch/user_build_options.gfortran.mpi user_build_options";
+            }
+
      else   {print "no selection $response\n"; last} 
   }
+
+  print "Please reminder to change the software package path in the generated user_build_options file before compiling! \n";
