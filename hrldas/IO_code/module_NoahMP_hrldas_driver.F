@@ -519,7 +519,7 @@ contains
                               NoahmpIO%kms,NoahmpIO%kme,NoahmpIO%NSOIL, NoahmpIO%LCZ_1_TABLE,                               & !urban  
                               NoahmpIO%LCZ_2_TABLE,NoahmpIO%LCZ_3_TABLE,NoahmpIO%LCZ_4_TABLE,NoahmpIO%LCZ_5_TABLE,          & !urban
                               NoahmpIO%LCZ_6_TABLE,NoahmpIO%LCZ_7_TABLE,NoahmpIO%LCZ_8_TABLE,NoahmpIO%LCZ_9_TABLE,          & !urban
-                              NoahmpIO%LCZ_10_TABLE, NoahmpIO%LCZ_11_TABLE,.true.,NoahmpIO%sf_urban_physics,                & !urban
+                              NoahmpIO%LCZ_10_TABLE, NoahmpIO%LCZ_11_TABLE,NoahmpIO%restart_flag,NoahmpIO%sf_urban_physics, & !urban
                               NoahmpIO%XXXR_URB2D, NoahmpIO%XXXB_URB2D, NoahmpIO%XXXG_URB2D, NoahmpIO%XXXC_URB2D,           & !urban
                               NoahmpIO%TR_URB2D, NoahmpIO%TB_URB2D, NoahmpIO%TG_URB2D, NoahmpIO%TC_URB2D,NoahmpIO%QC_URB2D, & !urban
                               NoahmpIO%TRL_URB3D, NoahmpIO%TBL_URB3D, NoahmpIO%TGL_URB3D, NoahmpIO%SH_URB2D,                & !urban
@@ -658,7 +658,7 @@ contains
                               NoahmpIO%kms,NoahmpIO%kme,NoahmpIO%NSOIL, NoahmpIO%LCZ_1_TABLE,                              & !urban  
                               NoahmpIO%LCZ_2_TABLE,NoahmpIO%LCZ_3_TABLE,NoahmpIO%LCZ_4_TABLE,NoahmpIO%LCZ_5_TABLE,         & !urban
                               NoahmpIO%LCZ_6_TABLE,NoahmpIO%LCZ_7_TABLE,NoahmpIO%LCZ_8_TABLE,NoahmpIO%LCZ_9_TABLE,         & !urban
-                              NoahmpIO%LCZ_10_TABLE, NoahmpIO%LCZ_11_TABLE,.true.,NoahmpIO%sf_urban_physics,               & !urban
+                              NoahmpIO%LCZ_10_TABLE, NoahmpIO%LCZ_11_TABLE,NoahmpIO%restart_flag,NoahmpIO%sf_urban_physics,& !urban
                               NoahmpIO%XXXR_URB2D, NoahmpIO%XXXB_URB2D, NoahmpIO%XXXG_URB2D, NoahmpIO%XXXC_URB2D,          & !urban
                               NoahmpIO%TR_URB2D, NoahmpIO%TB_URB2D, NoahmpIO%TG_URB2D, NoahmpIO%TC_URB2D,NoahmpIO%QC_URB2D,& !urban
                               NoahmpIO%TRL_URB3D, NoahmpIO%TBL_URB3D, NoahmpIO%TGL_URB3D, NoahmpIO%SH_URB2D,               & !urban
