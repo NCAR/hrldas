@@ -1,33 +1,42 @@
 &NOAHLSM_OFFLINE
 
- HRLDAS_SETUP_FILE = "/d1/barlage/data/NLDAS/LDASIN/HRLDAS_setup_2010010100_d1"
-! HRLDAS_SETUP_FILE = "/d1/barlage/data/mptest/wrfinput_d01"
- MMF_RUNOFF_FILE = "/blah/WRF/wrfleafxyz_d01.nc"
- INDIR = "/d1/barlage/data/NLDAS/LDASIN/"
- OUTDIR = "/d1/barlage/data/NLDAS/LDASOUT/"
+ HRLDAS_SETUP_FILE = "/glade/scratch/cenlinhe/NoahMP_NLDAS/HRLDAS_setup_2000010100_d1"
+ INDIR = "/glade/scratch/cenlinhe/NoahMP_NLDAS/forcing/"
+ OUTDIR = "/glade/scratch/cenlinhe/test/hrldas_output/"
 
- START_YEAR  = 2010
+ START_YEAR  = 2000
  START_MONTH = 01
  START_DAY   = 01
  START_HOUR  = 00
  START_MIN   = 00
 
-! RESTART_FILENAME_REQUESTED = "/d1/barlage/data/NLDAS/LDASOUT/RESTART.2010010200_DOMAIN1"
+! RESTART_FILENAME_REQUESTED = "/glade/scratch/cenlinhe/test/hrldas_output/RESTART.2000010100_DOMAIN1"
 
- KDAY = 2
+ KDAY = 365
  SPINUP_LOOPS = 0
+
+ FORCING_NAME_T = "T2D"
+ FORCING_NAME_Q = "Q2D"
+ FORCING_NAME_U = "U2D"
+ FORCING_NAME_V = "V2D"
+ FORCING_NAME_P = "PSFC"
+ FORCING_NAME_LW = "LWDOWN"
+ FORCING_NAME_SW = "SWDOWN"
+ FORCING_NAME_PR = "PRCP"
 
  DYNAMIC_VEG_OPTION                = 4
  CANOPY_STOMATAL_RESISTANCE_OPTION = 1
  BTR_OPTION                        = 1
- RUNOFF_OPTION                     = 3
+ SURFACE_RUNOFF_OPTION             = 3
+ SUBSURFACE_RUNOFF_OPTION          = 3
  DVIC_INFILTRATION_OPTION          = 1
  SURFACE_DRAG_OPTION               = 1
  FROZEN_SOIL_OPTION                = 1
  SUPERCOOLED_WATER_OPTION          = 1
  RADIATIVE_TRANSFER_OPTION         = 3
- SNOW_ALBEDO_OPTION                = 1
+ SNOW_ALBEDO_OPTION                = 2
  PCP_PARTITION_OPTION              = 1
+ SNOW_THERMAL_CONDUCTIVITY         = 1
  TBOT_OPTION                       = 2
  TEMP_TIME_SCHEME_OPTION           = 1
  GLACIER_OPTION                    = 1
