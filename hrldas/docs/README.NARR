@@ -222,7 +222,8 @@ See the full documentation for a complete description of items, but these are th
  DYNAMIC_VEG_OPTION                = Noah-MP options
  CANOPY_STOMATAL_RESISTANCE_OPTION = 
  BTR_OPTION                        = 
- RUNOFF_OPTION                     = 
+ SURFACE_RUNOFF_OPTION             =        
+ SUBSURFACE_RUNOFF_OPTION          =
  SURFACE_DRAG_OPTION               = 
  FROZEN_SOIL_OPTION                = 
  SUPERCOOLED_WATER_OPTION          = 
