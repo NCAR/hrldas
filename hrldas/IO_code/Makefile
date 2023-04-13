@@ -29,7 +29,7 @@ main_hrldas_driver.o: main_hrldas_driver.F
 	@echo ""
 	$(RM) $(*).f90
 	$(CPP) $(CPPFLAGS) $(CPPHRLDAS) $(*).F > $(*).f90
-	$(COMPILERF90) -o $(@) -c $(F90FLAGS) $(FREESOURCE) -I ../MPP -I. \
+	$(COMPILERF90) -o $(@) -c $(F90FLAGS) $(FREESOURCE) -I../MPP -I. \
 	-I../../noahmp/src -I../../noahmp/utility -I../../noahmp/drivers/hrldas -I../../urban/wrf -I../Utility_routines $(NETCDFMOD) $(*).f90
 	@echo ""
 
@@ -37,7 +37,7 @@ module_hrldas_netcdf_io.o: module_hrldas_netcdf_io.F
 	@echo ""
 	$(RM) $(*).f90
 	$(CPP) $(CPPFLAGS) $(CPPHRLDAS) $(NETCDFMOD) $(*).F > $(*).f90
-	$(COMPILERF90) -o $(@) -c $(F90FLAGS) $(FREESOURCE) -I ../MPP -I../Utility_routines $(NETCDFMOD)  $(*).f90
+	$(COMPILERF90) -o $(@) -c $(F90FLAGS) $(FREESOURCE) -I../MPP -I../Utility_routines $(NETCDFMOD)  $(*).f90
 	@echo ""
 
 .F.o:

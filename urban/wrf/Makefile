@@ -17,12 +17,20 @@ CPPHRLDAS = -D_HRLDAS_OFFLINE_
 
 all:	$(OBJS)
 
+NoahmpUrbanDriverMainMod.o: NoahmpUrbanDriverMainMod.F
+	@echo ""
+	$(RM) NoahmpUrbanDriverMainMod.f90
+	$(CPP) $(CPPFLAGS) $(*).F > $(*).f90
+	$(COMPILERF90) -c -I../../noahmp/drivers/hrldas -I. -I../../hrldas/Utility_routines \
+        -I../../noahmp/utility $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) $(*).f90
+	@echo ""
+
 .F.o:
 	@echo ""
 	$(RM) $(*).f90
 	$(CPP) $(CPPFLAGS) $(CPPHRLDAS) $(*).F > $(*).f90
-	$(COMPILERF90) -o $(@) -c -I../../hrldas/Utility_routines -I../../noahmp/drivers/hrldas -I. -I../../hrldas/Utility_routines \
-        -I../../noahmp/utility $(F90FLAGS) $(FREESOURCE) $(*).f90
+	$(COMPILERF90) -c  -I. -I../../hrldas/Utility_routines \
+        $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) $(*).f90
 	@echo ""
 
 #
