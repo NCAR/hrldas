@@ -1,3 +1,6 @@
+[![DOI](https://zenodo.org/badge/261594454.svg)](https://zenodo.org/badge/latestdoi/261594454)
+
+
 # HRLDAS (High Resolution Land Data Assimilation System) Community Model Repository
 
 The High-Resolution Land Data Assimilation System (HRLDAS) is a widely-used open-source offline community framework/driver of land surface models (LSMs). HRLDAS uses a combination of observed and analyzed meterological forcing (precipitation, shortwave and longwave radiation, surface wind, specific humidity, temperature, surface pressure) to drive a LSM to simulate the evolution of land surface states. The system has been developed to leverage the WRF pre-processed input data (e.g., WPS geo_em* file) and conduct computationally-efficient model run to generate more accurate initial land state conditions and/or produce the offline LSM simulations alone for scientific studies.
@@ -77,4 +80,6 @@ Some suggestions for model developers to contribute to HRLDAS code through the G
 7. Step (7) The HRLDAS/Noah-MP physics and code review committee merges the updated "develop" branch to the master branch during the annual release of new model versions.
 
 
-Updated on March 10, 2023
+## License
+
+The license and terms of use for this software can be found [here](https://github.com/NCAR/hrldas/blob/master/LICENSE.txt).
