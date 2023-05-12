@@ -1120,6 +1120,7 @@ contains
               call add_to_output(NoahmpIO%WAXY       , "WA"      , "Water in aquifer"                     , "mm"                    )
               call add_to_output(NoahmpIO%WTXY       , "WT"      , "Water in aquifer and saturated soil"  , "mm"                    )
               call add_to_output(NoahmpIO%QTDRAIN    , "QTDRAIN" , "Accumulated tile drainage"            , "mm"                    )
+              call add_to_output(NoahmpIO%BTRANXY    , "BTRANXY" , "Soil Transpiration Factor (0-1)"      , "-"                     )
             ! Additional needed to close the canopy energy budget
               call add_to_output(NoahmpIO%SAVXY      , "SAV"     , "Solar radiation absorbed by canopy"   , "W/m2"                  )
               call add_to_output(NoahmpIO%TRXY       , "TR"      , "Transpiration heat"                   , "W/m2"                  )
