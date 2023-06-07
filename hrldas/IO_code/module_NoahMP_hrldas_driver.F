@@ -59,7 +59,7 @@ contains
     implicit none
 
     integer      :: NTIME_out
-    real         :: max_utype_urb2d
+    real         :: max_landtype2d
     type(domain) :: grid
     ! initilization for stand alone parallel code.
     integer, optional, intent(in) :: wrfits,wrfite,wrfjts,wrfjte
@@ -555,12 +555,11 @@ contains
                               NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                          & !multi-layer urban
                               NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                              !urban
 
-          max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
-
-          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_utype_urb2d > 3.0) ) then  !new LCZ
+          max_landtype2d = maxval(NoahmpIO%IVGTYP)*1.0
+          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_landtype2d > 50.0) ) then   ! LCZ number: 51~61
              stop "USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1"
           endif
-          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_utype_urb2d <= 3.0) ) then  ! new LCZ
+          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_landtype2d <= 50.0) ) then  ! LCZ number: 51~61
              stop "USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0"
           endif
 
@@ -694,14 +693,14 @@ contains
                               NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                         & !multi-layer urban
                               NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                             !urban
 
-          max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
-               
-          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_utype_urb2d > 3.0) ) then  !new LCZ
+          max_landtype2d = maxval(NoahmpIO%IVGTYP)*1.0
+          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_landtype2d > 50.0) ) then   ! LCZ number: 51~61
              stop "USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1"
           endif
-          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_utype_urb2d <= 3.0) ) then  ! new LCZ
+          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_landtype2d <= 50.0) ) then  ! LCZ number: 51~61
              stop "USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0"
           endif
+
        endif !urban
 
        if ( NoahmpIO%SF_URBAN_PHYSICS > 1 ) then  !urban
