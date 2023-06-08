@@ -883,6 +883,10 @@ contains
        NoahmpIO%height_urban = 0.5*(NoahmpIO%dz_urban(1,NoahmpIO%kde,1) + &
                                  NoahmpIO%dz_urban(1,NoahmpIO%kde-1,1))
 
+       do i = 3, NoahmpIO%kde
+           where(NoahmpIO%XLAND < 1.5) NoahmpIO%QV_CURR(:,i,:) = NoahmpIO%QV_CURR(:,1,:)
+       enddo
+
        DO I = NoahmpIO%KDE-1, NoahmpIO%KDS, -1
          where(NoahmpIO%XLAND < 1.5) NoahmpIO%p_urban(:,i,:) = NoahmpIO%p8w(:,1,:)* &
                                                              exp(9.8*NoahmpIO%height_urban/287.04/NoahmpIO%t_phy(:,1,:))
@@ -891,9 +895,9 @@ contains
          where(NoahmpIO%XLAND < 1.5) NoahmpIO%theta_urban(:,i,:) = NoahmpIO%t_phy(:,1,:)* &
                                                              (100000.0/NoahmpIO%p_urban(:,i,:))**(0.285714)
          where(NoahmpIO%XLAND < 1.5) NoahmpIO%u_urban(:,i,:) = NoahmpIO%u_urban(:,NoahmpIO%kde,:)* &
-                                                             log(NoahmpIO%zlvl-NoahmpIO%height_urban)/log(NoahmpIO%zlvl)
+                                                             log(max(NoahmpIO%zlvl-NoahmpIO%height_urban,1.001))/log(NoahmpIO%zlvl)
          where(NoahmpIO%XLAND < 1.5) NoahmpIO%v_urban(:,i,:) = NoahmpIO%v_urban(:,NoahmpIO%kde,:)* &
-                                                             log(NoahmpIO%zlvl-NoahmpIO%height_urban)/log(NoahmpIO%zlvl)
+                                                             log(max(NoahmpIO%zlvl-NoahmpIO%height_urban,1.001))/log(NoahmpIO%zlvl)
          NoahmpIO%height_urban = NoahmpIO%height_urban + NoahmpIO%urban_atmosphere_thickness
        END DO    
      ENDIF
