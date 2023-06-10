@@ -17,7 +17,7 @@
  NETCDFMOD      =      -I/glade/u/apps/ch/opt/netcdf/4.8.1/gnu/10.1.0/include
  NETCDFLIB      =      -L/glade/u/apps/ch/opt/netcdf/4.8.1/gnu/10.1.0/lib -lnetcdf -lnetcdff
  BZIP2          =       NO
- BZIP2_INCLUDE  =       -I/usr/include
- BZIP2_LIB      =       -L/usr/lib64 -lbz2
+# BZIP2_INCLUDE  =       -I/usr/include
+# BZIP2_LIB      =       -L/usr/lib64 -lbz2
  RM             =       rm -f
  CC             =       cc

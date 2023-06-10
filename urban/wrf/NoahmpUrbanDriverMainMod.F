@@ -748,7 +748,7 @@ IF((SF_URBAN_PHYSICS == 2).OR.(SF_URBAN_PHYSICS == 3))THEN
     tsk(i,j)      = (max(0., (-1.*rl_up_tot-(1.-emiss(i,j))*glw(i,j) )/emiss(i,j)/sigma_sb))**.25
     rs_abs_tot    = (1.-frc_urb2d(i,j))*swdown(i,j)*(1.-albedo(i,j))+frc_urb2d(i,j)*rs_abs_urb(i,j)
 
-    if(swdown(i,j) > 0.)then
+    if((swdown(i,j) > 0.0) .and. (cosz_urb2d(i,j)>0.0))then
       albedo(i,j) = 1.-rs_abs_tot/swdown(i,j)
     else
       albedo(i,j) = alb_rural(i,j)
