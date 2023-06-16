@@ -1259,7 +1259,11 @@ contains
           call latlon_to_ij(datastruct%proj, geo_em%lat(i,j), east_longitude, etax(i,j), etay(i,j))
 #else
           if (forcing_type=="ERA5") then
-            call latlon_to_ij(datastruct%proj, geo_em%lat(i,j), geo_em%lon(i,j)+360., etax(i,j), etay(i,j))
+            if (geo_em%lon(i,j) < 0) then
+              call latlon_to_ij(datastruct%proj, geo_em%lat(i,j), geo_em%lon(i,j)+360., etax(i,j), etay(i,j))
+            else
+              call latlon_to_ij(datastruct%proj, geo_em%lat(i,j), geo_em%lon(i,j), etax(i,j), etay(i,j))
+            endif
           else
             call latlon_to_ij(datastruct%proj, geo_em%lat(i,j), geo_em%lon(i,j), etax(i,j), etay(i,j))
           endif

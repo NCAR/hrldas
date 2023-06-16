@@ -52,7 +52,7 @@ GRIB1| Level| From |  To  |          |          |                               
 Param| Type |Level1|Level2| Name     | Units    | Description                              |Discp|Catgy|Param|Level|
 -----+------+------+------+----------+----------+------------------------------------------+-----------------------+
  134 |  1   |   0  |      | PSFC     | Pa       |                                          |  0  |  3  |  0  |  1  |
- 129 |  1   |   0  |      | z        | m2 s-2   | Geopotential                             |  0  |  3  |  4  |  1  |
+ 129 |  1   |   0  |      | TERRAIN  | m2 s-2   | Geopotential                             |  0  |  3  |  4  |  1  |
  172 |  1   |   0  |      | LANDSEA  | fraction | Land/Sea flag                            |  2  |  0  |  0  |  1  |
  157 | 109  |   0  |      | RH       | %        | Relative Humidity                        |  0  |  1  |  1  | 105 |
  165 |  1   |   0  |      | U2D      | m s-1    | U                                        |  0  |  2  |  2  | 103 |
