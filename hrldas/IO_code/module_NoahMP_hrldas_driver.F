@@ -376,7 +376,6 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  DEEPSH2O          ! Extended column liquid volumetric soil moisture [m3/m3] 
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  DEEPSMOISEQ       ! Extended column equilibrium soil moisture [m3/m3] 
   REAL,    ALLOCATABLE, DIMENSION(:)      ::  DEEPDZS           ! Extended column soil layer thickness [m]
-  REAL,    ALLOCATABLE, DIMENSION(:)      ::  ADDL_SOIL_DZ      ! Thickness of additional soil layers [m]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  DEEPZSNSOXY       ! Extended column snow + soil layer thickness [m]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  EASYXY            ! Root scheme ease function [-] 
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  ROOTACTIVITYXY    ! Root activity function [-]
@@ -713,8 +712,10 @@ module module_NoahMP_hrldas_driver
   integer            ::   xend = 0
   integer            ::   yend = 0
   integer, PARAMETER    :: MAX_SOIL_LEVELS = 10   ! maximum soil levels in namelist
-  integer            :: addl_soil_layers = 8      ! number of additional soil layers in extended soil column 
-  REAL, DIMENSION(MAX_SOIL_LEVELS) :: soil_thick_input       ! depth to soil interfaces from namelist [m]
+  integer            :: addl_soil_layers          ! number of additional soil layers in extended soil column 
+  REAL, DIMENSION(MAX_SOIL_LEVELS) :: soil_thick_input   ! depth to soil interfaces from namelist [m]
+  REAL, DIMENSION(MAX_SOIL_LEVELS) :: addl_soil_dz       ! thickness of additional soil layers [m]
+
 
   namelist / NOAHLSM_OFFLINE /    &
 #ifdef WRF_HYDRO
@@ -722,7 +723,7 @@ module module_NoahMP_hrldas_driver
 #endif
        indir, nsoil, soil_thick_input, forcing_timestep, noah_timestep, &
        start_year, start_month, start_day, start_hour, start_min, &
-       outdir, skip_first_output, &
+       outdir, skip_first_output, addl_soil_layers, addl_soil_dz, &
        restart_filename_requested, restart_frequency_hours, output_timestep, &
        spinup_loops, &
        forcing_name_T,forcing_name_Q,forcing_name_U,forcing_name_V,forcing_name_P, &
@@ -783,6 +784,8 @@ module module_NoahMP_hrldas_driver
   output_timestep         = -999
   spinup_loops            = 0
   restart_frequency_hours = -999
+  addl_soil_layers        = -999
+  addl_soil_dz            = -999
 
   open(30, file="namelist.hrldas", form="FORMATTED")
   read(30, NOAHLSM_OFFLINE, iostat=ierr)
@@ -1361,7 +1364,6 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( DEEPSH2O       (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Extended column liquid volumetric soil moisture [m3/m3] 
   ALLOCATE ( DEEPSMOISEQ    (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Extended column equilibrium soil moisture [m3/m3]
   ALLOCATE ( DEEPDZS        (1:NSOIL+ADDL_SOIL_LAYERS) )                          ! Extended column soil layer thickness [m]
-  ALLOCATE ( ADDL_SOIL_DZ   (1:ADDL_SOIL_LAYERS) )                                ! Thickness of additional soil layers [m]
   ALLOCATE ( DEEPZSNSOXY    (XSTART:XEND,-NSNOW+1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) ) ! Extended column snow + soil layer thickness [m]
   ALLOCATE ( EASYXY         (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Root scheme ease function [-] 
   ALLOCATE ( ROOTACTIVITYXY (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Root activity function [-]
@@ -2206,9 +2208,6 @@ ENDIF
 
 ! Must still call NOAHMP_INIT even in restart to set up parameter arrays (also done in WRF)
 
-     ! Define thickness of additional soil layers
-     ADDL_SOIL_DZ      = (/1.0,1.0,2.0,2.0,2.0,2.0,3.0,5.0/) ! Thickness of additional layers
-
      ! Replace original arrays with extended column arrays
 
      CALL NOAHMP_INIT(    LLANDUSE,     SNOW,    SNOWH,   CANWAT,   ISLTYP,   IVGTYP, XLAT, &   ! call from WRF phys_init
@@ -2373,8 +2372,6 @@ ENDIF
 #endif
 
 !     SNOW = SNOW * 1000.    ! Convert snow water equivalent to mm. MB: remove v3.7
-
-     ADDL_SOIL_DZ = (/1.0,1.0,2.0,2.0,2.0,2.0,3.0,5.0/) ! Define thickness of additional soil layers
 
      FNDSOILW = .FALSE.
      CALL NOAHMP_INIT(    LLANDUSE,     SNOW,    SNOWH,   CANWAT,   ISLTYP,   IVGTYP, XLAT, &   ! call from WRF phys_init
