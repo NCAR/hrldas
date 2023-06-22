@@ -56,6 +56,7 @@ OBJS = \
         ../../noahmp/drivers/hrldas/PedoTransferSR2006Mod.o \
         ../../noahmp/utility/Machine.o \
         ../../noahmp/utility/CheckNanMod.o \
+        ../../noahmp/utility/PiecewiseLinearInterp1dMod.o \
         ../../noahmp/src/ConstantDefineMod.o \
         ../../noahmp/src/ConfigVarType.o \
         ../../noahmp/src/ForcingVarType.o \
@@ -122,6 +123,11 @@ OBJS = \
         ../../noahmp/src/SnowAgingBatsMod.o \
         ../../noahmp/src/SnowAlbedoBatsMod.o \
         ../../noahmp/src/SnowAlbedoClassMod.o \
+        ../../noahmp/src/SnowAgeSnicarMod.o \
+        ../../noahmp/src/SnowAlbedoSnicarMod.o \
+        ../../noahmp/src/SnowAlbedoSnicarGlacierMod.o \
+        ../../noahmp/src/SnowRadiationSnicarMod.o \
+        ../../noahmp/src/SnowFreshRadiusMod.o \
         ../../noahmp/src/SurfaceAlbedoMod.o \
         ../../noahmp/src/SurfaceRadiationMod.o \
         ../../noahmp/src/HumiditySaturationMod.o \

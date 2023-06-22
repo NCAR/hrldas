@@ -185,8 +185,9 @@
                                                              ! **3 -> two-stream applied to vegetated fraction (gap=1-FVEG)
 
  SNOW_ALBEDO_OPTION                = 1                       ! options for ground snow surface albedo  [default = 1]
-                                                             !   1 -> BATS
-		                                             ! **2 -> CLASS
+                                                             ! **1 -> BATS
+		                                             !   2 -> CLASS
+                                                             !   3 -> SNICAR
 
  SNOW_THERMAL_CONDUCTIVITY         = 1                       ! options for snow thermal conductivity   [default = 1]
                                                              ! **1 -> Stieglitz (Yen,1965) scheme
@@ -264,4 +265,53 @@
  NOAHMP_OUTPUT                     = 0,                      ! NoahMP output level
                                                              !   0 -> standard output
                                                              !   1 -> standard output with additional water and energy budget term output
+
+ SNICAR_BANDNUMBER_OPTION          = 1                       ! number of wavelength bands used in SNICAR snow albedo calculation
+                                                             ! **1 -> 5
+                                                             !   2 -> 480
+
+ SNICAR_SOLARSPEC_OPTION           = 1                       ! type of downward solar radiation spectrum for SNICAR snow albedo calculation
+                                                             ! **1 -> mid-latitude winter
+                                                             !   2 -> mid-latitude summer
+                                                             !   3 -> sub-Arctic winter
+                                                             !   4 -> sub-Arctic summer
+                                                             !   5 -> Summit,Greenland,summer
+                                                             !   6 -> High Mountain summer
+
+ SNICAR_SNOWOPTICS_OPTION          = 3                       ! snow optics type using different refractive index databases in SNICAR
+                                                             !   1 -> Warren (1984)
+                                                             !   2 -> Warren and Brandt (2008)
+                                                             ! **3 -> Picard et al (2016)
+
+ SNICAR_DUSTOPTICS_OPTION          = 1                       ! dust optics type for SNICAR snow albedo calculation
+                                                             ! **1 -> Saharan dust (Balkanski et al., 2007, central hematite)
+                                                             !   2 -> San Juan Mountains dust, CO (Skiles et al, 2017)
+                                                             !   3 -> Greenland dust (Polashenski et al., 2015, central absorptivity)
+
+ SNICAR_RTSOLVER_OPTION            = 2                       ! option for two different SNICAR radiative transfer solver
+                                                             !   1 -> Toon et a 1989 2-stream (Flanner et al. 2007)
+                                                             ! **2 -> Adding-doubling 2-stream (Dang et al.2019)
+
+ SNICAR_SNOWSHAPE_OPTION           = 1                       ! option for snow grain shape in SNICAR (He et al. 2017 JC)
+                                                             ! **1 -> sphere 
+                                                             !   2 -> spheroid 
+                                                             !   3 -> hexagonal plate
+                                                             !   4 -> Koch snowflake
+
+ SNICAR_USE_AEROSOL                = .true.                  ! option to turn on/off aerosol deposition flux effect in snow in SNICAR
+                                                             !   .false. -> without aerosol deposition flux effect
+                                                             ! **.true.  -> with aerosol deposition flux effect
+
+ SNICAR_SNOWBC_INTMIX              = .true.                  ! option to activate BC-snow internal mixing in SNICAR (He et al. 2017 JC)
+                                                             !   .false. -> external mixing for all BC
+                                                             ! **.true.  -> internal mixing for hydrophilic BC
+
+ SNICAR_SNOWDUST_INTMIX            = .false.                 ! option to activate dust-snow internal mixing in SNICAR (He et al. 2017 JC)
+                                                             ! **.false. -> external mixing for all dust
+                                                             !   .true.  -> internal mixing for all dust
+
+ SNICAR_USE_OC                     = .false.                 ! option to activate OC in snow in SNICAR
+                                                             ! **.false. -> without organic carbon in snow
+                                                             !   .true.  -> with organic carbon in snow
+
 /

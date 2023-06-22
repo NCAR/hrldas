@@ -12,6 +12,7 @@ module module_NoahMP_hrldas_driver
   use NoahmpUrbanDriverMainMod, only : noahmp_urban
   use module_sf_urban,          only : urban_param_init, urban_var_init
   use module_date_utilities
+  use Machine, only : kind_noahmp
 
 #ifdef MPP_LAND
   use module_mpp_land, only: MPP_LAND_PAR_INI, mpp_land_init, getLocalXY, mpp_land_bcast_char
@@ -27,11 +28,11 @@ module module_NoahMP_hrldas_driver
 
 #ifdef WRF_HYDRO
    integer :: forc_typ, snow_assim, HRLDAS_ini_typ
-   real,    allocatable, dimension(:,:)   :: etpnd, greenfrac, prcp0
-   real :: etpnd1
+   real(kind=kind_noahmp),    allocatable, dimension(:,:)   :: etpnd, greenfrac, prcp0
+   real(kind=kind_noahmp) :: etpnd1
    character(len=19) :: forcDate
    character(len = 256):: GEO_STATIC_FLNM
-   real, allocatable, dimension(:) :: zsoil    
+   real(kind=kind_noahmp), allocatable, dimension(:) :: zsoil    
    integer :: kk
    integer  :: finemesh, finemesh_factor
 #endif
@@ -59,7 +60,7 @@ contains
     implicit none
 
     integer      :: NTIME_out
-    real         :: max_utype_urb2d
+    real(kind=kind_noahmp)         :: max_utype_urb2d
     type(domain) :: grid
     ! initilization for stand alone parallel code.
     integer, optional, intent(in) :: wrfits,wrfite,wrfjts,wrfjte
@@ -271,6 +272,26 @@ contains
     endif
 
 !------------------------------------------------------------------------
+! For IOPT_ALB = 3 (SNICAR), read in necessary fileds and parameters
+!------------------------------------------------------------------------
+    if (NoahmpIO%IOPT_ALB == 3) then
+        call read_snicar_data(NoahmpIO%snicar_numrad_snw,NoahmpIO%SNICAR_SNOWOPTICS_OPT_TABLE,NoahmpIO%SNICAR_DUSTOPTICS_OPT_TABLE,&
+                            NoahmpIO%SNICAR_SOLARSPEC_OPT_TABLE,&
+                            NoahmpIO%ss_alb_snw_drc,NoahmpIO%asm_prm_snw_drc,NoahmpIO%ext_cff_mss_snw_drc,     &
+                            NoahmpIO%ss_alb_snw_dfs,NoahmpIO%asm_prm_snw_dfs,NoahmpIO%ext_cff_mss_snw_dfs,     &
+                            NoahmpIO%ss_alb_bc1,NoahmpIO%asm_prm_bc1,NoahmpIO%ext_cff_mss_bc1,                 &
+                            NoahmpIO%ss_alb_bc2,NoahmpIO%asm_prm_bc2,NoahmpIO%ext_cff_mss_bc2,                 &
+                            NoahmpIO%ss_alb_oc1,NoahmpIO%asm_prm_oc1,NoahmpIO%ext_cff_mss_oc1,                 &
+                            NoahmpIO%ss_alb_oc2,NoahmpIO%asm_prm_oc2,NoahmpIO%ext_cff_mss_oc2,                 &
+                            NoahmpIO%ss_alb_dst1,NoahmpIO%asm_prm_dst1,NoahmpIO%ext_cff_mss_dst1,              &
+                            NoahmpIO%ss_alb_dst2,NoahmpIO%asm_prm_dst2,NoahmpIO%ext_cff_mss_dst2,              &
+                            NoahmpIO%ss_alb_dst3,NoahmpIO%asm_prm_dst3,NoahmpIO%ext_cff_mss_dst3,              &
+                            NoahmpIO%ss_alb_dst4,NoahmpIO%asm_prm_dst4,NoahmpIO%ext_cff_mss_dst4,              &
+                            NoahmpIO%flx_wgt_dir,NoahmpIO%flx_wgt_dif,NoahmpIO%snowage_tau,                    &
+                            NoahmpIO%snowage_kappa,NoahmpIO%snowage_drdt0)
+    endif
+
+!------------------------------------------------------------------------
 ! For OPT_CROP=1 (crop model), read in necessary extra fields
 !------------------------------------------------------------------------
 
@@ -325,6 +346,10 @@ contains
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ZSNSO"   , NoahmpIO%ZSNSOXY  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNICE"   , NoahmpIO%SNICEXY  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNLIQ"   , NoahmpIO%SNLIQXY  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNRDS"   , NoahmpIO%SNRDSXY  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNFR"    , NoahmpIO%SNFRXY   )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ALBSOILDIR", NoahmpIO%ALBSOILDIRXY)
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ALBSOILDIF", NoahmpIO%ALBSOILDIFXY)
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FWET"    , NoahmpIO%FWETXY   )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNEQVO"  , NoahmpIO%SNEQVOXY )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "EAH"     , NoahmpIO%EAHXY    )
@@ -332,7 +357,7 @@ contains
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ALBOLD"  , NoahmpIO%ALBOLDXY )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CM"      , NoahmpIO%CMXY     )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CH"      , NoahmpIO%CHXY     )
-       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ISNOW"   , NoahmpIO%ISNOWXY  )                                            
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ISNOW"   , NoahmpIO%ISNOWXY  ) 
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CANLIQ"  , NoahmpIO%CANLIQXY )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CANICE"  , NoahmpIO%CANICEXY )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNEQV"   , NoahmpIO%SNOW     )
@@ -1079,8 +1104,9 @@ contains
                                      NoahmpIO%xstartpar, NoahmpIO%ystartpar,                           &
                                      NoahmpIO%iswater, NoahmpIO%mapproj, NoahmpIO%lat1, NoahmpIO%lon1, &
                                      NoahmpIO%dx, NoahmpIO%dy, NoahmpIO%truelat1, NoahmpIO%truelat2,   &
-                                     NoahmpIO%cen_lon, NoahmpIO%NSOIL, NoahmpIO%nsnow, NoahmpIO%dzs,   &
-                                     NoahmpIO%startdate, NoahmpIO%olddate, NoahmpIO%spinup_loop,       &
+                                     NoahmpIO%cen_lon, NoahmpIO%NSOIL, NoahmpIO%nsnow, NoahmpIO%NUMRAD,&
+                                     NoahmpIO%dzs, NoahmpIO%startdate, NoahmpIO%olddate,               &                                    
+                                     NoahmpIO%spinup_loop,                                             &                                    
                                      NoahmpIO%spinup_loops, NoahmpIO%IVGTYP, NoahmpIO%ISLTYP)
 
            DEFINE_MODE_LOOP : do imode = 1, 2
@@ -1155,10 +1181,17 @@ contains
               call add_to_output(NoahmpIO%ZSNSOXY(:,-NoahmpIO%nsnow+1:0,:),"ZSNSO_SN","Snow layer depth from snow surface","m","SNOW")
               call add_to_output(NoahmpIO%SNICEXY    , "SNICE"   , "Snow layer ice"                       , "mm"             , "SNOW")
               call add_to_output(NoahmpIO%SNLIQXY    , "SNLIQ"   , "Snow layer liquid water"              , "mm"             , "SNOW")
+              call add_to_output(NoahmpIO%SNRDSXY    , "SNRDS"   , "Snow layer effective grain radius"    , "m-6"            , "SNOW")
+              call add_to_output(NoahmpIO%SNFRXY     , "SNFR"    , "Snow layer rate of freezing"          , "mm/s"           , "SNOW")
               call add_to_output(NoahmpIO%TSLB       , "SOIL_T"  , "soil temperature"                     , "K"              , "SOIL")
               call add_to_output(NoahmpIO%SMOIS      , "SOIL_M"  , "volumetric soil moisture"             , "m3/m3"          , "SOIL")
               call add_to_output(NoahmpIO%SH2O       , "SOIL_W"  , "liquid volumetric soil moisture"      , "m3/m3"          , "SOIL")
               call add_to_output(NoahmpIO%TSNOXY     , "SNOW_T"  , "snow temperature"                     , "K"              , "SNOW")
+              call add_to_output(NoahmpIO%ALBSNOWDIRXY, "ALBSNOWDIR"  , "Snow albedo (direct)"            , "-"              , "RADN" )
+              call add_to_output(NoahmpIO%ALBSNOWDIFXY, "ALBSNOWDIF"  , "Snow albedo (diffuse)"           , "-"              , "RADN" )
+              call add_to_output(NoahmpIO%ALBSOILDIRXY, "ALBSOILDIR"  , "Soil albedo (direct)"            , "-"              , "RADN" )
+              call add_to_output(NoahmpIO%ALBSOILDIFXY, "ALBSOILDIF"  , "Soil albedo (diffuse)"           , "-"              , "RADN" )
+
             ! Snow - 2D terms
               call add_to_output(NoahmpIO%SNOWH      , "SNOWH"   , "Snow depth"                           , "m"                     )
               call add_to_output(NoahmpIO%SNOW       , "SNEQV"   , "Snow water equivalent"                , "mm"                    )
@@ -1342,9 +1375,7 @@ subroutine lsm_restart()
   call prepare_restart_file (trim(NoahmpIO%outdir), version, NoahmpIO%igrid, NoahmpIO%llanduse,       &
                              NoahmpIO%olddate, NoahmpIO%startdate, NoahmpIO%ixfull, NoahmpIO%jxfull,  &
                              NoahmpIO%ixpar, NoahmpIO%jxpar, NoahmpIO%xstartpar, NoahmpIO%ystartpar,  &                               
-                             NoahmpIO%NSOIL, NoahmpIO%nsnow, NoahmpIO%max_urban_dim, NoahmpIO%dx,     &
-                             NoahmpIO%dy, NoahmpIO%truelat1, NoahmpIO%truelat2, NoahmpIO%mapproj,     &
-                             NoahmpIO%lat1, NoahmpIO%lon1, NoahmpIO%cen_lon, NoahmpIO%iswater, NoahmpIO%ivgtyp)
+                             NoahmpIO%NSOIL, NoahmpIO%nsnow, NoahmpIO%NUMRAD, NoahmpIO%max_urban_dim, &                             NoahmpIO%dx, NoahmpIO%dy, NoahmpIO%truelat1, NoahmpIO%truelat2,          &                             NoahmpIO%mapproj, NoahmpIO%lat1, NoahmpIO%lon1, NoahmpIO%cen_lon,        &                             NoahmpIO%iswater, NoahmpIO%ivgtyp)
   
   call add_to_restart(NoahmpIO%TSLB      , "SOIL_T", layers="SOIL")
   call add_to_restart(NoahmpIO%TSNOXY    , "SNOW_T", layers="SNOW")
@@ -1353,6 +1384,10 @@ subroutine lsm_restart()
   call add_to_restart(NoahmpIO%ZSNSOXY   , "ZSNSO" , layers="SOSN")
   call add_to_restart(NoahmpIO%SNICEXY   , "SNICE" , layers="SNOW")
   call add_to_restart(NoahmpIO%SNLIQXY   , "SNLIQ" , layers="SNOW")
+  call add_to_restart(NoahmpIO%SNFRXY    , "SNFR"  , layers="SNOW")
+  call add_to_restart(NoahmpIO%SNRDSXY   , "SNRDS" , layers="SNOW")
+  call add_to_restart(NoahmpIO%ALBSOILDIRXY   , "ALBSOILDIR" , layers="RADN")
+  call add_to_restart(NoahmpIO%ALBSOILDIFXY   , "ALBSOILDIF" , layers="RADN")
   call add_to_restart(NoahmpIO%FWETXY    , "FWET"  )
   call add_to_restart(NoahmpIO%SNEQVOXY  , "SNEQVO")
   call add_to_restart(NoahmpIO%EAHXY     , "EAH"   )
@@ -1540,30 +1575,30 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
 
 ! !ARGUMENTS:
    CHARACTER(LEN=19), INTENT(IN)  :: NOWDATE    ! YYYY-MM-DD_HH:MM:SS
-   REAL,              INTENT(IN)  :: LATITUDE
-   REAL,              INTENT(IN)  :: LONGITUDE
-   REAL,              INTENT(OUT) :: COSZ
-   REAL,              INTENT(OUT) :: JULIAN
-   REAL,    OPTIONAL, INTENT(OUT) :: HRANG_OUT
-   REAL,    OPTIONAL, INTENT(OUT) :: DECLIN_OUT
-   REAL,    OPTIONAL, INTENT(OUT) :: GMT_OUT
+   REAL(kind=kind_noahmp),              INTENT(IN)  :: LATITUDE
+   REAL(kind=kind_noahmp),              INTENT(IN)  :: LONGITUDE
+   REAL(kind=kind_noahmp),              INTENT(OUT) :: COSZ
+   REAL(kind=kind_noahmp),              INTENT(OUT) :: JULIAN
+   REAL(kind=kind_noahmp),    OPTIONAL, INTENT(OUT) :: HRANG_OUT
+   REAL(kind=kind_noahmp),    OPTIONAL, INTENT(OUT) :: DECLIN_OUT
+   REAL(kind=kind_noahmp),    OPTIONAL, INTENT(OUT) :: GMT_OUT
    INTEGER, OPTIONAL, INTENT(OUT) :: JULDAY_OUT
-   REAL                           :: OBECL
-   REAL                           :: SINOB
-   REAL                           :: SXLONG
-   REAL                           :: ARG
-   REAL                           :: TLOCTIM
-   REAL                           :: HRANG
-   REAL                           :: DECLIN
-   REAL                           :: GMT
+   REAL(kind=kind_noahmp)                           :: OBECL
+   REAL(kind=kind_noahmp)                           :: SINOB
+   REAL(kind=kind_noahmp)                           :: SXLONG
+   REAL(kind=kind_noahmp)                           :: ARG
+   REAL(kind=kind_noahmp)                           :: TLOCTIM
+   REAL(kind=kind_noahmp)                           :: HRANG
+   REAL(kind=kind_noahmp)                           :: DECLIN
+   REAL(kind=kind_noahmp)                           :: GMT
    INTEGER                        :: JULDAY
    INTEGER                        :: IDAY
    INTEGER                        :: IHOUR
    INTEGER                        :: IMINUTE
    INTEGER                        :: ISECOND
 
-   REAL, PARAMETER :: DEGRAD = 3.14159265/180.
-   REAL, PARAMETER :: DPD    = 360./365.
+   REAL(kind=kind_noahmp), PARAMETER :: DEGRAD = 3.14159265/180.
+   REAL(kind=kind_noahmp), PARAMETER :: DPD    = 360./365.
 
    call GETH_IDTS(NOWDATE(1:10), NOWDATE(1:4)//"-01-01", IDAY)
    READ(NOWDATE(12:13), *) IHOUR
@@ -1609,8 +1644,8 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
    IMPLICIT NONE
 !---------------------------------------------------------------------
    CHARACTER(LEN=19), INTENT(IN)  :: NOWDATE    ! YYYY-MM-DD_HH:MM:SS
-   REAL,              INTENT(IN)  :: LONGITUDE
-   REAL,              INTENT(OUT) :: TLOCTIM
+   REAL(kind=kind_noahmp),              INTENT(IN)  :: LONGITUDE
+   REAL(kind=kind_noahmp),              INTENT(OUT) :: TLOCTIM
    INTEGER                        :: IHOUR
    INTEGER                        :: IMINUTE
    INTEGER                        :: ISECOND

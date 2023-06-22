@@ -80,29 +80,29 @@ contains
     INTEGER,                                         INTENT(IN   ) ::  NSOIL     ! number of soil layers
     INTEGER, DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  IVGTYP    ! vegetation type
     INTEGER,                                         INTENT(IN   ) ::  ITIMESTEP ! timestep number
-    REAL,                                            INTENT(IN   ) ::  DT        ! timestep [s]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  COSZ_URB2D
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  XLAT_URB2D
-    REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  T3D       ! 3D atmospheric temperature valid at mid-levels [K]
-    REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  QV3D      ! 3D water vapor mixing ratio [kg/kg_dry]
-    REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  U_PHY     ! 3D U wind component [m/s]
-    REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  V_PHY     ! 3D V wind component [m/s]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  SWDOWN    ! solar down at surface [W m-2]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  SWDDIF    ! solar down at surface [W m-2]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  SWDDIR    ! solar down at surface [W m-2]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  GLW       ! longwave down at surface [W m-2]
-    REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  P8W3D     ! 3D pressure, valid at interface [Pa]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  RAINBL    ! total input precipitation [mm]
-    REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  DZ8W      ! thickness of atmo layers [m]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  ZNT       ! combined z0 sent to coupled model
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  TSK       ! surface radiative temperature [K]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  HFX       ! sensible heat flux [W m-2]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  QFX       ! latent heat flux [kg s-1 m-2]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  LH        ! latent heat flux [W m-2]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  GRDFLX    ! ground/snow heat flux [W m-2]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  ALBEDO    ! total grid albedo []
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  EMISS     ! surface bulk emissivity
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  QSFC      ! bulk surface mixing ratio
+    REAL(kind=kind_noahmp),                                            INTENT(IN   ) ::  DT        ! timestep [s]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  COSZ_URB2D
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  XLAT_URB2D
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  T3D       ! 3D atmospheric temperature valid at mid-levels [K]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  QV3D      ! 3D water vapor mixing ratio [kg/kg_dry]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  U_PHY     ! 3D U wind component [m/s]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  V_PHY     ! 3D V wind component [m/s]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  SWDOWN    ! solar down at surface [W m-2]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  SWDDIF    ! solar down at surface [W m-2]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  SWDDIR    ! solar down at surface [W m-2]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  GLW       ! longwave down at surface [W m-2]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  P8W3D     ! 3D pressure, valid at interface [Pa]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  RAINBL    ! total input precipitation [mm]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  DZ8W      ! thickness of atmo layers [m]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  ZNT       ! combined z0 sent to coupled model
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  TSK       ! surface radiative temperature [K]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  HFX       ! sensible heat flux [W m-2]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  QFX       ! latent heat flux [kg s-1 m-2]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  LH        ! latent heat flux [W m-2]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  GRDFLX    ! ground/snow heat flux [W m-2]
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  ALBEDO    ! total grid albedo []
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  EMISS     ! surface bulk emissivity
+    REAL(kind=kind_noahmp),    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  QSFC      ! bulk surface mixing ratio
 
     INTEGER,  INTENT(IN   )   ::     ids,ide, jds,jde, kds,kde,  &  ! d -> domain
          &                           ims,ime, jms,jme, kms,kme,  &  ! m -> memory
@@ -115,170 +115,170 @@ contains
      INTEGER,                                                INTENT(IN   ) :: num_road_layers
 
      INTEGER,        DIMENSION( ims:ime, jms:jme ),          INTENT(IN   ) :: UTYPE_URB2D
-     REAL,           DIMENSION( ims:ime, jms:jme ),          INTENT(IN   ) :: FRC_URB2D
+     REAL(kind=kind_noahmp),           DIMENSION( ims:ime, jms:jme ),          INTENT(IN   ) :: FRC_URB2D
 
-     REAL, OPTIONAL, DIMENSION(1:num_roof_layers),           INTENT(IN   ) :: DZR
-     REAL, OPTIONAL, DIMENSION(1:num_wall_layers),           INTENT(IN   ) :: DZB
-     REAL, OPTIONAL, DIMENSION(1:num_road_layers),           INTENT(IN   ) :: DZG
-     REAL, OPTIONAL,                                         INTENT(IN   ) :: DECLIN_URB
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),          INTENT(IN   ) :: OMG_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) :: TH_PHY
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) :: P_PHY
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) :: RHO
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION(1:num_roof_layers),           INTENT(IN   ) :: DZR
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION(1:num_wall_layers),           INTENT(IN   ) :: DZB
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION(1:num_road_layers),           INTENT(IN   ) :: DZG
+     REAL(kind=kind_noahmp), OPTIONAL,                                         INTENT(IN   ) :: DECLIN_URB
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),          INTENT(IN   ) :: OMG_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) :: TH_PHY
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) :: P_PHY
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) :: RHO
 
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),          INTENT(INOUT) :: UST
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),          INTENT(INOUT) :: CHS, CHS2, CQS2
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),          INTENT(INOUT) :: UST
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),          INTENT(INOUT) :: CHS, CHS2, CQS2
 
      INTEGER,  INTENT(IN   )   ::  julian, julyr                  !urban
 
 ! local variables lsm --> urban
 
      INTEGER :: UTYPE_URB ! urban type [urban=1, suburban=2, rural=3]
-     REAL    :: TA_URB       ! potential temp at 1st atmospheric level [K]
-     REAL    :: QA_URB       ! mixing ratio at 1st atmospheric level  [kg/kg]
-     REAL    :: UA_URB       ! wind speed at 1st atmospheric level    [m/s]
-     REAL    :: U1_URB       ! u at 1st atmospheric level             [m/s]
-     REAL    :: V1_URB       ! v at 1st atmospheric level             [m/s]
-     REAL    :: SSG_URB      ! downward total short wave radiation    [W/m/m]
-     REAL    :: LLG_URB      ! downward long wave radiation           [W/m/m]
-     REAL    :: RAIN_URB     ! precipitation                          [mm/h]
-     REAL    :: RHOO_URB     ! air density                            [kg/m^3]
-     REAL    :: ZA_URB       ! first atmospheric level                [m]
-     REAL    :: DELT_URB     ! time step                              [s]
-     REAL    :: SSGD_URB     ! downward direct short wave radiation   [W/m/m]
-     REAL    :: SSGQ_URB     ! downward diffuse short wave radiation  [W/m/m]
-     REAL    :: XLAT_URB     ! latitude                               [deg]
-     REAL    :: COSZ_URB     ! cosz
-     REAL    :: OMG_URB      ! hour angle
-     REAL    :: ZNT_URB      ! roughness length                       [m]
-     REAL    :: TR_URB
-     REAL    :: TB_URB
-     REAL    :: TG_URB
-     REAL    :: TC_URB
-     REAL    :: QC_URB
-     REAL    :: UC_URB
-     REAL    :: XXXR_URB
-     REAL    :: XXXB_URB
-     REAL    :: XXXG_URB
-     REAL    :: XXXC_URB
-     REAL, DIMENSION(1:num_roof_layers) :: TRL_URB  ! roof layer temp [K]
-     REAL, DIMENSION(1:num_wall_layers) :: TBL_URB  ! wall layer temp [K]
-     REAL, DIMENSION(1:num_road_layers) :: TGL_URB  ! road layer temp [K]
+     REAL(kind=kind_noahmp)    :: TA_URB       ! potential temp at 1st atmospheric level [K]
+     REAL(kind=kind_noahmp)    :: QA_URB       ! mixing ratio at 1st atmospheric level  [kg/kg]
+     REAL(kind=kind_noahmp)    :: UA_URB       ! wind speed at 1st atmospheric level    [m/s]
+     REAL(kind=kind_noahmp)    :: U1_URB       ! u at 1st atmospheric level             [m/s]
+     REAL(kind=kind_noahmp)    :: V1_URB       ! v at 1st atmospheric level             [m/s]
+     REAL(kind=kind_noahmp)    :: SSG_URB      ! downward total short wave radiation    [W/m/m]
+     REAL(kind=kind_noahmp)    :: LLG_URB      ! downward long wave radiation           [W/m/m]
+     REAL(kind=kind_noahmp)    :: RAIN_URB     ! precipitation                          [mm/h]
+     REAL(kind=kind_noahmp)    :: RHOO_URB     ! air density                            [kg/m^3]
+     REAL(kind=kind_noahmp)    :: ZA_URB       ! first atmospheric level                [m]
+     REAL(kind=kind_noahmp)    :: DELT_URB     ! time step                              [s]
+     REAL(kind=kind_noahmp)    :: SSGD_URB     ! downward direct short wave radiation   [W/m/m]
+     REAL(kind=kind_noahmp)    :: SSGQ_URB     ! downward diffuse short wave radiation  [W/m/m]
+     REAL(kind=kind_noahmp)    :: XLAT_URB     ! latitude                               [deg]
+     REAL(kind=kind_noahmp)    :: COSZ_URB     ! cosz
+     REAL(kind=kind_noahmp)    :: OMG_URB      ! hour angle
+     REAL(kind=kind_noahmp)    :: ZNT_URB      ! roughness length                       [m]
+     REAL(kind=kind_noahmp)    :: TR_URB
+     REAL(kind=kind_noahmp)    :: TB_URB
+     REAL(kind=kind_noahmp)    :: TG_URB
+     REAL(kind=kind_noahmp)    :: TC_URB
+     REAL(kind=kind_noahmp)    :: QC_URB
+     REAL(kind=kind_noahmp)    :: UC_URB
+     REAL(kind=kind_noahmp)    :: XXXR_URB
+     REAL(kind=kind_noahmp)    :: XXXB_URB
+     REAL(kind=kind_noahmp)    :: XXXG_URB
+     REAL(kind=kind_noahmp)    :: XXXC_URB
+     REAL(kind=kind_noahmp), DIMENSION(1:num_roof_layers) :: TRL_URB  ! roof layer temp [K]
+     REAL(kind=kind_noahmp), DIMENSION(1:num_wall_layers) :: TBL_URB  ! wall layer temp [K]
+     REAL(kind=kind_noahmp), DIMENSION(1:num_road_layers) :: TGL_URB  ! road layer temp [K]
      LOGICAL  :: LSOLAR_URB
 
 !===hydrological variable for single layer UCM===
 
      INTEGER :: jmonth, jday
-     REAL    :: DRELR_URB
-     REAL    :: DRELB_URB
-     REAL    :: DRELG_URB
-     REAL    :: FLXHUMR_URB
-     REAL    :: FLXHUMB_URB
-     REAL    :: FLXHUMG_URB
-     REAL    :: CMCR_URB
-     REAL    :: TGR_URB
+     REAL(kind=kind_noahmp)    :: DRELR_URB
+     REAL(kind=kind_noahmp)    :: DRELB_URB
+     REAL(kind=kind_noahmp)    :: DRELG_URB
+     REAL(kind=kind_noahmp)    :: FLXHUMR_URB
+     REAL(kind=kind_noahmp)    :: FLXHUMB_URB
+     REAL(kind=kind_noahmp)    :: FLXHUMG_URB
+     REAL(kind=kind_noahmp)    :: CMCR_URB
+     REAL(kind=kind_noahmp)    :: TGR_URB
 
-     REAL, DIMENSION(1:num_roof_layers) :: SMR_URB  ! green roof layer moisture
-     REAL, DIMENSION(1:num_roof_layers) :: TGRL_URB ! green roof layer temp [K]
+     REAL(kind=kind_noahmp), DIMENSION(1:num_roof_layers) :: SMR_URB  ! green roof layer moisture
+     REAL(kind=kind_noahmp), DIMENSION(1:num_roof_layers) :: TGRL_URB ! green roof layer temp [K]
 
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: DRELR_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: DRELB_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: DRELG_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: FLXHUMR_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: FLXHUMB_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: FLXHUMG_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: CMCR_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: TGR_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: DRELR_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: DRELB_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: DRELG_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: FLXHUMR_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: FLXHUMB_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: FLXHUMG_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: CMCR_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                    INTENT(INOUT) :: TGR_URB2D
 
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_roof_layers, jms:jme ), INTENT(INOUT) :: TGRL_URB3D
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_roof_layers, jms:jme ), INTENT(INOUT) :: SMR_URB3D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:num_roof_layers, jms:jme ), INTENT(INOUT) :: TGRL_URB3D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:num_roof_layers, jms:jme ), INTENT(INOUT) :: SMR_URB3D
 
 
 ! state variable surface_driver <--> lsm <--> urban
 
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TR_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TB_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TG_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TC_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: QC_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: UC_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXR_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXB_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXG_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXC_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: SH_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: LH_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: G_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: RN_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TS_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TR_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TB_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TG_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TC_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: QC_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: UC_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXR_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXB_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXG_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXC_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: SH_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: LH_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: G_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: RN_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TS_URB2D
 
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_roof_layers, jms:jme ), INTENT(INOUT) :: TRL_URB3D
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_wall_layers, jms:jme ), INTENT(INOUT) :: TBL_URB3D
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_road_layers, jms:jme ), INTENT(INOUT) :: TGL_URB3D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:num_roof_layers, jms:jme ), INTENT(INOUT) :: TRL_URB3D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:num_wall_layers, jms:jme ), INTENT(INOUT) :: TBL_URB3D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:num_road_layers, jms:jme ), INTENT(INOUT) :: TGL_URB3D
 
 ! output variable lsm --> surface_driver
 
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: PSIM_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: PSIH_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: GZ1OZ0_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: U10_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: V10_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: TH2_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: Q2_URB2D
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: AKMS_URB2D
-     REAL,           DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: UST_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: PSIM_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: PSIH_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: GZ1OZ0_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: U10_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: V10_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: TH2_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: Q2_URB2D
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: AKMS_URB2D
+     REAL(kind=kind_noahmp),           DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: UST_URB2D
 
 
 ! output variables urban --> lsm
 
-     REAL :: TS_URB           ! surface radiative temperature    [K]
-     REAL :: QS_URB           ! surface humidity                 [-]
-     REAL :: SH_URB           ! sensible heat flux               [W/m/m]
-     REAL :: LH_URB           ! latent heat flux                 [W/m/m]
-     REAL :: LH_KINEMATIC_URB ! latent heat flux, kinetic  [kg/m/m/s]
-     REAL :: SW_URB           ! upward short wave radiation flux [W/m/m]
-     REAL :: ALB_URB          ! time-varying albedo            [fraction]
-     REAL :: LW_URB           ! upward long wave radiation flux  [W/m/m]
-     REAL :: G_URB            ! heat flux into the ground        [W/m/m]
-     REAL :: RN_URB           ! net radiation                    [W/m/m]
-     REAL :: PSIM_URB         ! shear f for momentum             [-]
-     REAL :: PSIH_URB         ! shear f for heat                 [-]
-     REAL :: GZ1OZ0_URB       ! shear f for heat                 [-]
-     REAL :: U10_URB          ! wind u component at 10 m         [m/s]
-     REAL :: V10_URB          ! wind v component at 10 m         [m/s]
-     REAL :: TH2_URB          ! potential temperature at 2 m     [K]
-     REAL :: Q2_URB           ! humidity at 2 m                  [-]
-     REAL :: CHS_URB
-     REAL :: CHS2_URB
-     REAL :: UST_URB
+     REAL(kind=kind_noahmp) :: TS_URB           ! surface radiative temperature    [K]
+     REAL(kind=kind_noahmp) :: QS_URB           ! surface humidity                 [-]
+     REAL(kind=kind_noahmp) :: SH_URB           ! sensible heat flux               [W/m/m]
+     REAL(kind=kind_noahmp) :: LH_URB           ! latent heat flux                 [W/m/m]
+     REAL(kind=kind_noahmp) :: LH_KINEMATIC_URB ! latent heat flux, kinetic  [kg/m/m/s]
+     REAL(kind=kind_noahmp) :: SW_URB           ! upward short wave radiation flux [W/m/m]
+     REAL(kind=kind_noahmp) :: ALB_URB          ! time-varying albedo            [fraction]
+     REAL(kind=kind_noahmp) :: LW_URB           ! upward long wave radiation flux  [W/m/m]
+     REAL(kind=kind_noahmp) :: G_URB            ! heat flux into the ground        [W/m/m]
+     REAL(kind=kind_noahmp) :: RN_URB           ! net radiation                    [W/m/m]
+     REAL(kind=kind_noahmp) :: PSIM_URB         ! shear f for momentum             [-]
+     REAL(kind=kind_noahmp) :: PSIH_URB         ! shear f for heat                 [-]
+     REAL(kind=kind_noahmp) :: GZ1OZ0_URB       ! shear f for heat                 [-]
+     REAL(kind=kind_noahmp) :: U10_URB          ! wind u component at 10 m         [m/s]
+     REAL(kind=kind_noahmp) :: V10_URB          ! wind v component at 10 m         [m/s]
+     REAL(kind=kind_noahmp) :: TH2_URB          ! potential temperature at 2 m     [K]
+     REAL(kind=kind_noahmp) :: Q2_URB           ! humidity at 2 m                  [-]
+     REAL(kind=kind_noahmp) :: CHS_URB
+     REAL(kind=kind_noahmp) :: CHS2_URB
+     REAL(kind=kind_noahmp) :: UST_URB
 
 ! NUDAPT Parameters urban --> lam
 
-     REAL :: mh_urb
-     REAL :: stdh_urb
-     REAL :: lp_urb
-     REAL :: hgt_urb
-     REAL, DIMENSION(4) :: lf_urb
+     REAL(kind=kind_noahmp) :: mh_urb
+     REAL(kind=kind_noahmp) :: stdh_urb
+     REAL(kind=kind_noahmp) :: lp_urb
+     REAL(kind=kind_noahmp) :: hgt_urb
+     REAL(kind=kind_noahmp), DIMENSION(4) :: lf_urb
 
 ! Local variables
 
      INTEGER :: I,J,K
-     REAL :: Q1
+     REAL(kind=kind_noahmp) :: Q1
 
 ! Noah UA changes
 
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: CMR_SFCDIF
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: CHR_SFCDIF
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: CMGR_SFCDIF
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: CHGR_SFCDIF
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: CMC_SFCDIF
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: CHC_SFCDIF
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: CMR_SFCDIF
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: CHR_SFCDIF
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: CMGR_SFCDIF
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: CHGR_SFCDIF
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: CMC_SFCDIF
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: CHC_SFCDIF
 
 ! Variables for multi-layer UCM
 
-     REAL, OPTIONAL,                                                    INTENT(IN   ) :: GMT
+     REAL(kind=kind_noahmp), OPTIONAL,                                                    INTENT(IN   ) :: GMT
      INTEGER, OPTIONAL,                                                 INTENT(IN   ) :: JULDAY
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(IN   ) :: XLAT, XLONG
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(IN   ) :: XLAT, XLONG
      INTEGER,                                                           INTENT(IN   ) :: num_urban_ndm
      INTEGER,                                                           INTENT(IN   ) :: urban_map_zrd
      INTEGER,                                                           INTENT(IN   ) :: urban_map_zwd
@@ -291,81 +291,81 @@ contains
      INTEGER,                                                           INTENT(IN   ) :: urban_map_fbd
      INTEGER,                                                           INTENT(IN   ) :: urban_map_zgrd
      INTEGER,                                                           INTENT(IN   ) :: NUM_URBAN_HI
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_urban_hi, jms:jme ),     INTENT(IN   ) :: hi_urb2d
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(IN   ) :: lp_urb2d
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(IN   ) :: lb_urb2d
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(IN   ) :: hgt_urb2d
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(IN   ) :: mh_urb2d
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(IN   ) :: stdh_urb2d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 4, jms:jme ),                  INTENT(IN   ) :: lf_urb2d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:num_urban_hi, jms:jme ),     INTENT(IN   ) :: hi_urb2d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(IN   ) :: lp_urb2d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(IN   ) :: lb_urb2d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(IN   ) :: hgt_urb2d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(IN   ) :: mh_urb2d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(IN   ) :: stdh_urb2d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 4, jms:jme ),                  INTENT(IN   ) :: lf_urb2d
 
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zrd, jms:jme ),    INTENT(INOUT) :: trb_urb4d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zwd, jms:jme ),    INTENT(INOUT) :: tw1_urb4d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zwd, jms:jme ),    INTENT(INOUT) :: tw2_urb4d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_gd , jms:jme ),    INTENT(INOUT) :: tgb_urb4d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_bd , jms:jme ),    INTENT(INOUT) :: tlev_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_bd , jms:jme ),    INTENT(INOUT) :: qlev_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ),    INTENT(INOUT) :: tw1lev_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ),    INTENT(INOUT) :: tw2lev_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_gbd, jms:jme ),    INTENT(INOUT) :: tglev_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_fbd, jms:jme ),    INTENT(INOUT) :: tflev_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: lf_ac_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: sf_ac_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: cm_ac_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: sfvent_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: lfvent_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ),    INTENT(INOUT) :: sfwin1_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ),    INTENT(INOUT) :: sfwin2_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zd , jms:jme ),    INTENT(INOUT) :: sfw1_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zd , jms:jme ),    INTENT(INOUT) :: sfw2_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),    INTENT(INOUT) :: sfr_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ),    INTENT(INOUT) :: sfg_urb3d
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: ep_pv_urb3d !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ), INTENT(INOUT) :: t_pv_urb3d !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zgrd, jms:jme ),INTENT(INOUT) :: trv_urb4d !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zgrd, jms:jme ),INTENT(INOUT) :: qr_urb4d !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime,jms:jme ), INTENT(INOUT) :: qgr_urb3d  !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime,jms:jme ), INTENT(INOUT) :: tgr_urb3d  !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: drain_urb4d !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: draingr_urb3d !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: sfrv_urb3d !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: lfrv_urb3d !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: dgr_urb3d !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ),INTENT(INOUT) :: dg_urb3d !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: lfr_urb3d !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ),INTENT(INOUT) :: lfg_urb3d !GRZ
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: a_u_bep   !Implicit momemtum component X-direction
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: a_v_bep   !Implicit momemtum component Y-direction
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: a_t_bep   !Implicit component pot. temperature
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: a_q_bep   !Implicit momemtum component X-direction
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: a_e_bep   !Implicit component TKE
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: b_u_bep   !Explicit momentum component X-direction
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: b_v_bep   !Explicit momentum component Y-direction
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: b_t_bep   !Explicit component pot. temperature
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: b_q_bep   !Implicit momemtum component Y-direction
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: b_e_bep   !Explicit component TKE
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: vl_bep    !Fraction air volume in grid cell
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: dlg_bep   !Height above ground
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: sf_bep    !Fraction air at the face of grid cell
-     REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: dl_u_bep  !Length scale
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zrd, jms:jme ),    INTENT(INOUT) :: trb_urb4d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zwd, jms:jme ),    INTENT(INOUT) :: tw1_urb4d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zwd, jms:jme ),    INTENT(INOUT) :: tw2_urb4d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_gd , jms:jme ),    INTENT(INOUT) :: tgb_urb4d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_bd , jms:jme ),    INTENT(INOUT) :: tlev_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_bd , jms:jme ),    INTENT(INOUT) :: qlev_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ),    INTENT(INOUT) :: tw1lev_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ),    INTENT(INOUT) :: tw2lev_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_gbd, jms:jme ),    INTENT(INOUT) :: tglev_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_fbd, jms:jme ),    INTENT(INOUT) :: tflev_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: lf_ac_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: sf_ac_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: cm_ac_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: sfvent_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ),                     INTENT(INOUT) :: lfvent_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ),    INTENT(INOUT) :: sfwin1_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ),    INTENT(INOUT) :: sfwin2_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zd , jms:jme ),    INTENT(INOUT) :: sfw1_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zd , jms:jme ),    INTENT(INOUT) :: sfw2_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),    INTENT(INOUT) :: sfr_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ),    INTENT(INOUT) :: sfg_urb3d
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: ep_pv_urb3d !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ), INTENT(INOUT) :: t_pv_urb3d !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zgrd, jms:jme ),INTENT(INOUT) :: trv_urb4d !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zgrd, jms:jme ),INTENT(INOUT) :: qr_urb4d !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime,jms:jme ), INTENT(INOUT) :: qgr_urb3d  !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime,jms:jme ), INTENT(INOUT) :: tgr_urb3d  !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: drain_urb4d !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: draingr_urb3d !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: sfrv_urb3d !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: lfrv_urb3d !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: dgr_urb3d !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ),INTENT(INOUT) :: dg_urb3d !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: lfr_urb3d !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ),INTENT(INOUT) :: lfg_urb3d !GRZ
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: a_u_bep   !Implicit momemtum component X-direction
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: a_v_bep   !Implicit momemtum component Y-direction
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: a_t_bep   !Implicit component pot. temperature
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: a_q_bep   !Implicit momemtum component X-direction
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: a_e_bep   !Implicit component TKE
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: b_u_bep   !Explicit momentum component X-direction
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: b_v_bep   !Explicit momentum component Y-direction
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: b_t_bep   !Explicit component pot. temperature
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: b_q_bep   !Implicit momemtum component Y-direction
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: b_e_bep   !Explicit component TKE
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: vl_bep    !Fraction air volume in grid cell
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: dlg_bep   !Height above ground
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: sf_bep    !Fraction air at the face of grid cell
+     REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme ),            INTENT(INOUT) :: dl_u_bep  !Length scale
 
 ! Local variables for multi-layer UCM
 
-     REAL,    DIMENSION( its:ite, jts:jte) :: HFX_RURAL,GRDFLX_RURAL          ! ,LH_RURAL,RN_RURAL
-     REAL,    DIMENSION( its:ite, jts:jte) :: QFX_RURAL                       ! ,QSFC_RURAL,UMOM_RURAL,VMOM_RURAL
-     REAL,    DIMENSION( its:ite, jts:jte) :: ALB_RURAL,EMISS_RURAL,TSK_RURAL ! ,UST_RURAL
-     REAL,    DIMENSION( its:ite, jts:jte) :: HFX_URB,UMOM_URB,VMOM_URB
-     REAL,    DIMENSION( its:ite, jts:jte) :: QFX_URB
-     REAL,    DIMENSION( its:ite, jts:jte) :: EMISS_URB
-     REAL,    DIMENSION( its:ite, jts:jte) :: RL_UP_URB
-     REAL,    DIMENSION( its:ite, jts:jte) :: RS_ABS_URB
-     REAL,    DIMENSION( its:ite, jts:jte) :: GRDFLX_URB
+     REAL(kind=kind_noahmp),    DIMENSION( its:ite, jts:jte) :: HFX_RURAL,GRDFLX_RURAL          ! ,LH_RURAL,RN_RURAL
+     REAL(kind=kind_noahmp),    DIMENSION( its:ite, jts:jte) :: QFX_RURAL                       ! ,QSFC_RURAL,UMOM_RURAL,VMOM_RURAL
+     REAL(kind=kind_noahmp),    DIMENSION( its:ite, jts:jte) :: ALB_RURAL,EMISS_RURAL,TSK_RURAL ! ,UST_RURAL
+     REAL(kind=kind_noahmp),    DIMENSION( its:ite, jts:jte) :: HFX_URB,UMOM_URB,VMOM_URB
+     REAL(kind=kind_noahmp),    DIMENSION( its:ite, jts:jte) :: QFX_URB
+     REAL(kind=kind_noahmp),    DIMENSION( its:ite, jts:jte) :: EMISS_URB
+     REAL(kind=kind_noahmp),    DIMENSION( its:ite, jts:jte) :: RL_UP_URB
+     REAL(kind=kind_noahmp),    DIMENSION( its:ite, jts:jte) :: RS_ABS_URB
+     REAL(kind=kind_noahmp),    DIMENSION( its:ite, jts:jte) :: GRDFLX_URB
 
-     REAL :: SIGMA_SB,RL_UP_RURAL,RL_UP_TOT,RS_ABS_TOT,UMOM,VMOM
-     REAL :: r1,r2,r3
-     REAL :: CMR_URB, CHR_URB, CMC_URB, CHC_URB, CMGR_URB, CHGR_URB
-     REAL :: frc_urb,lb_urb
-     REAL :: check
+     REAL(kind=kind_noahmp) :: SIGMA_SB,RL_UP_RURAL,RL_UP_TOT,RS_ABS_TOT,UMOM,VMOM
+     REAL(kind=kind_noahmp) :: r1,r2,r3
+     REAL(kind=kind_noahmp) :: CMR_URB, CHR_URB, CMC_URB, CHC_URB, CMGR_URB, CHGR_URB
+     REAL(kind=kind_noahmp) :: frc_urb,lb_urb
+     REAL(kind=kind_noahmp) :: check
 
     character(len=80) :: message
 

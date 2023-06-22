@@ -71,6 +71,17 @@
 
  SF_URBAN_PHYSICS = 0
  USE_WUDAPT_LCZ = 0
- 
+
+ SNICAR_BANDNUMBER_OPTION          = 1
+ SNICAR_SOLARSPEC_OPTION           = 1                                                                                               
+ SNICAR_SNOWOPTICS_OPTION          = 3
+ SNICAR_DUSTOPTICS_OPTION          = 1
+ SNICAR_RTSOLVER_OPTION            = 2
+ SNICAR_SNOWSHAPE_OPTION           = 1
+ SNICAR_USE_AEROSOL                = .true.
+ SNICAR_SNOWBC_INTMIX              = .true.
+ SNICAR_SNOWDUST_INTMIX            = .false.
+ SNICAR_USE_OC                     = .false.
+
 /
 
