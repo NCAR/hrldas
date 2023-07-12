@@ -370,13 +370,6 @@ module module_NoahMP_hrldas_driver
 !------------------------------------------------------------------------
 ! Needed for root water uptake scheme (Fan et al. 2017)
 !------------------------------------------------------------------------
-  ! Including soil data variables with additional layers (default 12 total layers) 
-  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  DEEPSMOIS         ! Extended column volumetric soil moisture [m3/m3] 
-  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  DEEPTSLB          ! Extended column soil temperature [K] 
-  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  DEEPSH2O          ! Extended column liquid volumetric soil moisture [m3/m3] 
-  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  DEEPSMOISEQ       ! Extended column equilibrium soil moisture [m3/m3] 
-  REAL,    ALLOCATABLE, DIMENSION(:)      ::  DEEPDZS           ! Extended column soil layer thickness [m]
-  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  DEEPZSNSOXY       ! Extended column snow + soil layer thickness [m]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  EASYXY            ! Root scheme ease function [-] 
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  ROOTACTIVITYXY    ! Root activity function [-]
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  INACTIVEXY        ! Number of timesteps with inactive roots [-]
@@ -711,10 +704,8 @@ module module_NoahMP_hrldas_driver
   integer            :: ystart = 1
   integer            ::   xend = 0
   integer            ::   yend = 0
-  integer, PARAMETER    :: MAX_SOIL_LEVELS = 10   ! maximum soil levels in namelist
-  integer            :: addl_soil_layers          ! number of additional soil layers in extended soil column 
+  integer, PARAMETER    :: MAX_SOIL_LEVELS = 12   ! maximum soil levels in namelist
   REAL, DIMENSION(MAX_SOIL_LEVELS) :: soil_thick_input   ! depth to soil interfaces from namelist [m]
-  REAL, DIMENSION(MAX_SOIL_LEVELS) :: addl_soil_dz       ! thickness of additional soil layers [m]
 
 
   namelist / NOAHLSM_OFFLINE /    &
@@ -723,7 +714,7 @@ module module_NoahMP_hrldas_driver
 #endif
        indir, nsoil, soil_thick_input, forcing_timestep, noah_timestep, &
        start_year, start_month, start_day, start_hour, start_min, &
-       outdir, skip_first_output, addl_soil_layers, addl_soil_dz, &
+       outdir, skip_first_output, &
        restart_filename_requested, restart_frequency_hours, output_timestep, &
        spinup_loops, &
        forcing_name_T,forcing_name_Q,forcing_name_U,forcing_name_V,forcing_name_P, &
@@ -784,8 +775,6 @@ module module_NoahMP_hrldas_driver
   output_timestep         = -999
   spinup_loops            = 0
   restart_frequency_hours = -999
-  addl_soil_layers        = -999
-  addl_soil_dz            = -999
 
   open(30, file="namelist.hrldas", form="FORMATTED")
   read(30, NOAHLSM_OFFLINE, iostat=ierr)
@@ -1317,7 +1306,7 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( ACC_SSOILXY (XSTART:XEND,YSTART:YEND) )
   ALLOCATE ( ACC_QINSURXY(XSTART:XEND,YSTART:YEND) )
   ALLOCATE ( ACC_QSEVAXY (XSTART:XEND,YSTART:YEND) )
-  ALLOCATE ( ACC_ETRANIXY(XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )
+  ALLOCATE ( ACC_ETRANIXY(XSTART:XEND,1:NSOIL,YSTART:YEND) )
   ALLOCATE ( EFLXBXY   (XSTART:XEND,YSTART:YEND) )
   ALLOCATE ( SOILENERGY(XSTART:XEND,YSTART:YEND) )
   ALLOCATE ( SNOWENERGY(XSTART:XEND,YSTART:YEND) )
@@ -1359,20 +1348,14 @@ module module_NoahMP_hrldas_driver
 ! Needed for root water uptake scheme (Fan et al. 2017)
 !------------------------------------------------------------------------
 
-  ALLOCATE ( DEEPSMOIS      (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Extended column volumetric soil moisture [m3/m3] 
-  ALLOCATE ( DEEPTSLB       (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Extended column soil temperature [K] 
-  ALLOCATE ( DEEPSH2O       (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Extended column liquid volumetric soil moisture [m3/m3] 
-  ALLOCATE ( DEEPSMOISEQ    (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Extended column equilibrium soil moisture [m3/m3]
-  ALLOCATE ( DEEPDZS        (1:NSOIL+ADDL_SOIL_LAYERS) )                          ! Extended column soil layer thickness [m]
-  ALLOCATE ( DEEPZSNSOXY    (XSTART:XEND,-NSNOW+1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) ) ! Extended column snow + soil layer thickness [m]
-  ALLOCATE ( EASYXY         (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Root scheme ease function [-] 
-  ALLOCATE ( ROOTACTIVITYXY (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Root activity function [-]
-  ALLOCATE ( INACTIVEXY     (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Number of timesteps with inactive roots [-]
-  ALLOCATE ( KROOTXY        (XSTART:XEND,YSTART:YEND)                          )  ! Layer depth of root zone [-]
-  ALLOCATE ( KWTDXY         (XSTART:XEND,YSTART:YEND)                          )  ! Layer depth of water table [-]
-  ALLOCATE ( PSIXY          (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Extended column soil matric potential [m]
-  ALLOCATE ( GWRDXY         (XSTART:XEND,YSTART:YEND)                          )  ! Root water uptake depth [m] 
-  ALLOCATE ( BTRANIXY       (XSTART:XEND,1:NSOIL+ADDL_SOIL_LAYERS,YSTART:YEND) )  ! Extended column beta factor for soil moisture stress [-]
+  ALLOCATE ( EASYXY         (XSTART:XEND,1:NSOIL,YSTART:YEND) )  ! Root scheme ease function [-] 
+  ALLOCATE ( ROOTACTIVITYXY (XSTART:XEND,1:NSOIL,YSTART:YEND) )  ! Root activity function [-]
+  ALLOCATE ( INACTIVEXY     (XSTART:XEND,1:NSOIL,YSTART:YEND) )  ! Number of timesteps with inactive roots [-]
+  ALLOCATE ( KROOTXY        (XSTART:XEND,YSTART:YEND)         )  ! Layer depth of root zone [-]
+  ALLOCATE ( KWTDXY         (XSTART:XEND,YSTART:YEND)         )  ! Layer depth of water table [-]
+  ALLOCATE ( PSIXY          (XSTART:XEND,1:NSOIL,YSTART:YEND) )  ! Extended column soil matric potential [m]
+  ALLOCATE ( GWRDXY         (XSTART:XEND,YSTART:YEND)         )  ! Root water uptake depth [m] 
+  ALLOCATE ( BTRANIXY       (XSTART:XEND,1:NSOIL,YSTART:YEND) )  ! Extended column beta factor for soil moisture stress [-]
 
 !------------------------------------------------------------------------
 ! Needed for crop model (OPT_CROP=1)
@@ -1779,12 +1762,6 @@ ENDIF
   EASYXY      = undefined_real           
   KWTDXY      = undefined_int                      
   GWRDXY      = undefined_int  ! undefined_real 
-  DEEPSMOIS   = undefined_real
-  DEEPTSLB    = undefined_real
-  DEEPSH2O    = undefined_real
-  DEEPSMOISEQ = undefined_real
-  DEEPDZS     = undefined_real
-  DEEPZSNSOXY = undefined_real
   PSIXY       = undefined_real
   BTRANIXY    = undefined_real    
 
@@ -2012,11 +1989,11 @@ ENDIF
      call mpp_land_bcast_char(19,OLDDATE(1:19))
 #endif
 
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SOIL_T"  , DEEPTSLB     ) ! Substituted for extended column var
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SOIL_T"  , TSLB     ) 
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNOW_T"  , TSNOXY   )
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SMC"     , DEEPSMOIS    ) ! Substituted for extended column var
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SH2O"    , DEEPSH2O     ) ! Substituted for extended column var
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ZSNSO"   , DEEPZSNSOXY  ) ! Substituted for extended column var
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SMC"     , SMOIS    )
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SH2O"    , SH2O     )
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ZSNSO"   , ZSNSOXY  ) 
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNICE"   , SNICEXY  )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNLIQ"   , SNLIQXY  )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSNOW"   , QSNOWXY  )
@@ -2083,7 +2060,7 @@ ENDIF
         call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "IRFIVOL" , IRFIVOL  )
      ENDIF
     ! below for opt_run = 5
-     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SMOISEQ"   , DEEPSMOISEQ    ) ! Substituted for extended column var
+     call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SMOISEQ"   , SMOISEQ    ) 
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "AREAXY"    , AREAXY     )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SMCWTDXY"  , SMCWTDXY   )
      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QRFXY"     , QRFXY      )
@@ -2211,7 +2188,6 @@ ENDIF
      ! Replace original arrays with extended column arrays
 
      CALL NOAHMP_INIT(    LLANDUSE,     SNOW,    SNOWH,   CANWAT,   ISLTYP,   IVGTYP, XLAT, &   ! call from WRF phys_init
-                    ADDL_SOIL_LAYERS, & 
                     TSLB,    SMOIS,     SH2O,      DZS, FNDSOILW, FNDSNOWH, &
                      TSK,  ISNOWXY,     TVXY,     TGXY, CANICEXY,      TMN,     XICE, &
                 CANLIQXY,    EAHXY,    TAHXY,     CMXY,     CHXY,                     &
@@ -2233,18 +2209,9 @@ ENDIF
                      ,smoiseq  ,smcwtdxy ,rechxy, deeprechxy, qtdrain, areaxy ,dx, dy, msftx, msfty,&
                      wtddt    ,stepwtd  ,dtbl  ,qrfsxy ,qspringsxy  ,qslatxy,                  &
                      fdepthxy ,terrain       ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy,              &
-                     rechclim ,gecros_state,                &
-                     ADDL_SOIL_DZ, DEEPDZS)
+                     rechclim ,gecros_state)
 
-     NSOIL             = NSOIL + ADDL_SOIL_LAYERS   ! Define new NSOIL
-     NUM_SOIL_LAYERS   = NSOIL
-
-     CALL move_alloc(DEEPZSNSOXY, ZSNSOXY)
-     CALL move_alloc(DEEPTSLB, TSLB)
-     CALL move_alloc(DEEPSMOIS, SMOIS)
-     CALL move_alloc(DEEPSH2O, SH2O)
-     CALL move_alloc(DEEPSMOISEQ, SMOISEQ)
-     CALL move_alloc(DEEPDZS, DZS)
+     !NUM_SOIL_LAYERS   = NSOIL
 
          IF(SF_URBAN_PHYSICS > 0 ) THEN  !urban
          
@@ -2340,6 +2307,7 @@ ENDIF
      CALL READINIT_HRLDAS(HRLDAS_SETUP_FILE, xstart, xend, ystart, yend,  &
           NSOIL, DZS, OLDDATE, LDASIN_VERSION, SMOIS,       &
           TSLB, CANWAT, TSK, SNOW, SNOWH, FNDSNOWH)
+
 	  
      VEGFRA    =  undefined_real
      LAI       =  undefined_real
@@ -2348,6 +2316,8 @@ ENDIF
 
      CALL READVEG_HRLDAS(HRLDAS_SETUP_FILE, xstart, xend, ystart, yend,  &
           OLDDATE, IVGTYP, VEGFRA, LAI, GVFMIN, GVFMAX)
+   
+     print*, DZS, SMOIS(1,:,20), TSLB(1,:,20)
 
 #ifdef WRF_HYDRO
   else   !  HRLDAS_ini_typ        
@@ -2375,7 +2345,6 @@ ENDIF
 
      FNDSOILW = .FALSE.
      CALL NOAHMP_INIT(    LLANDUSE,     SNOW,    SNOWH,   CANWAT,   ISLTYP,   IVGTYP, XLAT, &   ! call from WRF phys_init
-                    ADDL_SOIL_LAYERS, & 
                     TSLB,    SMOIS,     SH2O,      DZS, FNDSOILW, FNDSNOWH, &
                      TSK,  ISNOWXY,     TVXY,     TGXY, CANICEXY,      TMN,     XICE, &
                 CANLIQXY,    EAHXY,    TAHXY,     CMXY,     CHXY,                     &
@@ -2397,13 +2366,8 @@ ENDIF
                      ,smoiseq  ,smcwtdxy ,rechxy, deeprechxy, qtdrain, areaxy ,dx, dy, msftx, msfty,&
                      wtddt    ,stepwtd  ,dtbl  ,qrfsxy ,qspringsxy  ,qslatxy,                  &
                      fdepthxy ,terrain       ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy,              &
-                     rechclim ,gecros_state,                 &
-                     DEEPTSLB, ADDL_SOIL_DZ, DEEPDZS, DEEPZSNSOXY )          
+                     rechclim ,gecros_state)
 
-     ! Replace original arrays with extended column arrays
-     call move_alloc(deepzsnsoxy, zsnsoxy) 
-     call move_alloc(deepdzs, dzs)        
-     call move_alloc(deeptslb, tslb)      
 
          if(iopt_run == 5) then
               call groundwater_init ( grid,                                     &
@@ -2413,21 +2377,12 @@ ENDIF
                  smois      , sh2o    , smoiseq   , smcwtdxy  ,                 &
                  QLATXY     , qslatxy , QRFXY     , qrfsxy    ,                 &
                  deeprechxy , rechxy  , QSPRINGXY , qspringsxy,                 &
-                 rechclim   ,                                                   &
-                 deepsmois, deepsh2o, deepsmoiseq, tslb, addl_soil_layers,      &
+                 rechclim   , tslb    ,                                         &
                  ids,ide+1, jds,jde+1, kds,kde,                                 &
                  ims,ime, jms,jme, kms,kme,                                     &
                  ims,ime, jms,jme, kms,kme,                                     &
                  its,ite, jts,jte, kts,kte )
 
-              ! Replace original arrays with extended column arrays
-              call move_alloc(deepsmois, smois)      
-              call move_alloc(deepsh2o, sh2o)        
-              call move_alloc(deepsmoiseq, smoiseq)  
-
-              ! Update NSOIL to include additional layers
-              ! Initialize KROOTXY with this value
-              NSOIL   = num_soil_layers 
          endif
 
 

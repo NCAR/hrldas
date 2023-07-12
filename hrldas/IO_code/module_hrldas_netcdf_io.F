@@ -1609,6 +1609,7 @@ contains
     iret = nf90_get_var(ncid, varid, values=insoil, start=(/xstart,ystart,1,1/), count=(/xend-xstart+1,yend-ystart+1,nsoil,1/))
     do isoil = 1,nsoil
       array(:,isoil,:) = insoil(:,:,isoil)
+      print*,insoil(1,20,:)
     end do
 #endif
     if (iret /= 0) then
@@ -1670,8 +1671,10 @@ contains
     real, dimension(100) :: layer_top
     real, dimension(nsoil)   :: dzs
 
+    integer, parameter :: nsoil_reduced = 4
+
     real, dimension(xstart:xend, ystart:yend, nsoil) :: insoil
-    real, dimension(xstart:xend, nsoil, ystart:yend) :: soildummy
+    real, dimension(xstart:xend, nsoil_reduced, ystart:yend) :: soildummy
     integer :: rank
 
     !
@@ -1767,26 +1770,26 @@ contains
     ! Get the interfaces from the input file (not the variable as of v3.7)
     
     ierr = nf90_inq_varid(ncid,  "DZS",  varid)
-    ierr = nf90_get_var(ncid, varid, values=dzs, start=(/1/), count=(/nsoil/))
+    ierr = nf90_get_var(ncid, varid, values=dzs, start=(/1/), count=(/nsoil_reduced/))
     
     layer_top(1) = 0.0
     layer_bottom(1) = dzs(1)
-    do isoil = 2, nsoil
+    do isoil = 2, nsoil_reduced
       layer_top(isoil) = layer_bottom(isoil-1)
       layer_bottom(isoil) = layer_top(isoil) + dzs(isoil)
     end do
 	
-    call get_netcdf_soillevel("TSLB", ncid, nsoil, soildummy, units,  xstart, xend, ystart, yend, FATAL, ierr)
+    call get_netcdf_soillevel("TSLB", ncid, nsoil_reduced, soildummy, units,  xstart, xend, ystart, yend, FATAL, ierr)
     
-    write(*, '("layer_bottom(1:nsoil) = ", 4F9.4)') layer_bottom(1:nsoil)
-    write(*, '("layer_top(1:nsoil)    = ", 4F9.4)') layer_top(1:nsoil)
+    write(*, '("layer_bottom(1:nsoil) = ", 4F9.4)') layer_bottom(1:nsoil_reduced)
+    write(*, '("layer_top(1:nsoil)    = ", 4F9.4)') layer_top(1:nsoil_reduced)
     write(*, '("Soil depth = ", 10F12.6)') sldpth
     
-    call init_interp(xstart, xend, ystart, yend, nsoil, sldpth, stc, nsoil, soildummy, layer_bottom(1:nsoil), layer_top(1:nsoil))
+    call init_interp(xstart, xend, ystart, yend, nsoil, sldpth, stc, nsoil_reduced, soildummy, layer_bottom(1:nsoil_reduced), layer_top(1:nsoil_reduced))
 
-    call get_netcdf_soillevel("SMOIS", ncid, nsoil, soildummy, units,  xstart, xend, ystart, yend, FATAL, ierr)
+    call get_netcdf_soillevel("SMOIS", ncid, nsoil_reduced, soildummy, units,  xstart, xend, ystart, yend, FATAL, ierr)
 
-    call init_interp(xstart, xend, ystart, yend, nsoil, sldpth, smc, nsoil, soildummy, layer_bottom(1:nsoil), layer_top(1:nsoil))
+    call init_interp(xstart, xend, ystart, yend, nsoil, sldpth, smc, nsoil_reduced, soildummy, layer_bottom(1:nsoil_reduced), layer_top(1:nsoil_reduced))
 
     ierr = nf90_close(ncid)
   end subroutine readinit_hrldas
@@ -1809,6 +1812,8 @@ contains
     integer :: ierr
     integer :: rank
 
+    integer, parameter :: nsoil_reduced = 4
+
 #ifdef _PARALLEL_    
     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
     if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
@@ -1816,7 +1821,7 @@ contains
     rank = 0
 #endif
 
-    do k = 1, nsoil
+    do k = 1, nsoil_reduced
        if (k==1) then
           dst_centerpoint(k) = sldpth(k)/2.
        else
@@ -1824,14 +1829,13 @@ contains
        endif
        if (rank == 0) print*, 'k, dst_centerpoint(k) = ', k, dst_centerpoint(k)
     enddo
-    print*
 
     do k = 1, nvar
        src_centerpoint(k) = 0.5*(layer_bottom(k)+layer_top(k))
        if (rank == 0) print*, 'k, src_centerpoint(k) = ', k, src_centerpoint(k)
     enddo
 
-    KLOOP : do k = 1, nsoil
+    KLOOP : do k = 1, nsoil_reduced
 
        if (dst_centerpoint(k) < src_centerpoint(1)) then
           ! If the center of the destination layer is closer to the surface than
