@@ -378,6 +378,7 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  PSIXY             ! Extended column soil matric potential [m]
   INTEGER, ALLOCATABLE, DIMENSION(:,:)    ::  GWRDXY            ! Root water uptake depth [m] 
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  BTRANIXY          ! Extended column beta factor for soil moisture stress [-] 
+  LOGICAL                                 ::  ROOT_UPDATE       ! If TRUE, update variables based on root scheme 
 
 !------------------------------------------------------------------------
 ! Needed for crop model (OPT_CROP=1)
@@ -2183,9 +2184,9 @@ ENDIF
      STEPWTD = nint(WTDDT*60./DTBL)
      STEPWTD = max(STEPWTD,1)
 
-! Must still call NOAHMP_INIT even in restart to set up parameter arrays (also done in WRF)
+     ROOT_UPDATE = .TRUE. ! If restart run, update variables based on root scheme (if active) 
 
-     ! Replace original arrays with extended column arrays
+! Must still call NOAHMP_INIT even in restart to set up parameter arrays (also done in WRF)
 
      CALL NOAHMP_INIT(    LLANDUSE,     SNOW,    SNOWH,   CANWAT,   ISLTYP,   IVGTYP, XLAT, &   ! call from WRF phys_init
                     TSLB,    SMOIS,     SH2O,      DZS, FNDSOILW, FNDSNOWH, &
@@ -2211,7 +2212,6 @@ ENDIF
                      fdepthxy ,terrain       ,riverbedxy ,eqzwt ,rivercondxy ,pexpxy,              &
                      rechclim ,gecros_state)
 
-     !NUM_SOIL_LAYERS   = NSOIL
 
          IF(SF_URBAN_PHYSICS > 0 ) THEN  !urban
          
@@ -2316,8 +2316,6 @@ ENDIF
 
      CALL READVEG_HRLDAS(HRLDAS_SETUP_FILE, xstart, xend, ystart, yend,  &
           OLDDATE, IVGTYP, VEGFRA, LAI, GVFMIN, GVFMAX)
-   
-     print*, DZS, SMOIS(1,:,20), TSLB(1,:,20)
 
 #ifdef WRF_HYDRO
   else   !  HRLDAS_ini_typ        
@@ -2342,6 +2340,8 @@ ENDIF
 #endif
 
 !     SNOW = SNOW * 1000.    ! Convert snow water equivalent to mm. MB: remove v3.7
+
+     ROOT_UPDATE = .FALSE.
 
      FNDSOILW = .FALSE.
      CALL NOAHMP_INIT(    LLANDUSE,     SNOW,    SNOWH,   CANWAT,   ISLTYP,   IVGTYP, XLAT, &   ! call from WRF phys_init
@@ -2739,7 +2739,7 @@ end subroutine land_driver_ini
                 its,ite, jts,jte, kts,kte,        &
                 ! For root scheme
                 EASYXY, ROOTACTIVITYXY, INACTIVEXY, KROOTXY, KWTDXY, BTRANIXY,& 
-                PSIXY, GWRDXY, FDEPTHXY,  & 
+                PSIXY, GWRDXY, FDEPTHXY, ROOT_UPDATE, & 
 ! variables below are optional
                 MP_RAINC =  RAINCV, MP_RAINNC =    RAINNCV, MP_SHCV = RAINSHV,&
 		MP_SNOW  = SNOWNCV, MP_GRAUP  = GRAUPELNCV, MP_HAIL = HAILNCV )
