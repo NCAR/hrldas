@@ -1609,7 +1609,6 @@ contains
     iret = nf90_get_var(ncid, varid, values=insoil, start=(/xstart,ystart,1,1/), count=(/xend-xstart+1,yend-ystart+1,nsoil,1/))
     do isoil = 1,nsoil
       array(:,isoil,:) = insoil(:,:,isoil)
-      print*,insoil(1,20,:)
     end do
 #endif
     if (iret /= 0) then

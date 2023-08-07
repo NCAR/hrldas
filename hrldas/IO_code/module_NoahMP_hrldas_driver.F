@@ -375,9 +375,9 @@ module module_NoahMP_hrldas_driver
   REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  INACTIVEXY        ! Number of timesteps with inactive roots [-]
   INTEGER, ALLOCATABLE, DIMENSION(:,:)    ::  KROOTXY           ! Layer depth of root zone [-]
   INTEGER, ALLOCATABLE, DIMENSION(:,:)    ::  KWTDXY            ! Layer depth of water table [-]
-  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  PSIXY             ! Extended column soil matric potential [m]
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  PSIXY             ! Soil matric potential [m]
   INTEGER, ALLOCATABLE, DIMENSION(:,:)    ::  GWRDXY            ! Root water uptake depth [m] 
-  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  BTRANIXY          ! Extended column beta factor for soil moisture stress [-] 
+  REAL,    ALLOCATABLE, DIMENSION(:,:,:)  ::  BTRANIXY          ! Beta factor for soil moisture stress [-] 
   LOGICAL                                 ::  ROOT_UPDATE       ! If TRUE, update variables based on root scheme 
 
 !------------------------------------------------------------------------
@@ -1354,9 +1354,9 @@ module module_NoahMP_hrldas_driver
   ALLOCATE ( INACTIVEXY     (XSTART:XEND,1:NSOIL,YSTART:YEND) )  ! Number of timesteps with inactive roots [-]
   ALLOCATE ( KROOTXY        (XSTART:XEND,YSTART:YEND)         )  ! Layer depth of root zone [-]
   ALLOCATE ( KWTDXY         (XSTART:XEND,YSTART:YEND)         )  ! Layer depth of water table [-]
-  ALLOCATE ( PSIXY          (XSTART:XEND,1:NSOIL,YSTART:YEND) )  ! Extended column soil matric potential [m]
+  ALLOCATE ( PSIXY          (XSTART:XEND,1:NSOIL,YSTART:YEND) )  ! Soil matric potential [m]
   ALLOCATE ( GWRDXY         (XSTART:XEND,YSTART:YEND)         )  ! Root water uptake depth [m] 
-  ALLOCATE ( BTRANIXY       (XSTART:XEND,1:NSOIL,YSTART:YEND) )  ! Extended column beta factor for soil moisture stress [-]
+  ALLOCATE ( BTRANIXY       (XSTART:XEND,1:NSOIL,YSTART:YEND) )  ! Beta factor for soil moisture stress [-]
 
 !------------------------------------------------------------------------
 ! Needed for crop model (OPT_CROP=1)
@@ -2184,7 +2184,7 @@ ENDIF
      STEPWTD = nint(WTDDT*60./DTBL)
      STEPWTD = max(STEPWTD,1)
 
-     ROOT_UPDATE = .TRUE. ! If restart run, update variables based on root scheme (if active) 
+     ROOT_UPDATE = .TRUE. ! If restart run, update variables based on root scheme (if activated) 
 
 ! Must still call NOAHMP_INIT even in restart to set up parameter arrays (also done in WRF)
 
@@ -2341,8 +2341,8 @@ ENDIF
 
 !     SNOW = SNOW * 1000.    ! Convert snow water equivalent to mm. MB: remove v3.7
 
-     ROOT_UPDATE = .FALSE.
-
+     ROOT_UPDATE = .FALSE. ! If not restart run, initialize to False
+ 
      FNDSOILW = .FALSE.
      CALL NOAHMP_INIT(    LLANDUSE,     SNOW,    SNOWH,   CANWAT,   ISLTYP,   IVGTYP, XLAT, &   ! call from WRF phys_init
                     TSLB,    SMOIS,     SH2O,      DZS, FNDSOILW, FNDSNOWH, &
@@ -2739,7 +2739,7 @@ end subroutine land_driver_ini
                 its,ite, jts,jte, kts,kte,        &
                 ! For root scheme
                 EASYXY, ROOTACTIVITYXY, INACTIVEXY, KROOTXY, KWTDXY, BTRANIXY,& 
-                PSIXY, GWRDXY, FDEPTHXY, ROOT_UPDATE, & 
+                PSIXY, GWRDXY, FDEPTHXY, ROOT_UPDATE, restart_flag, & 
 ! variables below are optional
                 MP_RAINC =  RAINCV, MP_RAINNC =    RAINNCV, MP_SHCV = RAINSHV,&
 		MP_SNOW  = SNOWNCV, MP_GRAUP  = GRAUPELNCV, MP_HAIL = HAILNCV )
