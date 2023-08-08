@@ -120,14 +120,15 @@ OBJS = \
         ../../noahmp/src/NoahmpMainMod.o \
         ../../noahmp/src/CanopyRadiationTwoStreamMod.o \
         ../../noahmp/src/GroundAlbedoMod.o \
+        ../../noahmp/src/SnowAerosolSnicarMod.o \
         ../../noahmp/src/SnowAgingBatsMod.o \
+        ../../noahmp/src/SnowAgingSnicarMod.o \
         ../../noahmp/src/SnowAlbedoBatsMod.o \
         ../../noahmp/src/SnowAlbedoClassMod.o \
-        ../../noahmp/src/SnowAgeSnicarMod.o \
         ../../noahmp/src/SnowAlbedoSnicarMod.o \
-        ../../noahmp/src/SnowAlbedoSnicarGlacierMod.o \
-        ../../noahmp/src/SnowRadiationSnicarMod.o \
         ../../noahmp/src/SnowFreshRadiusMod.o \
+        ../../noahmp/src/SnowInputSnicarMod.o \
+        ../../noahmp/src/SnowRadiationSnicarMod.o \
         ../../noahmp/src/SurfaceAlbedoMod.o \
         ../../noahmp/src/SurfaceRadiationMod.o \
         ../../noahmp/src/HumiditySaturationMod.o \

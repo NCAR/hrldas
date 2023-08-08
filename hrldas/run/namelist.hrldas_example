@@ -82,6 +82,7 @@
  SNICAR_SNOWBC_INTMIX              = .true.
  SNICAR_SNOWDUST_INTMIX            = .false.
  SNICAR_USE_OC                     = .false.
+ SNICAR_AEROSOL_READTABLE          = .false.
 
 /
 

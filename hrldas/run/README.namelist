@@ -314,4 +314,7 @@
                                                              ! **.false. -> without organic carbon in snow
                                                              !   .true.  -> with organic carbon in snow
 
+ SNICAR_AEROSOL_READTABLE          = .false.                 ! option to read aerosol deposition fluxes from table or not
+                                                             ! **.false. -> data read from NetCDF forcing file
+                                                             !   .true.  -> data read from table
 /
