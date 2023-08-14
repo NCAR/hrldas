@@ -831,16 +831,7 @@ contains
                              NoahmpIO%SWDOWN, NoahmpIO%RAINBL, NoahmpIO%SNOWBL,       &
                              NoahmpIO%VEGFRA, NoahmpIO%update_veg, NoahmpIO%LAI,      &
                              NoahmpIO%update_lai, NoahmpIO%reset_spinup_date,         &
-                             NoahmpIO%startdate, NoahmpIO%forcing_name_BCPHI,         &
-                             NoahmpIO%forcing_name_BCPHO, NoahmpIO%forcing_name_OCPHI,&
-                             NoahmpIO%forcing_name_OCPHO, NoahmpIO%forcing_name_DUST1,&
-                             NoahmpIO%forcing_name_DUST2, NoahmpIO%forcing_name_DUST3,&
-                             NoahmpIO%forcing_name_DUST4, NoahmpIO%DepBChydrophiXY,   &
-                             NoahmpIO%DepBChydrophoXY, NoahmpIO%DepOChydrophiXY,      &
-                             NoahmpIO%DepOChydrophoXY, NoahmpIO%DepDust1XY,           &
-                             NoahmpIO%DepDust2XY, NoahmpIO%DepDust3XY,                &
-                             NoahmpIO%DepDust4XY, NoahmpIO%IOPT_ALB,                  &
-                             NoahmpIO%SNICAR_AEROSOL_READTABLE )
+                             NoahmpIO%startdate)
                              
              NoahmpIO%VEGFRA = NoahmpIO%VEGFRA * 100.0
      else
@@ -866,21 +857,23 @@ contains
                           NoahmpIO%T_PHY(:,1,:),NoahmpIO%QV_CURR(:,1,:),NoahmpIO%U_PHY(:,1,:),                  &
                           NoahmpIO%V_PHY(:,1,:),NoahmpIO%P8W(:,1,:), NoahmpIO%GLW, NoahmpIO%SWDOWN,             &
                           NoahmpIO%RAINBL, NoahmpIO%SNOWBL, NoahmpIO%VEGFRA, NoahmpIO%update_veg,               &
-                          NoahmpIO%LAI, NoahmpIO%update_lai, NoahmpIO%reset_spinup_date, NoahmpIO%startdate,    &
-                          NoahmpIO%forcing_name_BCPHI, NoahmpIO%forcing_name_BCPHO, NoahmpIO%forcing_name_OCPHI,&
-                          NoahmpIO%forcing_name_OCPHO, NoahmpIO%forcing_name_DUST1, NoahmpIO%forcing_name_DUST2,&
-                          NoahmpIO%forcing_name_DUST3, NoahmpIO%forcing_name_DUST4, NoahmpIO%DepBChydrophiXY,   &
-                          NoahmpIO%DepBChydrophoXY, NoahmpIO%DepOChydrophiXY, NoahmpIO%DepOChydrophoXY,         &
-                          NoahmpIO%DepDust1XY, NoahmpIO%DepDust2XY, NoahmpIO%DepDust3XY, NoahmpIO%DepDust4XY,   &
-                          NoahmpIO%IOPT_ALB, NoahmpIO%SNICAR_AEROSOL_READTABLE )
-
-
+                          NoahmpIO%LAI, NoahmpIO%update_lai, NoahmpIO%reset_spinup_date, NoahmpIO%startdate)    
           
        if(maxval(NoahmpIO%VEGFRA) <= 1 ) then
            NoahmpIO%VEGFRA = NoahmpIO%VEGFRA * 100.   ! added for input vegfra as a fraction (0~1)
        endif
 
 #endif
+       if (NoahmpIO%IOPT_ALB == 3 .and. NoahmpIO%SNICAR_AEROSOL_READTABLE == .false.) then
+          call READFORC_AEROSOL(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,               &
+             NoahmpIO%OLDDATE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,     &
+             NoahmpIO%reset_spinup_date, NoahmpIO%startdate,                                       &
+             NoahmpIO%forcing_name_BCPHI, NoahmpIO%forcing_name_BCPHO, NoahmpIO%forcing_name_OCPHI,&
+             NoahmpIO%forcing_name_OCPHO, NoahmpIO%forcing_name_DUST1, NoahmpIO%forcing_name_DUST2,&
+             NoahmpIO%forcing_name_DUST3, NoahmpIO%forcing_name_DUST4, NoahmpIO%DepBChydrophiXY,   &
+             NoahmpIO%DepBChydrophoXY, NoahmpIO%DepOChydrophiXY, NoahmpIO%DepOChydrophoXY,         &
+             NoahmpIO%DepDust1XY, NoahmpIO%DepDust2XY, NoahmpIO%DepDust3XY, NoahmpIO%DepDust4XY    )
+       endif
 
 991  continue
 

@@ -1998,9 +1998,7 @@ contains
   subroutine READFORC_HRLDAS(flnm_template, forcing_timestep, target_date, xstart, xend, ystart, yend,  &
        forcing_name_T,forcing_name_Q,forcing_name_U,forcing_name_V,forcing_name_P, &
        forcing_name_LW,forcing_name_SW,forcing_name_PR,forcing_name_SN, &
-       t,q,u,v,p,lw,sw,pcp,snow,vegfra,update_veg,lai,update_lai,reset_spinup_date,startdate, &
-       forcing_name_BCPHI,forcing_name_BCPHO,forcing_name_OCPHI,forcing_name_OCPHO,           &
-       forcing_name_DUST1,forcing_name_DUST2,forcing_name_DUST3,forcing_name_DUST4,           &                bcphi,bcpho,ocphi,ocpho,dust1,dust2,dust3,dust4,IOPT_ALB,SNICAR_AEROSOL_READTABLE)
+       t,q,u,v,p,lw,sw,pcp,snow,vegfra,update_veg,lai,update_lai,reset_spinup_date,startdate) 
     use kwm_string_utilities
     implicit none
 
@@ -2008,7 +2006,6 @@ contains
     integer,                            intent(in)  :: forcing_timestep
     integer,                            intent(in)  :: xstart, xend
     integer,                            intent(in)  :: ystart, yend
-    integer,                            intent(in)  :: IOPT_ALB
     character(len=19),                  intent(in)  :: target_date, startdate ! (YYYY-MM-DD_hh:mm:ss)
     character(len=256),                 intent(in)  :: forcing_name_T
     character(len=256),                 intent(in)  :: forcing_name_Q
@@ -2019,14 +2016,6 @@ contains
     character(len=256),                 intent(in)  :: forcing_name_SW
     character(len=256),                 intent(in)  :: forcing_name_PR
     character(len=256),                 intent(in)  :: forcing_name_SN
-    character(len=256),                 intent(in)  :: forcing_name_BCPHI
-    character(len=256),                 intent(in)  :: forcing_name_BCPHO
-    character(len=256),                 intent(in)  :: forcing_name_OCPHI
-    character(len=256),                 intent(in)  :: forcing_name_OCPHO
-    character(len=256),                 intent(in)  :: forcing_name_DUST1
-    character(len=256),                 intent(in)  :: forcing_name_DUST2
-    character(len=256),                 intent(in)  :: forcing_name_DUST3
-    character(len=256),                 intent(in)  :: forcing_name_DUST4
 
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: t
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: q
@@ -2037,19 +2026,10 @@ contains
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: sw
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: pcp
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: snow
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: bcphi
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: bcpho
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: ocphi
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: ocpho
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust1
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust2
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust3
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust4
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(inout) :: lai    !Barlage v3.7: change to inout
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(inout) :: vegfra
     logical,                            intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
     logical,                                              intent(inout) :: reset_spinup_date
-    logical,                            intent(in)  :: SNICAR_AEROSOL_READTABLE 
     character(len=256) :: flnm
     character(len=256) :: units
     character(len=256) :: nextflnm
@@ -2161,27 +2141,7 @@ contains
        
        nextread%snow = 0.0  ! Assume zero in case not present
        call get_2d_netcdf(trim(forcing_name_SN), ncid, nextread%snow,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
-
-       nextread%bcphi = 0.0  ! Assume zero in case not present
-       nextread%bcpho = 0.0  ! Assume zero in case not present
-       nextread%ocphi = 0.0  ! Assume zero in case not present
-       nextread%ocpho = 0.0  ! Assume zero in case not present
-       nextread%dust1 = 0.0  ! Assume zero in case not present
-       nextread%dust2 = 0.0  ! Assume zero in case not present
-       nextread%dust3 = 0.0  ! Assume zero in case not present
-       nextread%dust4 = 0.0  ! Assume zero in case not present
-
-       if (IOPT_ALB == 3 .and. SNICAR_AEROSOL_READTABLE == .false.) then
-          call get_2d_netcdf(trim(forcing_name_BCPHI), ncid, nextread%bcphi,  units, xstart, xend, ystart, yend, FATAL, ierr)
-          call get_2d_netcdf(trim(forcing_name_BCPHO), ncid, nextread%bcpho,  units, xstart, xend, ystart, yend, FATAL, ierr)
-          call get_2d_netcdf(trim(forcing_name_OCPHI), ncid, nextread%ocphi,  units, xstart, xend, ystart, yend, FATAL, ierr)
-          call get_2d_netcdf(trim(forcing_name_OCPHO), ncid, nextread%ocpho,  units, xstart, xend, ystart, yend, FATAL, ierr)
-          call get_2d_netcdf(trim(forcing_name_DUST1), ncid, nextread%dust1,  units, xstart, xend, ystart, yend, FATAL, ierr)
-          call get_2d_netcdf(trim(forcing_name_DUST2), ncid, nextread%dust2,  units, xstart, xend, ystart, yend, FATAL, ierr)
-          call get_2d_netcdf(trim(forcing_name_DUST3), ncid, nextread%dust3,  units, xstart, xend, ystart, yend, FATAL, ierr)
-          call get_2d_netcdf(trim(forcing_name_DUST4), ncid, nextread%dust4,  units, xstart, xend, ystart, yend, FATAL, ierr)
-       endif
-  
+ 
        if(update_veg) then    ! Barlage v3.7: update only if dveg option is appropriate
        
          call get_2d_netcdf("VEGFRA",  ncid, nextread%vegfra,units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
@@ -2235,8 +2195,7 @@ contains
 
        ! Fill the t, q, u, v, ... arrays with data from the nextread structure.
        call copyfrom_inputstruct(nextread, t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, &
-                                 update_veg, update_lai, xstart, xend, ystart, yend,      &
-                                 bcphi, bcpho, ocphi, ocpho, dust1, dust2, dust3, dust4 )
+                                 update_veg, update_lai, xstart, xend, ystart, yend)
 
        ! Clear the old lastread data
        call clear_inputstruct(lastread)
@@ -2260,8 +2219,7 @@ contains
 
        ! Fill the t, q, u, v, ... arrays with data interpolated between lastread and nextread times.
        call interpolate_inputstruct(lastread, nextread, target_date, &
-            t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend, &
-            bcphi, bcpho, ocphi, ocpho, dust1, dust2, dust3, dust4)
+            t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend)
 
     else
 
@@ -2274,6 +2232,218 @@ contains
     endif
 
   end subroutine READFORC_HRLDAS
+
+!---------------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------------
+
+  subroutine READFORC_AEROSOL(flnm_template, forcing_timestep, target_date, xstart, xend, ystart, yend,&
+       reset_spinup_date,startdate,                                                                    &
+       forcing_name_BCPHI,forcing_name_BCPHO,forcing_name_OCPHI,forcing_name_OCPHO,                    &
+       forcing_name_DUST1,forcing_name_DUST2,forcing_name_DUST3,forcing_name_DUST4,                    &
+       bcphi,bcpho,ocphi,ocpho,dust1,dust2,dust3,dust4)
+    use kwm_string_utilities
+    implicit none
+
+    character(len=*),                   intent(in)  :: flnm_template
+    integer,                            intent(in)  :: forcing_timestep
+    integer,                            intent(in)  :: xstart, xend
+    integer,                            intent(in)  :: ystart, yend
+    character(len=19),                  intent(in)  :: target_date, startdate ! (YYYY-MM-DD_hh:mm:ss)
+    character(len=256),                 intent(in)  :: forcing_name_BCPHI
+    character(len=256),                 intent(in)  :: forcing_name_BCPHO
+    character(len=256),                 intent(in)  :: forcing_name_OCPHI
+    character(len=256),                 intent(in)  :: forcing_name_OCPHO
+    character(len=256),                 intent(in)  :: forcing_name_DUST1
+    character(len=256),                 intent(in)  :: forcing_name_DUST2
+    character(len=256),                 intent(in)  :: forcing_name_DUST3
+    character(len=256),                 intent(in)  :: forcing_name_DUST4
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: bcphi
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: bcpho
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: ocphi
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: ocpho
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust1
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust2
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust3
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust4
+    logical,                            intent(inout) :: reset_spinup_date
+    character(len=256) :: flnm
+    character(len=256) :: units
+    character(len=256) :: nextflnm
+    integer :: ierr
+    integer :: ncid
+    integer :: rank
+
+    type(inputstruct) :: lastread = inputstruct("0000-00-00_00:00:00", &
+         null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), &
+         null(), null(), null(), null(), null(), null(), null(), null())
+    type(inputstruct) :: nextread= inputstruct("0000-00-00_00:00:00", &
+         null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), &
+         null(), null(), null(), null(), null(), null(), null(), null())
+
+    if(reset_spinup_date) lastread%read_date = startdate
+    reset_spinup_date = .false.
+#ifdef MPP_LAND
+     call mpp_land_bcast_char(19,target_date(1:19))
+     call mpp_land_bcast_char(19,nextread%read_date(1:19))
+#endif
+    if (target_date > nextread%read_date ) then
+       !
+       ! We've advanced beyond the date of the end-bracketing data in memory.
+       ! Read the next (later) forcing data, and put the data into the nextread
+       ! structure.
+       !
+       if (nextread%read_date /= "0000-00-00_00:00:00") then
+          ! Clear the old lastread data
+          call clear_inputstruct(lastread)
+
+          ! Copy nextread to lastread
+          lastread = nextread
+          ! Clear nextread
+          call nullify_inputstruct(nextread)
+       endif
+       ! Guess the next read date (from the last read date and the forcing timestep).
+       ! If there is no last date, assume we're at the beginning of our processing
+       ! and take the target_date as the first timestep, for which forcing data
+       ! must be available.
+#ifdef MPP_LAND
+     call mpp_land_bcast_char(19,lastread%read_date(1:19))
+#endif
+
+       if (lastread%read_date == "0000-00-00_00:00:00") then
+          nextread%read_date = target_date
+       else
+          call geth_newdate(nextread%read_date, lastread%read_date, forcing_timestep)
+       endif
+
+       ! Build a file name
+       flnm = flnm_template
+
+#ifdef MPP_LAND
+       if(my_id .eq. IO_id) then
+#endif
+
+       if(mod(forcing_timestep,3600) == 0) then
+         call strrep(flnm, "<date>", nextread%read_date(1:4)//nextread%read_date(6:7)//nextread%read_date(9:10)//nextread%read_date(12:13))
+       elseif(mod(forcing_timestep,60) == 0) then
+         call strrep(flnm, "<date>", nextread%read_date(1:4)//nextread%read_date(6:7)//nextread%read_date(9:10)//nextread%read_date(12:13)//nextread%read_date(15:16))
+       else
+         call strrep(flnm, "<date>", nextread%read_date(1:4)//nextread%read_date(6:7)//nextread%read_date(9:10)//nextread%read_date(12:13)//nextread%read_date(15:16)//nextread%read_date(18:19))
+       endif
+
+       ! Open the NetCDF file.
+#ifdef _PARALLEL_
+       ierr = nf90_open_par(flnm, NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+#else
+       ierr = nf90_open(flnm, NF90_NOWRITE, ncid)
+#endif
+       if (ierr /= 0) then
+#ifdef _PARALLEL_
+          call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+          if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
+          if (rank == 0) then
+#endif
+             write(*,'("A)  Problem opening netcdf file: ''", A, "''")') trim(flnm)
+#ifdef _PARALLEL_
+          endif
+          call mpi_finalize(ierr)
+#endif
+          stop
+       endif
+
+#ifdef MPP_LAND
+      endif
+#endif
+
+       ! Allocate space to hold data
+       call allocate_inputstruct(nextread, xstart, xend, ystart, yend)
+       nextread%bcphi = 0.0  ! Assume zero in case not present
+       nextread%bcpho = 0.0  ! Assume zero in case not present
+       nextread%ocphi = 0.0  ! Assume zero in case not present
+       nextread%ocpho = 0.0  ! Assume zero in case not present
+       nextread%dust1 = 0.0  ! Assume zero in case not present
+       nextread%dust2 = 0.0  ! Assume zero in case not present
+       nextread%dust3 = 0.0  ! Assume zero in case not present
+       nextread%dust4 = 0.0  ! Assume zero in case not present
+
+       call get_2d_netcdf(trim(forcing_name_BCPHI), ncid, nextread%bcphi,  units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_BCPHO), ncid, nextread%bcpho,  units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_OCPHI), ncid, nextread%ocphi,  units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_OCPHO), ncid, nextread%ocpho,  units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST1), ncid, nextread%dust1,  units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST2), ncid, nextread%dust2,  units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST3), ncid, nextread%dust3,  units, xstart, xend, ystart, yend, FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST4), ncid, nextread%dust4,  units, xstart, xend, ystart, yend, FATAL, ierr)
+
+#ifdef MPP_LAND
+       if(my_id .eq. IO_id) &
+#endif
+       ! Close the file
+       ierr = nf90_close(ncid)
+
+    endif
+
+#ifdef MPP_LAND
+     call mpp_land_bcast_char(19,target_date(1:19))
+#endif
+
+    if (target_date == nextread%read_date) then
+       !
+       ! We have advanced to the later date of our bracketing times for interpolation.
+       ! Take that data as is, no interpolation necessary, move that data into the
+       ! lastread structure, and return that data.
+       !
+       ! Fill the arrays with data from the nextread structure.
+
+       bcphi= nextread%bcphi
+       bcpho= nextread%bcpho
+       ocphi= nextread%ocphi
+       ocpho= nextread%ocpho
+       dust1= nextread%dust1
+       dust2= nextread%dust2
+       dust3= nextread%dust3
+       dust4= nextread%dust4
+
+       ! Clear the old lastread data
+       call clear_inputstruct(lastread)
+
+       ! Copy nextread to lastread
+       lastread = nextread
+
+       ! Set the nextread%read_date field to signal that we need to read
+       nextread%read_date = "0000-00-00_00:00:00"
+
+       ! Clear nextread
+       call nullify_inputstruct(nextread)
+
+    else if ( ( target_date > lastread%read_date ) .and. ( target_date < nextread%read_date ) ) then
+
+       !
+       ! We are at a Noah time step between the lastread data and the available nextread data.
+       ! Do temporal interpolation and return the interpolated data.  Keep lastread
+       ! and nextread as they were.
+       !
+       ! Fill the arrays with data interpolated between lastread and nextread times.
+
+       bcphi = lastread%bcphi
+       bcpho = lastread%bcpho
+       ocphi = lastread%ocphi
+       ocpho = lastread%ocpho
+       dust1 = lastread%dust1
+       dust2 = lastread%dust2
+       dust3 = lastread%dust3
+       dust4 = lastread%dust4
+
+    else
+
+       print*, 'target_date        = ', target_date
+       print*, 'lastread%read_date = ', lastread%read_date
+       print*, 'nextread%read_date = ', nextread%read_date
+
+       STOP "We should not be here.  Problem with the logic of READFORC_SHORTER_TIMESTEP"
+
+    endif
+
+  end subroutine READFORC_AEROSOL
 
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
@@ -2353,13 +2523,12 @@ contains
 !---------------------------------------------------------------------------------------------------------
 
   subroutine copyfrom_inputstruct(instruct, t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, &
-                                  update_veg, update_lai, xstart, xend, ystart, yend,      &
-                                  bcphi, bcpho, ocphi, ocpho, dust1, dust2, dust3, dust4)
+                                  update_veg, update_lai, xstart, xend, ystart, yend)
     implicit none
     type(inputstruct), intent(in) :: instruct
     integer,           intent(in) :: xstart, xend, ystart, yend
     logical,           intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
-    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, bcphi, bcpho, ocphi, ocpho, dust1, dust2, dust3, dust4
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai
     t    = instruct%t
     q    = instruct%q
     u    = instruct%u
@@ -2368,14 +2537,6 @@ contains
     lw   = instruct%lw
     sw   = instruct%sw
     snow = instruct%snow
-    bcphi= instruct%bcphi
-    bcpho= instruct%bcpho
-    ocphi= instruct%ocphi
-    ocpho= instruct%ocpho
-    dust1= instruct%dust1
-    dust2= instruct%dust2
-    dust3= instruct%dust3
-    dust4= instruct%dust4
     pcp  = instruct%pcp
     if(update_veg) vegfra = instruct%vegfra
     if(update_lai)   lai  = instruct%lai
@@ -2385,14 +2546,13 @@ contains
 !---------------------------------------------------------------------------------------------------------
 
   subroutine interpolate_inputstruct(instructA, instructB, target_date, &
-       t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend, &
-       bcphi, bcpho, ocphi, ocpho, dust1, dust2, dust3, dust4)
+       t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend)
     implicit none
     type(inputstruct),                        intent(in)  :: instructA, instructB
     character(len=19),                        intent(in)  :: target_date
     integer,                                  intent(in)  :: xstart, xend, ystart, yend
     logical,                                  intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
-    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, bcphi, bcpho, ocphi, ocpho, dust1, dust2, dust3, dust4
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai
 
     integer :: idts, idts2
     real(kind=kind_noahmp)    :: fraction
@@ -2410,14 +2570,6 @@ contains
     sw = ( instructA%sw * fraction ) + ( instructB%sw * (1.0-fraction) )
     snow = instructA%snow
     pcp = instructA%pcp
-    bcphi = instructA%bcphi
-    bcpho = instructA%bcpho
-    ocphi = instructA%ocphi
-    ocpho = instructA%ocpho
-    dust1 = instructA%dust1
-    dust2 = instructA%dust2
-    dust3 = instructA%dust3
-    dust4 = instructA%dust4
     if(update_veg) vegfra = instructA%vegfra
     if(update_lai)   lai  = instructA%lai
   end subroutine interpolate_inputstruct
