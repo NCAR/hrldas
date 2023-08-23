@@ -1196,10 +1196,10 @@ contains
               call add_to_output(NoahmpIO%SMOIS      , "SOIL_M"  , "volumetric soil moisture"             , "m3/m3"          , "SOIL")
               call add_to_output(NoahmpIO%SH2O       , "SOIL_W"  , "liquid volumetric soil moisture"      , "m3/m3"          , "SOIL")
               call add_to_output(NoahmpIO%TSNOXY     , "SNOW_T"  , "snow temperature"                     , "K"              , "SNOW")
-              call add_to_output(NoahmpIO%ALBSNOWDIRXY, "ALBSNOWDIR"  , "Snow albedo (direct)"            , "-"              , "RADN" )
-              call add_to_output(NoahmpIO%ALBSNOWDIFXY, "ALBSNOWDIF"  , "Snow albedo (diffuse)"           , "-"              , "RADN" )
-              call add_to_output(NoahmpIO%ALBSOILDIRXY, "ALBSOILDIR"  , "Soil albedo (direct)"            , "-"              , "RADN" )
-              call add_to_output(NoahmpIO%ALBSOILDIFXY, "ALBSOILDIF"  , "Soil albedo (diffuse)"           , "-"              , "RADN" )
+              call add_to_output(NoahmpIO%ALBSNOWDIRXY, "ALBSNOWDIR" , "Snow albedo (direct)"             , "-"              , "RADN")
+              call add_to_output(NoahmpIO%ALBSNOWDIFXY, "ALBSNOWDIF" , "Snow albedo (diffuse)"            , "-"              , "RADN")
+              call add_to_output(NoahmpIO%ALBSFCDIRXY , "ALBSFCDIR"  , "Surface albedo (direct)"          , "-"              , "RADN")
+              call add_to_output(NoahmpIO%ALBSFCDIFXY , "ALBSFCDIF"  , "Surface albedo (diffuse)"         , "-"              , "RADN")
 
             ! Snow - 2D terms
               call add_to_output(NoahmpIO%SNOWH      , "SNOWH"   , "Snow depth"                           , "m"                     )
@@ -1286,6 +1286,8 @@ contains
             if (NoahmpIO%IOPT_ALB == 3)then
               call add_to_output(NoahmpIO%SNRDSXY    , "SNRDS"   , "Snow layer effective grain radius"    , "m-6"            , "SNOW")
               call add_to_output(NoahmpIO%SNFRXY     , "SNFR"    , "Snow layer rate of freezing"          , "mm/s"           , "SNOW")
+              call add_to_output(NoahmpIO%ALBSOILDIRXY, "ALBSOILDIR"  , "Soil albedo (direct)"            , "-"              , "RADN")
+              call add_to_output(NoahmpIO%ALBSOILDIFXY, "ALBSOILDIF"  , "Soil albedo (diffuse)"           , "-"              , "RADN")
             endif
 
             ! Irrigation
