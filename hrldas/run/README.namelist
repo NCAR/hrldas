@@ -162,6 +162,11 @@
                                                              !   7 -> Xinanjiang Infiltration and surface runoff scheme ((Jayawardena and Zhou, 2000)
                                                              !   8 -> Dynamic VIC surface runoff scheme (Liang and Xie, 2001)
 
+ WETLAND_OPTION                    = 0                       ! options for wetland model [default = 0]
+                                                             ! wetland water budget model in (Zhang et al. 2022 WRR)
+                                                             !   1 -> Single point, read parameters from table 
+                                                             !   2 -> 2-D, read parameters from the input file
+
  DVIC_INFILTRATION_OPTION          = 1                       ! options for infiltration in dynamic VIC runoff scheme (only works when RUNOFF_OPTION=8, default=1)
                                                              ! **1 -> Philip scheme
                       					     !   2 -> Green-Ampt scheme
