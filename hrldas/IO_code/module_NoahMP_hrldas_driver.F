@@ -59,7 +59,7 @@ contains
     implicit none
 
     integer      :: NTIME_out
-    real         :: max_utype_urb2d
+    real         :: max_landtype2d
     type(domain) :: grid
     ! initilization for stand alone parallel code.
     integer, optional, intent(in) :: wrfits,wrfite,wrfjts,wrfjte
@@ -180,9 +180,9 @@ contains
     NoahmpIO%kme = 2
   
     if ( (NoahmpIO%sf_urban_physics == 2) .or. (NoahmpIO%sf_urban_physics == 3) ) then
-       NoahmpIO%kde = NoahmpIO%num_urban_atmosphere
+       NoahmpIO%kde = NoahmpIO%num_urban_atmosphere + 1  ! to be consistent with kme
+       NoahmpIO%kme = NoahmpIO%num_urban_atmosphere + 1  ! bug fix for dimension of urban cell interfaces
        NoahmpIO%kte = NoahmpIO%num_urban_atmosphere
-       NoahmpIO%kme = NoahmpIO%num_urban_atmosphere
     endif
 
 !---------------------------------------------------------------------
@@ -565,12 +565,11 @@ contains
                               NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                          & !multi-layer urban
                               NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                              !urban
 
-          max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
-
-          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_utype_urb2d > 3.0) ) then  !new LCZ
+          max_landtype2d = maxval(NoahmpIO%IVGTYP)*1.0
+          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_landtype2d > 50.0) ) then   ! LCZ number: 51~61
              stop "USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1"
           endif
-          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_utype_urb2d <= 3.0) ) then  ! new LCZ
+          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_landtype2d <= 50.0) ) then  ! LCZ number: 51~61
              stop "USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0"
           endif
 
@@ -704,14 +703,14 @@ contains
                               NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                         & !multi-layer urban
                               NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                             !urban
 
-          max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
-               
-          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_utype_urb2d > 3.0) ) then  !new LCZ
+          max_landtype2d = maxval(NoahmpIO%IVGTYP)*1.0
+          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_landtype2d > 50.0) ) then   ! LCZ number: 51~61
              stop "USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1"
           endif
-          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_utype_urb2d <= 3.0) ) then  ! new LCZ
+          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_landtype2d <= 50.0) ) then  ! LCZ number: 51~61
              stop "USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0"
           endif
+
        endif !urban
 
        if ( NoahmpIO%SF_URBAN_PHYSICS > 1 ) then  !urban
@@ -884,27 +883,37 @@ contains
      NoahmpIO%SWDDIF = NoahmpIO%SWDOWN * 0.3                    ! following noahmplsm ATM 30% diffuse radiation
 
      IF(NoahmpIO%SF_URBAN_PHYSICS == 2 .or. NoahmpIO%SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
-       where(NoahmpIO%XLAND < 1.5) NoahmpIO%p_urban(:,NoahmpIO%kde,:) = NoahmpIO%p8w(:,1,:)
-       where(NoahmpIO%XLAND < 1.5) NoahmpIO%rho_urban(:,NoahmpIO%kde,:) = NoahmpIO%p8w(:,1,:) /287.04/NoahmpIO%t_phy(:,1,:)
+       where(NoahmpIO%XLAND < 1.5) NoahmpIO%p_urban    (:,NoahmpIO%kde,:) = NoahmpIO%p8w(:,1,:)
+       where(NoahmpIO%XLAND < 1.5) NoahmpIO%rho_urban  (:,NoahmpIO%kde,:) = NoahmpIO%p8w(:,1,:) /287.04/NoahmpIO%t_phy(:,1,:)
        where(NoahmpIO%XLAND < 1.5) NoahmpIO%theta_urban(:,NoahmpIO%kde,:) = NoahmpIO%t_phy(:,1,:)*&
-                                                                   (100000.0/NoahmpIO%p8w(:,1,:))**(0.285714)
-       where(NoahmpIO%XLAND < 1.5) NoahmpIO%u_urban(:,NoahmpIO%kde,:) = NoahmpIO%u_phy(:,1,:)
-       where(NoahmpIO%XLAND < 1.5) NoahmpIO%v_urban(:,NoahmpIO%kde,:) = NoahmpIO%v_phy(:,1,:)
-       
-       NoahmpIO%height_urban = 0.5*(NoahmpIO%dz_urban(1,NoahmpIO%kde,1) + &
-                                 NoahmpIO%dz_urban(1,NoahmpIO%kde-1,1))
+                                                                            (100000.0/NoahmpIO%p8w(:,1,:))**(0.285714)
+       where(NoahmpIO%XLAND < 1.5) NoahmpIO%u_urban    (:,NoahmpIO%kde,:) = NoahmpIO%u_phy(:,1,:)
+       where(NoahmpIO%XLAND < 1.5) NoahmpIO%v_urban    (:,NoahmpIO%kde,:) = NoahmpIO%v_phy(:,1,:)
 
-       DO I = NoahmpIO%KDE-1, NoahmpIO%KDS, -1
+       ! allow one more dummy layer at the top to be consistent with cell interface array dimension
+       NoahmpIO%p_urban    (:,NoahmpIO%kde-1,:) = NoahmpIO%p_urban(:,NoahmpIO%kde,:)
+       NoahmpIO%rho_urban  (:,NoahmpIO%kde-1,:) = NoahmpIO%rho_urban(:,NoahmpIO%kde,:)
+       NoahmpIO%theta_urban(:,NoahmpIO%kde-1,:) = NoahmpIO%theta_urban(:,NoahmpIO%kde,:)
+       NoahmpIO%u_urban    (:,NoahmpIO%kde-1,:) = NoahmpIO%u_urban(:,NoahmpIO%kde,:)
+       NoahmpIO%v_urban    (:,NoahmpIO%kde-1,:) = NoahmpIO%v_urban(:,NoahmpIO%kde,:)
+
+       NoahmpIO%height_urban = 0.5*(NoahmpIO%dz_urban(1,NoahmpIO%kde-1,1) + &
+                               NoahmpIO%dz_urban(1,NoahmpIO%kde-2,1))
+       
+       do i = 3, NoahmpIO%kde
+           where(NoahmpIO%XLAND < 1.5) NoahmpIO%QV_CURR(:,i,:) = NoahmpIO%QV_CURR(:,1,:)
+       enddo
+
+       DO I = NoahmpIO%kde-2, NoahmpIO%kds, -1
          where(NoahmpIO%XLAND < 1.5) NoahmpIO%p_urban(:,i,:) = NoahmpIO%p8w(:,1,:)* &
-                                                             exp(9.8*NoahmpIO%height_urban/287.04/NoahmpIO%t_phy(:,1,:))
-         where(NoahmpIO%XLAND < 1.5) NoahmpIO%rho_urban(:,i,:) = NoahmpIO%p_urban(:,i,:)/287.04/ &
-                                                             NoahmpIO%t_phy(:,1,:)
+                                                               exp(9.8*NoahmpIO%height_urban/287.04/NoahmpIO%t_phy(:,1,:))
+         where(NoahmpIO%XLAND < 1.5) NoahmpIO%rho_urban(:,i,:) = NoahmpIO%p_urban(:,i,:)/287.04/NoahmpIO%t_phy(:,1,:)
          where(NoahmpIO%XLAND < 1.5) NoahmpIO%theta_urban(:,i,:) = NoahmpIO%t_phy(:,1,:)* &
-                                                             (100000.0/NoahmpIO%p_urban(:,i,:))**(0.285714)
+                                                                   (100000.0/NoahmpIO%p_urban(:,i,:))**(0.285714)
          where(NoahmpIO%XLAND < 1.5) NoahmpIO%u_urban(:,i,:) = NoahmpIO%u_urban(:,NoahmpIO%kde,:)* &
-                                                             log(NoahmpIO%zlvl-NoahmpIO%height_urban)/log(NoahmpIO%zlvl)
+                                                               log(max(NoahmpIO%zlvl-NoahmpIO%height_urban,1.001))/log(NoahmpIO%zlvl)
          where(NoahmpIO%XLAND < 1.5) NoahmpIO%v_urban(:,i,:) = NoahmpIO%v_urban(:,NoahmpIO%kde,:)* &
-                                                             log(NoahmpIO%zlvl-NoahmpIO%height_urban)/log(NoahmpIO%zlvl)
+                                                               log(max(NoahmpIO%zlvl-NoahmpIO%height_urban,1.001))/log(NoahmpIO%zlvl)
          NoahmpIO%height_urban = NoahmpIO%height_urban + NoahmpIO%urban_atmosphere_thickness
        END DO    
      ENDIF
@@ -1272,12 +1281,13 @@ contains
               call add_to_output(NoahmpIO%QSLATXY    , "QSLAT"    , "accumulated lateral flow"                                     , "mm"     )
               call add_to_output(NoahmpIO%QLATXY     , "QLAT"     , "instantaneous lateral flow"                                   , "m"      )
             endif
-           
+
             ! Wetland model
             if (NoahmpIO%IOPT_WETLAND > 0) then
               call add_to_output(NoahmpIO%FSATXY      , "FSAT"    , "saturated fraction of the grid"                               , "-"      )
               call add_to_output(NoahmpIO%WSURFXY     , "WSURF"   , "Wetland Water Storage"                                        , "mm"     )
             endif
+           
            ! For now, no urban output variables included
 
            enddo DEFINE_MODE_LOOP
