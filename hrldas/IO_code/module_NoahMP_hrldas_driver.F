@@ -284,6 +284,16 @@ contains
     endif
 
 !------------------------------------------------------------------------
+! For surface wetland scheme, read in necessary extra fields 
+!------------------------------------------------------------------------
+    NoahmpIO%FSATMX     = 0.38
+    NoahmpIO%WCAP       = 0.1 
+    if (NoahmpIO%IOPT_WETLAND == 2) then ! use wetland_option=2 for reading wetland extra fields
+       call READ_WETLAND_INPUT(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
+                               NoahmpIO%FSATMX,NoahmpIO%WCAP)
+    endif
+
+!------------------------------------------------------------------------
 ! For IOPT_TDRN = 1 or 2 READ TILE DRAIN MAP
 !------------------------------------------------------------------------
 
@@ -1271,6 +1281,12 @@ contains
               call add_to_output(NoahmpIO%QSLATXY    , "QSLAT"    , "accumulated lateral flow"                                     , "mm"     )
               call add_to_output(NoahmpIO%QLATXY     , "QLAT"     , "instantaneous lateral flow"                                   , "m"      )
             endif
+
+            ! Wetland model
+            if (NoahmpIO%IOPT_WETLAND > 0) then
+              call add_to_output(NoahmpIO%FSATXY      , "FSAT"    , "saturated fraction of the grid"                               , "-"      )
+              call add_to_output(NoahmpIO%WSURFXY     , "WSURF"   , "Wetland Water Storage"                                        , "mm"     )
+            endif
            
            ! For now, no urban output variables included
 
@@ -1635,4 +1651,3 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
 
 
 end module module_NoahMP_hrldas_driver
-

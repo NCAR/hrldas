@@ -29,6 +29,7 @@
  BTR_OPTION                        = 1
  SURFACE_RUNOFF_OPTION             = 3
  SUBSURFACE_RUNOFF_OPTION          = 3
+ WETLAND_OPTION                    = 0
  DVIC_INFILTRATION_OPTION          = 1
  SURFACE_DRAG_OPTION               = 1
  FROZEN_SOIL_OPTION                = 1
