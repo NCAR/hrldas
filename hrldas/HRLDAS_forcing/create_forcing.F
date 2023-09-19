@@ -2731,7 +2731,15 @@ subroutine interp_rainfall_nearest_neighbor(datastruct, newarr, mix, mjx, geo_em
 
         call latlon_to_ij(datastruct%proj, geo_em%lat(ii,jj), east_longitude, x, y)
 #else
-        call latlon_to_ij(datastruct%proj, geo_em%lat(ii,jj), geo_em%lon(ii,jj), x, y)
+       if (forcing_type=="ERA5") then
+          if (geo_em%lon(ii,jj) < 0) then
+             call latlon_to_ij(datastruct%proj, geo_em%lat(ii,jj), geo_em%lon(ii,jj)+360.0, x, y)
+          else
+             call latlon_to_ij(datastruct%proj, geo_em%lat(ii,jj), geo_em%lon(ii,jj), x, y)
+          endif
+       else
+          call latlon_to_ij(datastruct%proj, geo_em%lat(ii,jj), geo_em%lon(ii,jj), x, y)
+       endif
 #endif
 
         xn = nint(x)
