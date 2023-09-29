@@ -831,7 +831,7 @@ contains
                              NoahmpIO%SWDOWN, NoahmpIO%RAINBL, NoahmpIO%SNOWBL,       &
                              NoahmpIO%VEGFRA, NoahmpIO%update_veg, NoahmpIO%LAI,      &
                              NoahmpIO%update_lai, NoahmpIO%reset_spinup_date,         &
-                             NoahmpIO%startdate)
+                             NoahmpIO%startdate, NoahmpIO%DirFrac, NoahmpIO%VisFrac   )
                              
              NoahmpIO%VEGFRA = NoahmpIO%VEGFRA * 100.0
      else
@@ -857,7 +857,8 @@ contains
                           NoahmpIO%T_PHY(:,1,:),NoahmpIO%QV_CURR(:,1,:),NoahmpIO%U_PHY(:,1,:),                  &
                           NoahmpIO%V_PHY(:,1,:),NoahmpIO%P8W(:,1,:), NoahmpIO%GLW, NoahmpIO%SWDOWN,             &
                           NoahmpIO%RAINBL, NoahmpIO%SNOWBL, NoahmpIO%VEGFRA, NoahmpIO%update_veg,               &
-                          NoahmpIO%LAI, NoahmpIO%update_lai, NoahmpIO%reset_spinup_date, NoahmpIO%startdate)    
+                          NoahmpIO%LAI, NoahmpIO%update_lai, NoahmpIO%reset_spinup_date, NoahmpIO%startdate,    &
+                          NoahmpIO%DirFrac, NoahmpIO%VisFrac )    
           
        if(maxval(NoahmpIO%VEGFRA) <= 1 ) then
            NoahmpIO%VEGFRA = NoahmpIO%VEGFRA * 100.   ! added for input vegfra as a fraction (0~1)
@@ -1289,6 +1290,9 @@ contains
               call add_to_output(NoahmpIO%ALBSOILDIRXY, "ALBSOILDIR"  , "Soil albedo (direct)"            , "-"              , "RADN")
               call add_to_output(NoahmpIO%ALBSOILDIFXY, "ALBSOILDIF"  , "Soil albedo (diffuse)"           , "-"              , "RADN")
             endif
+
+            call add_to_output(NoahmpIO%VisFrac   , "VISFRAC", "Fraction of visible band radiation"                         , "-"     )
+            call add_to_output(NoahmpIO%DirFrac   , "DIRFRAC", "Fraction of direct radiation"                         , "-"     )
 
             ! Irrigation
             if ( NoahmpIO%IOPT_IRR > 0 ) then

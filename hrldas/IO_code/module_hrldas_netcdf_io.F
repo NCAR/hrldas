@@ -27,6 +27,14 @@ module module_hrldas_netcdf_io
      real(kind=kind_noahmp), pointer, dimension(:,:) :: sw
      real(kind=kind_noahmp), pointer, dimension(:,:) :: pcp
      real(kind=kind_noahmp), pointer, dimension(:,:) :: snow
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: raddir
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: radvis
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: vegfra
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: lai
+  end type inputstruct
+
+  type inputstructa
+     character(len=19)             :: read_date
      real(kind=kind_noahmp), pointer, dimension(:,:) :: bcphi
      real(kind=kind_noahmp), pointer, dimension(:,:) :: bcpho
      real(kind=kind_noahmp), pointer, dimension(:,:) :: ocphi
@@ -35,9 +43,7 @@ module module_hrldas_netcdf_io
      real(kind=kind_noahmp), pointer, dimension(:,:) :: dust2
      real(kind=kind_noahmp), pointer, dimension(:,:) :: dust3
      real(kind=kind_noahmp), pointer, dimension(:,:) :: dust4
-     real(kind=kind_noahmp), pointer, dimension(:,:) :: vegfra
-     real(kind=kind_noahmp), pointer, dimension(:,:) :: lai
-  end type inputstruct
+  end type inputstructa
 
   character(len=256), private :: restart_filename_remember
   integer, private :: iswater_remember
@@ -1998,7 +2004,8 @@ contains
   subroutine READFORC_HRLDAS(flnm_template, forcing_timestep, target_date, xstart, xend, ystart, yend,  &
        forcing_name_T,forcing_name_Q,forcing_name_U,forcing_name_V,forcing_name_P, &
        forcing_name_LW,forcing_name_SW,forcing_name_PR,forcing_name_SN, &
-       t,q,u,v,p,lw,sw,pcp,snow,vegfra,update_veg,lai,update_lai,reset_spinup_date,startdate) 
+       t,q,u,v,p,lw,sw,pcp,snow,vegfra,update_veg,lai,update_lai,reset_spinup_date,startdate,&
+       raddir,radvis) 
     use kwm_string_utilities
     implicit none
 
@@ -2028,6 +2035,9 @@ contains
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: snow
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(inout) :: lai    !Barlage v3.7: change to inout
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(inout) :: vegfra
+
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out) :: raddir
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out) :: radvis
     logical,                            intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
     logical,                                              intent(inout) :: reset_spinup_date
     character(len=256) :: flnm
@@ -2039,10 +2049,10 @@ contains
 
     type(inputstruct) :: lastread = inputstruct("0000-00-00_00:00:00", &
          null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), &
-         null(), null(), null(), null(), null(), null(), null(), null() )
-    type(inputstruct) :: nextread= inputstruct("0000-00-00_00:00:00", &
-         null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), & 
-         null(), null(), null(), null(), null(), null(), null(), null())
+         null(), null())
+    type(inputstruct) :: nextread = inputstruct("0000-00-00_00:00:00", &
+         null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), &
+         null(), null())
 
     if(reset_spinup_date) lastread%read_date = startdate
     reset_spinup_date = .false.
@@ -2141,6 +2151,12 @@ contains
        
        nextread%snow = 0.0  ! Assume zero in case not present
        call get_2d_netcdf(trim(forcing_name_SN), ncid, nextread%snow,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+
+       nextread%raddir = 0.7
+       nextread%radvis = 0.5
+       call get_2d_netcdf("RadDirFrac", ncid, nextread%raddir,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf("RadVisFrac", ncid, nextread%radvis,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+
  
        if(update_veg) then    ! Barlage v3.7: update only if dveg option is appropriate
        
@@ -2195,7 +2211,7 @@ contains
 
        ! Fill the t, q, u, v, ... arrays with data from the nextread structure.
        call copyfrom_inputstruct(nextread, t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, &
-                                 update_veg, update_lai, xstart, xend, ystart, yend)
+                                 update_veg, update_lai, xstart, xend, ystart, yend, raddir, radvis)
 
        ! Clear the old lastread data
        call clear_inputstruct(lastread)
@@ -2219,7 +2235,7 @@ contains
 
        ! Fill the t, q, u, v, ... arrays with data interpolated between lastread and nextread times.
        call interpolate_inputstruct(lastread, nextread, target_date, &
-            t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend)
+            t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend,raddir,radvis)
 
     else
 
@@ -2273,11 +2289,9 @@ contains
     integer :: ncid
     integer :: rank
 
-    type(inputstruct) :: lastread = inputstruct("0000-00-00_00:00:00", &
-         null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), &
+    type(inputstructa) :: lastread = inputstructa("0000-00-00_00:00:00", &
          null(), null(), null(), null(), null(), null(), null(), null())
-    type(inputstruct) :: nextread= inputstruct("0000-00-00_00:00:00", &
-         null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), &
+    type(inputstructa) :: nextread= inputstructa("0000-00-00_00:00:00", &
          null(), null(), null(), null(), null(), null(), null(), null())
 
     if(reset_spinup_date) lastread%read_date = startdate
@@ -2294,12 +2308,12 @@ contains
        !
        if (nextread%read_date /= "0000-00-00_00:00:00") then
           ! Clear the old lastread data
-          call clear_inputstruct(lastread)
+          call clear_inputstructa(lastread)
 
           ! Copy nextread to lastread
           lastread = nextread
           ! Clear nextread
-          call nullify_inputstruct(nextread)
+          call nullify_inputstructa(nextread)
        endif
        ! Guess the next read date (from the last read date and the forcing timestep).
        ! If there is no last date, assume we're at the beginning of our processing
@@ -2355,7 +2369,7 @@ contains
 #endif
 
        ! Allocate space to hold data
-       call allocate_inputstruct(nextread, xstart, xend, ystart, yend)
+       call allocate_inputstructa(nextread, xstart, xend, ystart, yend)
        nextread%bcphi = 0.0  ! Assume zero in case not present
        nextread%bcpho = 0.0  ! Assume zero in case not present
        nextread%ocphi = 0.0  ! Assume zero in case not present
@@ -2404,7 +2418,7 @@ contains
        dust4= nextread%dust4
 
        ! Clear the old lastread data
-       call clear_inputstruct(lastread)
+       call clear_inputstructa(lastread)
 
        ! Copy nextread to lastread
        lastread = nextread
@@ -2413,7 +2427,7 @@ contains
        nextread%read_date = "0000-00-00_00:00:00"
 
        ! Clear nextread
-       call nullify_inputstruct(nextread)
+       call nullify_inputstructa(nextread)
 
     else if ( ( target_date > lastread%read_date ) .and. ( target_date < nextread%read_date ) ) then
 
@@ -2449,6 +2463,7 @@ contains
 !---------------------------------------------------------------------------------------------------------
 
   subroutine allocate_inputstruct(instruct, xstart, xend, ystart, yend)
+
     implicit none
     type(inputstruct)   :: instruct
     integer, intent(in) :: xstart
@@ -2485,35 +2500,18 @@ contains
     allocate(instruct%snow (xstart:xend,ystart:yend), stat=allostat )
     if (allostat/=0) stop "Problem allocating instruct%snow"
 
-    allocate(instruct%bcphi (xstart:xend,ystart:yend), stat=allostat )
-    if (allostat/=0) stop "Problem allocating instruct%bcphi"
-
-    allocate(instruct%bcpho (xstart:xend,ystart:yend), stat=allostat )
-    if (allostat/=0) stop "Problem allocating instruct%bcpho"
-
-    allocate(instruct%ocphi (xstart:xend,ystart:yend), stat=allostat )
-    if (allostat/=0) stop "Problem allocating instruct%ocphi"
-
-    allocate(instruct%ocpho (xstart:xend,ystart:yend), stat=allostat )
-    if (allostat/=0) stop "Problem allocating instruct%ocpho"
-
-    allocate(instruct%dust1 (xstart:xend,ystart:yend), stat=allostat )
-    if (allostat/=0) stop "Problem allocating instruct%dust1"
-
-    allocate(instruct%dust2 (xstart:xend,ystart:yend), stat=allostat )
-    if (allostat/=0) stop "Problem allocating instruct%dust2"
-
-    allocate(instruct%dust3 (xstart:xend,ystart:yend), stat=allostat )
-    if (allostat/=0) stop "Problem allocating instruct%dust3"
-
-    allocate(instruct%dust4 (xstart:xend,ystart:yend), stat=allostat )
-    if (allostat/=0) stop "Problem allocating instruct%dust4"
-
     allocate(instruct%vegfra(xstart:xend,ystart:yend), stat=allostat )
     if (allostat/=0) stop "Problem allocating instruct%vegfra"
 
     allocate(instruct%lai (xstart:xend,ystart:yend), stat=allostat )
     if (allostat/=0) stop "Problem allocating instruct%lai"
+
+    allocate(instruct%raddir (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%RadDir"
+
+    allocate(instruct%radvis (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%RadVis"
+
 #ifdef MPP_LAND
     instruct%lai = 0.0
 #endif
@@ -2522,13 +2520,53 @@ contains
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
 
+  subroutine allocate_inputstructa(instructa, xstart, xend, ystart, yend)
+
+    implicit none
+    type(inputstructa)   :: instructa
+    integer, intent(in) :: xstart
+    integer, intent(in) :: xend
+    integer, intent(in) :: ystart
+    integer, intent(in) :: yend
+
+    integer :: allostat
+
+    allocate(instructa%bcphi (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%bcphi"
+
+    allocate(instructa%bcpho (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%bcpho"
+
+    allocate(instructa%ocphi (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%ocphi"
+
+    allocate(instructa%ocpho (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%ocpho"
+
+    allocate(instructa%dust1 (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%dust1"
+
+    allocate(instructa%dust2 (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%dust2"
+
+    allocate(instructa%dust3 (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%dust3"
+
+    allocate(instructa%dust4 (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%dust4"
+
+  end subroutine allocate_inputstructa
+
+!---------------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------------
+
   subroutine copyfrom_inputstruct(instruct, t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, &
-                                  update_veg, update_lai, xstart, xend, ystart, yend)
+                                  update_veg, update_lai, xstart, xend, ystart, yend, raddir, radvis)
     implicit none
     type(inputstruct), intent(in) :: instruct
     integer,           intent(in) :: xstart, xend, ystart, yend
     logical,           intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
-    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, raddir, radvis
     t    = instruct%t
     q    = instruct%q
     u    = instruct%u
@@ -2538,21 +2576,26 @@ contains
     sw   = instruct%sw
     snow = instruct%snow
     pcp  = instruct%pcp
+    raddir  = instruct%raddir
+    radvis  = instruct%radvis
+
     if(update_veg) vegfra = instruct%vegfra
     if(update_lai)   lai  = instruct%lai
+
   end subroutine copyfrom_inputstruct
 
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
 
   subroutine interpolate_inputstruct(instructA, instructB, target_date, &
-       t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend)
+       t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend, raddir, radvis)
+
     implicit none
     type(inputstruct),                        intent(in)  :: instructA, instructB
     character(len=19),                        intent(in)  :: target_date
     integer,                                  intent(in)  :: xstart, xend, ystart, yend
     logical,                                  intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
-    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, raddir, radvis
 
     integer :: idts, idts2
     real(kind=kind_noahmp)    :: fraction
@@ -2570,14 +2613,19 @@ contains
     sw = ( instructA%sw * fraction ) + ( instructB%sw * (1.0-fraction) )
     snow = instructA%snow
     pcp = instructA%pcp
+    raddir = instructA%raddir
+    radvis = instructA%radvis
+
     if(update_veg) vegfra = instructA%vegfra
     if(update_lai)   lai  = instructA%lai
+
   end subroutine interpolate_inputstruct
 
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
 
   subroutine clear_inputstruct(instruct)
+
     implicit none
     type(inputstruct) :: instruct
 
@@ -2626,44 +2674,14 @@ contains
        nullify(instruct%snow)
     endif
 
-    if (associated(instruct%bcphi)) then
-       deallocate(instruct%bcphi)
-       nullify(instruct%bcphi)
+    if (associated(instruct%raddir)) then
+       deallocate(instruct%raddir)
+       nullify(instruct%raddir)
     endif
 
-    if (associated(instruct%bcpho)) then
-       deallocate(instruct%bcpho)
-       nullify(instruct%bcpho)
-    endif
-
-    if (associated(instruct%ocphi)) then
-       deallocate(instruct%ocphi)
-       nullify(instruct%ocphi)
-    endif
-
-    if (associated(instruct%ocpho)) then
-       deallocate(instruct%ocpho)
-       nullify(instruct%ocpho)
-    endif
-
-    if (associated(instruct%dust1)) then
-       deallocate(instruct%dust1)
-       nullify(instruct%dust1)
-    endif
-
-    if (associated(instruct%dust2)) then
-       deallocate(instruct%dust2)
-       nullify(instruct%dust2)
-    endif
-
-    if (associated(instruct%dust3)) then
-       deallocate(instruct%dust3)
-       nullify(instruct%dust3)
-    endif
-
-    if (associated(instruct%dust4)) then
-       deallocate(instruct%dust4)
-       nullify(instruct%dust4)
+    if (associated(instruct%radvis)) then
+       deallocate(instruct%radvis)
+       nullify(instruct%radvis)
     endif
 
     if (associated(instruct%vegfra)) then
@@ -2676,6 +2694,55 @@ contains
        nullify(instruct%lai)
     endif
   end subroutine clear_inputstruct
+
+!---------------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------------
+
+  subroutine clear_inputstructa(instructa)
+    implicit none
+    type(inputstructa) :: instructa
+
+    if (associated(instructa%bcphi)) then
+       deallocate(instructa%bcphi)
+       nullify(instructa%bcphi)
+    endif
+
+    if (associated(instructa%bcpho)) then
+       deallocate(instructa%bcpho)
+       nullify(instructa%bcpho)
+    endif
+
+    if (associated(instructa%ocphi)) then
+       deallocate(instructa%ocphi)
+       nullify(instructa%ocphi)
+    endif
+
+    if (associated(instructa%ocpho)) then
+       deallocate(instructa%ocpho)
+       nullify(instructa%ocpho)
+    endif
+
+    if (associated(instructa%dust1)) then
+       deallocate(instructa%dust1)
+       nullify(instructa%dust1)
+    endif
+
+    if (associated(instructa%dust2)) then
+       deallocate(instructa%dust2)
+       nullify(instructa%dust2)
+    endif
+
+    if (associated(instructa%dust3)) then
+       deallocate(instructa%dust3)
+       nullify(instructa%dust3)
+    endif
+
+    if (associated(instructa%dust4)) then
+       deallocate(instructa%dust4)
+       nullify(instructa%dust4)
+    endif
+
+  end subroutine clear_inputstructa
 
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
@@ -2693,17 +2760,30 @@ contains
     nullify(instruct%sw)
     nullify(instruct%pcp)
     nullify(instruct%snow)
-    nullify(instruct%bcphi)
-    nullify(instruct%bcpho)
-    nullify(instruct%ocphi)
-    nullify(instruct%ocpho)
-    nullify(instruct%dust1)
-    nullify(instruct%dust2)
-    nullify(instruct%dust3)
-    nullify(instruct%dust4)
+    nullify(instruct%raddir)
+    nullify(instruct%radvis)
     nullify(instruct%vegfra)
     nullify(instruct%lai)
+
   end subroutine nullify_inputstruct
+
+!---------------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------------
+
+  subroutine nullify_inputstructa(instructa)
+    implicit none
+    type(inputstructa) :: instructa
+
+    nullify(instructa%bcphi)
+    nullify(instructa%bcpho)
+    nullify(instructa%ocphi)
+    nullify(instructa%ocpho)
+    nullify(instructa%dust1)
+    nullify(instructa%dust2)
+    nullify(instructa%dust3)
+    nullify(instructa%dust4)
+
+  end subroutine nullify_inputstructa
 
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
