@@ -232,13 +232,7 @@ See the full documentation for a complete description of items, but these are th
 
  ZLVL = forcing height 
 
-For ERA5-Land data, will also need to change the four layer depth, as they are different in ERA5-Land data:
-
- NSOIL=4
- soil_thick_input(1) = 0.07
- soil_thick_input(2) = 0.21
- soil_thick_input(3) = 0.72
- soil_thick_input(4) = 1.55
+Note the newest version HRLDAS can cope with different soil layer thickness, so don't need to change soil thickness: https://github.com/NCAR/hrldas/commit/ba09bf052c22f1e0fcbb93065998f3903ce2c033
 
 4.2 Run the HRLDAS
 
