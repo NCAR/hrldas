@@ -1,6 +1,6 @@
 &files
- STARTDATE          = "2001-10-01_00"
- ENDDATE            = "2001-10-02_00"
+ STARTDATE          = "1980-01-01_00"
+ ENDDATE            = "1980-01-02_00"
  DataDir            = "/glade/scratch/zhezhang/ERA5/land/extract"
  OutputDir          = "/glade/scratch/zhezhang/ERA5/land/LDASIN"
  FORCING_TYPE       = "ERA5"
