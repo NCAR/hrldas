@@ -1,13 +1,16 @@
 
 Steps for running a HRLDAS simulation using ERA5-Land for forcing. 
 
-UPDATES in 2022-10-03, Zhe Zhang, with contribution from Dr. Stefano Serafin (University of Vienna)
+UPDATES in 2023-10-23, with contribution from Dr. Stefano Serafin (University of Vienna);
+Dr. Allesandro Anav (alessandro.anav@enea.it) from Italian National Agency for New Technologies, Energy and Sustainable Economic Development;
+Dr. Ehsan Jalilvand (ehsanj@msu.edu) from Michigan State University;
+Dr. Tzu-Shun Lin (tslin2@ucar.edu) and Dr. Zhe Zhang (zhezhang@ucar.edu) from NCAR.
 
 1. Create your geo_em file through WPS. These are not needed until the end of Step 2, but there is no point in creating the forcing if you don't have the domain.
 
 --------------------------------------------------
 
-2. Compile HRLDAS
+and Compile HRLDAS
 
 Place the HRLDAS tar file where you will be running the model. 
 
@@ -37,12 +40,10 @@ run/hrldas.exe
 
 --------------------------------------------------
 
-3. Prepare ERA5-Land forcing data.
+2. Download ERA5-Land forcing data.
 The ERA5-Land data are in 0.1-deg resolution for global coverage and hourly interval from 1950 to present.
 
-3.1 Get the ERA5-Land raw files in GRIB1 format.
-
-They can be retrieved from here:
+Get the ERA5-Land raw files in GRIB1 format. They can be retrieved from here:
 https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-land?tab=overview
 
 Users can select to download the necessary variables to create HRLDAS forcing, these include: 
@@ -52,6 +53,8 @@ Users can select to download the necessary variables to create HRLDAS forcing, t
 To use ERA5-Land data for initialization, please also download extra variables, but only for the first timestep:
 Skin temperature, Soil temperature (level1-4), Snow depth water equivalent, Volumetric soil water (layer1-4)
 (ERA5-Land doesn't provide Canopy water storage for initialization)
+
+**Note**: in the ERA5-Land data documentation (https://codes.ecmwf.int/grib/param-db/?id=141), the variable snow depth water equivalent (SWE) is with short name **sd**. It is easy to get confused with another variable snow depth that has a short name **sde**. The model requires snow water equivalent, hence **sd** is the correct variable to download and process. 
 
 I recommend download the forcing data with global coverage, since the current code only cope with global data array dimension. 
 
@@ -63,26 +66,37 @@ These two datasets are provided in GRIB1, GRIB2, and netCDF4 format. I recommend
 
 --------------------------------------------------
 
-3.2 extract_era5.py: extract the individual variables from the ERA5 files
+3. Pre-processing ERA5-Land foring data
 
-The current script uses wgrib program to extract individual fields from the compressed GRIB files. Users can change the processing time period by modifying the python script.
+Prepare_ERA5-Land_Forcing.sh: extract the individual variables from the ERA5 files
+(this extracting program was originaally written with python, while users might have encountered issues with discrepancies between python version 2 and 3. Thus, we decide to adapt to a shell code Prepare_ERA5-Land_Forcing.sh provided by Alessandro Anav (alessandro.anav@enea.it), that is also faster and simpler in extracting ERA5-land forcing data in one step. We really appreciate the user's contribution!)
 
-Change these two paths for where raw ERA5 files are located and where separated(extracted) files will go. 
+Note: You will need eccodes module, cdo module, and shell program for this step. Check with your IT staff to see if they are already installed and you need to load them, for example, module load eccodes.
 
-data_dir = "/raw_ERA5_data_path";
-results_dir = "/extracted_ERA5_data_path";
+Or you will need to install eccodes: An installation guide for eccodes is provided by ECMWF at this link: https://confluence.ecmwf.int/display/ECC/ecCodes+installation and also see this discussion page provided by Ehsan Jalilvand (ehsanj@msu.edu): https://github.com/NCAR/hrldas/discussions/111
 
-For convenience, you may want to create directories in the results_dir for each variable and a few more for processed fields.
+3.1 Extract individial variables from the ERA5-Land GRIB files
+ 
+In Prepare_ERA5-Land_Forcing.sh, users only need to modify one place to successfully run the shell code, that is to provide the input file names, shown below.
 
-`cd /extracted_ERA5_data_path`
-`mkdir Rainf/ Snowf/ Wind/ Tair/ Qair/ Psurf/ SWdown/ LWdown/ SWdown24/ Precip/  U/  V/ INIT/`
+Note: After testing the code, the code can deal with data contained in one single file, not necessary to be one year exact, can also be days, months, etc. Running the code can extract all these the data timesteps contained in this one single file
 
-Run the python code:
-`python extract_era5.py`
+`year=1980`
+`INFILE=/fas4/anav/INPUTS/ERA5_for_Noah-MP/YEARLY/ERA5-Land_Noah-MP_$year.grb`
+
+`let last_year=$year-1
+`PREVIOUS_YEAR=/fas4/anav/INPUTS/ERA5_for_Noah-MP/YEARLY/ERA5-Land_Noah-MP_$last_year.grb`
+
+These lines specify the input file names and path where extracting data will go.
+
+Note: for running the shell code for pre-processing, an additional last time step before the simulation starting time is required. Therefore, will also need to download 1979-12-31_23:00:00 and put it in the previous_year line. 
 
 --------------------------------------------------
 
-3.3 extract_era5_init.py: extract the initial-only fields (SWE_inst,Canopint_inst,AvgSurfT_inst,SoilMoi,SoilTMP) from the ERA5 output files
+
+3.2 extract_era5_init.py: extract the initial-only fields (**SKT, SD, STL1-4, SWV1-4**) from the ERA5-Land GRIB file 
+
+**Note**: in the ERA5-Land data documentation (https://codes.ecmwf.int/grib/param-db/?id=141), the variable snow depth water equivalent (SWE) is with short name **sd**. It is easy to get confused with another variable snow depth that has a short name **sde**. The model requires snow water equivalent, hence **sd** is the correct variable to download and process. 
 
 Change the date of initialization and run the script one time. The files should appear in the /extracted_ERA5_data_path/INIT/ directory.
 
@@ -93,39 +107,19 @@ Run the python code:
 
 --------------------------------------------------
 
-3.4 deaccumulate_era5.py: three variables are accumulated fields in ERA5:
-shortwave radiation (SSRD), longwave radiation (STRD), total precipitation (TP)
-start accumulate by 00 hour, neglect the first time step, until the end of the day
-start subtracting the previous time step from the rest 01-23 time steps
-
-Run the python code:
-`python deaccumulate_era5.py`
-
-3.5 calculate_Q_era5.py: the ERA5 data doesn't provide specific humidity directly, as needed in hrldas
-So, will need to calculate the specific humidity (Q), from dewpoint temperature and surface pressure
-
-Run the python code:
-`python calculate_Q_era5.py`
-
-3.6 intermediate clean-up (optional)
-
-If you are space-limited, at this point you can remove the raw ERA5 files. You have extracted all you need and they are no longer needed.
-
---------------------------------------------------
-
-3.7 Run the HRLDAS pre-processor code.
+3.3 Run the HRLDAS pre-processor code.
 
 At this point, you should have all the ERA5 output extracted into different directories at /extracted_ERA5_data_path/. Now it's finally time to run the first step of the HRLDAS.
 
-cd /root_path/HRLDAS-v3.x/HRLDAS_COLLECT_DATA/run
+cd /root_path/hrldas/hrldas/HRLDAS_forcing/
 
 In the examples/ERA5/ directory there is a namelist.input file that is consistent with the ERA5 procedure described above. You can modify this file for your case and place it in the pre-processor run directory:
 
-cp examples/ERA5/namelist.input.ERA5 .
+cp run/examples/ERA5/namelist.input.ERA5 .
 
 --------------------------------------------------
 
-3.9.1 Modify the namelist
+3.3.1 Modify the namelist
 Note: I have made changes to this namelist here. Please see an updated version in /HRLDAS_forcing/run/example/ERA5/namelist.input.ERA5
 Modifying the namelist.input.ERA5 to your case. The following is a short description of each line in the file. A longer description is available in README.namelist
 
@@ -167,7 +161,7 @@ Modifying the namelist.input.ERA5 to your case. The following is a short descrip
 
 Note: for ERA5 there will be no need to include a secondary SW and precipitation file, so just set them to be the same
 
-3.9.2 Run the pre-processor
+3.3.2 Run the pre-processor
 
 Note: please use create_forcing_netcdf.F for this purpose. 
 `cp create_forcing_netcdf.F create_forcing.F`
@@ -183,7 +177,7 @@ In your OUTPUTDIR, you should now have all your LDASIN files.
 
 The hard part is over. Go to the HRLDAS Run directory:
 
-cd /root_path/HRLDAS-v3.x/run
+cd /hrldas/hrldas/run
 
 4.1 Modify the namelist
 
@@ -237,6 +231,8 @@ See the full documentation for a complete description of items, but these are th
  YEND   = 
 
  ZLVL = forcing height 
+
+Note the newest version HRLDAS can cope with different soil layer thickness, so don't need to change soil thickness: https://github.com/NCAR/hrldas/commit/ba09bf052c22f1e0fcbb93065998f3903ce2c033
 
 4.2 Run the HRLDAS
 
