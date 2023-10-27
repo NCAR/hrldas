@@ -300,10 +300,10 @@
                                                              !   1 -> Toon et a 1989 2-stream (Flanner et al. 2007)
                                                              ! **2 -> Adding-doubling 2-stream (Dang et al.2019)
 
- SNICAR_SNOWSHAPE_OPTION           = 1                       ! option for snow grain shape in SNICAR (He et al. 2017 JC)
-                                                             ! **1 -> sphere 
+ SNICAR_SNOWSHAPE_OPTION           = 3                       ! option for snow grain shape in SNICAR (He et al. 2017 JC)
+                                                             !   1 -> sphere 
                                                              !   2 -> spheroid 
-                                                             !   3 -> hexagonal plate
+                                                             ! **3 -> hexagonal plate
                                                              !   4 -> Koch snowflake
 
  SNICAR_USE_AEROSOL                = .true.                  ! option to turn on/off aerosol deposition flux effect in snow in SNICAR
