@@ -397,6 +397,7 @@ contains
           call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DUST2"   , NoahmpIO%DUST2XY  )
           call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DUST3"   , NoahmpIO%DUST3XY  )
           call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DUST4"   , NoahmpIO%DUST4XY  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DUST5"   , NoahmpIO%DUST5XY  )
        endif
 
 
@@ -744,6 +745,7 @@ contains
     NoahmpIO%NTIME       = (NoahmpIO%KHOUR)*3600.0/nint(NoahmpIO%dtbl)*(NoahmpIO%spinup_loops+1)
     NoahmpIO%spinup_loop = 0
     NoahmpIO%reset_spinup_date = .false.
+    NoahmpIO%reset_spinup_datea = .false.
 
     print*, "NTIME = ", NoahmpIO%NTIME , "KHOUR=",NoahmpIO%KHOUR,"dtbl = ", NoahmpIO%dtbl
   
@@ -868,12 +870,12 @@ contains
        if (NoahmpIO%IOPT_ALB == 3 .and. NoahmpIO%SNICAR_AEROSOL_READTABLE == .false.) then
           call READFORC_AEROSOL(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,               &
              NoahmpIO%OLDDATE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,     &
-             NoahmpIO%reset_spinup_date, NoahmpIO%startdate,                                       &
+             NoahmpIO%reset_spinup_datea, NoahmpIO%startdate,                                       &
              NoahmpIO%forcing_name_BCPHI, NoahmpIO%forcing_name_BCPHO, NoahmpIO%forcing_name_OCPHI,&
              NoahmpIO%forcing_name_OCPHO, NoahmpIO%forcing_name_DUST1, NoahmpIO%forcing_name_DUST2,&
-             NoahmpIO%forcing_name_DUST3, NoahmpIO%forcing_name_DUST4, NoahmpIO%DepBChydrophiXY,   &
+             NoahmpIO%forcing_name_DUST3, NoahmpIO%forcing_name_DUST4, NoahmpIO%forcing_name_DUST5, NoahmpIO%DepBChydrophiXY,   &
              NoahmpIO%DepBChydrophoXY, NoahmpIO%DepOChydrophiXY, NoahmpIO%DepOChydrophoXY,         &
-             NoahmpIO%DepDust1XY, NoahmpIO%DepDust2XY, NoahmpIO%DepDust3XY, NoahmpIO%DepDust4XY    )
+             NoahmpIO%DepDust1XY, NoahmpIO%DepDust2XY, NoahmpIO%DepDust3XY, NoahmpIO%DepDust4XY, NoahmpIO%DepDust5XY    )
        endif
 
 991  continue
@@ -1367,6 +1369,7 @@ contains
        NoahmpIO%spinup_loop = NoahmpIO%spinup_loop + 1
        call geth_newdate(NoahmpIO%olddate, NoahmpIO%startdate, nint(NoahmpIO%dtbl))
        NoahmpIO%reset_spinup_date = .true.
+       NoahmpIO%reset_spinup_datea = .true.
      end if
 
 ! update the timer
@@ -1469,6 +1472,7 @@ subroutine lsm_restart()
      call add_to_restart(NoahmpIO%DUST2XY   , "DUST2" , layers="SNOW")
      call add_to_restart(NoahmpIO%DUST3XY   , "DUST3" , layers="SNOW")
      call add_to_restart(NoahmpIO%DUST4XY   , "DUST4" , layers="SNOW")
+     call add_to_restart(NoahmpIO%DUST5XY   , "DUST5" , layers="SNOW")
   endif
 
  ! irrigation scheme

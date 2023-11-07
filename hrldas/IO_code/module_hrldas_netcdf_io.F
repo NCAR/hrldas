@@ -43,6 +43,7 @@ module module_hrldas_netcdf_io
      real(kind=kind_noahmp), pointer, dimension(:,:) :: dust2
      real(kind=kind_noahmp), pointer, dimension(:,:) :: dust3
      real(kind=kind_noahmp), pointer, dimension(:,:) :: dust4
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: dust5
   end type inputstructa
 
   character(len=256), private :: restart_filename_remember
@@ -2255,8 +2256,8 @@ contains
   subroutine READFORC_AEROSOL(flnm_template, forcing_timestep, target_date, xstart, xend, ystart, yend,&
        reset_spinup_date,startdate,                                                                    &
        forcing_name_BCPHI,forcing_name_BCPHO,forcing_name_OCPHI,forcing_name_OCPHO,                    &
-       forcing_name_DUST1,forcing_name_DUST2,forcing_name_DUST3,forcing_name_DUST4,                    &
-       bcphi,bcpho,ocphi,ocpho,dust1,dust2,dust3,dust4)
+       forcing_name_DUST1,forcing_name_DUST2,forcing_name_DUST3,forcing_name_DUST4,forcing_name_DUST5, &
+       bcphi,bcpho,ocphi,ocpho,dust1,dust2,dust3,dust4,dust5)
     use kwm_string_utilities
     implicit none
 
@@ -2273,6 +2274,7 @@ contains
     character(len=256),                 intent(in)  :: forcing_name_DUST2
     character(len=256),                 intent(in)  :: forcing_name_DUST3
     character(len=256),                 intent(in)  :: forcing_name_DUST4
+    character(len=256),                 intent(in)  :: forcing_name_DUST5
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: bcphi
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: bcpho
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: ocphi
@@ -2281,6 +2283,7 @@ contains
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust2
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust3
     real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust4
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust5
     logical,                            intent(inout) :: reset_spinup_date
     character(len=256) :: flnm
     character(len=256) :: units
@@ -2290,9 +2293,9 @@ contains
     integer :: rank
 
     type(inputstructa) :: lastread = inputstructa("0000-00-00_00:00:00", &
-         null(), null(), null(), null(), null(), null(), null(), null())
+         null(), null(), null(), null(), null(), null(), null(), null(), null())
     type(inputstructa) :: nextread= inputstructa("0000-00-00_00:00:00", &
-         null(), null(), null(), null(), null(), null(), null(), null())
+         null(), null(), null(), null(), null(), null(), null(), null(), null())
 
     if(reset_spinup_date) lastread%read_date = startdate
     reset_spinup_date = .false.
@@ -2378,16 +2381,17 @@ contains
        nextread%dust2 = 0.0  ! Assume zero in case not present
        nextread%dust3 = 0.0  ! Assume zero in case not present
        nextread%dust4 = 0.0  ! Assume zero in case not present
+       nextread%dust5 = 0.0  ! Assume zero in case not present
 
-       call get_2d_netcdf(trim(forcing_name_BCPHI), ncid, nextread%bcphi,  units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf(trim(forcing_name_BCPHO), ncid, nextread%bcpho,  units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf(trim(forcing_name_OCPHI), ncid, nextread%ocphi,  units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf(trim(forcing_name_OCPHO), ncid, nextread%ocpho,  units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf(trim(forcing_name_DUST1), ncid, nextread%dust1,  units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf(trim(forcing_name_DUST2), ncid, nextread%dust2,  units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf(trim(forcing_name_DUST3), ncid, nextread%dust3,  units, xstart, xend, ystart, yend, FATAL, ierr)
-       call get_2d_netcdf(trim(forcing_name_DUST4), ncid, nextread%dust4,  units, xstart, xend, ystart, yend, FATAL, ierr)
-
+       call get_2d_netcdf(trim(forcing_name_BCPHI), ncid, nextread%bcphi,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_BCPHO), ncid, nextread%bcpho,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_OCPHI), ncid, nextread%ocphi,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_OCPHO), ncid, nextread%ocpho,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST1), ncid, nextread%dust1,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST2), ncid, nextread%dust2,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST3), ncid, nextread%dust3,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST4), ncid, nextread%dust4,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST5), ncid, nextread%dust5,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
 #ifdef MPP_LAND
        if(my_id .eq. IO_id) &
 #endif
@@ -2416,6 +2420,7 @@ contains
        dust2= nextread%dust2
        dust3= nextread%dust3
        dust4= nextread%dust4
+       dust5= nextread%dust5
 
        ! Clear the old lastread data
        call clear_inputstructa(lastread)
@@ -2446,6 +2451,7 @@ contains
        dust2 = lastread%dust2
        dust3 = lastread%dust3
        dust4 = lastread%dust4
+       dust5 = lastread%dust5
 
     else
 
@@ -2554,6 +2560,9 @@ contains
 
     allocate(instructa%dust4 (xstart:xend,ystart:yend), stat=allostat )
     if (allostat/=0) stop "Problem allocating instruct%dust4"
+
+    allocate(instructa%dust5 (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%dust5"
 
   end subroutine allocate_inputstructa
 
@@ -2742,6 +2751,11 @@ contains
        nullify(instructa%dust4)
     endif
 
+    if (associated(instructa%dust5)) then
+       deallocate(instructa%dust5)
+       nullify(instructa%dust5)
+    endif
+
   end subroutine clear_inputstructa
 
 !---------------------------------------------------------------------------------------------------------
@@ -2782,6 +2796,7 @@ contains
     nullify(instructa%dust2)
     nullify(instructa%dust3)
     nullify(instructa%dust4)
+    nullify(instructa%dust5)
 
   end subroutine nullify_inputstructa
 

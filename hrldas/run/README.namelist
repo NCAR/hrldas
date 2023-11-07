@@ -116,6 +116,7 @@
  FORCING_NAME_DUST2                                          !    Forcing variable name for dust species 2              [default = "DUST2"]
  FORCING_NAME_DUST3                                          !    Forcing variable name for dust species 3              [default = "DUST3"] 
  FORCING_NAME_DUST4                                          !    Forcing variable name for dust species 4              [default = "DUST4"]
+ FORCING_NAME_DUST5                                          !    Forcing variable name for dust species 5              [default = "DUST5"]
 
  EXTERNAL_VEG_FILENAME_TEMPLATE                              ! defunct
  EXTERNAL_LAI_FILENAME_TEMPLATE                              ! defunct
@@ -314,13 +315,13 @@
                                                              !   .false. -> external mixing for all BC
                                                              ! **.true.  -> internal mixing for hydrophilic BC
 
- SNICAR_SNOWDUST_INTMIX            = .false.                 ! option to activate dust-snow internal mixing in SNICAR (He et al. 2017 JC)
-                                                             ! **.false. -> external mixing for all dust
-                                                             !   .true.  -> internal mixing for all dust
+ SNICAR_SNOWDUST_INTMIX            = .true.                 ! option to activate dust-snow internal mixing in SNICAR (He et al. 2017 JC)
+                                                             !   .false. -> external mixing for all dust
+                                                             ! **.true.  -> internal mixing for all dust
 
- SNICAR_USE_OC                     = .false.                 ! option to activate OC in snow in SNICAR
-                                                             ! **.false. -> without organic carbon in snow
-                                                             !   .true.  -> with organic carbon in snow
+ SNICAR_USE_OC                     = .true.                 ! option to activate OC in snow in SNICAR
+                                                             !   .false. -> without organic carbon in snow
+                                                             ! **.true.  -> with organic carbon in snow
 
  SNICAR_AEROSOL_READTABLE          = .false.                 ! option to read aerosol deposition fluxes from table or not
                                                              ! **.false. -> data read from NetCDF forcing file
