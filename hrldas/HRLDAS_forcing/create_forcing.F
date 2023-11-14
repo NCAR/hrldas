@@ -91,6 +91,7 @@ program create_forcing
   integer :: ihour
   integer :: numarg
   integer :: unmatched
+  logical :: ic_flag
 #ifndef _GFORTRAN_
   ! For some reason, gfortran does not like this declared external,
   ! but everyone else wants it declared external.  So we use #ifndef
@@ -441,8 +442,16 @@ program create_forcing
      ierr = nf90_close(ncid)
      call error_handler(ierr, "Problem closing Netcdf file")
 
+     ic_flag = .false.
      if ( full_ic_frq > -1 ) then  ! full_ic_frq == -1 turns off extra processing for initial conditions.
-        if ( ( (full_ic_frq>0) .and. (mod(ihour, full_ic_frq)==0) ) .or. ( ihour==0 ) ) then
+        if ( ihour == 0) ic_flag = .true. 
+        if ( full_ic_frq > 0 ) then
+           if (mod(ihour, full_ic_frq) == 0) then
+             ic_flag = .true.
+           endif
+        endif 
+
+        if ( ic_flag .eqv. .true. ) then
 
            call open_netcdf_for_output( trim(OutputDir)//"HRLDAS_setup_"//date(1:4)//date(6:7)//date(9:10)//date(12:13)//"_d"//hgrid, &
              ncid, version, geo_em%idim, geo_em%jdim, geo_em, .true.)
@@ -2107,7 +2116,7 @@ contains
     array = [string('Tair_f_inst'),string('z'),string('lsm')] ! Only z (for geopotential) and lsm (for land-sea mask) are needed 
     nullify(datastruct%data)
     ! Match the netcdf attribute with one of the Vtable entries
-    VARSEARCH : do j = 0, vtable_count 
+    VARSEARCH : do j = 1, vtable_count 
     if (current%label == vtable(j)%name) then 
         VAR_NAME = array(j)%str
         datastruct%field  = vtable(j)%name
