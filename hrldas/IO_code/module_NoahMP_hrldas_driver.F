@@ -292,6 +292,15 @@ contains
        call READ_TILE_DRAIN_MAP(NoahmpIO%TDINPUT_FLNM, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, NoahmpIO%TD_FRACTION)
     endif
 
+!------------------------------------------------------------------------
+! For SF_URBAN_PHYSICS > 0 read 2D map of urban parameters
+!------------------------------------------------------------------------
+
+    NoahmpIO%FRC_URB2D = 0.0
+    if (NoahmpIO%SF_URBAN_PHYSICS > 0) then
+       call READ_URBAN_MAP(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, NoahmpIO%FRC_URB2D)
+    endif
+
 !----------------------------------------------------------------------
 ! Initialize Model State
 !----------------------------------------------------------------------
@@ -1014,7 +1023,7 @@ contains
                             NoahmpIO%drelr_urb2d, NoahmpIO%drelb_urb2d, NoahmpIO%drelg_urb2d,                   & !H urban
                             NoahmpIO%flxhumr_urb2d, NoahmpIO%flxhumb_urb2d, NoahmpIO%flxhumg_urb2d,             & !H urban
                             NoahmpIO%julday, NoahmpIO%yr,                                                       & !H urban
-                            NoahmpIO%frc_urb2d, NoahmpIO%utype_urb2d,                                           & !I urban
+                            NoahmpIO%FRC_URB2D, NoahmpIO%utype_urb2d,                                           & !I urban
                             NoahmpIO%chs, NoahmpIO%chs2, NoahmpIO%cqs2,                                          & !H
                             NoahmpIO%num_urban_ndm, NoahmpIO%urban_map_zrd, NoahmpIO%urban_map_zwd,             & !I multi-layer urban
                             NoahmpIO%urban_map_gd,                                                              & !I multi-layer urban 
