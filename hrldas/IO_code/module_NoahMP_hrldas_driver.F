@@ -578,13 +578,6 @@ contains
     else
 
        NoahmpIO%restart_flag = .false.
-       NoahmpIO%SMOIS        =  undefined_real
-       NoahmpIO%TSLB         =  undefined_real
-       NoahmpIO%SH2O         =  undefined_real
-       NoahmpIO%CANLIQXY     =  undefined_real
-       NoahmpIO%TSK          =  undefined_real
-       NoahmpIO%SNOW         =  undefined_real
-       NoahmpIO%SNOWH        =  undefined_real
 
 #ifdef WRF_HYDRO
        if ( (forc_typ > 2) .and. (forc_typ /= 6) ) HRLDAS_ini_typ = 0
@@ -612,11 +605,7 @@ contains
                               NoahmpIO%TSLB, NoahmpIO%CANWAT, NoahmpIO%TSK, NoahmpIO%SNOW,   &
                               NoahmpIO%SNOWH, NoahmpIO%FNDSNOWH)
 
-          NoahmpIO%VEGFRA =  undefined_real
-          NoahmpIO%LAI    =  undefined_real
-          NoahmpIO%GVFMIN =  undefined_real
-          NoahmpIO%GVFMAX =  undefined_real
-
+          NoahmpIO%VEGFRA =  0.0
           call READVEG_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend,        &
                               NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%OLDDATE, NoahmpIO%IVGTYP, &
                               NoahmpIO%VEGFRA, NoahmpIO%LAI, NoahmpIO%GVFMIN, NoahmpIO%GVFMAX)
