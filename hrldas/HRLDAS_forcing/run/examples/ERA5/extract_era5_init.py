@@ -18,8 +18,8 @@ vars_name = ["SKT","SD","STL1","STL2","STL3","STL4","SWVL1","SWVL2","SWVL3","SWV
 vars_time = ["hr fcst:","hr fcst:","hr fcst:","hr fcst:","hr fcst:","hr acc:","hr acc:","hr acc:"]
 
 data_dir = "../../../ERA5_forcing/"
-infile  = data_dir+"ERA5-Land-Noah-MP-2023_11_01_INIT.grib"
-results_dir = "./OUTPUT/INIT/"
+infile  = data_dir+"ERA5-Land-Noah-MP-2023-11-01_INIT.grib"
+results_dir = "./OUTPUTS/INIT/"
 
 os.system("mkdir -p "+results_dir)
 

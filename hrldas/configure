@@ -12,9 +12,10 @@
      print "   4. Linux ifort compiler MPI      \n";
      print "   5. Linux gfortran compiler serial \n";
      print "   6. Linux gfortran compiler MPI \n";
+     print "   7. Linux gfortran compiler MPI for Docker container \n";
      print "   0. exit only \n";
 
-     printf "\nEnter selection [%d-%d] : ",1,6 ;
+     printf "\nEnter selection [%d-%d] : ",1,7 ;
 
      $response = <STDIN> ;
      chop($response);
@@ -52,7 +53,13 @@
               system "cp arch/user_build_options.gfortran.mpi user_build_options";
             }
 
+     case 7 {
+              # MPI GFORTRAN for Docker container
+              system "cp arch/user_build_options.gfortran.mpi.container user_build_options";
+            }
+
      else   {print "no selection $response\n"; last} 
   }
 
-  print "Please reminder to change the software package path in the generated user_build_options file before compiling! \n";
+  print "The user_build_options file used for compiling source code has been successfully generated. \n";
+  print "Please check and change the software package path in the generated user_build_options file before compiling! \n";

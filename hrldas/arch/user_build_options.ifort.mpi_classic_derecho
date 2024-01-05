@@ -1,0 +1,24 @@
+
+#=============================================================================================
+#  Options for Linux with Intel Fortran MPI
+#=============================================================================================
+
+ COMPILERF90    =       mpif90
+ MPPFLAG        =       YES
+ FREESOURCE     =       -free
+ F90FLAGS       =       -convert big_endian -g -O0 -fpe0  # -traceback
+ MODFLAG        =       -I ../MPP
+ HYDRO_LIB      =       ../MPP/mpp_land.o ../MPP/CPL_WRF.o
+ LDFLAGS        =
+ CPP            =       cpp
+ CPPFLAGS       =       -P -traditional -DMPP_LAND # -DSPATIAL_SOIL
+ LIBS           =
+ LIBJASPER      =      -ljasper
+ INCJASPER      =      -I/glade/u/apps/derecho/23.06/opt/include/jasper
+ NETCDFMOD      =      -I${NCAR_INC_NETCDF}
+ NETCDFLIB      =      -L${NCAR_LDFLAGS_NETCDF} -lnetcdf -lnetcdff 
+ BZIP2          =       NO
+# BZIP2_INCLUDE  =       -I/usr/include
+# BZIP2_LIB      =       -L/usr/lib64 -lbz2
+ RM             =       rm -f
+ CC             =       cc
