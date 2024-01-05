@@ -808,6 +808,60 @@ contains
 
 !---------------------------------------------------------------------------------------------------------
 
+  subroutine read_urban_map(wrfinput_flnm,              &
+                            xstart, xend, ystart, yend, &
+                            urban_fraction)
+
+    implicit none
+    character(len=*),                            intent(in)  :: wrfinput_flnm
+    integer,                                     intent(in)  :: xstart, xend, ystart, yend
+    real,    dimension(xstart:xend,ystart:yend), intent(out) :: urban_fraction
+    character(len=24)                                        :: name
+    integer                                                  :: ierr,iret
+    integer                                                  :: ncid, varid
+    integer                                                  :: rank
+
+#ifdef _PARALLEL_  
+    call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+    if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
+#else
+    rank = 0
+#endif
+
+
+    ! Open the NetCDF file.
+    if (rank == 0) write(*,'("wrfinput_flnm: ''", A, "''")') trim(wrfinput_flnm)
+#ifdef _PARALLEL_
+    ierr = nf90_open_par(wrfinput_flnm, NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+#else
+    ierr = nf90_open(wrfinput_flnm, NF90_NOWRITE, ncid)
+#endif
+    if (ierr /= 0) then
+       write(*,'("read_urban_map:  Problem opening wrfinput file: ''", A, "''")') trim(wrfinput_flnm)
+#ifdef _PARALLEL_
+       call mpi_finalize(ierr)
+       if (ierr /= 0) write(*, '("Problem with MPI_finalize.")')
+#endif
+       stop
+    endif
+
+! Get Urban Fraction
+    name = "FRC_URB2D"
+    iret = nf90_inq_varid(ncid,  name,  varid)
+    if (iret == 0) then
+      ierr = nf90_get_var(ncid, varid, urban_fraction, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
+    else
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using default table values."
+    endif
+
+! Close the NetCDF file
+    ierr = nf90_close(ncid)
+    if (ierr /= 0) stop "MODULE_NOAHLSM_HRLDAS_INPUT:  read_urban_map:  NF90_CLOSE"
+
+  end subroutine read_urban_map
+
+!---------------------------------------------------------------------------------------------------------
+
   subroutine read_3d_soil(spatial_filename,xstart, xend,ystart, yend,           &
                           nsoil,bexp_3d,smcdry_3d,smcwlt_3d,smcref_3d,smcmax_3d,  &
 		          dksat_3d,dwsat_3d,psisat_3d,quartz_3d,refdk_2d,refkdt_2d,&
