@@ -1,5 +1,6 @@
 module module_NoahMP_hrldas_driver
 
+  use Machine
   use NoahmpIOVarType
   use NoahmpIOVarInitMod
   use NoahmpReadNamelistMod
@@ -27,11 +28,11 @@ module module_NoahMP_hrldas_driver
 
 #ifdef WRF_HYDRO
    integer :: forc_typ, snow_assim, HRLDAS_ini_typ
-   real,    allocatable, dimension(:,:)   :: etpnd, greenfrac, prcp0
-   real :: etpnd1
+   real(kind=kind_noahmp), allocatable, dimension(:,:)   :: etpnd, greenfrac, prcp0
+   real(kind=kind_noahmp) :: etpnd1
    character(len=19) :: forcDate
    character(len = 256):: GEO_STATIC_FLNM
-   real, allocatable, dimension(:) :: zsoil    
+   real(kind=kind_noahmp), allocatable, dimension(:) :: zsoil    
    integer :: kk
    integer  :: finemesh, finemesh_factor
 #endif
@@ -59,7 +60,7 @@ contains
     implicit none
 
     integer      :: NTIME_out
-    real         :: max_landtype2d
+    real(kind=kind_noahmp) :: max_landtype2d
     type(domain) :: grid
     ! initilization for stand alone parallel code.
     integer, optional, intent(in) :: wrfits,wrfite,wrfjts,wrfjte
@@ -577,13 +578,13 @@ contains
     else
 
        NoahmpIO%restart_flag = .false.
-       NoahmpIO%SMOIS        =  huge(1.0)
-       NoahmpIO%TSLB         =  huge(1.0)
-       NoahmpIO%SH2O         =  huge(1.0)
-       NoahmpIO%CANLIQXY     =  huge(1.0)
-       NoahmpIO%TSK          =  huge(1.0)
-       NoahmpIO%SNOW         =  huge(1.0)
-       NoahmpIO%SNOWH        =  huge(1.0)
+       NoahmpIO%SMOIS        =  undefined_real
+       NoahmpIO%TSLB         =  undefined_real
+       NoahmpIO%SH2O         =  undefined_real
+       NoahmpIO%CANLIQXY     =  undefined_real
+       NoahmpIO%TSK          =  undefined_real
+       NoahmpIO%SNOW         =  undefined_real
+       NoahmpIO%SNOWH        =  undefined_real
 
 #ifdef WRF_HYDRO
        if ( (forc_typ > 2) .and. (forc_typ /= 6) ) HRLDAS_ini_typ = 0
@@ -611,10 +612,10 @@ contains
                               NoahmpIO%TSLB, NoahmpIO%CANWAT, NoahmpIO%TSK, NoahmpIO%SNOW,   &
                               NoahmpIO%SNOWH, NoahmpIO%FNDSNOWH)
 
-          NoahmpIO%VEGFRA =  huge(1.0)
-          NoahmpIO%LAI    =  huge(1.0)
-          NoahmpIO%GVFMIN =  huge(1.0)
-          NoahmpIO%GVFMAX =  huge(1.0)
+          NoahmpIO%VEGFRA =  undefined_real
+          NoahmpIO%LAI    =  undefined_real
+          NoahmpIO%GVFMIN =  undefined_real
+          NoahmpIO%GVFMAX =  undefined_real
 
           call READVEG_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend,        &
                               NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%OLDDATE, NoahmpIO%IVGTYP, &
@@ -1557,31 +1558,31 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
 !---------------------------------------------------------------------
 
 ! !ARGUMENTS:
-   CHARACTER(LEN=19), INTENT(IN)  :: NOWDATE    ! YYYY-MM-DD_HH:MM:SS
-   REAL,              INTENT(IN)  :: LATITUDE
-   REAL,              INTENT(IN)  :: LONGITUDE
-   REAL,              INTENT(OUT) :: COSZ
-   REAL,              INTENT(OUT) :: JULIAN
-   REAL,    OPTIONAL, INTENT(OUT) :: HRANG_OUT
-   REAL,    OPTIONAL, INTENT(OUT) :: DECLIN_OUT
-   REAL,    OPTIONAL, INTENT(OUT) :: GMT_OUT
-   INTEGER, OPTIONAL, INTENT(OUT) :: JULDAY_OUT
-   REAL                           :: OBECL
-   REAL                           :: SINOB
-   REAL                           :: SXLONG
-   REAL                           :: ARG
-   REAL                           :: TLOCTIM
-   REAL                           :: HRANG
-   REAL                           :: DECLIN
-   REAL                           :: GMT
-   INTEGER                        :: JULDAY
-   INTEGER                        :: IDAY
-   INTEGER                        :: IHOUR
-   INTEGER                        :: IMINUTE
-   INTEGER                        :: ISECOND
+   CHARACTER(LEN=19),                   INTENT(IN)  :: NOWDATE    ! YYYY-MM-DD_HH:MM:SS
+   REAL(kind=kind_noahmp),              INTENT(IN)  :: LATITUDE
+   REAL(kind=kind_noahmp),              INTENT(IN)  :: LONGITUDE
+   REAL(kind=kind_noahmp),              INTENT(OUT) :: COSZ
+   REAL(kind=kind_noahmp),              INTENT(OUT) :: JULIAN
+   REAL(kind=kind_noahmp),    OPTIONAL, INTENT(OUT) :: HRANG_OUT
+   REAL(kind=kind_noahmp),    OPTIONAL, INTENT(OUT) :: DECLIN_OUT
+   REAL(kind=kind_noahmp),    OPTIONAL, INTENT(OUT) :: GMT_OUT
+   INTEGER,                   OPTIONAL, INTENT(OUT) :: JULDAY_OUT
+   REAL(kind=kind_noahmp)                           :: OBECL
+   REAL(kind=kind_noahmp)                           :: SINOB
+   REAL(kind=kind_noahmp)                           :: SXLONG
+   REAL(kind=kind_noahmp)                           :: ARG
+   REAL(kind=kind_noahmp)                           :: TLOCTIM
+   REAL(kind=kind_noahmp)                           :: HRANG
+   REAL(kind=kind_noahmp)                           :: DECLIN
+   REAL(kind=kind_noahmp)                           :: GMT
+   INTEGER                                          :: JULDAY
+   INTEGER                                          :: IDAY
+   INTEGER                                          :: IHOUR
+   INTEGER                                          :: IMINUTE
+   INTEGER                                          :: ISECOND
 
-   REAL, PARAMETER :: DEGRAD = 3.14159265/180.
-   REAL, PARAMETER :: DPD    = 360./365.
+   REAL(kind=kind_noahmp), PARAMETER                :: DEGRAD = 3.14159265/180.
+   REAL(kind=kind_noahmp), PARAMETER                :: DPD    = 360./365.
 
    call GETH_IDTS(NOWDATE(1:10), NOWDATE(1:4)//"-01-01", IDAY)
    READ(NOWDATE(12:13), *) IHOUR
@@ -1626,12 +1627,12 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
 
    IMPLICIT NONE
 !---------------------------------------------------------------------
-   CHARACTER(LEN=19), INTENT(IN)  :: NOWDATE    ! YYYY-MM-DD_HH:MM:SS
-   REAL,              INTENT(IN)  :: LONGITUDE
-   REAL,              INTENT(OUT) :: TLOCTIM
-   INTEGER                        :: IHOUR
-   INTEGER                        :: IMINUTE
-   INTEGER                        :: ISECOND
+   CHARACTER(LEN=19),      INTENT(IN)  :: NOWDATE    ! YYYY-MM-DD_HH:MM:SS
+   REAL(kind=kind_noahmp), INTENT(IN)  :: LONGITUDE
+   REAL(kind=kind_noahmp), INTENT(OUT) :: TLOCTIM
+   INTEGER                             :: IHOUR
+   INTEGER                             :: IMINUTE
+   INTEGER                             :: ISECOND
 
    READ(NOWDATE(12:13), *) IHOUR
    READ(NOWDATE(15:16), *) IMINUTE
