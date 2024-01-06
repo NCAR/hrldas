@@ -8,14 +8,16 @@
 
      print "   1. Linux PGI compiler serial \n";
      print "   2. Linux PGI compiler MPI \n";
-     print "   3. Linux ifort compiler serial \n";
-     print "   4. Linux ifort compiler MPI      \n";
-     print "   5. Linux gfortran compiler serial \n";
-     print "   6. Linux gfortran compiler MPI \n";
-     print "   7. Linux gfortran compiler MPI for Docker container \n";
+     print "   3. Linux intel compiler serial \n";
+     print "   4. Linux intel compiler MPI      \n";
+     print "   5. Linux intel compiler MPI (NCAR/Derecho) \n";
+     print "   6. Linux gfortran/gcc compiler serial \n";
+     print "   7. Linux gfortran/gcc compiler MPI \n";
+     print "   8. Linux gfortran/gcc compiler MPI (NCAR/Derecho) \n";
+     print "   9. Linux gfortran/gcc compiler MPI (Docker container) \n";
      print "   0. exit only \n";
 
-     printf "\nEnter selection [%d-%d] : ",1,7 ;
+     printf "\nEnter selection [%d-%d] : ",0,9 ;
 
      $response = <STDIN> ;
      chop($response);
@@ -34,26 +36,36 @@
             }
 
      case 3 {
-              # serial ifort
+              # serial intel
               system "cp arch/user_build_options.ifort.serial user_build_options"; 
             }
 
      case 4 {
-              # MPI ifort
+              # MPI intel
               system "cp arch/user_build_options.ifort.mpi user_build_options"; 
             }
 
      case 5 {
+              # MPI intel (NCAR/Derecho)
+              system "cp arch/user_build_options.ifort.mpi.derecho user_build_options";
+            }
+
+     case 6 {
               # serial GFORTRAN
               system "cp arch/user_build_options.gfortran.serial user_build_options"; 
             }
 
-     case 6 {
+     case 7 {
               # MPI GFORTRAN
               system "cp arch/user_build_options.gfortran.mpi user_build_options";
             }
 
-     case 7 {
+     case 8 {
+              # MPI GFORTRAN (NCAR/Derecho)
+              system "cp arch/user_build_options.gfortran.mpi.derecho user_build_options";
+            }
+
+     case 9 {
               # MPI GFORTRAN for Docker container
               system "cp arch/user_build_options.gfortran.mpi.container user_build_options";
             }

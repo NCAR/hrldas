@@ -297,8 +297,8 @@ contains
 ! For SF_URBAN_PHYSICS > 0 read 2D map of urban parameters
 !------------------------------------------------------------------------
 
-    NoahmpIO%FRC_URB2D = 0.0
     if (NoahmpIO%SF_URBAN_PHYSICS > 0) then
+       NoahmpIO%FRC_URB2D = 0.0
        call READ_URBAN_MAP(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, NoahmpIO%FRC_URB2D)
     endif
 
