@@ -1295,19 +1295,17 @@ contains
 ! Write Restart - timestamp equal to output will have same states
 !------------------------------------------------------------------------
 
-      if ( (NoahmpIO%restart_frequency_hours .gt. 0) .and. &
-           (mod(ITIME, int(NoahmpIO%restart_frequency_hours*3600./nint(NoahmpIO%dtbl))) == 0)) then
-       call lsm_restart()
-
-      else
-
-       if (NoahmpIO%restart_frequency_hours <= 0) then
-          if ( (NoahmpIO%olddate( 9:10) == "01") .and. (NoahmpIO%olddate(12:13) == "00") .and. &
-               (NoahmpIO%olddate(15:16) == "00") .and. (NoahmpIO%olddate(18:19) == "00") ) then
-                call lsm_restart()  ! jlm - i moved all the restart code to a subroutine. 
-          endif
-       endif
-      endif
+     if (NoahmpIO%restart_frequency_hours > 0) then
+        if (mod(ITIME, int(NoahmpIO%restart_frequency_hours*3600./nint(NoahmpIO%dtbl))) == 0) then
+           call lsm_restart()
+        endif
+     endif
+     if (NoahmpIO%restart_frequency_hours <= 0) then
+        if ((NoahmpIO%olddate( 9:10) == "01") .and. (NoahmpIO%olddate(12:13) == "00") .and. &
+            (NoahmpIO%olddate(15:16) == "00") .and. (NoahmpIO%olddate(18:19) == "00")) then
+            call lsm_restart()  ! jlm - i moved all the restart code to a subroutine. 
+        endif
+     endif
 
 !------------------------------------------------------------------------
 ! Advance the time 
@@ -1320,7 +1318,7 @@ contains
        NoahmpIO%spinup_loop = NoahmpIO%spinup_loop + 1
        call geth_newdate(NoahmpIO%olddate, NoahmpIO%startdate, nint(NoahmpIO%dtbl))
        NoahmpIO%reset_spinup_date = .true.
-     end if
+     endif
 
 ! update the timer
      call system_clock(count=NoahmpIO%clock_count_2, count_rate=NoahmpIO%clock_rate)
