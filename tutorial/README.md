@@ -25,6 +25,8 @@ This folder currently includes 5 main tutorial contents for running HRLDAS/Noah-
 
 5. Steps to contribute code updates through GitHub Pull Request (PR): Note4_Code_Development_GitHub_Pull_Request.ipynb
 
+6. Hands-on instruction for AMS 2024 short course to run point-scale and ERA-5 forcing driven 2-D simulations: Note6_AMS2024_NoahMP_short_course.ipynb
+
 
 **More tutorial materials will be provided in the near future**
 
