@@ -1,9 +1,9 @@
-# HRLDAS/Noah-MP model tutorial material
+# Noah-MP model tutorial material
 
 The tutorial materials are prepared mainly by Dr. Zhe Zhang (NCAR). If users have any questions, please contact Cenlin he (cenlinhe@ucar.edu) and Zhe Zhang (zhezhang@ucar.edu).
 
-This folder archives the tutorial material for running the offline HRLDAS/Noah-MP models. 
-Note that Noah-MP code (https://github.com/NCAR/noahmp) needs to be run in a host model frame such as HRLDAS, WRF, MPAS, UFS, LIS, etc.
+This folder archives the tutorial material for running the offline Noah-MP models. 
+Note that Noah-MP code (https://github.com/NCAR/noahmp) needs to be run in a host model frame such as HRLDAS, UFS, WRF, MPAS, LIS, etc.
 
 
 ## Tutorial datasets
@@ -26,6 +26,8 @@ This folder currently includes 5 main tutorial contents for running HRLDAS/Noah-
 5. Steps to contribute code updates through GitHub Pull Request (PR): Note4_Code_Development_GitHub_Pull_Request.ipynb
 
 6. Hands-on instruction for AMS 2024 short course to run point-scale and ERA-5 forcing driven 2-D simulations: Note6_AMS2024_NoahMP_short_course.ipynb
+
+7. Hands-on instruction for AMS 2024 short course to run UFS/Noah-MP component model: Note7_AMS24_Tutorial_UFS_NoahMP_component.ipynb
 
 
 **More tutorial materials will be provided in the near future**
