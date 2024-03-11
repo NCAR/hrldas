@@ -1,5 +1,6 @@
 module module_NoahMP_hrldas_driver
 
+  use Machine
   use NoahmpIOVarType
   use NoahmpIOVarInitMod
   use NoahmpReadNamelistMod
@@ -29,7 +30,7 @@ module module_NoahMP_hrldas_driver
 
 #ifdef WRF_HYDRO
    integer :: forc_typ, snow_assim, HRLDAS_ini_typ
-   real(kind=kind_noahmp),    allocatable, dimension(:,:)   :: etpnd, greenfrac, prcp0
+   real(kind=kind_noahmp), allocatable, dimension(:,:)   :: etpnd, greenfrac, prcp0
    real(kind=kind_noahmp) :: etpnd1
    character(len=19) :: forcDate
    character(len = 256):: GEO_STATIC_FLNM
@@ -61,7 +62,7 @@ contains
     implicit none
 
     integer      :: NTIME_out
-    real(kind=kind_noahmp)         :: max_utype_urb2d
+    real(kind=kind_noahmp) :: max_landtype2d
     type(domain) :: grid
     ! initilization for stand alone parallel code.
     integer, optional, intent(in) :: wrfits,wrfite,wrfjts,wrfjte
@@ -182,9 +183,9 @@ contains
     NoahmpIO%kme = 2
   
     if ( (NoahmpIO%sf_urban_physics == 2) .or. (NoahmpIO%sf_urban_physics == 3) ) then
-       NoahmpIO%kde = NoahmpIO%num_urban_atmosphere
+       NoahmpIO%kde = NoahmpIO%num_urban_atmosphere + 1  ! to be consistent with kme
+       NoahmpIO%kme = NoahmpIO%num_urban_atmosphere + 1  ! bug fix for dimension of urban cell interfaces
        NoahmpIO%kte = NoahmpIO%num_urban_atmosphere
-       NoahmpIO%kme = NoahmpIO%num_urban_atmosphere
     endif
 
 !---------------------------------------------------------------------
@@ -299,6 +300,15 @@ contains
     NoahmpIO%TD_FRACTION = 0.0
     if (NoahmpIO%IOPT_TDRN > 0) then
        call READ_TILE_DRAIN_MAP(NoahmpIO%TDINPUT_FLNM, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, NoahmpIO%TD_FRACTION)
+    endif
+
+!------------------------------------------------------------------------
+! For SF_URBAN_PHYSICS > 0 read 2D map of urban parameters
+!------------------------------------------------------------------------
+
+    if (NoahmpIO%SF_URBAN_PHYSICS > 0) then
+       NoahmpIO%FRC_URB2D = 0.0
+       call READ_URBAN_MAP(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND, NoahmpIO%FRC_URB2D)
     endif
 
 !----------------------------------------------------------------------
@@ -582,12 +592,11 @@ contains
                               NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                          & !multi-layer urban
                               NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                              !urban
 
-          max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
-
-          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_utype_urb2d > 3.0) ) then  !new LCZ
+          max_landtype2d = maxval(NoahmpIO%IVGTYP)*1.0
+          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_landtype2d > 50.0) ) then   ! LCZ number: 51~61
              stop "USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1"
           endif
-          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_utype_urb2d <= 3.0) ) then  ! new LCZ
+          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_landtype2d <= 50.0) ) then  ! LCZ number: 51~61
              stop "USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0"
           endif
 
@@ -596,13 +605,6 @@ contains
     else
 
        NoahmpIO%restart_flag = .false.
-       NoahmpIO%SMOIS        =  huge(1.0)
-       NoahmpIO%TSLB         =  huge(1.0)
-       NoahmpIO%SH2O         =  huge(1.0)
-       NoahmpIO%CANLIQXY     =  huge(1.0)
-       NoahmpIO%TSK          =  huge(1.0)
-       NoahmpIO%SNOW         =  huge(1.0)
-       NoahmpIO%SNOWH        =  huge(1.0)
 
 #ifdef WRF_HYDRO
        if ( (forc_typ > 2) .and. (forc_typ /= 6) ) HRLDAS_ini_typ = 0
@@ -630,11 +632,7 @@ contains
                               NoahmpIO%TSLB, NoahmpIO%CANWAT, NoahmpIO%TSK, NoahmpIO%SNOW,   &
                               NoahmpIO%SNOWH, NoahmpIO%FNDSNOWH)
 
-          NoahmpIO%VEGFRA =  huge(1.0)
-          NoahmpIO%LAI    =  huge(1.0)
-          NoahmpIO%GVFMIN =  huge(1.0)
-          NoahmpIO%GVFMAX =  huge(1.0)
-
+          NoahmpIO%VEGFRA =  0.0
           call READVEG_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend,        &
                               NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%OLDDATE, NoahmpIO%IVGTYP, &
                               NoahmpIO%VEGFRA, NoahmpIO%LAI, NoahmpIO%GVFMIN, NoahmpIO%GVFMAX)
@@ -721,14 +719,14 @@ contains
                               NoahmpIO%DL_U_BEP, NoahmpIO%SF_BEP, NoahmpIO%VL_BEP,                                         & !multi-layer urban
                               NoahmpIO%FRC_URB2D, NoahmpIO%UTYPE_URB2D, NoahmpIO%use_wudapt_lcz)                             !urban
 
-          max_utype_urb2d = maxval(NoahmpIO%UTYPE_URB2D)*1.0
-               
-          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_utype_urb2d > 3.0) ) then  !new LCZ
+          max_landtype2d = maxval(NoahmpIO%IVGTYP)*1.0
+          if ( (NoahmpIO%use_wudapt_lcz == 0) .and. (max_landtype2d > 50.0) ) then   ! LCZ number: 51~61
              stop "USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1"
           endif
-          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_utype_urb2d <= 3.0) ) then  ! new LCZ
+          if ( (NoahmpIO%use_wudapt_lcz == 1) .and. (max_landtype2d <= 50.0) ) then  ! LCZ number: 51~61
              stop "USING URBPARM_LCZ.TBL WITH OLD 3 URBAN CLASSES. SET USE_WUDAPT_LCZ=0"
           endif
+
        endif !urban
 
        if ( NoahmpIO%SF_URBAN_PHYSICS > 1 ) then  !urban
@@ -913,27 +911,37 @@ contains
      NoahmpIO%SWDDIF = NoahmpIO%SWDOWN * 0.3                    ! following noahmplsm ATM 30% diffuse radiation
 
      IF(NoahmpIO%SF_URBAN_PHYSICS == 2 .or. NoahmpIO%SF_URBAN_PHYSICS == 3) THEN  ! BEP or BEM urban models
-       where(NoahmpIO%XLAND < 1.5) NoahmpIO%p_urban(:,NoahmpIO%kde,:) = NoahmpIO%p8w(:,1,:)
-       where(NoahmpIO%XLAND < 1.5) NoahmpIO%rho_urban(:,NoahmpIO%kde,:) = NoahmpIO%p8w(:,1,:) /287.04/NoahmpIO%t_phy(:,1,:)
+       where(NoahmpIO%XLAND < 1.5) NoahmpIO%p_urban    (:,NoahmpIO%kde,:) = NoahmpIO%p8w(:,1,:)
+       where(NoahmpIO%XLAND < 1.5) NoahmpIO%rho_urban  (:,NoahmpIO%kde,:) = NoahmpIO%p8w(:,1,:) /287.04/NoahmpIO%t_phy(:,1,:)
        where(NoahmpIO%XLAND < 1.5) NoahmpIO%theta_urban(:,NoahmpIO%kde,:) = NoahmpIO%t_phy(:,1,:)*&
-                                                                   (100000.0/NoahmpIO%p8w(:,1,:))**(0.285714)
-       where(NoahmpIO%XLAND < 1.5) NoahmpIO%u_urban(:,NoahmpIO%kde,:) = NoahmpIO%u_phy(:,1,:)
-       where(NoahmpIO%XLAND < 1.5) NoahmpIO%v_urban(:,NoahmpIO%kde,:) = NoahmpIO%v_phy(:,1,:)
-       
-       NoahmpIO%height_urban = 0.5*(NoahmpIO%dz_urban(1,NoahmpIO%kde,1) + &
-                                 NoahmpIO%dz_urban(1,NoahmpIO%kde-1,1))
+                                                                            (100000.0/NoahmpIO%p8w(:,1,:))**(0.285714)
+       where(NoahmpIO%XLAND < 1.5) NoahmpIO%u_urban    (:,NoahmpIO%kde,:) = NoahmpIO%u_phy(:,1,:)
+       where(NoahmpIO%XLAND < 1.5) NoahmpIO%v_urban    (:,NoahmpIO%kde,:) = NoahmpIO%v_phy(:,1,:)
 
-       DO I = NoahmpIO%KDE-1, NoahmpIO%KDS, -1
+       ! allow one more dummy layer at the top to be consistent with cell interface array dimension
+       NoahmpIO%p_urban    (:,NoahmpIO%kde-1,:) = NoahmpIO%p_urban(:,NoahmpIO%kde,:)
+       NoahmpIO%rho_urban  (:,NoahmpIO%kde-1,:) = NoahmpIO%rho_urban(:,NoahmpIO%kde,:)
+       NoahmpIO%theta_urban(:,NoahmpIO%kde-1,:) = NoahmpIO%theta_urban(:,NoahmpIO%kde,:)
+       NoahmpIO%u_urban    (:,NoahmpIO%kde-1,:) = NoahmpIO%u_urban(:,NoahmpIO%kde,:)
+       NoahmpIO%v_urban    (:,NoahmpIO%kde-1,:) = NoahmpIO%v_urban(:,NoahmpIO%kde,:)
+
+       NoahmpIO%height_urban = 0.5*(NoahmpIO%dz_urban(1,NoahmpIO%kde-1,1) + &
+                               NoahmpIO%dz_urban(1,NoahmpIO%kde-2,1))
+       
+       do i = 3, NoahmpIO%kde
+           where(NoahmpIO%XLAND < 1.5) NoahmpIO%QV_CURR(:,i,:) = NoahmpIO%QV_CURR(:,1,:)
+       enddo
+
+       DO I = NoahmpIO%kde-2, NoahmpIO%kds, -1
          where(NoahmpIO%XLAND < 1.5) NoahmpIO%p_urban(:,i,:) = NoahmpIO%p8w(:,1,:)* &
-                                                             exp(9.8*NoahmpIO%height_urban/287.04/NoahmpIO%t_phy(:,1,:))
-         where(NoahmpIO%XLAND < 1.5) NoahmpIO%rho_urban(:,i,:) = NoahmpIO%p_urban(:,i,:)/287.04/ &
-                                                             NoahmpIO%t_phy(:,1,:)
+                                                               exp(9.8*NoahmpIO%height_urban/287.04/NoahmpIO%t_phy(:,1,:))
+         where(NoahmpIO%XLAND < 1.5) NoahmpIO%rho_urban(:,i,:) = NoahmpIO%p_urban(:,i,:)/287.04/NoahmpIO%t_phy(:,1,:)
          where(NoahmpIO%XLAND < 1.5) NoahmpIO%theta_urban(:,i,:) = NoahmpIO%t_phy(:,1,:)* &
-                                                             (100000.0/NoahmpIO%p_urban(:,i,:))**(0.285714)
+                                                                   (100000.0/NoahmpIO%p_urban(:,i,:))**(0.285714)
          where(NoahmpIO%XLAND < 1.5) NoahmpIO%u_urban(:,i,:) = NoahmpIO%u_urban(:,NoahmpIO%kde,:)* &
-                                                             log(NoahmpIO%zlvl-NoahmpIO%height_urban)/log(NoahmpIO%zlvl)
+                                                               log(max(NoahmpIO%zlvl-NoahmpIO%height_urban,1.001))/log(NoahmpIO%zlvl)
          where(NoahmpIO%XLAND < 1.5) NoahmpIO%v_urban(:,i,:) = NoahmpIO%v_urban(:,NoahmpIO%kde,:)* &
-                                                             log(NoahmpIO%zlvl-NoahmpIO%height_urban)/log(NoahmpIO%zlvl)
+                                                               log(max(NoahmpIO%zlvl-NoahmpIO%height_urban,1.001))/log(NoahmpIO%zlvl)
          NoahmpIO%height_urban = NoahmpIO%height_urban + NoahmpIO%urban_atmosphere_thickness
        END DO    
      ENDIF
@@ -1044,7 +1052,7 @@ contains
                             NoahmpIO%drelr_urb2d, NoahmpIO%drelb_urb2d, NoahmpIO%drelg_urb2d,                   & !H urban
                             NoahmpIO%flxhumr_urb2d, NoahmpIO%flxhumb_urb2d, NoahmpIO%flxhumg_urb2d,             & !H urban
                             NoahmpIO%julday, NoahmpIO%yr,                                                       & !H urban
-                            NoahmpIO%frc_urb2d, NoahmpIO%utype_urb2d,                                           & !I urban
+                            NoahmpIO%FRC_URB2D, NoahmpIO%utype_urb2d,                                           & !I urban
                             NoahmpIO%chs, NoahmpIO%chs2, NoahmpIO%cqs2,                                          & !H
                             NoahmpIO%num_urban_ndm, NoahmpIO%urban_map_zrd, NoahmpIO%urban_map_zwd,             & !I multi-layer urban
                             NoahmpIO%urban_map_gd,                                                              & !I multi-layer urban 
@@ -1344,19 +1352,17 @@ contains
 ! Write Restart - timestamp equal to output will have same states
 !------------------------------------------------------------------------
 
-      if ( (NoahmpIO%restart_frequency_hours .gt. 0) .and. &
-           (mod(ITIME, int(NoahmpIO%restart_frequency_hours*3600./nint(NoahmpIO%dtbl))) == 0)) then
-       call lsm_restart()
-
-      else
-
-       if (NoahmpIO%restart_frequency_hours <= 0) then
-          if ( (NoahmpIO%olddate( 9:10) == "01") .and. (NoahmpIO%olddate(12:13) == "00") .and. &
-               (NoahmpIO%olddate(15:16) == "00") .and. (NoahmpIO%olddate(18:19) == "00") ) then
-                call lsm_restart()  ! jlm - i moved all the restart code to a subroutine. 
-          endif
-       endif
-      endif
+     if (NoahmpIO%restart_frequency_hours > 0) then
+        if (mod(ITIME, int(NoahmpIO%restart_frequency_hours*3600./nint(NoahmpIO%dtbl))) == 0) then
+           call lsm_restart()
+        endif
+     endif
+     if (NoahmpIO%restart_frequency_hours <= 0) then
+        if ((NoahmpIO%olddate( 9:10) == "01") .and. (NoahmpIO%olddate(12:13) == "00") .and. &
+            (NoahmpIO%olddate(15:16) == "00") .and. (NoahmpIO%olddate(18:19) == "00")) then
+            call lsm_restart()  ! jlm - i moved all the restart code to a subroutine. 
+        endif
+     endif
 
 !------------------------------------------------------------------------
 ! Advance the time 
@@ -1616,7 +1622,7 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
 !---------------------------------------------------------------------
 
 ! !ARGUMENTS:
-   CHARACTER(LEN=19), INTENT(IN)  :: NOWDATE    ! YYYY-MM-DD_HH:MM:SS
+   CHARACTER(LEN=19),                   INTENT(IN)  :: NOWDATE    ! YYYY-MM-DD_HH:MM:SS
    REAL(kind=kind_noahmp),              INTENT(IN)  :: LATITUDE
    REAL(kind=kind_noahmp),              INTENT(IN)  :: LONGITUDE
    REAL(kind=kind_noahmp),              INTENT(OUT) :: COSZ
@@ -1624,7 +1630,7 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
    REAL(kind=kind_noahmp),    OPTIONAL, INTENT(OUT) :: HRANG_OUT
    REAL(kind=kind_noahmp),    OPTIONAL, INTENT(OUT) :: DECLIN_OUT
    REAL(kind=kind_noahmp),    OPTIONAL, INTENT(OUT) :: GMT_OUT
-   INTEGER, OPTIONAL, INTENT(OUT) :: JULDAY_OUT
+   INTEGER,                   OPTIONAL, INTENT(OUT) :: JULDAY_OUT
    REAL(kind=kind_noahmp)                           :: OBECL
    REAL(kind=kind_noahmp)                           :: SINOB
    REAL(kind=kind_noahmp)                           :: SXLONG
@@ -1633,14 +1639,14 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
    REAL(kind=kind_noahmp)                           :: HRANG
    REAL(kind=kind_noahmp)                           :: DECLIN
    REAL(kind=kind_noahmp)                           :: GMT
-   INTEGER                        :: JULDAY
-   INTEGER                        :: IDAY
-   INTEGER                        :: IHOUR
-   INTEGER                        :: IMINUTE
-   INTEGER                        :: ISECOND
+   INTEGER                                          :: JULDAY
+   INTEGER                                          :: IDAY
+   INTEGER                                          :: IHOUR
+   INTEGER                                          :: IMINUTE
+   INTEGER                                          :: ISECOND
 
-   REAL(kind=kind_noahmp), PARAMETER :: DEGRAD = 3.14159265/180.
-   REAL(kind=kind_noahmp), PARAMETER :: DPD    = 360./365.
+   REAL(kind=kind_noahmp), PARAMETER                :: DEGRAD = 3.14159265/180.
+   REAL(kind=kind_noahmp), PARAMETER                :: DPD    = 360./365.
 
    call GETH_IDTS(NOWDATE(1:10), NOWDATE(1:4)//"-01-01", IDAY)
    READ(NOWDATE(12:13), *) IHOUR
@@ -1685,12 +1691,12 @@ SUBROUTINE CALC_DECLIN ( NOWDATE, LATITUDE, LONGITUDE, COSZ, JULIAN, &
 
    IMPLICIT NONE
 !---------------------------------------------------------------------
-   CHARACTER(LEN=19), INTENT(IN)  :: NOWDATE    ! YYYY-MM-DD_HH:MM:SS
-   REAL(kind=kind_noahmp),              INTENT(IN)  :: LONGITUDE
-   REAL(kind=kind_noahmp),              INTENT(OUT) :: TLOCTIM
-   INTEGER                        :: IHOUR
-   INTEGER                        :: IMINUTE
-   INTEGER                        :: ISECOND
+   CHARACTER(LEN=19),      INTENT(IN)  :: NOWDATE    ! YYYY-MM-DD_HH:MM:SS
+   REAL(kind=kind_noahmp), INTENT(IN)  :: LONGITUDE
+   REAL(kind=kind_noahmp), INTENT(OUT) :: TLOCTIM
+   INTEGER                             :: IHOUR
+   INTEGER                             :: IMINUTE
+   INTEGER                             :: ISECOND
 
    READ(NOWDATE(12:13), *) IHOUR
    READ(NOWDATE(15:16), *) IMINUTE
