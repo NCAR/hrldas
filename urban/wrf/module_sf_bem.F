@@ -1,23 +1,25 @@
 MODULE module_sf_bem
+use Machine, only : kind_noahmp
+
 ! -----------------------------------------------------------------------
 !  Variables and constants used in the BEM module
 ! -----------------------------------------------------------------------
          
-        real emins		!emissivity of the internal walls
+        real(kind=kind_noahmp) emins		!emissivity of the internal walls
         parameter (emins=0.9) 
-        real albins	        !albedo of the internal walls
+        real(kind=kind_noahmp) albins	        !albedo of the internal walls
 !!      parameter (albins=0.5)
         parameter (albins=0.3)
 
-        real thickwin           !thickness of the window [m] 
+        real(kind=kind_noahmp) thickwin           !thickness of the window [m] 
         parameter (thickwin=0.006)
-        real cswin		!Specific heat of the windows [J/(m3.K)]
+        real(kind=kind_noahmp) cswin		!Specific heat of the windows [J/(m3.K)]
         parameter(cswin= 2.268e+06)
 
-        real temp_rat            !power of the A.C. heating/cooling the indoor air [K/s]
+        real(kind=kind_noahmp) temp_rat            !power of the A.C. heating/cooling the indoor air [K/s]
         parameter(temp_rat=0.001)
 
-        real hum_rat            !power of the A.C. drying/moistening the indoor air [(Kg/kg)/s]
+        real(kind=kind_noahmp) hum_rat            !power of the A.C. drying/moistening the indoor air [(Kg/kg)/s]
         parameter(hum_rat=1.e-06)
 
         real,parameter :: effpv=0.19  ! Efficiency of PV panels installed at the roofs, typical values [0.10,0.15] 
@@ -94,7 +96,7 @@ MODULE module_sf_bem
 ! Input:
 ! -----	
 
-	real dt				!time step [s]
+	real(kind=kind_noahmp) dt				!time step [s]
                                        
            integer nzcanm                  !Maximum number of vertical levels in the urban grid
 	integer nlev			!number of floors in the building
@@ -102,95 +104,95 @@ MODULE module_sf_bem
 	integer nrof                    !number of levels inside the roof
 	integer nflo                    !number of levels inside the floor
 	integer ngrd                    !number of levels inside the ground
-	real dzlev			!vertical grid resolution [m]			
-	real bl				!Building length [m]
-	real bw                         !Building width [m]
+	real(kind=kind_noahmp) dzlev			!vertical grid resolution [m]			
+	real(kind=kind_noahmp) bl				!Building length [m]
+	real(kind=kind_noahmp) bw                         !Building width [m]
 	
-	real albwal			!albedo of the walls 				
-	real albwin		 	!albedo of the windows
-	real albrof			!albedo of the roof
+	real(kind=kind_noahmp) albwal			!albedo of the walls 				
+	real(kind=kind_noahmp) albwin		 	!albedo of the windows
+	real(kind=kind_noahmp) albrof			!albedo of the roof
 	
-	real emwal 	          	!emissivity of the walls
+	real(kind=kind_noahmp) emwal 	          	!emissivity of the walls
 	
-	real emrof			!emissivity of the roof
-        real emwin                      !emissivity of the windows
+	real(kind=kind_noahmp) emrof			!emissivity of the roof
+        real(kind=kind_noahmp) emwin                      !emissivity of the windows
 
-	real pwin                       !window proportion
-	real,    intent(in) :: cop      !Coefficient of performance of the A/C systems
-	real,    intent(in) :: beta     !Thermal efficiency of the heat exchanger
+	real(kind=kind_noahmp) pwin                       !window proportion
+	real(kind=kind_noahmp),    intent(in) :: cop      !Coefficient of performance of the A/C systems
+	real(kind=kind_noahmp),    intent(in) :: beta     !Thermal efficiency of the heat exchanger
         integer, intent(in) :: sw_cond  ! Air Conditioning switch
-        real,    intent(in) :: timeon   ! Initial local time of A/C systems
-        real,    intent(in) :: timeoff  ! Ending local time of A/C systems
-        real,    intent(in) :: targtemp ! Target temperature of A/C systems
-        real,    intent(in) :: gaptemp  ! Comfort range of indoor temperature
-        real,    intent(in) :: targhum  ! Target humidity of A/C systems
-        real,    intent(in) :: gaphum   ! Comfort range of specific humidity
-        real,    intent(in) :: perflo   ! Peak number of occupants per unit floor area
-        real gr_frac_roof   
-        real pv_frac_roof
+        real(kind=kind_noahmp),    intent(in) :: timeon   ! Initial local time of A/C systems
+        real(kind=kind_noahmp),    intent(in) :: timeoff  ! Ending local time of A/C systems
+        real(kind=kind_noahmp),    intent(in) :: targtemp ! Target temperature of A/C systems
+        real(kind=kind_noahmp),    intent(in) :: gaptemp  ! Comfort range of indoor temperature
+        real(kind=kind_noahmp),    intent(in) :: targhum  ! Target humidity of A/C systems
+        real(kind=kind_noahmp),    intent(in) :: gaphum   ! Comfort range of specific humidity
+        real(kind=kind_noahmp),    intent(in) :: perflo   ! Peak number of occupants per unit floor area
+        real(kind=kind_noahmp) gr_frac_roof   
+        real(kind=kind_noahmp) pv_frac_roof
         integer gr_flag  
-        real   uout(nzcanm) 
-        real    vout(nzcanm)
-        real,    intent(in) :: hsesf    ! 
-        real,    intent(in) :: hsequip(24) ! 
+        real(kind=kind_noahmp)   uout(nzcanm) 
+        real(kind=kind_noahmp)    vout(nzcanm)
+        real(kind=kind_noahmp),    intent(in) :: hsesf    ! 
+        real(kind=kind_noahmp),    intent(in) :: hsequip(24) ! 
 	
-	real cswal(nwal)		!Specific heat of the wall [J/(m3.K)] 
+	real(kind=kind_noahmp) cswal(nwal)		!Specific heat of the wall [J/(m3.K)] 
 	
-	real csflo(nflo)		!Specific heat of the floor [J/(m3.K)]
-	real csrof(nrof)		!Specific heat of the roof [J/(m3.K)] 
-	real csgrd(ngrd)		!Specific heat of the ground [J/(m3.K)]
+	real(kind=kind_noahmp) csflo(nflo)		!Specific heat of the floor [J/(m3.K)]
+	real(kind=kind_noahmp) csrof(nrof)		!Specific heat of the roof [J/(m3.K)] 
+	real(kind=kind_noahmp) csgrd(ngrd)		!Specific heat of the ground [J/(m3.K)]
 	
-	real kwal(nwal+1)		!Thermal conductivity in each layers of the walls (face) [W/(m.K)]
-	real kflo(nflo+1)		!Thermal diffusivity in each layers of the floors (face) [W/(m.K)]
-	real krof(nrof+1)		!Thermal diffusivity in each layers of the roof (face) [W/(m.K)]
-	real kgrd(ngrd+1)		!Thermal diffusivity in each layers of the ground (face) [W/(m.K)]
+	real(kind=kind_noahmp) kwal(nwal+1)		!Thermal conductivity in each layers of the walls (face) [W/(m.K)]
+	real(kind=kind_noahmp) kflo(nflo+1)		!Thermal diffusivity in each layers of the floors (face) [W/(m.K)]
+	real(kind=kind_noahmp) krof(nrof+1)		!Thermal diffusivity in each layers of the roof (face) [W/(m.K)]
+	real(kind=kind_noahmp) kgrd(ngrd+1)		!Thermal diffusivity in each layers of the ground (face) [W/(m.K)]
 	
-	real dzwal(nwal)		!Layer sizes of walls [m]
-	real dzflo(nflo)		!Layer sizes of floors [m]
-	real dzrof(nrof)		!Layer sizes of roof [m]
-	real dzgrd(ngrd)		!Layer sizes of ground [m]
-	real tpv
-        real tr_av 
-	real latent                      !latent heat of evaporation [J/Kg]	
+	real(kind=kind_noahmp) dzwal(nwal)		!Layer sizes of walls [m]
+	real(kind=kind_noahmp) dzflo(nflo)		!Layer sizes of floors [m]
+	real(kind=kind_noahmp) dzrof(nrof)		!Layer sizes of roof [m]
+	real(kind=kind_noahmp) dzgrd(ngrd)		!Layer sizes of ground [m]
+	real(kind=kind_noahmp) tpv
+        real(kind=kind_noahmp) tr_av 
+	real(kind=kind_noahmp) latent                      !latent heat of evaporation [J/Kg]	
 
-        real swddif
-   	real rs				!external short wave radiation [W/m2]
-	real rl				!external long wave radiation [W/m2]
-	real rswal(4,nzcanm)		!short wave radiation reaching the exterior walls [W/m2]
-        real rlwal(4,nzcanm)		!long wave radiation reaching the walls [W/m2]	
-	real rhoout(nzcanm)		!exterior air density [kg/m3]
-	real tout(nzcanm)		!external temperature [K]
-	real humout(nzcanm)		!absolute humidity [Kgwater/Kgair]
-	real press(nzcanm)		!external air pressure [Pa]
+        real(kind=kind_noahmp) swddif
+   	real(kind=kind_noahmp) rs				!external short wave radiation [W/m2]
+	real(kind=kind_noahmp) rl				!external long wave radiation [W/m2]
+	real(kind=kind_noahmp) rswal(4,nzcanm)		!short wave radiation reaching the exterior walls [W/m2]
+        real(kind=kind_noahmp) rlwal(4,nzcanm)		!long wave radiation reaching the walls [W/m2]	
+	real(kind=kind_noahmp) rhoout(nzcanm)		!exterior air density [kg/m3]
+	real(kind=kind_noahmp) tout(nzcanm)		!external temperature [K]
+	real(kind=kind_noahmp) humout(nzcanm)		!absolute humidity [Kgwater/Kgair]
+	real(kind=kind_noahmp) press(nzcanm)		!external air pressure [Pa]
 	
-	real hswalout(4,nzcanm)	        !outside walls sensible heat flux [W/m2]
-	real hswinout(4,nzcanm)	        !outside window sensible heat flux [W/m2]
-	real hsrof			!Sensible heat flux at the roof [W/m2]
-	real lsrof
-        real rair			!ideal gas constant  [J.kg-1.K-1]
-	real sigma			!parameter (wall is not black body) [W/m2.K4]
-	real cp				!specific heat of air [J/kg.K]
-        real hfgr       !Green roof heat flux
+	real(kind=kind_noahmp) hswalout(4,nzcanm)	        !outside walls sensible heat flux [W/m2]
+	real(kind=kind_noahmp) hswinout(4,nzcanm)	        !outside window sensible heat flux [W/m2]
+	real(kind=kind_noahmp) hsrof			!Sensible heat flux at the roof [W/m2]
+	real(kind=kind_noahmp) lsrof
+        real(kind=kind_noahmp) rair			!ideal gas constant  [J.kg-1.K-1]
+	real(kind=kind_noahmp) sigma			!parameter (wall is not black body) [W/m2.K4]
+	real(kind=kind_noahmp) cp				!specific heat of air [J/kg.K]
+        real(kind=kind_noahmp) hfgr       !Green roof heat flux
 	
 !Input-Output
 !------------
-	real tlev(nzcanm)		!temperature of the floors [K] 
-	real shumlev(nzcanm)		!specific humidity of the floor [kg/kg]
-	real twal(4,nwal,nzcanm)	!walls temperatures [K]
-	real twin(4,nzcanm)		!windows temperatures [K]	
-	real tflo(nflo,nzcanm-1)	!floor temperatures [K]
-	real tgrd(ngrd)		        !ground temperature [K]
-	real trof(nrof)		        !roof temperature [K]
-	real hsout(nzcanm)		!sensible heat emitted outside the floor [W]
-	real hlout(nzcanm)		!latent heat emitted outside the floor [W]
-        real consump(nzcanm)            !Consumption for the a.c. in each floor [W]
-	real hsvent(nzcanm)		!sensible heat generated by natural ventilation [W]
-	real hlvent(nzcanm)		!latent heat generated by natural ventilation [W] 
-        real gsrof                      !heat flux flowing inside the roof [W/m2]
-        real hspv			!Sensible heat flux at the roof from the PV panels [W/m2]
-        real gswal(4,nzcanm)             !heat flux flowing inside the floors [W/m2]
-        real eppv                        !Electricity production of PV panels [W]
-        real sfr_indoor,sfpv,tpv_print
+	real(kind=kind_noahmp) tlev(nzcanm)		!temperature of the floors [K] 
+	real(kind=kind_noahmp) shumlev(nzcanm)		!specific humidity of the floor [kg/kg]
+	real(kind=kind_noahmp) twal(4,nwal,nzcanm)	!walls temperatures [K]
+	real(kind=kind_noahmp) twin(4,nzcanm)		!windows temperatures [K]	
+	real(kind=kind_noahmp) tflo(nflo,nzcanm-1)	!floor temperatures [K]
+	real(kind=kind_noahmp) tgrd(ngrd)		        !ground temperature [K]
+	real(kind=kind_noahmp) trof(nrof)		        !roof temperature [K]
+	real(kind=kind_noahmp) hsout(nzcanm)		!sensible heat emitted outside the floor [W]
+	real(kind=kind_noahmp) hlout(nzcanm)		!latent heat emitted outside the floor [W]
+        real(kind=kind_noahmp) consump(nzcanm)            !Consumption for the a.c. in each floor [W]
+	real(kind=kind_noahmp) hsvent(nzcanm)		!sensible heat generated by natural ventilation [W]
+	real(kind=kind_noahmp) hlvent(nzcanm)		!latent heat generated by natural ventilation [W] 
+        real(kind=kind_noahmp) gsrof                      !heat flux flowing inside the roof [W/m2]
+        real(kind=kind_noahmp) hspv			!Sensible heat flux at the roof from the PV panels [W/m2]
+        real(kind=kind_noahmp) gswal(4,nzcanm)             !heat flux flowing inside the floors [W/m2]
+        real(kind=kind_noahmp) eppv                        !Electricity production of PV panels [W]
+        real(kind=kind_noahmp) sfr_indoor,sfpv,tpv_print
 ! Local:
 ! -----
 	integer swwal                   !swich for the physical coefficients calculation
@@ -200,48 +202,48 @@ MODULE module_sf_bem
 	integer ivw			!index for vertical walls
         integer igrd                    !index for ground
         integer irof                    !index for roof 
-        real hseqocc(nzcanm)		!sensible heat generated by equipments and occupants [W]
-	real hleqocc(nzcanm)		!latent heat generated by occupants [W]
-        real hscond(nzcanm)		!sensible heat generated by wall conduction [W]
-        real hslev(nzcanm)		!sensible heat flux generated inside the room [W]
-        real hllev(nzcanm)		!latent heat flux generatd inside the room [W]
-	real surwal(6,nzcanm)	        !Surface of the walls [m2]
-	real surwal1D(6)	        !wall surfaces of a generic room [m2]
-	real rsint(6)		        !short wave radiation reaching the indoor walls[W/m2]
-	real rswalins(6,nzcanm)	        !internal short wave radiation for the building [W/m2]
-	real twin1D(4)		        !temperature of windows for a particular room [K]
-	real twal_int(6)		!temperature of the first internal layers of a room [K]
-	real rlint(6)		        !internal wall long wave radiation [w/m2]
-	real rlwalins(6,nzcanm)	        !internal long wave radiation for the building [W/m2]	
-	real hrwalout(4,nzcanm)	        !external radiative flux to the walls [W/m2]
-	real hrwalins(6,nzcanm)	        !inside radiative flux to the walls [W/m2] 
-	real hrwinout(4,nzcanm)	        !external radiative flux to the window [W/m2]
-	real hrwinins(4,nzcanm)	        !inside radiative flux to the window [W/m2] 
-	real hrrof			!external radiative flux to the roof [W/m2]
-	real hs
-        real hsneed(nzcanm)		!sensible heat needed by the room [W]
-	real hlneed(nzcanm)		!latent heat needed by the room [W]	
-        real hswalins(6,nzcanm)	        !inside walls sensible heat flux [W/m2]
-	real hswalins1D(6)
-	real hswinins(4,nzcanm)	        !inside window sensible heat flux [W/m2]
-	real hswinins1D(4)	
-	real htot(2)			!total heat flux at the wall [W/m2]
-	real twal1D(nwal)
-	real tflo1D(nflo)	
-        real tgrd1D(ngrd)
-        real trof1D(nrof)
-	real rswal1D(4)
-	real Qb				!Overall heat capacity of the indoor air [J/K]
-	real vollev			!volume of the room [m3]
-	real rhoint			!density of the internal air [Kg/m3]
-	real cpint			!specific heat of the internal air [J/kg.K]
-        real humdry                     !specific humidiy of dry air [kg water/kg dry air]
-	real radflux                    !Function to compute the total radiation budget
-	real consumpbuild               !Energetic consumption for the entire building [KWh/s]
-        real hsoutbuild                 !Total sensible heat ejected into the atmosphere[W]
+        real(kind=kind_noahmp) hseqocc(nzcanm)		!sensible heat generated by equipments and occupants [W]
+	real(kind=kind_noahmp) hleqocc(nzcanm)		!latent heat generated by occupants [W]
+        real(kind=kind_noahmp) hscond(nzcanm)		!sensible heat generated by wall conduction [W]
+        real(kind=kind_noahmp) hslev(nzcanm)		!sensible heat flux generated inside the room [W]
+        real(kind=kind_noahmp) hllev(nzcanm)		!latent heat flux generatd inside the room [W]
+	real(kind=kind_noahmp) surwal(6,nzcanm)	        !Surface of the walls [m2]
+	real(kind=kind_noahmp) surwal1D(6)	        !wall surfaces of a generic room [m2]
+	real(kind=kind_noahmp) rsint(6)		        !short wave radiation reaching the indoor walls[W/m2]
+	real(kind=kind_noahmp) rswalins(6,nzcanm)	        !internal short wave radiation for the building [W/m2]
+	real(kind=kind_noahmp) twin1D(4)		        !temperature of windows for a particular room [K]
+	real(kind=kind_noahmp) twal_int(6)		!temperature of the first internal layers of a room [K]
+	real(kind=kind_noahmp) rlint(6)		        !internal wall long wave radiation [w/m2]
+	real(kind=kind_noahmp) rlwalins(6,nzcanm)	        !internal long wave radiation for the building [W/m2]	
+	real(kind=kind_noahmp) hrwalout(4,nzcanm)	        !external radiative flux to the walls [W/m2]
+	real(kind=kind_noahmp) hrwalins(6,nzcanm)	        !inside radiative flux to the walls [W/m2] 
+	real(kind=kind_noahmp) hrwinout(4,nzcanm)	        !external radiative flux to the window [W/m2]
+	real(kind=kind_noahmp) hrwinins(4,nzcanm)	        !inside radiative flux to the window [W/m2] 
+	real(kind=kind_noahmp) hrrof			!external radiative flux to the roof [W/m2]
+	real(kind=kind_noahmp) hs
+        real(kind=kind_noahmp) hsneed(nzcanm)		!sensible heat needed by the room [W]
+	real(kind=kind_noahmp) hlneed(nzcanm)		!latent heat needed by the room [W]	
+        real(kind=kind_noahmp) hswalins(6,nzcanm)	        !inside walls sensible heat flux [W/m2]
+	real(kind=kind_noahmp) hswalins1D(6)
+	real(kind=kind_noahmp) hswinins(4,nzcanm)	        !inside window sensible heat flux [W/m2]
+	real(kind=kind_noahmp) hswinins1D(4)	
+	real(kind=kind_noahmp) htot(2)			!total heat flux at the wall [W/m2]
+	real(kind=kind_noahmp) twal1D(nwal)
+	real(kind=kind_noahmp) tflo1D(nflo)	
+        real(kind=kind_noahmp) tgrd1D(ngrd)
+        real(kind=kind_noahmp) trof1D(nrof)
+	real(kind=kind_noahmp) rswal1D(4)
+	real(kind=kind_noahmp) Qb				!Overall heat capacity of the indoor air [J/K]
+	real(kind=kind_noahmp) vollev			!volume of the room [m3]
+	real(kind=kind_noahmp) rhoint			!density of the internal air [Kg/m3]
+	real(kind=kind_noahmp) cpint			!specific heat of the internal air [J/kg.K]
+        real(kind=kind_noahmp) humdry                     !specific humidiy of dry air [kg water/kg dry air]
+	real(kind=kind_noahmp) radflux                    !Function to compute the total radiation budget
+	real(kind=kind_noahmp) consumpbuild               !Energetic consumption for the entire building [KWh/s]
+        real(kind=kind_noahmp) hsoutbuild                 !Total sensible heat ejected into the atmosphere[W]
                                         !by the air conditioning system and per building
-        real nhourday                   !number of hours from midnight, local time
-        real hfgrd                      !Dummy variable to assign hfgr=0 to walls, windows and ground
+        real(kind=kind_noahmp) nhourday                   !number of hours from midnight, local time
+        real(kind=kind_noahmp) hfgrd                      !Dummy variable to assign hfgr=0 to walls, windows and ground
 
 !
         parameter(hfgrd=0) 
@@ -820,63 +822,63 @@ MODULE module_sf_bem
 ! Input variables
 !
       integer,intent(in) :: nz     !Maximum number of vertical levels in the urban grid
-      real,intent(in) :: bl		!Building length [m]
-      real,intent(in) :: bw            !Building width [m]
-      real,intent(in) :: albr	!albedo of the roof (ext.) 
-      real,intent(in) :: emr   !emissivity of the roof (ext.)
-      real,intent(in) :: rs    !external short wave radiation [W/m2]
-      real,intent(in) :: rl	!external long wave radiation [W/m2]
-      real,intent(in) :: tr	!roof surface temperature [K]
-      real,intent(in) :: pv_frac_roof ! fraction of PV  []
-      real,intent(in) :: sigma !Stefan-Boltzmann constant [W/m2.K4] 
-      real,intent(in),dimension(1:nz) :: tair  !external temperature [K] 
+      real(kind=kind_noahmp),intent(in) :: bl		!Building length [m]
+      real(kind=kind_noahmp),intent(in) :: bw            !Building width [m]
+      real(kind=kind_noahmp),intent(in) :: albr	!albedo of the roof (ext.) 
+      real(kind=kind_noahmp),intent(in) :: emr   !emissivity of the roof (ext.)
+      real(kind=kind_noahmp),intent(in) :: rs    !external short wave radiation [W/m2]
+      real(kind=kind_noahmp),intent(in) :: rl	!external long wave radiation [W/m2]
+      real(kind=kind_noahmp),intent(in) :: tr	!roof surface temperature [K]
+      real(kind=kind_noahmp),intent(in) :: pv_frac_roof ! fraction of PV  []
+      real(kind=kind_noahmp),intent(in) :: sigma !Stefan-Boltzmann constant [W/m2.K4] 
+      real(kind=kind_noahmp),intent(in),dimension(1:nz) :: tair  !external temperature [K] 
       integer,intent(in) :: n  !number of floors in the building
-      real,intent(in), dimension(1:nz) :: uout		
-      real,intent(in), dimension(1:nz) :: vout
-      real,intent(in)  :: dt
-      real,intent(in)  :: swddif
+      real(kind=kind_noahmp),intent(in), dimension(1:nz) :: uout		
+      real(kind=kind_noahmp),intent(in), dimension(1:nz) :: vout
+      real(kind=kind_noahmp),intent(in)  :: dt
+      real(kind=kind_noahmp),intent(in)  :: swddif
 ! Output variables
 !
-      real,intent(inout) :: hspv ! Sensible heat flux from the PV panels to the atmosphere [W/m2]
-      real,intent(inout) :: eppv ! Electricity production from PV panels [W]
-      real,intent(inout) :: tpv       !Temperature of the PV panels [K]
+      real(kind=kind_noahmp),intent(inout) :: hspv ! Sensible heat flux from the PV panels to the atmosphere [W/m2]
+      real(kind=kind_noahmp),intent(inout) :: eppv ! Electricity production from PV panels [W]
+      real(kind=kind_noahmp),intent(inout) :: tpv       !Temperature of the PV panels [K]
 !
 ! Local variables
 !
-      real,parameter :: albpv=0.11 ! albedo of the PV panels
-      real,parameter :: empv_down=0.95  ! emissivity of the PV panels
-      real,parameter :: empv_up=0.79
-      real, parameter :: T_amb=25
-      real, parameter :: tiltangle=0.
-      real, parameter :: a=3.8
-      real, parameter :: b=6.9
+      real(kind=kind_noahmp),parameter :: albpv=0.11 ! albedo of the PV panels
+      real(kind=kind_noahmp),parameter :: empv_down=0.95  ! emissivity of the PV panels
+      real(kind=kind_noahmp),parameter :: empv_up=0.79
+      real(kind=kind_noahmp), parameter :: T_amb=25
+      real(kind=kind_noahmp), parameter :: tiltangle=0.
+      real(kind=kind_noahmp), parameter :: a=3.8
+      real(kind=kind_noahmp), parameter :: b=6.9
 
-      real, parameter :: r1=2330.
-      real, parameter :: r2=1200.
-      real, parameter :: r3=3000.
-      real, parameter :: c1=677.
-      real, parameter :: c2=1250.
-      real, parameter :: c3=500.
-      real, parameter :: d1=0.0003
-      real, parameter :: d2=0.0005
-      real, parameter :: d3=0.003
-      real, parameter :: F12=1.
-      real :: lwuppv     !Long-wave emitted by the PV panels to the sky [W/m2]
-      real :: lwdwr      !Long-wave incoming radiation on the roof [W/m2]
-      real :: lwupr      !Long-wave coming up from the roof intercepted by the PV panels [W/m2] 
-      real :: enerpv     !Energy produced by PV panels [W/m2]
-      real :: hc
-      real :: sw_d
-      real :: lw_d
-      real :: lwpv_out
-      real :: tpv_new
-      real :: hdown
-      real :: hup
-      real :: deltat
-      real :: uroof
-      real :: hrad
-      real :: Cm      
-      real :: hf
+      real(kind=kind_noahmp), parameter :: r1=2330.
+      real(kind=kind_noahmp), parameter :: r2=1200.
+      real(kind=kind_noahmp), parameter :: r3=3000.
+      real(kind=kind_noahmp), parameter :: c1=677.
+      real(kind=kind_noahmp), parameter :: c2=1250.
+      real(kind=kind_noahmp), parameter :: c3=500.
+      real(kind=kind_noahmp), parameter :: d1=0.0003
+      real(kind=kind_noahmp), parameter :: d2=0.0005
+      real(kind=kind_noahmp), parameter :: d3=0.003
+      real(kind=kind_noahmp), parameter :: F12=1.
+      real(kind=kind_noahmp) :: lwuppv     !Long-wave emitted by the PV panels to the sky [W/m2]
+      real(kind=kind_noahmp) :: lwdwr      !Long-wave incoming radiation on the roof [W/m2]
+      real(kind=kind_noahmp) :: lwupr      !Long-wave coming up from the roof intercepted by the PV panels [W/m2] 
+      real(kind=kind_noahmp) :: enerpv     !Energy produced by PV panels [W/m2]
+      real(kind=kind_noahmp) :: hc
+      real(kind=kind_noahmp) :: sw_d
+      real(kind=kind_noahmp) :: lw_d
+      real(kind=kind_noahmp) :: lwpv_out
+      real(kind=kind_noahmp) :: tpv_new
+      real(kind=kind_noahmp) :: hdown
+      real(kind=kind_noahmp) :: hup
+      real(kind=kind_noahmp) :: deltat
+      real(kind=kind_noahmp) :: uroof
+      real(kind=kind_noahmp) :: hrad
+      real(kind=kind_noahmp) :: Cm      
+      real(kind=kind_noahmp) :: hf
        Cm=r1*c1*d1+r2*c2*d2+r3*c3*d3
        hrad=sigma/((1-empv_down)/empv_down+1/F12+(1-emr)/emr)
        uroof=(uout(n+1)**2+vout(n+1)**2)**0.5
@@ -939,34 +941,34 @@ MODULE module_sf_bem
 		
 !Input:
 !-----
-            real hfgr        !Green roof heat flux
-            real gr_frac_roof     !Green roof fraction
+            real(kind=kind_noahmp) hfgr        !Green roof heat flux
+            real(kind=kind_noahmp) gr_frac_roof     !Green roof fraction
 
 	integer nz		!Number of layers inside the material
-	real dt			!Time step
-	real dz(nz)		!Layer sizes [m]
-	real cs(nz)		!Specific heat of the material [J/(m3.K)] 
-	real k(nz+1)		!Thermal conductivity in each layers (face) [W/(m.K)]
-	real flux(2)		!Internal and external flux terms.
+	real(kind=kind_noahmp) dt			!Time step
+	real(kind=kind_noahmp) dz(nz)		!Layer sizes [m]
+	real(kind=kind_noahmp) cs(nz)		!Specific heat of the material [J/(m3.K)] 
+	real(kind=kind_noahmp) k(nz+1)		!Thermal conductivity in each layers (face) [W/(m.K)]
+	real(kind=kind_noahmp) flux(2)		!Internal and external flux terms.
         
 
 !Input-Output:
 !-------------
 
 	integer swwall          !swich for the physical coefficients calculation
-	real temp(nz)		!Temperature at each layer
+	real(kind=kind_noahmp) temp(nz)		!Temperature at each layer
 
 !Local:
 !-----	
 
-      real a(-1:1,nz)          !  a(-1,*) lower diagonal      A(i,i-1)
+      real(kind=kind_noahmp) a(-1:1,nz)          !  a(-1,*) lower diagonal      A(i,i-1)
                                !  a(0,*)  principal diagonal  A(i,i)
                                !  a(1,*)  upper diagonal      A(i,i+1).
       
-      real b(nz)	       !Coefficients of the second term.	
-      real k1(20)
-      real k2(20)
-      real kc(20)
+      real(kind=kind_noahmp) b(nz)	       !Coefficients of the second term.	
+      real(kind=kind_noahmp) k1(20)
+      real(kind=kind_noahmp) k2(20)
+      real(kind=kind_noahmp) kc(20)
       save k1,k2,kc
       integer iz
         	
@@ -1070,30 +1072,30 @@ MODULE module_sf_bem
 !Input:
 !-----
  	integer nz		!Number of layers inside the material
-	real dt			!Time step
-	real dz(nz)		!Layer sizes [m]
-	real cs(nz)		!Specific heat of the material [J/(m3.K)] 
-	real k(nz+1)		!Thermal conductivity in each layers (face) [W/(m.K)]
-	real flux(2)		!Internal and external flux terms.
+	real(kind=kind_noahmp) dt			!Time step
+	real(kind=kind_noahmp) dz(nz)		!Layer sizes [m]
+	real(kind=kind_noahmp) cs(nz)		!Specific heat of the material [J/(m3.K)] 
+	real(kind=kind_noahmp) k(nz+1)		!Thermal conductivity in each layers (face) [W/(m.K)]
+	real(kind=kind_noahmp) flux(2)		!Internal and external flux terms.
         
 
 !Input-Output:
 !-------------
 
 	integer swwall          !swich for the physical coefficients calculation
-	real temp(nz)		!Temperature at each layer
+	real(kind=kind_noahmp) temp(nz)		!Temperature at each layer
 
 !Local:
 !-----	
 
-      real a(-1:1,nz)          !  a(-1,*) lower diagonal      A(i,i-1)
+      real(kind=kind_noahmp) a(-1:1,nz)          !  a(-1,*) lower diagonal      A(i,i-1)
                                !  a(0,*)  principal diagonal  A(i,i)
                                !  a(1,*)  upper diagonal      A(i,i+1).
       
-      real b(nz)	       !Coefficients of the second term.	
-      real k1(20)
-      real k2(20)
-      real kc(20)
+      real(kind=kind_noahmp) b(nz)	       !Coefficients of the second term.	
+      real(kind=kind_noahmp) k1(20)
+      real(kind=kind_noahmp) k2(20)
+      real(kind=kind_noahmp) kc(20)
       save k1,k2,kc
       integer iz
         	
@@ -1154,28 +1156,28 @@ MODULE module_sf_bem
 !Input
 !-----
 	integer nz		!Number of layers inside the material
-	real dt			!Time step
-	real dz(nz)		!Layer sizes [m]
-	real cs(nz)		!Specific heat of the material [J/(m3.K)] 
-	real k(nz+1)		!Thermal diffusivity in each layers (face) [W/(m.K)]
+	real(kind=kind_noahmp) dt			!Time step
+	real(kind=kind_noahmp) dz(nz)		!Layer sizes [m]
+	real(kind=kind_noahmp) cs(nz)		!Specific heat of the material [J/(m3.K)] 
+	real(kind=kind_noahmp) k(nz+1)		!Thermal diffusivity in each layers (face) [W/(m.K)]
 
 
 !Input-Output
 !------------
 
-	real flux(2)		!Internal and external flux terms.
+	real(kind=kind_noahmp) flux(2)		!Internal and external flux terms.
 
 
 !Output
 !------
-        real k1(20)
-        real k2(20)
-        real kc(20)
+        real(kind=kind_noahmp) k1(20)
+        real(kind=kind_noahmp) k2(20)
+        real(kind=kind_noahmp) kc(20)
 
 !Local
 !-----	
 	integer iz
-	real kf(nz)
+	real(kind=kind_noahmp) kf(nz)
 
 !------------------------------------------------------------------
 
@@ -1216,16 +1218,16 @@ MODULE module_sf_bem
 !----
 	integer swsurf  !swich for the type of surface (horizontal/vertical) 
             integer swwin   !swich for the type of surface (window/wall)
-	real tin	!Inside temperature [K]
-	real tw		!Internal wall temperature [K]  	
+	real(kind=kind_noahmp) tin	!Inside temperature [K]
+	real(kind=kind_noahmp) tw		!Internal wall temperature [K]  	
 
 
 !Output
 !------
-	real hsins	!internal sensible heat flux [W/m2]
+	real(kind=kind_noahmp) hsins	!internal sensible heat flux [W/m2]
 !Local
 !-----
-	real hc		!heat conduction coefficient [W/\B0C.m2]
+	real(kind=kind_noahmp) hc		!heat conduction coefficient [W/\B0C.m2]
 !--------------------------------------------------------------------
 
 	if (swsurf.eq.2) then	!vertical surface
@@ -1260,26 +1262,26 @@ MODULE module_sf_bem
 
 !Input
 !-----
-	real albwin		!albedo of the windows
-	real albwal		!albedo of the internal wall					
-	real rswal(4)		!incoming short wave radiation [W/m2]
-            real surwal(6) 		!surface of the indoor walls [m2]
-	real bw,bl		!width of the walls [m]
-	real zw			!height of the wall [m]
-	real pwin               !window proportion
+	real(kind=kind_noahmp) albwin		!albedo of the windows
+	real(kind=kind_noahmp) albwal		!albedo of the internal wall					
+	real(kind=kind_noahmp) rswal(4)		!incoming short wave radiation [W/m2]
+            real(kind=kind_noahmp) surwal(6) 		!surface of the indoor walls [m2]
+	real(kind=kind_noahmp) bw,bl		!width of the walls [m]
+	real(kind=kind_noahmp) zw			!height of the wall [m]
+	real(kind=kind_noahmp) pwin               !window proportion
 	
 !Output
 !------
-	real rsint(6)		!internal walls short wave radiation [W/m2]
+	real(kind=kind_noahmp) rsint(6)		!internal walls short wave radiation [W/m2]
 
 !Local
 !-----
-	real transmit   !transmittance of the direct/diffused radiation
-            real rstr	!solar radiation transmitted through the windows	
-            real surtotwal  !total indoor surface of the walls in the room
+	real(kind=kind_noahmp) transmit   !transmittance of the direct/diffused radiation
+            real(kind=kind_noahmp) rstr	!solar radiation transmitted through the windows	
+            real(kind=kind_noahmp) surtotwal  !total indoor surface of the walls in the room
 	integer iw
-	real b(6)	!second member for the system
-	real a(6,6)	!matrix for the system
+	real(kind=kind_noahmp) b(6)	!second member for the system
+	real(kind=kind_noahmp) a(6,6)	!matrix for the system
 
 !-------------------------------------------------------------------
 
@@ -1329,26 +1331,26 @@ MODULE module_sf_bem
 !Input
 !-----
 
-	real emwal	!emissivity of the internal walls
-	real emwin	!emissivity of the window
-	real sigma	!Stefan-Boltzmann constant [W/m2.K4]
-	real twal_int(6)!temperature of the first internal layers of a room [K]
-	real twin(4)	!temperature of the windows [K]
-	real bw		!width of the wall
-	real bl		!length of the wall
-	real zw		!height of the wall
-	real pwin       !window proportion	
+	real(kind=kind_noahmp) emwal	!emissivity of the internal walls
+	real(kind=kind_noahmp) emwin	!emissivity of the window
+	real(kind=kind_noahmp) sigma	!Stefan-Boltzmann constant [W/m2.K4]
+	real(kind=kind_noahmp) twal_int(6)!temperature of the first internal layers of a room [K]
+	real(kind=kind_noahmp) twin(4)	!temperature of the windows [K]
+	real(kind=kind_noahmp) bw		!width of the wall
+	real(kind=kind_noahmp) bl		!length of the wall
+	real(kind=kind_noahmp) zw		!height of the wall
+	real(kind=kind_noahmp) pwin       !window proportion	
 
 !Output
 !------
 
-	real rlint(6)	!internal walls long wave radiation [W/m2]
+	real(kind=kind_noahmp) rlint(6)	!internal walls long wave radiation [W/m2]
 
 !Local
 !------
 	
-	real b(6)	!second member vector for the system
-	real a(6,6)	!matrix for the system
+	real(kind=kind_noahmp) b(6)	!second member vector for the system
+	real(kind=kind_noahmp) a(6,6)	!matrix for the system
         integer iw
 !----------------------------------------------------------------
 
@@ -1391,23 +1393,23 @@ MODULE module_sf_bem
 
 !Input
 !-----
-	real rstr	!solar radiation transmitted through the windows		
-	real albwal	!albedo of the internal walls
-	real albwin	!albedo of the windows.
-	real bw		!length of the wall
-	real aw		!width of the wall
-	real zw		!height of the wall
-	real fprl_int	!view factor
-	real fnrm_int	!view factor
-	real pwin       !window proportion
+	real(kind=kind_noahmp) rstr	!solar radiation transmitted through the windows		
+	real(kind=kind_noahmp) albwal	!albedo of the internal walls
+	real(kind=kind_noahmp) albwin	!albedo of the windows.
+	real(kind=kind_noahmp) bw		!length of the wall
+	real(kind=kind_noahmp) aw		!width of the wall
+	real(kind=kind_noahmp) zw		!height of the wall
+	real(kind=kind_noahmp) fprl_int	!view factor
+	real(kind=kind_noahmp) fnrm_int	!view factor
+	real(kind=kind_noahmp) pwin       !window proportion
 !Output
 !------
-	real a(6,6)		!Matrix for the system
-	real b(6)		!Second member for the system
+	real(kind=kind_noahmp) a(6,6)		!Matrix for the system
+	real(kind=kind_noahmp) b(6)		!Second member for the system
 !Local
 !-----
 	integer iw,jw	
-	real albm               !averaged albedo
+	real(kind=kind_noahmp) albm               !averaged albedo
 !----------------------------------------------------------------
 
 !Initialise the variables
@@ -1536,34 +1538,34 @@ MODULE module_sf_bem
 !Input
 !-----
 
-	real pwin       !window proportion 
-	real emwal	!emissivity of the internal walls
-	real emwin	!emissivity of the window
-	real sigma	!Stefan-Boltzmann constant [W/m2.K4]
-	real twalint(6) !temperature of the first internal layers of a room [K]
-	real twinint(4)	!temperature of the windows [K]
-	real aw		!width of the wall
-	real bw		!length of the wall
-	real zw		!height of the wall
-	real fprl_int	!view factor
-	real fnrm_int	!view factor	
-           real fnrm_intx	!view factor
-           real fnrm_inty	!view factor
+	real(kind=kind_noahmp) pwin       !window proportion 
+	real(kind=kind_noahmp) emwal	!emissivity of the internal walls
+	real(kind=kind_noahmp) emwin	!emissivity of the window
+	real(kind=kind_noahmp) sigma	!Stefan-Boltzmann constant [W/m2.K4]
+	real(kind=kind_noahmp) twalint(6) !temperature of the first internal layers of a room [K]
+	real(kind=kind_noahmp) twinint(4)	!temperature of the windows [K]
+	real(kind=kind_noahmp) aw		!width of the wall
+	real(kind=kind_noahmp) bw		!length of the wall
+	real(kind=kind_noahmp) zw		!height of the wall
+	real(kind=kind_noahmp) fprl_int	!view factor
+	real(kind=kind_noahmp) fnrm_int	!view factor	
+           real(kind=kind_noahmp) fnrm_intx	!view factor
+           real(kind=kind_noahmp) fnrm_inty	!view factor
 
 !Output
 !------
-	real b(6)	!second member vector for the system
-	real a(6,6)	!matrix for the system
+	real(kind=kind_noahmp) b(6)	!second member vector for the system
+	real(kind=kind_noahmp) a(6,6)	!matrix for the system
 !Local
 !-----
 	integer iw,jw
-	real b_wall(6)	
-	real b_wind(6)
-	real emwal_av		!averadge emissivity of the wall
-	real emwin_av		!averadge emissivity of the window
-        real em_av		!averadge emissivity
-        real twal_int(6)        !twalint 
-	real twin(4)   		!twinint 
+	real(kind=kind_noahmp) b_wall(6)	
+	real(kind=kind_noahmp) b_wind(6)
+	real(kind=kind_noahmp) emwal_av		!averadge emissivity of the wall
+	real(kind=kind_noahmp) emwin_av		!averadge emissivity of the window
+        real(kind=kind_noahmp) em_av		!averadge emissivity
+        real(kind=kind_noahmp) twal_int(6)        !twalint 
+	real(kind=kind_noahmp) twin(4)   		!twinint 
 !------------------------------------------------------------------
 
 !Initialise the variables
@@ -1833,16 +1835,16 @@ MODULE module_sf_bem
 
 !Input
 !-----
-	real hseqocc		!sensible heat generated by equipments and occupants [W]
-	real hleqocc		!latent heat generated by occupants [W]
-	real hsvent		!sensible heat generated by natural ventilation [W]
-	real hlvent		!latent heat generated by natural ventilation [W] 
-	real hscond		!sensible heat generated by wall conduction 
+	real(kind=kind_noahmp) hseqocc		!sensible heat generated by equipments and occupants [W]
+	real(kind=kind_noahmp) hleqocc		!latent heat generated by occupants [W]
+	real(kind=kind_noahmp) hsvent		!sensible heat generated by natural ventilation [W]
+	real(kind=kind_noahmp) hlvent		!latent heat generated by natural ventilation [W] 
+	real(kind=kind_noahmp) hscond		!sensible heat generated by wall conduction 
 
 !Output
 !------
-	real hslev		!sensible heat flux generated inside the room [W]
-	real hllev		!latent heat flux generatd inside the room
+	real(kind=kind_noahmp) hslev		!sensible heat flux generated inside the room [W]
+	real(kind=kind_noahmp) hllev		!latent heat flux generatd inside the room
 
 
 !Calculation of the total sensible heat generated inside the room
@@ -1871,11 +1873,11 @@ MODULE module_sf_bem
 !Input
 !-----
 
-	real nhourday	! number of hours from midnight (local time)
+	real(kind=kind_noahmp) nhourday	! number of hours from midnight (local time)
 	
 !Output
 !------
-	real rocc       !value between 0 and 1
+	real(kind=kind_noahmp) rocc       !value between 0 and 1
 
 !!TEST
         rocc=1.
@@ -1895,13 +1897,13 @@ MODULE module_sf_bem
 !Input
 !-----
 
-	real nhourday ! number of hours from midnight, Local time
-        real, intent(in) :: hsesf
-        real, intent(in), dimension(24) :: hsequip
+	real(kind=kind_noahmp) nhourday ! number of hours from midnight, Local time
+        real(kind=kind_noahmp), intent(in) :: hsesf
+        real(kind=kind_noahmp), intent(in), dimension(24) :: hsequip
 	
 !Output
 !------
-	real hsequ    !sensible heat gain from equipment [Wm\AF2]
+	real(kind=kind_noahmp) hsequ    !sensible heat gain from equipment [Wm\AF2]
 
 !---------------------------------------------------------------------	
 
@@ -1922,28 +1924,28 @@ MODULE module_sf_bem
 
 !Input
 !-----
-	real bw			!Room width [m]
-	real bl			!Room lengzh [m]
-	real nhourday		!number of hours from the beginning of the day
-        real, intent(in) :: perflo ! Peak number of occupants per unit floor area
-        real, intent(in) :: hsesf
-        real, intent(in), dimension(24) :: hsequip
+	real(kind=kind_noahmp) bw			!Room width [m]
+	real(kind=kind_noahmp) bl			!Room lengzh [m]
+	real(kind=kind_noahmp) nhourday		!number of hours from the beginning of the day
+        real(kind=kind_noahmp), intent(in) :: perflo ! Peak number of occupants per unit floor area
+        real(kind=kind_noahmp), intent(in) :: hsesf
+        real(kind=kind_noahmp), intent(in), dimension(24) :: hsequip
 
 !Output
 !------
-	real hseqocc		!sensible heat generated by equipments and occupants [W]
-	real hleqocc		!latent heat generated by occupants [W]
+	real(kind=kind_noahmp) hseqocc		!sensible heat generated by equipments and occupants [W]
+	real(kind=kind_noahmp) hleqocc		!latent heat generated by occupants [W]
 !Local
 !-----
-	real Af			!Air conditioned floor area [m2]
-	real rocc		!Occupation ratio of the floor [0,1]
-        real hsequ		!Heat generated from equipments 
+	real(kind=kind_noahmp) Af			!Air conditioned floor area [m2]
+	real(kind=kind_noahmp) rocc		!Occupation ratio of the floor [0,1]
+        real(kind=kind_noahmp) hsequ		!Heat generated from equipments 
 
-        real hsocc		!Sensible heat generated by a person [W/Person]
+        real(kind=kind_noahmp) hsocc		!Sensible heat generated by a person [W/Person]
                                 !Source Boundary Layer Climates,page 195 (book)
         parameter (hsocc=160.)
 
-        real hlocc		!Latent heat generated by a person [W/Person]
+        real(kind=kind_noahmp) hlocc		!Latent heat generated by a person [W/Person]
                                 !Source Boundary Layer Climates,page 225 (book)
         parameter (hlocc=1.96e6/86400.)
 
@@ -1984,21 +1986,21 @@ MODULE module_sf_bem
 
 !Input
 !-----
-	real cpint		!specific heat of the indoor air [J/kg.K]
-	real rhoint		!density of the indoor air [Kg/m3]	
-	real vollev		!volume of the room [m3]
-	real tlev		!Room temperature [K]
-	real tout		!outside air temperature [K]
-	real latent		!latent heat of evaporation [J/Kg]
-	real humout		!outside absolute humidity [Kgwater/Kgair]
-	real rhoout		!air density [kg/m3]
-	real humlev		!Specific humidity of the indoor air [Kgwater/Kgair]
-        real, intent(in) :: beta!Thermal efficiency of the heat exchanger 
+	real(kind=kind_noahmp) cpint		!specific heat of the indoor air [J/kg.K]
+	real(kind=kind_noahmp) rhoint		!density of the indoor air [Kg/m3]	
+	real(kind=kind_noahmp) vollev		!volume of the room [m3]
+	real(kind=kind_noahmp) tlev		!Room temperature [K]
+	real(kind=kind_noahmp) tout		!outside air temperature [K]
+	real(kind=kind_noahmp) latent		!latent heat of evaporation [J/Kg]
+	real(kind=kind_noahmp) humout		!outside absolute humidity [Kgwater/Kgair]
+	real(kind=kind_noahmp) rhoout		!air density [kg/m3]
+	real(kind=kind_noahmp) humlev		!Specific humidity of the indoor air [Kgwater/Kgair]
+        real(kind=kind_noahmp), intent(in) :: beta!Thermal efficiency of the heat exchanger 
 	
 !Output
 !------
-	real hsvent		!sensible heat generated by natural ventilation [W]
-	real hlvent		!latent heat generated by natural ventilation [W] 
+	real(kind=kind_noahmp) hsvent		!sensible heat generated by natural ventilation [W]
+	real(kind=kind_noahmp) hlvent		!latent heat generated by natural ventilation [W] 
 
 !Local
 !-----       
@@ -2035,16 +2037,16 @@ MODULE module_sf_bem
 
 !Input
 !-----
-	real hswalins(6)	!sensible heat at the internal layers of the wall [W/m2]
-	real hswinins(4)	!internal window sensible heat flux [W/m2]
-	real surwal(6)	        !surfaces of the room walls [m2]
-	real pwin               !window proportion	
+	real(kind=kind_noahmp) hswalins(6)	!sensible heat at the internal layers of the wall [W/m2]
+	real(kind=kind_noahmp) hswinins(4)	!internal window sensible heat flux [W/m2]
+	real(kind=kind_noahmp) surwal(6)	        !surfaces of the room walls [m2]
+	real(kind=kind_noahmp) pwin               !window proportion	
 
 
 !Output
 !------
 	
-	real hscond		!sensible heat generated by wall conduction [W]
+	real(kind=kind_noahmp) hscond		!sensible heat generated by wall conduction [W]
 	
 !Local
 !-----
@@ -2088,26 +2090,26 @@ MODULE module_sf_bem
 !Input:
 !-----.
         integer swcond       !swich air conditioning
-	real nhourday        !number of hours from the beginning of the day real
-	real dt	             !time step [s]
-	real Qb		     !overall heat capacity of the indoor air [J/K]
-        real hsroo           !sensible heat flux generated inside the room [W]
-        real tlev            !room air temperature [K]
-        real, intent(in) :: timeon  ! Initial local time of A/C systems
-        real, intent(in) :: timeoff ! Ending local time of A/C systems
-        real, intent(in) :: targtemp! Target temperature of A/C systems
-        real, intent(in) :: gaptemp ! Comfort range of indoor temperature
+	real(kind=kind_noahmp) nhourday        !number of hours from the beginning of the day real
+	real(kind=kind_noahmp) dt	             !time step [s]
+	real(kind=kind_noahmp) Qb		     !overall heat capacity of the indoor air [J/K]
+        real(kind=kind_noahmp) hsroo           !sensible heat flux generated inside the room [W]
+        real(kind=kind_noahmp) tlev            !room air temperature [K]
+        real(kind=kind_noahmp), intent(in) :: timeon  ! Initial local time of A/C systems
+        real(kind=kind_noahmp), intent(in) :: timeoff ! Ending local time of A/C systems
+        real(kind=kind_noahmp), intent(in) :: targtemp! Target temperature of A/C systems
+        real(kind=kind_noahmp), intent(in) :: gaptemp ! Comfort range of indoor temperature
         
 
 !Local:
 !-----.
 
-        real templev         !hipotetical room air temperature [K]
-        real alpha           !variable to control the heating/cooling of 
+        real(kind=kind_noahmp) templev         !hipotetical room air temperature [K]
+        real(kind=kind_noahmp) alpha           !variable to control the heating/cooling of 
                              !the air conditining system
 !Output:
 !-----.
-	real hsneed	     !sensible heat extracted to the indoor air [W]
+	real(kind=kind_noahmp) hsneed	     !sensible heat extracted to the indoor air [W]
 !---------------------------------------------------------------------
 !initialize variables
 !---------------------
@@ -2173,27 +2175,27 @@ MODULE module_sf_bem
 !Input:
 !-----.
         integer swcond    !swich air conditioning
-	real nhourday     !number of hours from the beginning of the day real[h]
-	real dt	          !time step [s]
-	real volroo       !volume of the room [m3]
-        real rhoint       !density of the internal air [Kg/m3]
-        real latent       !latent heat of evaporation [J/Kg]
-        real hlroo        !latent heat flux generated inside the room [W]
-        real shumroo      !specific humidity of the indoor air [kg/kg]
-        real, intent(in) :: timeon  ! Initial local time of A/C systems
-        real, intent(in) :: timeoff ! Ending local time of A/C systems
-        real, intent(in) :: targhum ! Target humidity of the A/C systems
-        real, intent(in) :: gaphum  ! comfort range of the specific humidity
+	real(kind=kind_noahmp) nhourday     !number of hours from the beginning of the day real[h]
+	real(kind=kind_noahmp) dt	          !time step [s]
+	real(kind=kind_noahmp) volroo       !volume of the room [m3]
+        real(kind=kind_noahmp) rhoint       !density of the internal air [Kg/m3]
+        real(kind=kind_noahmp) latent       !latent heat of evaporation [J/Kg]
+        real(kind=kind_noahmp) hlroo        !latent heat flux generated inside the room [W]
+        real(kind=kind_noahmp) shumroo      !specific humidity of the indoor air [kg/kg]
+        real(kind=kind_noahmp), intent(in) :: timeon  ! Initial local time of A/C systems
+        real(kind=kind_noahmp), intent(in) :: timeoff ! Ending local time of A/C systems
+        real(kind=kind_noahmp), intent(in) :: targhum ! Target humidity of the A/C systems
+        real(kind=kind_noahmp), intent(in) :: gaphum  ! comfort range of the specific humidity
 
 !Local:
 !-----.
 
-        real humlev       !hipotetical specific humidity of the indoor [kg/kg]
-        real betha        !variable to control the drying/moistening of
+        real(kind=kind_noahmp) humlev       !hipotetical specific humidity of the indoor [kg/kg]
+        real(kind=kind_noahmp) betha        !variable to control the drying/moistening of
                           !the air conditioning system
 !Output:
 !-----.
-	real hlneed	  !latent heat extracted to the indoor air [W]
+	real(kind=kind_noahmp) hlneed	  !latent heat extracted to the indoor air [W]
 !------------------------------------------------------------------------
 !initialize variables
 !---------------------
@@ -2256,21 +2258,21 @@ MODULE module_sf_bem
 !Performance of the air conditioning system        
 !
 !INPUT/OUTPUT VARIABLES
-         real, intent(in) :: cop
+         real(kind=kind_noahmp), intent(in) :: cop
 !
 !INPUT/OUTPUT VARIABLES
 !       
-         real hsneed     !sensible heat that is necessary for cooling/heating
+         real(kind=kind_noahmp) hsneed     !sensible heat that is necessary for cooling/heating
                          !the indoor air temperature [W] 
-         real hlneed     !latent heat that is necessary for controling
+         real(kind=kind_noahmp) hlneed     !latent heat that is necessary for controling
                          !the humidity of the indoor air [W]
-         real dt         !time step [s]
+         real(kind=kind_noahmp) dt         !time step [s]
 !
 !OUTPUT VARIABLES
 !
-         real hsout      !sensible heat pumped out into the atmosphere [W]
-         real hlout      !latent heat pumped out into the atmosphere [W]
-         real consump    !Electrical consumption of the air conditioning system [W] 
+         real(kind=kind_noahmp) hsout      !sensible heat pumped out into the atmosphere [W]
+         real(kind=kind_noahmp) hlout      !latent heat pumped out into the atmosphere [W]
+         real(kind=kind_noahmp) consump    !Electrical consumption of the air conditioning system [W] 
                          
     
 !
@@ -2321,13 +2323,13 @@ MODULE module_sf_bem
 !
 !
         integer nzcanm            !Maximum number of vertical levels in the urban grid
-        real hsout(nzcanm)        !sensible heat emitted outside the room [W]
-        real consump(nzcanm)      !Electricity consumption for the a.c. in each floor[W]
+        real(kind=kind_noahmp) hsout(nzcanm)        !sensible heat emitted outside the room [W]
+        real(kind=kind_noahmp) consump(nzcanm)      !Electricity consumption for the a.c. in each floor[W]
 !
 !OUTPUT VARIABLES
 !
-	real consumpbuild         !Energetic consumption for the entire building[kWh/s]
-        real hsoutbuild           !Total sensible heat ejected into the atmosphere
+	real(kind=kind_noahmp) consumpbuild         !Energetic consumption for the entire building[kWh/s]
+        real(kind=kind_noahmp) hsoutbuild           !Total sensible heat ejected into the atmosphere
                                   !by the air conditioning systems per building [W]        
 !
 !LOCAL  VARIABLES
@@ -2373,13 +2375,13 @@ MODULE module_sf_bem
 
 ! Input
         integer n
-        real a(-1:1,n)           !  a(-1,*) lower diagonal      A(i,i-1)
+        real(kind=kind_noahmp) a(-1:1,n)           !  a(-1,*) lower diagonal      A(i,i-1)
                                !  a(0,*)  principal diagonal  A(i,i)
                                !  a(1,*)  upper diagonal      A(i,i+1)
-        real b(n)
+        real(kind=kind_noahmp) b(n)
 
 ! Output
-        real x(n)
+        real(kind=kind_noahmp) x(n)
 
 ! Local
         integer i
@@ -2420,12 +2422,12 @@ MODULE module_sf_bem
 ! INPUT:
 ! ----------------------------------------------------------------------
        integer np
-       real a(np,np)
+       real(kind=kind_noahmp) a(np,np)
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-       real b(np)
+       real(kind=kind_noahmp) b(np)
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
@@ -2433,11 +2435,11 @@ MODULE module_sf_bem
       integer nmax
       parameter (nmax=150)
 
-      real big,dum
+      real(kind=kind_noahmp) big,dum
       integer i,icol,irow
       integer j,k,l,ll,n
       integer ipiv(nmax)
-      real pivinv
+      real(kind=kind_noahmp) pivinv
 
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -2519,13 +2521,13 @@ MODULE module_sf_bem
 !-------------------------------------------------------------------
 
 	
-	real alb	!albedo of the surface
-	real rs		!shor wave radiation
-	real em		!emissivity of the surface
-	real rl 	!lon wave radiation
-	real sigma	!parameter (wall is not black body) [W/m2.K4]
-	real twal	!wall temperature [K]
-	real radflux
+	real(kind=kind_noahmp) alb	!albedo of the surface
+	real(kind=kind_noahmp) rs		!shor wave radiation
+	real(kind=kind_noahmp) em		!emissivity of the surface
+	real(kind=kind_noahmp) rl 	!lon wave radiation
+	real(kind=kind_noahmp) sigma	!parameter (wall is not black body) [W/m2.K4]
+	real(kind=kind_noahmp) twal	!wall temperature [K]
+	real(kind=kind_noahmp) radflux
 	
 	 radflux=(1.-alb)*rs+em*rl-em*sigma*twal**4
 	
@@ -2547,23 +2549,23 @@ MODULE module_sf_bem
 ! Input Variables
 !	
       integer,intent(in) :: nz !Maximum number of vertical levels in the urban grid
-      real,intent(in) :: alb	!albedo of the surface
-      real,intent(in) :: rs	!shortwave radiation [W m-2]
-      real,intent(in) :: swddif
-      real,intent(in) :: em	!emissivity of the surface
-      real,intent(in) :: rl 	!longwave radiation [W m-2]
-      real,intent(in) :: twal	!surface temperature [K]
-      real,intent(in) :: sigma !Stefan-Boltzmann constant [W/m2.K4]
-      real,intent(in) :: tpv !Stefan-Boltzmann constant [W/m2.K4]
-      real,intent(in),dimension(1:nz) :: tair  !external temperature [K] 
+      real(kind=kind_noahmp),intent(in) :: alb	!albedo of the surface
+      real(kind=kind_noahmp),intent(in) :: rs	!shortwave radiation [W m-2]
+      real(kind=kind_noahmp),intent(in) :: swddif
+      real(kind=kind_noahmp),intent(in) :: em	!emissivity of the surface
+      real(kind=kind_noahmp),intent(in) :: rl 	!longwave radiation [W m-2]
+      real(kind=kind_noahmp),intent(in) :: twal	!surface temperature [K]
+      real(kind=kind_noahmp),intent(in) :: sigma !Stefan-Boltzmann constant [W/m2.K4]
+      real(kind=kind_noahmp),intent(in) :: tpv !Stefan-Boltzmann constant [W/m2.K4]
+      real(kind=kind_noahmp),intent(in),dimension(1:nz) :: tair  !external temperature [K] 
       integer,intent(in) :: n  !number of floors in the building
-      real, intent(in) :: pv_frac_roof !
-      real :: empv
-      real :: hrad
-      real :: F12
+      real(kind=kind_noahmp), intent(in) :: pv_frac_roof !
+      real(kind=kind_noahmp) :: empv
+      real(kind=kind_noahmp) :: hrad
+      real(kind=kind_noahmp) :: F12
 ! Output variables
 !
-      real,intent(inout) :: radflux !radiative flux at the surface [W m-2]
+      real(kind=kind_noahmp),intent(inout) :: radflux !radiative flux at the surface [W m-2]
 !     
 ! Local variables
       F12=1. 
@@ -2588,8 +2590,8 @@ MODULE module_sf_bem
         
         implicit none
 
-	real vx,vy
-	real fprl_int
+	real(kind=kind_noahmp) vx,vy
+	real(kind=kind_noahmp) fprl_int
         
 	fprl_int=(2./(3.141592653*vx*vy))*                       &
              (log(sqrt((1.+vx*vx)*(1.+vy*vy)/(1.+vx*vx+vy*vy)))+ &
@@ -2612,8 +2614,8 @@ MODULE module_sf_bem
 
         implicit none
         
-	real wx,wy,wz
-	real fnrm_int
+	real(kind=kind_noahmp) wx,wy,wz
+	real(kind=kind_noahmp) fnrm_int
 	
         fnrm_int=(1./(3.141592653*wy))*(wy*atan(1./wy)+wx*atan(1./wx)- &
               (sqrt(wz)*atan(1./sqrt(wz)))+                            &
