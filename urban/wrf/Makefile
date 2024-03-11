@@ -29,7 +29,7 @@ NoahmpUrbanDriverMainMod.o: NoahmpUrbanDriverMainMod.F
 	@echo ""
 	$(RM) $(*).f90
 	$(CPP) $(CPPFLAGS) $(CPPHRLDAS) $(*).F > $(*).f90
-	$(COMPILERF90) -c  -I. -I../../hrldas/Utility_routines \
+	$(COMPILERF90) -c  -I. -I../../hrldas/Utility_routines -I../../noahmp/utility \
         $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) $(*).f90
 	@echo ""
 

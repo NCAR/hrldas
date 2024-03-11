@@ -8,7 +8,7 @@ use module_wrf_error
 #define FATAL_ERROR(M) call wrf_error_fatal( M )
 #define WRITE_MESSAGE(M) call wrf_message( M )
 #endif
-
+use Machine, only : kind_noahmp
 !===============================================================================
 !     Single-Layer Urban Canopy Model for WRF Noah-LSM
 !     Original Version: 2002/11/06 by Hiroyuki Kusaka
@@ -19,50 +19,50 @@ use module_wrf_error
 
    INTEGER                         :: ICATE
 
-   REAL, ALLOCATABLE, DIMENSION(:) :: ZR_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: Z0C_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: Z0HC_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: ZDC_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: SVF_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: R_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: RW_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: HGT_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: AH_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: ALH_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: BETR_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: BETB_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: BETG_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: FRC_URB_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: ZR_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: Z0C_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: Z0HC_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: ZDC_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: SVF_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: R_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: RW_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: HGT_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: AH_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: ALH_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: BETR_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: BETB_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: BETG_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: FRC_URB_TBL
 
-   REAL, ALLOCATABLE, DIMENSION(:) :: COP_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: BLDAC_FRC_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: COOLED_FRC_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: PWIN_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: BETA_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: COP_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: BLDAC_FRC_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: COOLED_FRC_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: PWIN_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: BETA_TBL
    INTEGER, ALLOCATABLE, DIMENSION(:) :: SW_COND_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: TIME_ON_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: TIME_OFF_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: TARGTEMP_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: GAPTEMP_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: TARGHUM_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: GAPHUM_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: PERFLO_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: PV_FRAC_ROOF_TBL !GRZ
-   REAL, ALLOCATABLE, DIMENSION(:) :: GR_FRAC_ROOF_TBL !GRZ
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: TIME_ON_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: TIME_OFF_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: TARGTEMP_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: GAPTEMP_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: TARGHUM_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: GAPHUM_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: PERFLO_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: PV_FRAC_ROOF_TBL !GRZ
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: GR_FRAC_ROOF_TBL !GRZ
    INTEGER :: GR_FLAG_TBL !GRZ
    INTEGER :: GR_TYPE_TBL !GRZ
-   REAL, DIMENSION(1:24)           :: IRHO_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: HSESF_TBL
+   REAL(kind=kind_noahmp), DIMENSION(1:24)           :: IRHO_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: HSESF_TBL
 
-   REAL, ALLOCATABLE, DIMENSION(:) :: CAPR_TBL, CAPB_TBL, CAPG_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: AKSR_TBL, AKSB_TBL, AKSG_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: ALBR_TBL, ALBB_TBL, ALBG_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: EPSR_TBL, EPSB_TBL, EPSG_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: Z0R_TBL,  Z0B_TBL,  Z0G_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: SIGMA_ZED_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: Z0HB_TBL, Z0HG_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: TRLEND_TBL, TBLEND_TBL, TGLEND_TBL
-   REAL, ALLOCATABLE, DIMENSION(:) :: AKANDA_URBAN_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: CAPR_TBL, CAPB_TBL, CAPG_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: AKSR_TBL, AKSB_TBL, AKSG_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: ALBR_TBL, ALBB_TBL, ALBG_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: EPSR_TBL, EPSB_TBL, EPSG_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: Z0R_TBL,  Z0B_TBL,  Z0G_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: SIGMA_ZED_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: Z0HB_TBL, Z0HG_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: TRLEND_TBL, TBLEND_TBL, TGLEND_TBL
+   REAL(kind=kind_noahmp), ALLOCATABLE, DIMENSION(:) :: AKANDA_URBAN_TBL
 !for BEP
 
    ! MAXDIRS :: The maximum number of street directions we're allowed to define
@@ -71,12 +71,12 @@ use module_wrf_error
    INTEGER, PARAMETER :: MAXHGTS = 50
 
    INTEGER, ALLOCATABLE, DIMENSION(:)   :: NUMDIR_TBL
-   REAL,    ALLOCATABLE, DIMENSION(:,:) :: STREET_DIRECTION_TBL
-   REAL,    ALLOCATABLE, DIMENSION(:,:) :: STREET_WIDTH_TBL
-   REAL,    ALLOCATABLE, DIMENSION(:,:) :: BUILDING_WIDTH_TBL
+   REAL(kind=kind_noahmp),    ALLOCATABLE, DIMENSION(:,:) :: STREET_DIRECTION_TBL
+   REAL(kind=kind_noahmp),    ALLOCATABLE, DIMENSION(:,:) :: STREET_WIDTH_TBL
+   REAL(kind=kind_noahmp),    ALLOCATABLE, DIMENSION(:,:) :: BUILDING_WIDTH_TBL
    INTEGER, ALLOCATABLE, DIMENSION(:)   :: NUMHGT_TBL
-   REAL,    ALLOCATABLE, DIMENSION(:,:) :: HEIGHT_BIN_TBL
-   REAL,    ALLOCATABLE, DIMENSION(:,:) :: HPERCENT_BIN_TBL
+   REAL(kind=kind_noahmp),    ALLOCATABLE, DIMENSION(:,:) :: HEIGHT_BIN_TBL
+   REAL(kind=kind_noahmp),    ALLOCATABLE, DIMENSION(:,:) :: HPERCENT_BIN_TBL
 !end BEP
    INTEGER                         :: BOUNDR_DATA,BOUNDB_DATA,BOUNDG_DATA
    INTEGER                         :: CH_SCHEME_DATA, TS_SCHEME_DATA
@@ -88,13 +88,13 @@ use module_wrf_error
    INTEGER                         :: IMP_SCHEME, IRI_SCHEME
    INTEGER                         :: alhoption       ! anthropogenic latent heat option
    INTEGER                         :: groption        ! anthropogenic latent heat option
-   REAL                            :: fgr             ! green roof fraction
-   REAL                            :: oasis           ! urban oasis parameter
-   REAL, DIMENSION(1:4)            :: DZGR            ! Layer depth of green roof 
-   REAL, DIMENSION(1:4)            :: alhseason       ! seasonal variation of alh
-   REAL, DIMENSION(1:48)           :: alhdiuprf       ! alh diurnal profile, tloc2: 1-48
-   REAL, DIMENSION(1:3)            :: porimp          ! porosity of pavement over impervious surface
-   REAL, DIMENSION(1:3)            :: dengimp         ! maximum water-holding depth of pavement
+   REAL(kind=kind_noahmp)                            :: fgr             ! green roof fraction
+   REAL(kind=kind_noahmp)                            :: oasis           ! urban oasis parameter
+   REAL(kind=kind_noahmp), DIMENSION(1:4)            :: DZGR            ! Layer depth of green roof 
+   REAL(kind=kind_noahmp), DIMENSION(1:4)            :: alhseason       ! seasonal variation of alh
+   REAL(kind=kind_noahmp), DIMENSION(1:48)           :: alhdiuprf       ! alh diurnal profile, tloc2: 1-48
+   REAL(kind=kind_noahmp), DIMENSION(1:3)            :: porimp          ! porosity of pavement over impervious surface
+   REAL(kind=kind_noahmp), DIMENSION(1:3)            :: dengimp         ! maximum water-holding depth of pavement
 
 !===end hydrological processes===
    
@@ -320,19 +320,19 @@ use module_wrf_error
 
    IMPLICIT NONE
 
-   REAL, PARAMETER    :: CP=0.24          ! heat capacity of dry air  [cgs unit]
-   REAL, PARAMETER    :: EL=583.          ! latent heat of vaporation [cgs unit]
-   REAL, PARAMETER    :: SIG=8.17E-11     ! stefun bolzman constant   [cgs unit]
-   REAL, PARAMETER    :: SIG_SI=5.67E-8   !                           [MKS unit]
-   REAL, PARAMETER    :: AK=0.4           ! kalman const.                [-]
-   REAL, PARAMETER    :: PI=3.14159       ! pi                           [-]
-   REAL, PARAMETER    :: TETENA=7.5       ! const. of Tetens Equation    [-]
-   REAL, PARAMETER    :: TETENB=237.3     ! const. of Tetens Equation    [-]
-   REAL, PARAMETER    :: SRATIO=0.75      ! ratio between direct/total solar [-]
+   REAL(kind=kind_noahmp), PARAMETER    :: CP=0.24          ! heat capacity of dry air  [cgs unit]
+   REAL(kind=kind_noahmp), PARAMETER    :: EL=583.          ! latent heat of vaporation [cgs unit]
+   REAL(kind=kind_noahmp), PARAMETER    :: SIG=8.17E-11     ! stefun bolzman constant   [cgs unit]
+   REAL(kind=kind_noahmp), PARAMETER    :: SIG_SI=5.67E-8   !                           [MKS unit]
+   REAL(kind=kind_noahmp), PARAMETER    :: AK=0.4           ! kalman const.                [-]
+   REAL(kind=kind_noahmp), PARAMETER    :: PI=3.14159       ! pi                           [-]
+   REAL(kind=kind_noahmp), PARAMETER    :: TETENA=7.5       ! const. of Tetens Equation    [-]
+   REAL(kind=kind_noahmp), PARAMETER    :: TETENB=237.3     ! const. of Tetens Equation    [-]
+   REAL(kind=kind_noahmp), PARAMETER    :: SRATIO=0.75      ! ratio between direct/total solar [-]
 
-   REAL, PARAMETER    :: CPP=1004.5       ! heat capacity of dry air    [J/K/kg]
-   REAL, PARAMETER    :: ELL=2.442E+06    ! latent heat of vaporization [J/kg]
-   REAL, PARAMETER    :: XKA=2.4E-5
+   REAL(kind=kind_noahmp), PARAMETER    :: CPP=1004.5       ! heat capacity of dry air    [J/K/kg]
+   REAL(kind=kind_noahmp), PARAMETER    :: ELL=2.442E+06    ! latent heat of vaporization [J/kg]
+   REAL(kind=kind_noahmp), PARAMETER    :: XKA=2.4E-5
 
 !-------------------------------------------------------------------------------
 ! C: configuration variables
@@ -349,9 +349,9 @@ use module_wrf_error
   INTEGER, INTENT(IN) :: num_road_layers
 
 
-  REAL, INTENT(IN), DIMENSION(1:num_roof_layers) :: DZR ! grid interval of roof layers [cm]
-  REAL, INTENT(IN), DIMENSION(1:num_wall_layers) :: DZB ! grid interval of wall layers [cm]
-  REAL, INTENT(IN), DIMENSION(1:num_road_layers) :: DZG ! grid interval of road layers [cm]
+  REAL(kind=kind_noahmp), INTENT(IN), DIMENSION(1:num_roof_layers) :: DZR ! grid interval of roof layers [cm]
+  REAL(kind=kind_noahmp), INTENT(IN), DIMENSION(1:num_wall_layers) :: DZB ! grid interval of wall layers [cm]
+  REAL(kind=kind_noahmp), INTENT(IN), DIMENSION(1:num_road_layers) :: DZG ! grid interval of road layers [cm]
 
 !-------------------------------------------------------------------------------
 ! I: input variables from LSM to Urban
@@ -360,66 +360,66 @@ use module_wrf_error
    INTEGER, INTENT(IN) :: UTYPE ! urban type [1=Commercial/Industrial, 2=High-intensity residential, 
                                 ! 3=low-intensity residential]
    INTEGER, INTENT(IN) :: jmonth! current month 
-   REAL, INTENT(IN)    :: TA   ! potential temp at 1st atmospheric level [K]
-   REAL, INTENT(IN)    :: QA   ! mixing ratio at 1st atmospheric level  [kg/kg]
-   REAL, INTENT(IN)    :: UA   ! wind speed at 1st atmospheric level    [m/s]
-   REAL, INTENT(IN)    :: U1   ! u at 1st atmospheric level             [m/s]
-   REAL, INTENT(IN)    :: V1   ! v at 1st atmospheric level             [m/s]
-   REAL, INTENT(IN)    :: SSG  ! downward total short wave radiation    [W/m/m]
-   REAL, INTENT(IN)    :: LLG  ! downward long wave radiation           [W/m/m]
-   REAL, INTENT(IN)    :: RAIN ! precipitation                          [mm/h]
-   REAL, INTENT(IN)    :: RHOO ! air density                            [kg/m^3]
-   REAL, INTENT(IN)    :: ZA   ! first atmospheric level                [m]
-   REAL, INTENT(IN)    :: DECLIN ! solar declination                    [rad]
-   REAL, INTENT(IN)    :: COSZ ! sin(fai)*sin(del)+cos(fai)*cos(del)*cos(omg)
-   REAL, INTENT(IN)    :: OMG  ! solar hour angle                       [rad]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: TA   ! potential temp at 1st atmospheric level [K]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: QA   ! mixing ratio at 1st atmospheric level  [kg/kg]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: UA   ! wind speed at 1st atmospheric level    [m/s]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: U1   ! u at 1st atmospheric level             [m/s]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: V1   ! v at 1st atmospheric level             [m/s]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: SSG  ! downward total short wave radiation    [W/m/m]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: LLG  ! downward long wave radiation           [W/m/m]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: RAIN ! precipitation                          [mm/h]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: RHOO ! air density                            [kg/m^3]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: ZA   ! first atmospheric level                [m]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: DECLIN ! solar declination                    [rad]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: COSZ ! sin(fai)*sin(del)+cos(fai)*cos(del)*cos(omg)
+   REAL(kind=kind_noahmp), INTENT(IN)    :: OMG  ! solar hour angle                       [rad]
 
-   REAL, INTENT(IN)    :: XLAT ! latitude                               [deg]
-   REAL, INTENT(IN)    :: DELT ! time step                              [s]
-   REAL, INTENT(INOUT) :: CHS,CHS2 ! CH*U at za and 2 m             [m/s]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: XLAT ! latitude                               [deg]
+   REAL(kind=kind_noahmp), INTENT(IN)    :: DELT ! time step                              [s]
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: CHS,CHS2 ! CH*U at za and 2 m             [m/s]
 
-   REAL, INTENT(INOUT) :: SSGD ! downward direct short wave radiation   [W/m/m]
-   REAL, INTENT(INOUT) :: SSGQ ! downward diffuse short wave radiation  [W/m/m]
-   REAL, INTENT(INOUT) :: CMR_URB
-   REAL, INTENT(INOUT) :: CHR_URB
-   REAL, INTENT(INOUT) :: CMC_URB
-   REAL, INTENT(INOUT) :: CHC_URB
-   REAL, INTENT(INOUT) :: ZNT  ! roughness length                       [m]    ! modified by danli
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: SSGD ! downward direct short wave radiation   [W/m/m]
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: SSGQ ! downward diffuse short wave radiation  [W/m/m]
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: CMR_URB
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: CHR_URB
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: CMC_URB
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: CHC_URB
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: ZNT  ! roughness length                       [m]    ! modified by danli
 !-------------------------------------------------------------------------------
 ! I: NUDAPT Input Parameters
 !-------------------------------------------------------------------------------
-   REAL, INTENT(INOUT) :: mh_urb   ! mean building height [m]
-   REAL, INTENT(INOUT) :: stdh_urb ! standard deviation of building height [m]
-   REAL, INTENT(INOUT) :: hgt_urb  ! area weighted mean building height [m] 
-   REAL, INTENT(INOUT) :: lp_urb   ! plan area fraction [-]
-   REAL, INTENT(INOUT) :: frc_urb  ! urban fraction [-]
-   REAL, INTENT(INOUT) :: lb_urb   ! building surface to plan area ratio [-]
-   REAL, INTENT(INOUT), DIMENSION(4) :: lf_urb   ! frontal area index [-]
-   REAL, INTENT(INOUT) :: zo_check  ! check for printing ZOC
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: mh_urb   ! mean building height [m]
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: stdh_urb ! standard deviation of building height [m]
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: hgt_urb  ! area weighted mean building height [m] 
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: lp_urb   ! plan area fraction [-]
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: frc_urb  ! urban fraction [-]
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: lb_urb   ! building surface to plan area ratio [-]
+   REAL(kind=kind_noahmp), INTENT(INOUT), DIMENSION(4) :: lf_urb   ! frontal area index [-]
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: zo_check  ! check for printing ZOC
 
 !-------------------------------------------------------------------------------
 ! O: output variables from Urban to LSM 
 !-------------------------------------------------------------------------------
 
-   REAL, INTENT(OUT) :: TS     ! surface potential temperature    [K]
-   REAL, INTENT(OUT) :: QS     ! surface humidity                 [K]
-   REAL, INTENT(OUT) :: SH     ! sensible heat flux               [W/m/m]
-   REAL, INTENT(OUT) :: LH     ! latent heat flux                 [W/m/m]
-   REAL, INTENT(OUT) :: LH_KINEMATIC ! latent heat, kinetic     [kg/m/m/s]
-   REAL, INTENT(OUT) :: SW     ! upward short wave radiation flux [W/m/m]
-   REAL, INTENT(OUT) :: ALB    ! time-varying albedo            [fraction]
-   REAL, INTENT(OUT) :: LW     ! upward long wave radiation flux  [W/m/m]
-   REAL, INTENT(OUT) :: G      ! heat flux into the ground        [W/m/m]
-   REAL, INTENT(OUT) :: RN     ! net radition                     [W/m/m]
-   REAL, INTENT(OUT) :: PSIM   ! similality stability shear function for momentum
-   REAL, INTENT(OUT) :: PSIH   ! similality stability shear function for heat
-   REAL, INTENT(OUT) :: GZ1OZ0   
-   REAL, INTENT(OUT) :: U10    ! u at 10m                         [m/s]
-   REAL, INTENT(OUT) :: V10    ! u at 10m                         [m/s]
-   REAL, INTENT(OUT) :: TH2    ! potential temperature at 2 m     [K]
-   REAL, INTENT(OUT) :: Q2     ! humidity at 2 m                  [-]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: TS     ! surface potential temperature    [K]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: QS     ! surface humidity                 [K]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: SH     ! sensible heat flux               [W/m/m]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: LH     ! latent heat flux                 [W/m/m]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: LH_KINEMATIC ! latent heat, kinetic     [kg/m/m/s]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: SW     ! upward short wave radiation flux [W/m/m]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: ALB    ! time-varying albedo            [fraction]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: LW     ! upward long wave radiation flux  [W/m/m]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: G      ! heat flux into the ground        [W/m/m]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: RN     ! net radition                     [W/m/m]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: PSIM   ! similality stability shear function for momentum
+   REAL(kind=kind_noahmp), INTENT(OUT) :: PSIH   ! similality stability shear function for heat
+   REAL(kind=kind_noahmp), INTENT(OUT) :: GZ1OZ0   
+   REAL(kind=kind_noahmp), INTENT(OUT) :: U10    ! u at 10m                         [m/s]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: V10    ! u at 10m                         [m/s]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: TH2    ! potential temperature at 2 m     [K]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: Q2     ! humidity at 2 m                  [-]
 !m   REAL, INTENT(OUT) :: CHS,CHS2 ! CH*U at za and 2 m             [m/s]
-   REAL, INTENT(OUT) :: UST    ! friction velocity                [m/s]
+   REAL(kind=kind_noahmp), INTENT(OUT) :: UST    ! friction velocity                [m/s]
 
 
 !-------------------------------------------------------------------------------
@@ -440,12 +440,12 @@ use module_wrf_error
 !
 ! TRL, TBL, TGL: layer temperature [K] (absolute temperature)
 
-   REAL, INTENT(INOUT):: TR, TB, TG, TC, QC, UC
-   REAL, INTENT(INOUT):: XXXR, XXXB, XXXG, XXXC
+   REAL(kind=kind_noahmp), INTENT(INOUT):: TR, TB, TG, TC, QC, UC
+   REAL(kind=kind_noahmp), INTENT(INOUT):: XXXR, XXXB, XXXG, XXXC
 
-   REAL, DIMENSION(1:num_roof_layers), INTENT(INOUT) :: TRL
-   REAL, DIMENSION(1:num_wall_layers), INTENT(INOUT) :: TBL
-   REAL, DIMENSION(1:num_road_layers), INTENT(INOUT) :: TGL
+   REAL(kind=kind_noahmp), DIMENSION(1:num_roof_layers), INTENT(INOUT) :: TRL
+   REAL(kind=kind_noahmp), DIMENSION(1:num_wall_layers), INTENT(INOUT) :: TBL
+   REAL(kind=kind_noahmp), DIMENSION(1:num_road_layers), INTENT(INOUT) :: TGL
 
 !===Yang,2014/10/08, urban hydrological variables for single layer UCM===
 ! FLXHUMR: evaporation over roof  [m/s];     FLXHUMRP: at previous time step [m/s]
@@ -461,25 +461,25 @@ use module_wrf_error
 ! SMR: soil moisture at each layer on roof [-];  SMRP: at previous time step
 ! TGRL:layer temperature on green roof [K]
   
-   REAL, INTENT(INOUT):: FLXHUMR,FLXHUMB,FLXHUMG,DRELR,DRELB,DRELG
-   REAL, INTENT(INOUT):: TGR,CMCR,CHGR_URB,CMGR_URB
-   REAL, DIMENSION(1:num_roof_layers), INTENT(INOUT) :: SMR        
-   REAL, DIMENSION(1:num_roof_layers), INTENT(INOUT) :: TGRL
+   REAL(kind=kind_noahmp), INTENT(INOUT):: FLXHUMR,FLXHUMB,FLXHUMG,DRELR,DRELB,DRELG
+   REAL(kind=kind_noahmp), INTENT(INOUT):: TGR,CMCR,CHGR_URB,CMGR_URB
+   REAL(kind=kind_noahmp), DIMENSION(1:num_roof_layers), INTENT(INOUT) :: SMR        
+   REAL(kind=kind_noahmp), DIMENSION(1:num_roof_layers), INTENT(INOUT) :: TGRL
 
 !-------------------------------------------------------------------------------
 ! L:  Local variables from read_param
 !-------------------------------------------------------------------------------
 
-   REAL :: ZR, Z0C, Z0HC, ZDC, SVF, R, RW, HGT, AH, ALH
-   REAL :: SIGMA_ZED
-   REAL :: CAPR, CAPB, CAPG, AKSR, AKSB, AKSG, ALBR, ALBB, ALBG 
-   REAL :: EPSR, EPSB, EPSG, Z0R,  Z0B,  Z0G,  Z0HB, Z0HG
-   REAL :: TRLEND,TBLEND,TGLEND
-   REAL :: T1VR, T1VC,TH2V
-   REAL :: RLMO_URB
-   REAL :: AKANDA_URBAN
+   REAL(kind=kind_noahmp) :: ZR, Z0C, Z0HC, ZDC, SVF, R, RW, HGT, AH, ALH
+   REAL(kind=kind_noahmp) :: SIGMA_ZED
+   REAL(kind=kind_noahmp) :: CAPR, CAPB, CAPG, AKSR, AKSB, AKSG, ALBR, ALBB, ALBG 
+   REAL(kind=kind_noahmp) :: EPSR, EPSB, EPSG, Z0R,  Z0B,  Z0G,  Z0HB, Z0HG
+   REAL(kind=kind_noahmp) :: TRLEND,TBLEND,TGLEND
+   REAL(kind=kind_noahmp) :: T1VR, T1VC,TH2V
+   REAL(kind=kind_noahmp) :: RLMO_URB
+   REAL(kind=kind_noahmp) :: AKANDA_URBAN
    
-   REAL :: TH2X                                                !m
+   REAL(kind=kind_noahmp) :: TH2X                                                !m
    
    INTEGER :: BOUNDR, BOUNDB, BOUNDG
    INTEGER :: CH_SCHEME, TS_SCHEME
@@ -488,107 +488,107 @@ use module_wrf_error
 
 !for BEP
    INTEGER                        :: NUMDIR
-   REAL,    DIMENSION ( MAXDIRS ) :: STREET_DIRECTION
-   REAL,    DIMENSION ( MAXDIRS ) :: STREET_WIDTH
-   REAL,    DIMENSION ( MAXDIRS ) :: BUILDING_WIDTH
+   REAL(kind=kind_noahmp),    DIMENSION ( MAXDIRS ) :: STREET_DIRECTION
+   REAL(kind=kind_noahmp),    DIMENSION ( MAXDIRS ) :: STREET_WIDTH
+   REAL(kind=kind_noahmp),    DIMENSION ( MAXDIRS ) :: BUILDING_WIDTH
    INTEGER                        :: NUMHGT
-   REAL,    DIMENSION ( MAXHGTS ) :: HEIGHT_BIN
-   REAL,    DIMENSION ( MAXHGTS ) :: HPERCENT_BIN
+   REAL(kind=kind_noahmp),    DIMENSION ( MAXHGTS ) :: HEIGHT_BIN
+   REAL(kind=kind_noahmp),    DIMENSION ( MAXHGTS ) :: HPERCENT_BIN
 !end BEP
 !-------------------------------------------------------------------------------
 ! L: Local variables
 !-------------------------------------------------------------------------------
 
-   REAL :: BETR, BETB, BETG
-   REAL :: SX, SD, SQ, RX
-   REAL :: UR, ZC, XLB, BB
-   REAL :: Z, RIBB, RIBG, RIBC, BHR, BHB, BHG, BHC
-   REAL :: TSC, LNET, SNET, FLXUV, THG, FLXTH, FLXHUM, FLXG
-   REAL :: W, VFGS, VFGW, VFWG, VFWS, VFWW
-   REAL :: HOUI1, HOUI2, HOUI3, HOUI4, HOUI5, HOUI6, HOUI7, HOUI8
-   REAL :: SLX, SLX1, SLX2, SLX3, SLX4, SLX5, SLX6, SLX7, SLX8
-   REAL :: FLXTHR, FLXTHB, FLXTHG
-   REAL :: SR, SB, SG, RR, RB, RG
-   REAL :: SR1, SR2, SB1, SB2, SG1, SG2, RR1, RR2, RB1, RB2, RG1, RG2
-   REAL :: HR, HB, HG, ELER, ELEB, ELEG, G0R, G0B, G0G
-   REAL :: ALPHAC, ALPHAR, ALPHAB, ALPHAG
-   REAL :: CHC, CHR, CHB, CHG, CDC, CDR, CDB, CDG, CDGR
-   REAL :: C1R, C1B, C1G, TE, TC1, TC2, QC1, QC2, QS0R, QS0B, QS0G,RHO,ES
+   REAL(kind=kind_noahmp) :: BETR, BETB, BETG
+   REAL(kind=kind_noahmp) :: SX, SD, SQ, RX
+   REAL(kind=kind_noahmp) :: UR, ZC, XLB, BB
+   REAL(kind=kind_noahmp) :: Z, RIBB, RIBG, RIBC, BHR, BHB, BHG, BHC
+   REAL(kind=kind_noahmp) :: TSC, LNET, SNET, FLXUV, THG, FLXTH, FLXHUM, FLXG
+   REAL(kind=kind_noahmp) :: W, VFGS, VFGW, VFWG, VFWS, VFWW
+   REAL(kind=kind_noahmp) :: HOUI1, HOUI2, HOUI3, HOUI4, HOUI5, HOUI6, HOUI7, HOUI8
+   REAL(kind=kind_noahmp) :: SLX, SLX1, SLX2, SLX3, SLX4, SLX5, SLX6, SLX7, SLX8
+   REAL(kind=kind_noahmp) :: FLXTHR, FLXTHB, FLXTHG
+   REAL(kind=kind_noahmp) :: SR, SB, SG, RR, RB, RG
+   REAL(kind=kind_noahmp) :: SR1, SR2, SB1, SB2, SG1, SG2, RR1, RR2, RB1, RB2, RG1, RG2
+   REAL(kind=kind_noahmp) :: HR, HB, HG, ELER, ELEB, ELEG, G0R, G0B, G0G
+   REAL(kind=kind_noahmp) :: ALPHAC, ALPHAR, ALPHAB, ALPHAG
+   REAL(kind=kind_noahmp) :: CHC, CHR, CHB, CHG, CDC, CDR, CDB, CDG, CDGR
+   REAL(kind=kind_noahmp) :: C1R, C1B, C1G, TE, TC1, TC2, QC1, QC2, QS0R, QS0B, QS0G,RHO,ES
 
-   REAL :: DESDT
-   REAL :: F
-   REAL :: DQS0RDTR
-   REAL :: DRRDTR, DHRDTR, DELERDTR, DG0RDTR
-   REAL :: DTR, DFDT
-   REAL :: FX, FY, GF, GX, GY
-   REAL :: DTCDTB, DTCDTG
-   REAL :: DQCDTB, DQCDTG
-   REAL :: DRBDTB1,  DRBDTG1,  DRBDTB2,  DRBDTG2
-   REAL :: DRGDTB1,  DRGDTG1,  DRGDTB2,  DRGDTG2
-   REAL :: DRBDTB,   DRBDTG,   DRGDTB,   DRGDTG
-   REAL :: DHBDTB,   DHBDTG,   DHGDTB,   DHGDTG
-   REAL :: DELEBDTB, DELEBDTG, DELEGDTG, DELEGDTB
-   REAL :: DG0BDTB,  DG0BDTG,  DG0GDTG,  DG0GDTB
-   REAL :: DQS0BDTB, DQS0GDTG
-   REAL :: DTB, DTG, DTC
+   REAL(kind=kind_noahmp) :: DESDT
+   REAL(kind=kind_noahmp) :: F
+   REAL(kind=kind_noahmp) :: DQS0RDTR
+   REAL(kind=kind_noahmp) :: DRRDTR, DHRDTR, DELERDTR, DG0RDTR
+   REAL(kind=kind_noahmp) :: DTR, DFDT
+   REAL(kind=kind_noahmp) :: FX, FY, GF, GX, GY
+   REAL(kind=kind_noahmp) :: DTCDTB, DTCDTG
+   REAL(kind=kind_noahmp) :: DQCDTB, DQCDTG
+   REAL(kind=kind_noahmp) :: DRBDTB1,  DRBDTG1,  DRBDTB2,  DRBDTG2
+   REAL(kind=kind_noahmp) :: DRGDTB1,  DRGDTG1,  DRGDTB2,  DRGDTG2
+   REAL(kind=kind_noahmp) :: DRBDTB,   DRBDTG,   DRGDTB,   DRGDTG
+   REAL(kind=kind_noahmp) :: DHBDTB,   DHBDTG,   DHGDTB,   DHGDTG
+   REAL(kind=kind_noahmp) :: DELEBDTB, DELEBDTG, DELEGDTG, DELEGDTB
+   REAL(kind=kind_noahmp) :: DG0BDTB,  DG0BDTG,  DG0GDTG,  DG0GDTB
+   REAL(kind=kind_noahmp) :: DQS0BDTB, DQS0GDTG
+   REAL(kind=kind_noahmp) :: DTB, DTG, DTC
 
-   REAL :: THEATAZ    ! Solar Zenith Angle [rad]
-   REAL :: THEATAS    ! = PI/2. - THETAZ
-   REAL :: FAI        ! Latitude [rad]
-   REAL :: CNT,SNT
-   REAL :: PS         ! Surface Pressure [hPa]
-   REAL :: TAV        ! Vertial Temperature [K] 
+   REAL(kind=kind_noahmp) :: THEATAZ    ! Solar Zenith Angle [rad]
+   REAL(kind=kind_noahmp) :: THEATAS    ! = PI/2. - THETAZ
+   REAL(kind=kind_noahmp) :: FAI        ! Latitude [rad]
+   REAL(kind=kind_noahmp) :: CNT,SNT
+   REAL(kind=kind_noahmp) :: PS         ! Surface Pressure [hPa]
+   REAL(kind=kind_noahmp) :: TAV        ! Vertial Temperature [K] 
 
-   REAL :: XXX, X, Z0, Z0H, CD, CH
-   REAL :: XXX2, PSIM2, PSIH2, XXX10, PSIM10, PSIH10
-   REAL :: PSIX, PSIT, PSIX2, PSIT2, PSIX10, PSIT10
+   REAL(kind=kind_noahmp) :: XXX, X, Z0, Z0H, CD, CH
+   REAL(kind=kind_noahmp) :: XXX2, PSIM2, PSIH2, XXX10, PSIM10, PSIH10
+   REAL(kind=kind_noahmp) :: PSIX, PSIT, PSIX2, PSIT2, PSIX10, PSIT10
 
-   REAL :: TRP, TBP, TGP, TCP, QCP, TST, QST
+   REAL(kind=kind_noahmp) :: TRP, TBP, TGP, TCP, QCP, TST, QST
 
-   REAL :: WDR,HGT2,BW,DHGT
-   REAL, parameter :: VonK = 0.4
-   REAL :: lambda_f,alpha_macd,beta_macd,lambda_fr
+   REAL(kind=kind_noahmp) :: WDR,HGT2,BW,DHGT
+   REAL(kind=kind_noahmp), parameter :: VonK = 0.4
+   REAL(kind=kind_noahmp) :: lambda_f,alpha_macd,beta_macd,lambda_fr
 
    INTEGER :: iteration, K, NUDAPT 
    INTEGER :: tloc, tloc2, Kalh
 
 !===Yang,2014/10/08, urban hydrological variables for single layer UCM===
-   REAL :: FLXHUMRP, FLXHUMBP, FLXHUMGP
-   REAL :: DRELRP, DRELBP, DRELGP
-   REAL :: TGRP, CMCRP
-   REAL, DIMENSION(1:num_roof_layers) :: ZSOILR, ETR, SMRP
+   REAL(kind=kind_noahmp) :: FLXHUMRP, FLXHUMBP, FLXHUMGP
+   REAL(kind=kind_noahmp) :: DRELRP, DRELBP, DRELGP
+   REAL(kind=kind_noahmp) :: TGRP, CMCRP
+   REAL(kind=kind_noahmp), DIMENSION(1:num_roof_layers) :: ZSOILR, ETR, SMRP
 !===Define parameters for green roof===
    INTEGER :: KZ
-   REAL :: RUNOFF1, RUNOFF2, RUNOFF3
-   REAL :: SGR, SGR1, T1VGR, CHGR, ALPHAGR 
-   REAL :: FLXTHGR, FLXHUMGR, HGR, ELEGR, G0GR
-   REAL :: QS0GR, EPGR, EDIR, ETTR, FV, DTGR, DRIP
+   REAL(kind=kind_noahmp) :: RUNOFF1, RUNOFF2, RUNOFF3
+   REAL(kind=kind_noahmp) :: SGR, SGR1, T1VGR, CHGR, ALPHAGR 
+   REAL(kind=kind_noahmp) :: FLXTHGR, FLXHUMGR, HGR, ELEGR, G0GR
+   REAL(kind=kind_noahmp) :: QS0GR, EPGR, EDIR, ETTR, FV, DTGR, DRIP
 !   REAL :: DQS0GRDTGR, ETR, ECR,RAIN1, RAINDR, DEW, ETAR, BETGR
-   REAL :: DQS0GRDTGR, ECR,RAIN1, RAINDR, DEW, ETAR, BETGR
+   REAL(kind=kind_noahmp) :: DQS0GRDTGR, ECR,RAIN1, RAINDR, DEW, ETAR, BETGR
 !   REAL :: DF1, RGR, RGRR, RCH, RR1, RR2, YY, ZZ1, SSOILR
-   REAL :: DF1, RGR, RGRR, RCH, YY, ZZ1, SSOILR
-   REAL :: DRRDTGR, DHRDTGR, DELERDTGR, DG0RDTGR, DFDVT  
-   real,parameter  :: SHDFAC   = 0.80   ! Vegetated area fraction of green roof vegetation
-   real,parameter  :: ALBV     = 0.20   ! green roof albedo
-   real,parameter  :: EPSV     = 0.93   ! green roof emissivity
-   real,parameter  :: LAI      = 1.50   ! leaf area index on green roof
-   real,parameter  :: CMCMAX   = 0.5E-3 ! Maximum canopy interception capacity   
-   real,parameter  :: SMCREF   = 0.329  ! Reference soil moisture
-   real,parameter  :: SMCDRY   = 0.066  ! Residual  soil moisture
-   real,parameter  :: SMCWLT   = 0.084  ! Wilting point        
-   real,parameter  :: SMCMAX   = 0.439  ! Saturated soil moisture
-   real,parameter  :: RSMAX    = 5000   ! Maximum stomatal resistance
-   real,parameter  :: RSMIN    = 100    ! Minimum stomatal resistance
-   real,parameter  :: RGL      = 100    ! Radiation limit where photosynthesis begins
-   real,parameter  :: CFACTR   = 0.5    ! Parameter used in the canopy inteception calculation        
-   real,parameter  :: DWSAT    = 0.143E-4 ! Saturated soil conductivity            
-   real,parameter  :: DKSAT    = 3.38E-6  ! Saturated soil diffusivity
-   real,parameter  :: BEXP     = 5.25   ! B parameter in soil hydraulic calculation
-   real,parameter  :: FXEXP    = 2.0    ! Parameter for computing direct soil evaporation        
-   real,parameter  :: ZBOT     = -2.0   
-   real,parameter  :: QUARTZ   = 0.40
-   real,parameter  :: CSOIL    = 2.0E+6
-   real,parameter  :: HS       = 36
+   REAL(kind=kind_noahmp) :: DF1, RGR, RGRR, RCH, YY, ZZ1, SSOILR
+   REAL(kind=kind_noahmp) :: DRRDTGR, DHRDTGR, DELERDTGR, DG0RDTGR, DFDVT  
+   real(kind=kind_noahmp),parameter  :: SHDFAC   = 0.80   ! Vegetated area fraction of green roof vegetation
+   real(kind=kind_noahmp),parameter  :: ALBV     = 0.20   ! green roof albedo
+   real(kind=kind_noahmp),parameter  :: EPSV     = 0.93   ! green roof emissivity
+   real(kind=kind_noahmp),parameter  :: LAI      = 1.50   ! leaf area index on green roof
+   real(kind=kind_noahmp),parameter  :: CMCMAX   = 0.5E-3 ! Maximum canopy interception capacity   
+   real(kind=kind_noahmp),parameter  :: SMCREF   = 0.329  ! Reference soil moisture
+   real(kind=kind_noahmp),parameter  :: SMCDRY   = 0.066  ! Residual  soil moisture
+   real(kind=kind_noahmp),parameter  :: SMCWLT   = 0.084  ! Wilting point        
+   real(kind=kind_noahmp),parameter  :: SMCMAX   = 0.439  ! Saturated soil moisture
+   real(kind=kind_noahmp),parameter  :: RSMAX    = 5000   ! Maximum stomatal resistance
+   real(kind=kind_noahmp),parameter  :: RSMIN    = 100    ! Minimum stomatal resistance
+   real(kind=kind_noahmp),parameter  :: RGL      = 100    ! Radiation limit where photosynthesis begins
+   real(kind=kind_noahmp),parameter  :: CFACTR   = 0.5    ! Parameter used in the canopy inteception calculation        
+   real(kind=kind_noahmp),parameter  :: DWSAT    = 0.143E-4 ! Saturated soil conductivity            
+   real(kind=kind_noahmp),parameter  :: DKSAT    = 3.38E-6  ! Saturated soil diffusivity
+   real(kind=kind_noahmp),parameter  :: BEXP     = 5.25   ! B parameter in soil hydraulic calculation
+   real(kind=kind_noahmp),parameter  :: FXEXP    = 2.0    ! Parameter for computing direct soil evaporation        
+   real(kind=kind_noahmp),parameter  :: ZBOT     = -2.0   
+   real(kind=kind_noahmp),parameter  :: QUARTZ   = 0.40
+   real(kind=kind_noahmp),parameter  :: CSOIL    = 2.0E+6
+   real(kind=kind_noahmp),parameter  :: HS       = 36
    integer,parameter ::  NROOT = 2      ! Root depth layer of green roof
    integer,parameter ::  NGR   = 4      ! Layer of green roof
    integer,parameter ::  IMPR  = 1     
@@ -853,7 +853,11 @@ use module_wrf_error
      ZC=0.7*ZR
      XLB=0.4*(ZR-ZDC)
      ! BB formulation from Inoue (1963)
+#ifdef DOUBLE_PREC
+     BB = 0.4 * ZR / ( XLB * dlog( ( ZR - ZDC ) / Z0C ) )
+#else
      BB = 0.4 * ZR / ( XLB * alog( ( ZR - ZDC ) / Z0C ) )
+#endif
      UC=UR*EXP(-BB*(1.-ZC/ZR))
    ELSE
      ! PRINT *, 'Warning ZR + 2m  is larger than the 1st WRF level' 
@@ -1526,15 +1530,32 @@ ENDIF
      PSIH = -5. * XXX
    ELSE
      X = (1.-16.*XXX)**0.25
+#ifdef DOUBLE_PREC
+
+     PSIM = 2.*DLOG((1.+X)/2.) + DLOG((1.+X*X)/2.) - 2.*ATAN(X) + PI/2.
+     PSIH = 2.*DLOG((1.+X*X)/2.)
+#else
      PSIM = 2.*ALOG((1.+X)/2.) + ALOG((1.+X*X)/2.) - 2.*ATAN(X) + PI/2.
      PSIH = 2.*ALOG((1.+X*X)/2.)
+#endif
    END IF
+#ifdef DOUBLE_PREC
+
+   GZ1OZ0 = DLOG(Z/Z0)
+   CD = 0.4**2./(DLOG(Z/Z0)-PSIM)**2.
+!
+!m   CH = 0.4**2./(ALOG(Z/Z0)-PSIM)/(ALOG(Z/Z0H)-PSIH)
+   CHS = 0.4*UST/(DLOG(Z/Z0H)-PSIH) ! cenlin 03/09/2023: uncomment to allow CHS calc for offline hrldas-urban
+#else
 
    GZ1OZ0 = ALOG(Z/Z0)
    CD = 0.4**2./(ALOG(Z/Z0)-PSIM)**2.
 !
 !m   CH = 0.4**2./(ALOG(Z/Z0)-PSIM)/(ALOG(Z/Z0H)-PSIH)
    CHS = 0.4*UST/(ALOG(Z/Z0H)-PSIH) ! cenlin 03/09/2023: uncomment to allow CHS calc for offline hrldas-urban
+
+
+#endif
 !m   TS = TA + FLXTH/CH/UA    ! surface potential temp (flux temp)
 !m   QS = QA + FLXHUM/CH/UA   ! surface humidity
 !
@@ -1554,12 +1575,25 @@ ENDIF
       PSIH2 = -5. * XXX2
    ELSE
       X = (1.-16.*XXX2)**0.25
+#ifdef DOUBLE_PREC
+
+      PSIM2 = 2.*DLOG((1.+X)/2.) + DLOG((1.+X*X)/2.) - 2.*ATAN(X) + 2.*ATAN(1.)
+      PSIH2 = 2.*DLOG((1.+X*X)/2.)
+#else
       PSIM2 = 2.*ALOG((1.+X)/2.) + ALOG((1.+X*X)/2.) - 2.*ATAN(X) + 2.*ATAN(1.)
       PSIH2 = 2.*ALOG((1.+X*X)/2.)
+
+#endif
    END IF
 !
-   CHS2 = 0.4*UST/(ALOG(2./Z0H)-PSIH2) ! cenlin 03/09/2023: uncomment to allow CHS2 calc for offline hrldas-urban
+#ifdef DOUBLE_PREC
+
+   CHS2 = 0.4*UST/(DLOG(2./Z0H)-PSIH2) ! cenlin 03/09/2023: uncomment to allow CHS2 calc for offline hrldas-urban
 !
+#else
+   CHS2 = 0.4*UST/(ALOG(2./Z0H)-PSIH2) ! cenlin 03/09/2023: uncomment to allow CHS2 calc for offline hrldas-urban
+
+#endif
 
    XXX10 = (10./Z)*XXX
    IF ( XXX10 >= 1. ) XXX10 = 1.
@@ -1570,10 +1604,26 @@ ENDIF
       PSIH10 = -5. * XXX10
    ELSE
       X = (1.-16.*XXX10)**0.25
+#ifdef DOUBLE_PREC
+      PSIM10 = 2.*DLOG((1.+X)/2.) + DLOG((1.+X*X)/2.) - 2.*ATAN(X) + 2.*ATAN(1.)
+      PSIH10 = 2.*DLOG((1.+X*X)/2.)
+#else
       PSIM10 = 2.*ALOG((1.+X)/2.) + ALOG((1.+X*X)/2.) - 2.*ATAN(X) + 2.*ATAN(1.)
       PSIH10 = 2.*ALOG((1.+X*X)/2.)
-   END IF
+#endif
 
+   END IF
+#ifdef DOUBLE_PREC
+
+   PSIX = DLOG(Z/Z0) - PSIM
+   PSIT = DLOG(Z/Z0H) - PSIH
+
+   PSIX2 = DLOG(2./Z0) - PSIM2
+   PSIT2 = DLOG(2./Z0H) - PSIH2
+
+   PSIX10 = DLOG(10./Z0) - PSIM10
+   PSIT10 = DLOG(10./Z0H) - PSIH10
+#else
    PSIX = ALOG(Z/Z0) - PSIM
    PSIT = ALOG(Z/Z0H) - PSIH
 
@@ -1583,6 +1633,7 @@ ENDIF
    PSIX10 = ALOG(10./Z0) - PSIM10
    PSIT10 = ALOG(10./Z0H) - PSIH10
 
+#endif
    U10 = U1 * (PSIX10/PSIX)       ! u at 10 m [m/s]
    V10 = V1 * (PSIX10/PSIX)       ! v at 10 m [m/s]
 
@@ -1610,12 +1661,12 @@ ENDIF
 
    IMPLICIT NONE
 
-   REAL, PARAMETER     :: CP=0.24
-   REAL, INTENT(IN)    :: B1, Z, Z0, UA, TA, TSF, RHO
-   REAL, INTENT(OUT)   :: ALPHA, CD
-   REAL, INTENT(INOUT) :: XXX, RIB
-   REAL                :: XXX0, X, X0, FAIH, DPSIM, DPSIH
-   REAL                :: F, DF, XXXP, US, TS, AL, XKB, DD, PSIM, PSIH
+   REAL(kind=kind_noahmp), PARAMETER     :: CP=0.24
+   REAL(kind=kind_noahmp), INTENT(IN)    :: B1, Z, Z0, UA, TA, TSF, RHO
+   REAL(kind=kind_noahmp), INTENT(OUT)   :: ALPHA, CD
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: XXX, RIB
+   REAL(kind=kind_noahmp)                :: XXX0, X, X0, FAIH, DPSIM, DPSIH
+   REAL(kind=kind_noahmp)                :: F, DF, XXXP, US, TS, AL, XKB, DD, PSIM, PSIH
    INTEGER             :: NEWT
    INTEGER, PARAMETER  :: NEWT_END=10
 
@@ -1631,7 +1682,18 @@ ENDIF
 
         X=(1.-16.*XXX)**0.25
         X0=(1.-16.*XXX0)**0.25
+#ifdef DOUBLE_PREC
 
+        PSIM=DLOG((Z+Z0)/Z0) &
+            -DLOG((X+1.)**2.*(X**2.+1.)) &
+            +2.*ATAN(X) &
+            +DLOG((X+1.)**2.*(X0**2.+1.)) &
+            -2.*ATAN(X0)
+        FAIH=1./SQRT(1.-16.*XXX)
+        PSIH=DLOG((Z+Z0)/Z0)+0.4*B1 &
+            -2.*DLOG(SQRT(1.-16.*XXX)+1.) &
+            +2.*DLOG(SQRT(1.-16.*XXX0)+1.)
+#else
         PSIM=ALOG((Z+Z0)/Z0) &
             -ALOG((X+1.)**2.*(X**2.+1.)) &
             +2.*ATAN(X) &
@@ -1642,6 +1704,7 @@ ENDIF
             -2.*ALOG(SQRT(1.-16.*XXX)+1.) &
             +2.*ALOG(SQRT(1.-16.*XXX0)+1.)
 
+#endif
         DPSIM=(1.-16.*XXX)**(-0.25)/XXX &
              -(1.-16.*XXX0)**(-0.25)/XXX
         DPSIH=1./SQRT(1.-16.*XXX)/XXX &
@@ -1661,17 +1724,30 @@ ENDIF
    ELSE IF(RIB >= 0.142857) THEN
 
       XXX=0.714
+#ifdef DOUBLE_PREC
+      PSIM=DLOG((Z+Z0)/Z0)+7.*XXX
+#else
       PSIM=ALOG((Z+Z0)/Z0)+7.*XXX
+#endif
       PSIH=PSIM+0.4*B1
 
    ELSE
-
+#ifdef DOUBLE_PREC
+      AL=DLOG((Z+Z0)/Z0)
+#else
       AL=ALOG((Z+Z0)/Z0)
+#endif
       XKB=0.4*B1
       DD=-4.*RIB*7.*XKB*AL+(AL+XKB)**2.
       IF(DD <= 0.) DD=0.
       XXX=(AL+XKB-2.*RIB*7.*AL-SQRT(DD))/(2.*(RIB*7.**2-7.))
+#ifdef DOUBLE_PREC
+
+      PSIM=DLOG((Z+Z0)/Z0)+7.*MIN(XXX,0.714)
+#else
       PSIM=ALOG((Z+Z0)/Z0)+7.*MIN(XXX,0.714)
+
+#endif
       PSIH=PSIM+0.4*B1
 
    END IF
@@ -1694,14 +1770,19 @@ ENDIF
 
    IMPLICIT NONE
 
-   REAL, PARAMETER     :: CP=0.24
-   REAL, INTENT(IN)    :: Z, Z0, UA, RHO
-   REAL, INTENT(OUT)   :: ALPHA, CD
-   REAL, INTENT(INOUT) :: RIB
-   REAL                :: A2, XX, CH, CMB, CHB
+   REAL(kind=kind_noahmp), PARAMETER     :: CP=0.24
+   REAL(kind=kind_noahmp), INTENT(IN)    :: Z, Z0, UA, RHO
+   REAL(kind=kind_noahmp), INTENT(OUT)   :: ALPHA, CD
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: RIB
+   REAL(kind=kind_noahmp)                :: A2, XX, CH, CMB, CHB
 
+#ifdef DOUBLE_PREC
+
+   A2=(0.4/DLOG(Z/Z0))**2.
+#else
    A2=(0.4/ALOG(Z/Z0))**2.
 
+#endif
    IF(RIB <= -15.) RIB=-15.
 
    IF(RIB >= 0.0) THEN
@@ -1732,14 +1813,17 @@ ENDIF
 
    IMPLICIT NONE
 
-   REAL, PARAMETER     :: CP=0.24
-   REAL, INTENT(IN)    :: Z, Z0, UA, RHO
-   REAL, INTENT(OUT)   :: ALPHA, CD
-   REAL, INTENT(INOUT) :: RIB 
-   REAL                :: A2, FM, FH, CH, CHH 
+   REAL(kind=kind_noahmp), PARAMETER     :: CP=0.24
+   REAL(kind=kind_noahmp), INTENT(IN)    :: Z, Z0, UA, RHO
+   REAL(kind=kind_noahmp), INTENT(OUT)   :: ALPHA, CD
+   REAL(kind=kind_noahmp), INTENT(INOUT) :: RIB 
+   REAL(kind=kind_noahmp)                :: A2, FM, FH, CH, CHH 
 
+#ifdef DOUBLE_PREC
+   A2=(0.4/DLOG(Z/Z0))**2.
+#else
    A2=(0.4/ALOG(Z/Z0))**2.
-
+#endif
    IF(RIB <= -15.) RIB=-15.
 
    IF(RIB >= 0.0) THEN 
@@ -1768,27 +1852,27 @@ ENDIF
 
    IMPLICIT NONE
 
-   REAL, INTENT(IN)                   :: G0
+   REAL(kind=kind_noahmp), INTENT(IN)                   :: G0
 
-   REAL, INTENT(IN)                   :: CAP
+   REAL(kind=kind_noahmp), INTENT(IN)                   :: CAP
 
-   REAL, INTENT(IN)                   :: AKS
+   REAL(kind=kind_noahmp), INTENT(IN)                   :: AKS
 
-   REAL, INTENT(IN)                   :: DELT      ! Time step [ s ]
+   REAL(kind=kind_noahmp), INTENT(IN)                   :: DELT      ! Time step [ s ]
 
-   REAL, INTENT(IN)                   :: TSLEND
+   REAL(kind=kind_noahmp), INTENT(IN)                   :: TSLEND
 
    INTEGER, INTENT(IN)                :: KM
 
    INTEGER, INTENT(IN)                :: BOUND
 
-   REAL, DIMENSION(KM), INTENT(IN)    :: DZ
+   REAL(kind=kind_noahmp), DIMENSION(KM), INTENT(IN)    :: DZ
 
-   REAL, DIMENSION(KM), INTENT(INOUT) :: TSL
+   REAL(kind=kind_noahmp), DIMENSION(KM), INTENT(INOUT) :: TSL
 
-   REAL, DIMENSION(KM)                :: A, B, C, D, X, P, Q
+   REAL(kind=kind_noahmp), DIMENSION(KM)                :: A, B, C, D, X, P, Q
 
-   REAL                               :: DZEND
+   REAL(kind=kind_noahmp)                               :: DZEND
 
    INTEGER                            :: K
 
@@ -1860,20 +1944,20 @@ ENDIF
 
    INTEGER, INTENT(IN)  :: UTYPE 
 
-   REAL, INTENT(OUT)    :: ZR,Z0C,Z0HC,ZDC,SVF,R,RW,HGT,AH,ALH,          &
+   REAL(kind=kind_noahmp), INTENT(OUT)    :: ZR,Z0C,Z0HC,ZDC,SVF,R,RW,HGT,AH,ALH,          &
                            CAPR,CAPB,CAPG,AKSR,AKSB,AKSG,ALBR,ALBB,ALBG, &
                            SIGMA_ZED,                                    &
                            EPSR,EPSB,EPSG,Z0R,Z0B,Z0G,Z0HB,Z0HG,         &
                            BETR,BETB,BETG,TRLEND,TBLEND,TGLEND
-   REAL, INTENT(OUT)    :: AKANDA_URBAN
+   REAL(kind=kind_noahmp), INTENT(OUT)    :: AKANDA_URBAN
 !for BEP
    INTEGER,                     INTENT(OUT) :: NUMDIR
-   REAL,    DIMENSION(MAXDIRS), INTENT(OUT) :: STREET_DIRECTION
-   REAL,    DIMENSION(MAXDIRS), INTENT(OUT) :: STREET_WIDTH
-   REAL,    DIMENSION(MAXDIRS), INTENT(OUT) :: BUILDING_WIDTH
+   REAL(kind=kind_noahmp),    DIMENSION(MAXDIRS), INTENT(OUT) :: STREET_DIRECTION
+   REAL(kind=kind_noahmp),    DIMENSION(MAXDIRS), INTENT(OUT) :: STREET_WIDTH
+   REAL(kind=kind_noahmp),    DIMENSION(MAXDIRS), INTENT(OUT) :: BUILDING_WIDTH
    INTEGER,                     INTENT(OUT) :: NUMHGT
-   REAL,    DIMENSION(MAXHGTS), INTENT(OUT) :: HEIGHT_BIN
-   REAL,    DIMENSION(MAXHGTS), INTENT(OUT) :: HPERCENT_BIN
+   REAL(kind=kind_noahmp),    DIMENSION(MAXHGTS), INTENT(OUT) :: HEIGHT_BIN
+   REAL(kind=kind_noahmp),    DIMENSION(MAXHGTS), INTENT(OUT) :: HPERCENT_BIN
    
 !end BEP
 
@@ -1957,9 +2041,9 @@ ENDIF
 !   REAL, DIMENSION(1:num_roof_layers), INTENT(INOUT) :: DZR
 !   REAL, DIMENSION(1:num_wall_layers), INTENT(INOUT) :: DZB
 !   REAL, DIMENSION(1:num_road_layers), INTENT(INOUT) :: DZG
-   REAL, DIMENSION(1:num_soil_layers), INTENT(INOUT) :: DZR
-   REAL, DIMENSION(1:num_soil_layers), INTENT(INOUT) :: DZB
-   REAL, DIMENSION(1:num_soil_layers), INTENT(INOUT) :: DZG
+   REAL(kind=kind_noahmp), DIMENSION(1:num_soil_layers), INTENT(INOUT) :: DZR
+   REAL(kind=kind_noahmp), DIMENSION(1:num_soil_layers), INTENT(INOUT) :: DZB
+   REAL(kind=kind_noahmp), DIMENSION(1:num_soil_layers), INTENT(INOUT) :: DZG
    INTEGER,                            INTENT(IN)    :: SF_URBAN_PHYSICS
    INTEGER,                            INTENT(IN)    :: USE_WUDAPT_LCZ !AndreaLCZ
    INTEGER,                            INTENT(INOUT) :: IRI_URBAN ! cenlin added
@@ -1970,28 +2054,28 @@ ENDIF
    INTEGER :: num_wall_layers
    INTEGER :: num_road_layers
    INTEGER :: dummy 
-   REAL    :: DHGT, HGT, VFWS, VFGS
+   REAL(kind=kind_noahmp)    :: DHGT, HGT, VFWS, VFGS
 
-   REAL, allocatable, dimension(:) :: ROOF_WIDTH
-   REAL, allocatable, dimension(:) :: ROAD_WIDTH
+   REAL(kind=kind_noahmp), allocatable, dimension(:) :: ROOF_WIDTH
+   REAL(kind=kind_noahmp), allocatable, dimension(:) :: ROAD_WIDTH
 
    character(len=512) :: string
    character(len=128) :: name
    integer :: indx
 
-   real, parameter :: VonK = 0.4
-   real :: lambda_p
-   real :: lambda_f
-   real :: Cd
-   real :: alpha_macd
-   real :: beta_macd
-   real :: lambda_fr
+   real(kind=kind_noahmp), parameter :: VonK = 0.4
+   real(kind=kind_noahmp) :: lambda_p
+   real(kind=kind_noahmp) :: lambda_f
+   real(kind=kind_noahmp) :: Cd
+   real(kind=kind_noahmp) :: alpha_macd
+   real(kind=kind_noahmp) :: beta_macd
+   real(kind=kind_noahmp) :: lambda_fr
 
 
 !for BEP
-   real :: dummy_hgt
-   real :: dummy_pct
-   real :: pctsum
+   real(kind=kind_noahmp) :: dummy_hgt
+   real(kind=kind_noahmp) :: dummy_pct
+   real(kind=kind_noahmp) :: pctsum
 !end BEP
    num_roof_layers = num_soil_layers
    num_wall_layers = num_soil_layers
@@ -2526,106 +2610,106 @@ ENDIF
    INTEGER, INTENT(IN) :: num_urban_hi                                !multi-layer urban
 !   INTEGER, INTENT(IN) :: num_roof_layers, num_wall_layers, num_road_layers
 
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(IN)                    :: TSURFACE0_URB
-   REAL, DIMENSION( ims:ime, 1:num_soil_layers, jms:jme ), INTENT(IN) :: TLAYER0_URB
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(IN)                    :: TDEEP0_URB
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(IN)                    :: TSURFACE0_URB
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:num_soil_layers, jms:jme ), INTENT(IN) :: TLAYER0_URB
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(IN)                    :: TDEEP0_URB
    INTEGER, DIMENSION( ims:ime, jms:jme ), INTENT(IN)                 :: IVGTYP
    LOGICAL , INTENT(IN) :: restart
  
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TR_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TB_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TG_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TC_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: QC_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXR_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXB_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXG_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXC_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TR_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TB_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TG_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TC_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: QC_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXR_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXB_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXG_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: XXXC_URB2D
 
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: DRELR_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: DRELB_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: DRELG_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: FLXHUMR_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: FLXHUMB_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: FLXHUMG_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: CMCR_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TGR_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: DRELR_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: DRELB_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: DRELG_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: FLXHUMR_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: FLXHUMB_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: FLXHUMG_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: CMCR_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TGR_URB2D
 
 !   REAL, DIMENSION(ims:ime, 1:num_roof_layers, jms:jme), INTENT(INOUT) :: TRL_URB3D
 !   REAL, DIMENSION(ims:ime, 1:num_wall_layers, jms:jme), INTENT(INOUT) :: TBL_URB3D
 !   REAL, DIMENSION(ims:ime, 1:num_road_layers, jms:jme), INTENT(INOUT) :: TGL_URB3D
-   REAL, DIMENSION(ims:ime, 1:num_soil_layers, jms:jme), INTENT(INOUT) :: TRL_URB3D
-   REAL, DIMENSION(ims:ime, 1:num_soil_layers, jms:jme), INTENT(INOUT) :: TBL_URB3D
-   REAL, DIMENSION(ims:ime, 1:num_soil_layers, jms:jme), INTENT(INOUT) :: TGL_URB3D
-   REAL, DIMENSION(ims:ime, 1:num_soil_layers, jms:jme), INTENT(INOUT) :: TGRL_URB3D
-   REAL, DIMENSION(ims:ime, 1:num_soil_layers, jms:jme), INTENT(INOUT) :: SMR_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:num_soil_layers, jms:jme), INTENT(INOUT) :: TRL_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:num_soil_layers, jms:jme), INTENT(INOUT) :: TBL_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:num_soil_layers, jms:jme), INTENT(INOUT) :: TGL_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:num_soil_layers, jms:jme), INTENT(INOUT) :: TGRL_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:num_soil_layers, jms:jme), INTENT(INOUT) :: SMR_URB3D
 
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: SH_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: LH_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: G_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: RN_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TS_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: SH_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: LH_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: G_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: RN_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: TS_URB2D
 
 ! multi-layer UCM variables
-   REAL, DIMENSION(ims:ime, 1:urban_map_zrd, jms:jme), INTENT(INOUT) :: TRB_URB4D
-   REAL, DIMENSION(ims:ime, 1:urban_map_zwd, jms:jme), INTENT(INOUT) :: TW1_URB4D
-   REAL, DIMENSION(ims:ime, 1:urban_map_zwd, jms:jme), INTENT(INOUT) :: TW2_URB4D
-   REAL, DIMENSION(ims:ime, 1:urban_map_gd , jms:jme), INTENT(INOUT) :: TGB_URB4D
-   REAL, DIMENSION(ims:ime, 1:urban_map_bd , jms:jme), INTENT(INOUT) :: TLEV_URB3D
-   REAL, DIMENSION(ims:ime, 1:urban_map_bd , jms:jme), INTENT(INOUT) :: QLEV_URB3D
-   REAL, DIMENSION(ims:ime, 1:urban_map_wd , jms:jme), INTENT(INOUT) :: TW1LEV_URB3D
-   REAL, DIMENSION(ims:ime, 1:urban_map_wd , jms:jme), INTENT(INOUT) :: TW2LEV_URB3D
-   REAL, DIMENSION(ims:ime, 1:urban_map_gbd, jms:jme), INTENT(INOUT) :: TGLEV_URB3D
-   REAL, DIMENSION(ims:ime, 1:urban_map_fbd, jms:jme), INTENT(INOUT) :: TFLEV_URB3D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: LF_AC_URB3D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: SF_AC_URB3D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: CM_AC_URB3D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: SFVENT_URB3D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: LFVENT_URB3D
-   REAL, DIMENSION( ims:ime, 1:urban_map_wd, jms:jme), INTENT(INOUT) :: SFWIN1_URB3D
-   REAL, DIMENSION( ims:ime, 1:urban_map_wd, jms:jme), INTENT(INOUT) :: SFWIN2_URB3D
-   REAL, DIMENSION(ims:ime, 1:urban_map_zd , jms:jme), INTENT(INOUT) :: SFW1_URB3D
-   REAL, DIMENSION(ims:ime, 1:urban_map_zd , jms:jme), INTENT(INOUT) :: SFW2_URB3D
-   REAL, DIMENSION(ims:ime, 1:urban_map_zdf, jms:jme), INTENT(INOUT) :: SFR_URB3D
-   REAL, DIMENSION(ims:ime, 1:num_urban_ndm, jms:jme), INTENT(INOUT) :: SFG_URB3D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: EP_PV_URB3D!GRZ
-   REAL, DIMENSION( ims:ime, 1:urban_map_zdf,jms:jme ), INTENT(INOUT) :: T_PV_URB3D!GRZ
-   REAL, DIMENSION( ims:ime, 1:urban_map_zgrd, jms:jme),INTENT(INOUT) :: TRV_URB4D ! GRZ
-   REAL, DIMENSION( ims:ime, 1:urban_map_zgrd, jms:jme),INTENT(INOUT) :: QR_URB4D ! GRZ
-   REAL, DIMENSION( ims:ime,jms:jme), INTENT(INOUT) :: QGR_URB3D ! GRZ
-   REAL, DIMENSION( ims:ime,jms:jme), INTENT(INOUT) :: TGR_URB3D ! GRZ
-   REAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme),INTENT(INOUT) :: DRAIN_URB4D !GRZ
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: DRAINGR_URB3D   !GRZ
-   REAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme),INTENT(INOUT) :: SFRV_URB3D !GRZ
-   REAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme),INTENT(INOUT) :: LFRV_URB3D ! GRZ
-   REAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: DGR_URB3D !GRZ
-   REAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ),INTENT(INOUT) :: DG_URB3D !GRZ
-   REAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: LFR_URB3D !GRZ
-   REAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ), INTENT(INOUT) :: LFG_URB3D !GRZ
-   REAL, DIMENSION( ims:ime, 1:num_soil_layers, jms:jme ), INTENT(IN) ::SMOIS_URB
-   REAL, DIMENSION( ims:ime,1:num_urban_hi , jms:jme), INTENT(INOUT) :: HI_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: LP_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: LB_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: HGT_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: MH_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: STDH_URB2D
-   REAL, DIMENSION( ims:ime, 4,jms:jme ), INTENT(INOUT) :: LF_URB2D
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: A_U_BEP
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: A_V_BEP
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: A_T_BEP
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: A_Q_BEP
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: A_E_BEP
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: B_U_BEP
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: B_V_BEP
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: B_T_BEP
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: B_Q_BEP
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: B_E_BEP
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: VL_BEP
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: DLG_BEP
-   REAL, DIMENSION(ims:ime, kms:kme,jms:jme),INTENT(INOUT) :: SF_BEP
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: DL_U_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_zrd, jms:jme), INTENT(INOUT) :: TRB_URB4D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_zwd, jms:jme), INTENT(INOUT) :: TW1_URB4D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_zwd, jms:jme), INTENT(INOUT) :: TW2_URB4D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_gd , jms:jme), INTENT(INOUT) :: TGB_URB4D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_bd , jms:jme), INTENT(INOUT) :: TLEV_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_bd , jms:jme), INTENT(INOUT) :: QLEV_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_wd , jms:jme), INTENT(INOUT) :: TW1LEV_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_wd , jms:jme), INTENT(INOUT) :: TW2LEV_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_gbd, jms:jme), INTENT(INOUT) :: TGLEV_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_fbd, jms:jme), INTENT(INOUT) :: TFLEV_URB3D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: LF_AC_URB3D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: SF_AC_URB3D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: CM_AC_URB3D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: SFVENT_URB3D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: LFVENT_URB3D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_wd, jms:jme), INTENT(INOUT) :: SFWIN1_URB3D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_wd, jms:jme), INTENT(INOUT) :: SFWIN2_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_zd , jms:jme), INTENT(INOUT) :: SFW1_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_zd , jms:jme), INTENT(INOUT) :: SFW2_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:urban_map_zdf, jms:jme), INTENT(INOUT) :: SFR_URB3D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, 1:num_urban_ndm, jms:jme), INTENT(INOUT) :: SFG_URB3D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: EP_PV_URB3D!GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zdf,jms:jme ), INTENT(INOUT) :: T_PV_URB3D!GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zgrd, jms:jme),INTENT(INOUT) :: TRV_URB4D ! GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zgrd, jms:jme),INTENT(INOUT) :: QR_URB4D ! GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime,jms:jme), INTENT(INOUT) :: QGR_URB3D ! GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime,jms:jme), INTENT(INOUT) :: TGR_URB3D ! GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme),INTENT(INOUT) :: DRAIN_URB4D !GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: DRAINGR_URB3D   !GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme),INTENT(INOUT) :: SFRV_URB3D !GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme),INTENT(INOUT) :: LFRV_URB3D ! GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: DGR_URB3D !GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ),INTENT(INOUT) :: DG_URB3D !GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: LFR_URB3D !GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ), INTENT(INOUT) :: LFG_URB3D !GRZ
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:num_soil_layers, jms:jme ), INTENT(IN) ::SMOIS_URB
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime,1:num_urban_hi , jms:jme), INTENT(INOUT) :: HI_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: LP_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: LB_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: HGT_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: MH_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: STDH_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 4,jms:jme ), INTENT(INOUT) :: LF_URB2D
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: A_U_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: A_V_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: A_T_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: A_Q_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: A_E_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: B_U_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: B_V_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: B_T_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: B_Q_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: B_E_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: VL_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: DLG_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme,jms:jme),INTENT(INOUT) :: SF_BEP
+   REAL(kind=kind_noahmp), DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT) :: DL_U_BEP
 !
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: FRC_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: FRC_URB2D
    INTEGER, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: UTYPE_URB2D
    INTEGER                                            :: UTYPE_URB
 !FS
@@ -2955,9 +3039,9 @@ ENDIF
 !===========================================================================
    SUBROUTINE force_restore(CAP,AKS,DELT,S,R,H,LE,TSLEND,TSP,TS)
 
-     REAL, INTENT(IN)  :: CAP,AKS,DELT,S,R,H,LE,TSLEND,TSP
-     REAL, INTENT(OUT) :: TS
-     REAL              :: C1,C2
+     REAL(kind=kind_noahmp), INTENT(IN)  :: CAP,AKS,DELT,S,R,H,LE,TSLEND,TSP
+     REAL(kind=kind_noahmp), INTENT(OUT) :: TS
+     REAL(kind=kind_noahmp)              :: C1,C2
 
      C2=24.*3600./2./3.14159
      C1=SQRT(0.5*C2*CAP*AKS)
@@ -2972,9 +3056,9 @@ ENDIF
 !============================================================================== 
    SUBROUTINE bisection(TSP,PS,S,EPS,RX,SIG,RHO,CP,CH,UA,QA,TA,EL,BET,AKS,TSL,DZ,TS) 
 
-     REAL, INTENT(IN) :: TSP,PS,S,EPS,RX,SIG,RHO,CP,CH,UA,QA,TA,EL,BET,AKS,TSL,DZ
-     REAL, INTENT(OUT) :: TS
-     REAL :: ES,QS0,R,H,ELE,G0,F1,F
+     REAL(kind=kind_noahmp), INTENT(IN) :: TSP,PS,S,EPS,RX,SIG,RHO,CP,CH,UA,QA,TA,EL,BET,AKS,TSL,DZ
+     REAL(kind=kind_noahmp), INTENT(OUT) :: TS
+     REAL(kind=kind_noahmp) :: ES,QS0,R,H,ELE,G0,F1,F
 
      TS1 = TSP - 5.
      TS2 = TSP + 5.
@@ -3021,22 +3105,22 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
 ! ----------------------------------------------------------------------
 
       IMPLICIT NONE
-      REAL     WWST, WWST2, G, VKRM, EXCM, BETA, BTG, ELFC, WOLD, WNEW
-      REAL     PIHF, EPSU2, EPSUST, EPSIT, EPSA, ZTMIN, ZTMAX, HPBL,     &
+      REAL(kind=kind_noahmp)     WWST, WWST2, G, VKRM, EXCM, BETA, BTG, ELFC, WOLD, WNEW
+      REAL(kind=kind_noahmp)     PIHF, EPSU2, EPSUST, EPSIT, EPSA, ZTMIN, ZTMAX, HPBL,     &
      & SQVISC
-      REAL     RIC, RRIC, FHNEU, RFC,RLMO_THR, RFAC, ZZ, PSLMU, PSLMS, PSLHU,     &
+      REAL(kind=kind_noahmp)     RIC, RRIC, FHNEU, RFC,RLMO_THR, RFAC, ZZ, PSLMU, PSLMS, PSLHU,     &
      & PSLHS
-      REAL     XX, PSPMU, YY, PSPMS, PSPHU, PSPHS, ZLM, Z0, THZ0, THLM
-      REAL     SFCSPD, AKANDA, AKMS, AKHS, ZU, ZT, RDZ, CXCH
-      REAL     DTHV, DU2, BTGH, WSTAR2, USTAR, ZSLU, ZSLT, RLOGU, RLOGT
-      REAL     RLMO, ZETALT, ZETALU, ZETAU, ZETAT, XLU4, XLT4, XU4, XT4
+      REAL(kind=kind_noahmp)     XX, PSPMU, YY, PSPMS, PSPHU, PSPHS, ZLM, Z0, THZ0, THLM
+      REAL(kind=kind_noahmp)     SFCSPD, AKANDA, AKMS, AKHS, ZU, ZT, RDZ, CXCH
+      REAL(kind=kind_noahmp)     DTHV, DU2, BTGH, WSTAR2, USTAR, ZSLU, ZSLT, RLOGU, RLOGT
+      REAL(kind=kind_noahmp)     RLMO, ZETALT, ZETALU, ZETAU, ZETAT, XLU4, XLT4, XU4, XT4
 !CC   ......REAL ZTFC
 
-      REAL     XLU, XLT, XU, XT, PSMZ, SIMM, PSHZ, SIMH, USTARK, RLMN,  &
+      REAL(kind=kind_noahmp)     XLU, XLT, XU, XT, PSMZ, SIMM, PSHZ, SIMH, USTARK, RLMN,  &
      &         RLMA
 
       INTEGER  ITRMX, ILECH, ITR
-      REAL,    INTENT(OUT) :: CD
+      REAL(kind=kind_noahmp),    INTENT(OUT) :: CD
       PARAMETER                                                         &
      &        (WWST = 1.2,WWST2 = WWST * WWST,G = 9.8,VKRM = 0.40,      &
      &         EXCM = 0.001                                             &
@@ -3213,9 +3297,9 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
 !===========================================================================
    SUBROUTINE DIREVAP (EDIR,ETP,SMC,SHDFAC,SMCMAX,SMCDRY,FXEXP)
 
-     REAL, INTENT(IN)  :: ETP,SMC,SHDFAC,SMCMAX,SMCDRY,FXEXP
-     REAL, INTENT(OUT) :: EDIR
-     REAL              :: FX, SRATIO
+     REAL(kind=kind_noahmp), INTENT(IN)  :: ETP,SMC,SHDFAC,SMCMAX,SMCDRY,FXEXP
+     REAL(kind=kind_noahmp), INTENT(OUT) :: EDIR
+     REAL(kind=kind_noahmp)              :: FX, SRATIO
 
 ! ----------------------------------------------------------------------
 ! FX > 1 REPRESENTS DEMAND CONTROL
@@ -3240,15 +3324,15 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
                         TS,TA,QA,SMC,SMCWLT,SMCREF,CPP,PS,CH,EPSV,DELT, NROOT,NSOIL,    &
                         DZVR, ZSOIL, HS)
      INTEGER, INTENT(IN)   :: NROOT, NSOIL
-     REAL, INTENT(IN)  :: SHDFAC,ETP1,CMC,CFACTR,CMCMAX,LAI,RSMIN,RSMAX,RGL,SX,TA
-     REAL, INTENT(IN)  :: TS,QA, SMCWLT, SMCREF, CPP, PS,CH, EPSV, DELT, HS
-     REAL, DIMENSION(1:NSOIL), INTENT(IN)   :: ZSOIL, DZVR, SMC
-     REAL, DIMENSION(1:NSOIL), INTENT(INOUT):: ET
-     REAL, INTENT(OUT) :: EC, ETT
-     REAL              :: RC, RCS, RCT, RCQ, RCSOIL, FF, WS, SLV, DESDT
-     REAL              :: SIGMA, PC, CMC2MS, SGX, DENOM, RTX, ETT1
+     REAL(kind=kind_noahmp), INTENT(IN)  :: SHDFAC,ETP1,CMC,CFACTR,CMCMAX,LAI,RSMIN,RSMAX,RGL,SX,TA
+     REAL(kind=kind_noahmp), INTENT(IN)  :: TS,QA, SMCWLT, SMCREF, CPP, PS,CH, EPSV, DELT, HS
+     REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(IN)   :: ZSOIL, DZVR, SMC
+     REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(INOUT):: ET
+     REAL(kind=kind_noahmp), INTENT(OUT) :: EC, ETT
+     REAL(kind=kind_noahmp)              :: RC, RCS, RCT, RCQ, RCSOIL, FF, WS, SLV, DESDT
+     REAL(kind=kind_noahmp)              :: SIGMA, PC, CMC2MS, SGX, DENOM, RTX, ETT1
      INTEGER           :: K
-     REAL, DIMENSION(1:NROOT) ::  PART, GX
+     REAL(kind=kind_noahmp), DIMENSION(1:NROOT) ::  PART, GX
      
      SLV    = 2.501E+6
      SIGMA  = 5.67E-8
@@ -3356,16 +3440,16 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
 
       INTEGER, INTENT(IN)   :: NSOIL
       INTEGER               :: I,K
-      REAL, INTENT(IN)      :: BEXP, CMCMAX, DKSAT,DWSAT, DT, EC, EDIR,  &
+      REAL(kind=kind_noahmp), INTENT(IN)      :: BEXP, CMCMAX, DKSAT,DWSAT, DT, EC, EDIR,  &
                                PRCP1, SHDFAC, SMCMAX, SMCWLT
-      REAL, INTENT(OUT)     :: DRIP, RUNOFF1, RUNOFF2, RUNOFF3
-      REAL, INTENT(IN)      :: CMCP
-      REAL, INTENT(OUT)     :: CMC
-      REAL, DIMENSION(1:NSOIL), INTENT(IN)   :: ZSOIL, ET
-      REAL, DIMENSION(1:NSOIL), INTENT(IN)   :: SMCP
-      REAL, DIMENSION(1:NSOIL), INTENT(OUT)  :: SMC
-      REAL, DIMENSION(1:NSOIL)               :: AI, BI, CI, STCF,RHSTS, RHSTT
-      REAL                  :: EXCESS,PCPDRP,RHSCT,TRHSCT
+      REAL(kind=kind_noahmp), INTENT(OUT)     :: DRIP, RUNOFF1, RUNOFF2, RUNOFF3
+      REAL(kind=kind_noahmp), INTENT(IN)      :: CMCP
+      REAL(kind=kind_noahmp), INTENT(OUT)     :: CMC
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(IN)   :: ZSOIL, ET
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(IN)   :: SMCP
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(OUT)  :: SMC
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL)               :: AI, BI, CI, STCF,RHSTS, RHSTT
+      REAL(kind=kind_noahmp)                  :: EXCESS,PCPDRP,RHSCT,TRHSCT
 
 
 ! ----------------------------------------------------------------------
@@ -3410,14 +3494,14 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
       INTEGER, INTENT(IN)       :: NSOIL
       INTEGER                   :: K, KS
 
-      REAL, INTENT(IN)          :: BEXP, DKSAT, DT, DWSAT, EDIR,  &
+      REAL(kind=kind_noahmp), INTENT(IN)          :: BEXP, DKSAT, DT, DWSAT, EDIR,  &
                                    PCPDRP, SMCMAX, SMCWLT
-      REAL, INTENT(OUT)         :: RUNOFF1, RUNOFF2
-      REAL, DIMENSION(1:NSOIL), INTENT(IN)   :: SMCP, ZSOIL, ET
-      REAL, DIMENSION(1:NSOIL), INTENT(OUT)  :: RHSTT
-      REAL, DIMENSION(1:NSOIL), INTENT(OUT)  :: AI, BI, CI
-      REAL, DIMENSION(1:NSOIL)  :: DDMAX
-      REAL                      :: DD, DDT, DDZ, DDZ2, DENOM,       &
+      REAL(kind=kind_noahmp), INTENT(OUT)         :: RUNOFF1, RUNOFF2
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(IN)   :: SMCP, ZSOIL, ET
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(OUT)  :: RHSTT
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(OUT)  :: AI, BI, CI
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL)  :: DDMAX
+      REAL(kind=kind_noahmp)                      :: DD, DDT, DDZ, DDZ2, DENOM,       &
                                    DENOM2, DSMDZ, DSMDZ2, DT1,      &
                                    INFMAX,MXSMC,MXSMC2,NUMER,PDDUM, &
                                    PX,SMCAV, SSTT, PAR,         &
@@ -3525,17 +3609,17 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
       INTEGER, INTENT(IN)       :: NSOIL
       INTEGER                   :: I, K, KK11
 
-      REAL, INTENT(IN)          :: CMCMAX, DT, SMCMAX
-      REAL, INTENT(OUT)         :: RUNOFF3
-      REAL, INTENT(IN)          :: CMCP
-      REAL, INTENT(OUT)         :: CMC
-      REAL, DIMENSION(1:NSOIL), INTENT(IN)     :: SMCP, ZSOIL
-      REAL, DIMENSION(1:NSOIL), INTENT(OUT)    :: SMC
-      REAL, DIMENSION(1:NSOIL), INTENT(INOUT)  :: RHSTT
-      REAL, DIMENSION(1:NSOIL), INTENT(INOUT)  :: AI, BI, CI 
-      REAL, DIMENSION(1:NSOIL)  :: RHSTTin, SMCOUT,SMCIN
-      REAL, DIMENSION(1:NSOIL)  :: CIin
-      REAL                      :: DDZ, RHSCT, WPLUS, STOT
+      REAL(kind=kind_noahmp), INTENT(IN)          :: CMCMAX, DT, SMCMAX
+      REAL(kind=kind_noahmp), INTENT(OUT)         :: RUNOFF3
+      REAL(kind=kind_noahmp), INTENT(IN)          :: CMCP
+      REAL(kind=kind_noahmp), INTENT(OUT)         :: CMC
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(IN)     :: SMCP, ZSOIL
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(OUT)    :: SMC
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(INOUT)  :: RHSTT
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(INOUT)  :: AI, BI, CI 
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL)  :: RHSTTin, SMCOUT,SMCIN
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL)  :: CIin
+      REAL(kind=kind_noahmp)                      :: DDZ, RHSCT, WPLUS, STOT
 
 ! ----------------------------------------------------------------------
 ! CREATE 'AMOUNT' VALUES OF VARIABLES TO BE INPUT TO THE
@@ -3608,20 +3692,20 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
 ! CALCULATE SOIL WATER DIFFUSIVITY AND SOIL HYDRAULIC CONDUCTIVITY.
 ! ----------------------------------------------------------------------
       IMPLICIT NONE
-      REAL     BEXP
-      REAL     DKSAT
-      REAL     DWSAT
-      REAL     EXPON
-      REAL     FACTR1
-      REAL     FACTR2
-      REAL     SMC
-      REAL     SMCMAX
-      REAL     WCND
+      REAL(kind=kind_noahmp)     BEXP
+      REAL(kind=kind_noahmp)     DKSAT
+      REAL(kind=kind_noahmp)     DWSAT
+      REAL(kind=kind_noahmp)     EXPON
+      REAL(kind=kind_noahmp)     FACTR1
+      REAL(kind=kind_noahmp)     FACTR2
+      REAL(kind=kind_noahmp)     SMC
+      REAL(kind=kind_noahmp)     SMCMAX
+      REAL(kind=kind_noahmp)     WCND
 
 ! ----------------------------------------------------------------------
 !     CALC THE RATIO OF THE ACTUAL TO THE MAX PSBL SOIL H2O CONTENT
 ! ----------------------------------------------------------------------
-      REAL     WDF
+      REAL(kind=kind_noahmp)     WDF
       FACTR1 = 0.05 / SMCMAX
 
 ! ----------------------------------------------------------------------
@@ -3661,8 +3745,8 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
       INTEGER, INTENT(IN)   :: NSOIL
       INTEGER               :: K, KK
 
-      REAL, DIMENSION(1:NSOIL), INTENT(IN):: A, B, D
-      REAL, DIMENSION(1:NSOIL),INTENT(INOUT):: C,P,DELTA
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(IN):: A, B, D
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL),INTENT(INOUT):: C,P,DELTA
 
 ! ----------------------------------------------------------------------
 ! INITIALIZE EQN COEF C FOR THE LOWEST SOIL LAYER
@@ -3706,13 +3790,13 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
       INTEGER, INTENT(IN)   :: NSOIL
       INTEGER               :: I
 
-      REAL, INTENT(IN)      :: DF1,DT,SMCMAX, SMCWLT, TBOT,YY, ZBOT,ZZ1, QUARTZ
-      REAL, INTENT(IN)      :: CSOIL, CAPR
-      REAL, INTENT(INOUT)   :: T1
-      REAL, INTENT(OUT)     :: SSOIL
-      REAL, DIMENSION(1:NSOIL), INTENT(IN)    :: SMC,ZSOIL
-      REAL, DIMENSION(1:NSOIL), INTENT(INOUT) :: STC
-      REAL, DIMENSION(1:NSOIL)             :: AI, BI, CI, STCF,RHSTS
+      REAL(kind=kind_noahmp), INTENT(IN)      :: DF1,DT,SMCMAX, SMCWLT, TBOT,YY, ZBOT,ZZ1, QUARTZ
+      REAL(kind=kind_noahmp), INTENT(IN)      :: CSOIL, CAPR
+      REAL(kind=kind_noahmp), INTENT(INOUT)   :: T1
+      REAL(kind=kind_noahmp), INTENT(OUT)     :: SSOIL
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(IN)    :: SMC,ZSOIL
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(INOUT) :: STC
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL)             :: AI, BI, CI, STCF,RHSTS
 
 ! ----------------------------------------------------------------------
 ! HRT ROUTINE CALCS THE RIGHT HAND SIDE OF THE SOIL TEMP DIF EQN
@@ -3753,14 +3837,14 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
       INTEGER, INTENT(IN)  :: NSOIL
       INTEGER              :: I, K
 
-      REAL, INTENT(IN)     :: DF1, DT,SMCMAX ,TBOT,YY,ZZ1, ZBOT, QUARTZ, CSOIL, CAPR
-      REAL, DIMENSION(1:NSOIL), INTENT(IN)   :: SMC,STC,ZSOIL
-      REAL, DIMENSION(1:NSOIL), INTENT(OUT)  :: RHSTS
-      REAL, DIMENSION(1:NSOIL), INTENT(OUT)  :: AI, BI,CI
-      REAL                 :: DDZ, DDZ2, DENOM, DF1K, DTSDZ,DF1N,      &
+      REAL(kind=kind_noahmp), INTENT(IN)     :: DF1, DT,SMCMAX ,TBOT,YY,ZZ1, ZBOT, QUARTZ, CSOIL, CAPR
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(IN)   :: SMC,STC,ZSOIL
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(OUT)  :: RHSTS
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(OUT)  :: AI, BI,CI
+      REAL(kind=kind_noahmp)                 :: DDZ, DDZ2, DENOM, DF1K, DTSDZ,DF1N,      &
                               DTSDZ2,HCPCT,QTOT,SSOIL,SICE,TAVG,TBK,     &
                               TBK1,TSNSR,TSURF
-      REAL, PARAMETER      :: CAIR = 1004.0, CH2O = 4.2E6
+      REAL(kind=kind_noahmp), PARAMETER      :: CAIR = 1004.0, CH2O = 4.2E6
 
 
 ! ----------------------------------------------------------------------
@@ -3897,13 +3981,13 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
       INTEGER, INTENT(IN)  :: NSOIL
       INTEGER              :: K
 
-      REAL, DIMENSION(1:NSOIL), INTENT(IN):: STCIN
-      REAL, DIMENSION(1:NSOIL), INTENT(OUT):: STCOUT
-      REAL, DIMENSION(1:NSOIL), INTENT(INOUT):: RHSTS
-      REAL, DIMENSION(1:NSOIL), INTENT(INOUT):: AI,BI,CI
-      REAL, DIMENSION(1:NSOIL) :: RHSTSin
-      REAL, DIMENSION(1:NSOIL) :: CIin
-      REAL                 :: DT
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(IN):: STCIN
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(OUT):: STCOUT
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(INOUT):: RHSTS
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(INOUT):: AI,BI,CI
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL) :: RHSTSin
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL) :: CIin
+      REAL(kind=kind_noahmp)                 :: DT
 
 ! ----------------------------------------------------------------------
 ! CREATE FINITE DIFFERENCE VALUES FOR USE IN ROSR12 ROUTINE
@@ -3949,10 +4033,10 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
       IMPLICIT NONE
       INTEGER, INTENT(IN)       :: NSOIL
       INTEGER                   :: K
-      REAL, INTENT(IN)          :: TB, TU, ZBOT
-      REAL, INTENT(OUT)         :: TBND1
-      REAL, DIMENSION(1:NSOIL), INTENT(IN)   :: ZSOIL
-      REAL                      :: ZB, ZUP
+      REAL(kind=kind_noahmp), INTENT(IN)          :: TB, TU, ZBOT
+      REAL(kind=kind_noahmp), INTENT(OUT)         :: TBND1
+      REAL(kind=kind_noahmp), DIMENSION(1:NSOIL), INTENT(IN)   :: ZSOIL
+      REAL(kind=kind_noahmp)                      :: ZB, ZUP
 
 ! ----------------------------------------------------------------------
 ! USE SURFACE TEMPERATURE ON THE TOP OF THE FIRST LAYER
@@ -3986,9 +4070,9 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
 ! PETERS-LIDARD APPROACH (PETERS-LIDARD et al., 1998)
 ! ----------------------------------------------------------------------
       IMPLICIT NONE
-      REAL, INTENT(IN)          :: QZ,  SMC, SMCMAX
-      REAL, INTENT(OUT)         :: DF
-      REAL                      :: AKE, GAMMD, THKDRY, THKO,         &
+      REAL(kind=kind_noahmp), INTENT(IN)          :: QZ,  SMC, SMCMAX
+      REAL(kind=kind_noahmp), INTENT(OUT)         :: DF
+      REAL(kind=kind_noahmp)                      :: AKE, GAMMD, THKDRY, THKO,         &
                                    THKQTZ,THKSAT,THKS,THKW,SATRATIO
 
 ! ----------------------------------------------------------------------
