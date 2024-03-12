@@ -13,7 +13,6 @@ module module_NoahMP_hrldas_driver
   use NoahmpUrbanDriverMainMod, only : noahmp_urban
   use module_sf_urban,          only : urban_param_init, urban_var_init
   use module_date_utilities
-  use Machine, only : kind_noahmp
   use SnowInputSnicarMod
 
 #ifdef MPP_LAND
