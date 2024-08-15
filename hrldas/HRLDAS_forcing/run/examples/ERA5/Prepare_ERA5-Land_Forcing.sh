@@ -162,7 +162,8 @@ for f in $FILES; do
    cdo -s merge $outfile1 $SP_file $outfile2
 
    outfile3=$(sed 's/'2D'/'Q'/g' <<< $f)
-   cdo -s -setparam,133.128 -expr,"var133=(0.622*var1)/(var134/100.-(0.378*var1))/1000." $outfile2 $outfile3
+   cdo -s -setparam,133.128 -expr,"var133=(0.622*var1)/(var134/100.-(0.378*var1))" $outfile2 $outfile3
+   # the output specific humidity in unit [kg/kg]
 done
 echo ""
 
