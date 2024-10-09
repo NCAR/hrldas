@@ -1,4 +1,4 @@
-List of variables
+List of variables in HRLDAS setup file
 TMN: annual mean deep soil temperature [K]
 HGT: topography height [m]
 SEAICE: sea ice fraction [-] (should be 0.0 for a land point)
