@@ -1,8 +1,8 @@
 &files
- STARTDATE          = "2001-10-01_00"
- ENDDATE            = "2001-10-02_00"
- DataDir            = "/glade/scratch/zhezhang/ERA5/land/extract"
- OutputDir          = "/glade/scratch/zhezhang/ERA5/land/LDASIN"
+ STARTDATE          = "2023-11-01_00"
+ ENDDATE            = "2023-11-03_00"
+ DataDir            = "./run/examples/ERA5/OUTPUTS"
+ OutputDir          = "./LDASIN/"
  FORCING_TYPE       = "ERA5"
  FULL_IC_FRQ        = 0 
  RAINFALL_INTERP    = 0
@@ -15,7 +15,7 @@
  VARY_LAI           = .TRUE.
  MASK_WATER         = .FALSE.
 
- geo_em_flnm        = "/glade/work/zhezhang/PPR/geo_em.d01.nc_ppr"
+ geo_em_flnm        = "./ERA5_forcing/geo_em.d01.nc"
 
  Zfile_template     = "./geo_1279l4_0.1x0.1.grib2_v4_unpack.nc"
  LANDSfile_template = "./lsm_1279l4_0.1x0.1.grb_v4_unpack.nc" 

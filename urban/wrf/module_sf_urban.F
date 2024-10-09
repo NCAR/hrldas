@@ -1279,7 +1279,7 @@ ENDIF
        ES=6.11*EXP( (2.5*10.**6./461.51)*(TGP-273.15)/(273.15*TGP) ) 
        DESDT=(2.5*10.**6./461.51)*ES/(TGP**2.)
        QS0G=0.622*ES/(PS-0.378*ES)        
-       DQS0GDTG=DESDT*0.22*PS/((PS-0.378*ES)**2.) 
+       DQS0GDTG=DESDT*0.622*PS/((PS-0.378*ES)**2.) 
 
        RG1=EPSG*( RX*VFGS          &
        +EPSB*VFGW*SIG*TBP**4./60.  &
@@ -1297,7 +1297,7 @@ ENDIF
        RB2=EPSB*( (1.-EPSG)*VFWG*VFGS*RX                          &
        +(1.-EPSG)*EPSB*VFGW*VFWG*SIG*(TBP**4.)/60.                &
        +(1.-EPSB)*VFWS*(1.-2.*VFWS)*RX                            &
-       +(1.-EPSB)*VFWG*(1.-2.*VFWS)*EPSG*SIG*EPSG*TGP**4./60.     &
+       +(1.-EPSB)*VFWG*(1.-2.*VFWS)*EPSG*SIG*TGP**4./60.     &
        +EPSB*(1.-EPSB)*(1.-2.*VFWS)*(1.-2.*VFWS)*SIG*TBP**4./60. )
 
        RG=RG1+RG2
@@ -1416,7 +1416,7 @@ ENDIF
        RB2=EPSB*( (1.-EPSG)*VFWG*VFGS*RX                          &
        +(1.-EPSG)*EPSB*VFGW*VFWG*SIG*(TBP**4.)/60.                &
        +(1.-EPSB)*VFWS*(1.-2.*VFWS)*RX                            &
-       +(1.-EPSB)*VFWG*(1.-2.*VFWS)*EPSG*SIG*EPSG*TGP**4./60.     &
+       +(1.-EPSB)*VFWG*(1.-2.*VFWS)*EPSG*SIG*TGP**4./60.     &
        +EPSB*(1.-EPSB)*(1.-2.*VFWS)*(1.-2.*VFWS)*SIG*TBP**4./60. )
 
        RG=RG1+RG2
