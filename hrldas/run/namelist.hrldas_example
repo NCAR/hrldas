@@ -47,6 +47,7 @@
  IRRIGATION_OPTION                 = 0
  IRRIGATION_METHOD                 = 0
  TILE_DRAINAGE_OPTION              = 0
+ SNOW_COMPACTION_OPTION            = 2
 
  FORCING_TIMESTEP = 3600
  NOAH_TIMESTEP    = 1800
