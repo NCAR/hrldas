@@ -2,6 +2,7 @@
 Steps for running a HRLDAS simulation using GLDAS for forcing. 
 
 UPDATES in 2020-07-10, Zhe Zhang
+UPDATES in 2024-11-14, Tzu-Shun Lin
 Reading GLDAS forcing from netcdf format
 Changes are associated with step 3, Prepare GLDAS-based forcing data
 
@@ -11,23 +12,21 @@ Changes are associated with step 3, Prepare GLDAS-based forcing data
 
 2. Compile HRLDAS
 
-Place the HRLDAS tar file where you will be running the model. 
+2.1 Download the model code where you will be running the model: 
 
-tar xvf HRLDAS-v3.x.tar
+`git clone --recurse-submodules https://github.com/NCAR/hrldas`
 
-I will refer to this location as /root_path/HRLDAS-v3.x
+2.2 Configure and Compile:
 
-In /root_path/HRLDAS-v3.x, modify user_build_options to link to the proper compilers and paths.
+`cd ./hrldas/hrldas`
 
- To compile with parallel version
-  edit the file 'user_build_options'
-  uncommment the compiler section with MPI (available for pgf90 and ifort compilers)
+`./configure`
 
- To compile with sequential version
-  edit the file 'user_build_options'
-  uncommment the compiler section without MPI
+Type your compiler option in number in the command line. A new configuration file user_build_options will appear in the directory. Go into the file and edit the correct path to necessary libraries.
 
-type 'make'
+After editing the user_build_options file, we can now compile the model with a simple command:
+
+`make`
 
 If successful, there should be two executables created
 
@@ -77,8 +76,6 @@ Change the date of initialization and run the script one time. The files should 
 
 Note: this step is not necessary unless you want to intialize using the GLDAS states
 
-Note: GLDAS soils are inverted (level 4 is actually level 1); this script takes care of that
-
 Run the python code:
 `python extract_glads_init.py`
 
@@ -90,7 +87,7 @@ If you are space-limited, at this point you can remove the raw GLDAS files. You 
 
 --------------------------------------------------
 
-3.6 create_UV_netcdf.perl: split Wind to U, V; just set V=0 (GLDAS has wind speed, HRLDAS wants components)
+3.6 create_UV_netcdf.perl: split Wind to U, V; just assume U=Wind speed and V=0 (GLDAS has wind speed, HRLDAS wants components)
 
 Again, you will need to change the paths in the Perl script along with the year/day ranges that are appropriate for your application.
 
@@ -112,15 +109,14 @@ Again, you will need to change the paths in the Perl script along with the year/
 #There is an NCL script (check_SW.ncl) if you want to see what the interpolation is doing.
 #--------------------------------------------------
 
-3.6 Run the HRLDAS pre-processor code.
+3.9 Run the HRLDAS pre-processor code.
 
 At this point, you should have all the GLDAS output extracted into different directories at /extracted_GLDAS_data_path/. Now it's finally time to run the first step of the HRLDAS.
-
-cd /root_path/HRLDAS-v3.x/HRLDAS_COLLECT_DATA/run
+`cd /root_path/hrldas/hrldas/HRLDAS_forcing/`
 
 In the examples/GLDAS/ directory there is a namelist.input file that is consistent with the GLDAS procedure described above. You can modify this file for your case and place it in the pre-processor run directory:
 
-cp examples/GLDAS/namelist.input.GLDAS .
+`cp run/examples/GLDAS/namelist.input.GLDAS .`
 
 --------------------------------------------------
 
@@ -167,13 +163,9 @@ Note: for GLDAS there will be no need to include a secondary SW and precipitatio
 
 3.9.2 Run the pre-processor
 
-Note: please use create_forcing_netcdf.F for this purpose. 
-`cp create_forcing_netcdf.F create_forcing.F`
-and compile again.
-
 Run the pre-processor with the GLDAS namelist
 
-./create_forcing.exe namelist.input.GLDAS
+`./create_forcing.exe namelist.input.GLDAS`
 
 In your OUTPUTDIR, you should now have all your LDASIN files.
 
@@ -181,18 +173,17 @@ In your OUTPUTDIR, you should now have all your LDASIN files.
 
 The hard part is over. Go to the HRLDAS Run directory:
 
-cd /root_path/HRLDAS-v3.x/run
+`cd /root_path/hrldas/hrldas/run`
 
 4.1 Modify the namelist
 
 There is an example namelist.hrldas in the examples/GLDAS/ directory. Copy this to the run/ directory
 
-cp examples/GLDAS/namelist.hrldas.GLDAS namelist.hrldas
+`cp examples/GLDAS/namelist.hrldas.GLDAS namelist.hrldas`
 
 See the full documentation for a complete description of items, but these are the important modifications:
 
  HRLDAS_SETUP_FILE     = path and name of your grid/initial conditions file (can also be a wrfinput file)
- MMF_RUNOFF_FILE       = special for OPT_RUN=5, which is unsupported, for now
  INDIR                 = where the LDASIN files are located
  OUTDIR                = where the LDASOUT files will be located
 
@@ -238,6 +229,6 @@ See the full documentation for a complete description of items, but these are th
 
 4.2 Run the HRLDAS
 
-./hrldas.exe
+`./hrldas.exe`
 
 The output will be saved to the OUTDIR directory.

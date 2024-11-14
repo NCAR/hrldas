@@ -18,8 +18,8 @@ $day_end = 116;
 @noleap_days = (0,31,59,90,120,151,181,212,243,273,304,334,365);
 @leap_days   = (0,31,60,91,121,152,182,213,244,274,305,335,366);
 
-$data_dir = "/glade/work/zhezhang/GLDAS/extracted/";
-$results_dir = "/glade/work/zhezhang/GLDAS/extracted/";
+$data_dir = "/glade/work/zhezhang/GLDAS/extracted";
+$results_dir = "/glade/work/zhezhang/GLDAS/extracted";
 
 for $yy (@yrs)
  {
