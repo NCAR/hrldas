@@ -51,7 +51,7 @@ I put these "raw" GLDAS files in one directory (e.g., /raw_GLDAS_data_path)
 
 --------------------------------------------------
 
-3.3 extract_gldas.py: extract the individual variables from the GLDAS netcdf files
+3.2 extract_gldas.py: extract the individual variables from the GLDAS netcdf files
 
 The current script uses nco(ncks) to extract individual fields from the GLDAS files. It will process entire years or sections of one year. You can change this by modifying the python script.
 
@@ -70,7 +70,7 @@ Run the python code:
 
 --------------------------------------------------
 
-3.4 extract_gldas_init.py: extract the initial-only fields (SWE_inst,Canopint_inst,AvgSurfT_inst,SoilMoi,SoilTMP) from the GLDAS NETCDF output files
+3.3 extract_gldas_init.py: extract the initial-only fields (SWE_inst,Canopint_inst,AvgSurfT_inst,SoilMoi,SoilTMP) from the GLDAS NETCDF output files
 
 Change the date of initialization and run the script one time. The files should appear in the /extracted_GLDAS_data_path/INIT/ directory.
 
@@ -81,26 +81,26 @@ Run the python code:
 
 --------------------------------------------------
 
-3.5 intermediate clean-up (optional)
+3.4 intermediate clean-up (optional)
 
 If you are space-limited, at this point you can remove the raw GLDAS files. You have extracted all you need and they are no longer needed.
 
 --------------------------------------------------
 
-3.6 create_UV_netcdf.perl: split Wind to U, V; just assume U=Wind speed and V=0 (GLDAS has wind speed, HRLDAS wants components)
+3.5 create_UV_netcdf.perl: split Wind to U, V; just assume U=Wind speed and V=0 (GLDAS has wind speed, HRLDAS wants components)
 
 Again, you will need to change the paths in the Perl script along with the year/day ranges that are appropriate for your application.
 
 --------------------------------------------------
 
-3.7 combine_precips_netcdf.perl: combine precipitations to a total precipitation
+3.6 combine_precips_netcdf.perl: combine precipitations to a total precipitation
 
 Again, you will need to change the paths in the Perl script along with the year/day ranges that are appropriate for your application.
 
 --------------------------------------------------
 
 # I didn't do this part, the forcing I used are 3-hourly
-#3.8 fill_SSRD.perl: do hourly interpolation of solar radiation via zenith angle
+#3.7 fill_SSRD.perl: do hourly interpolation of solar radiation via zenith angle
 #
 #  - note original data are instantaneous 3-hourly
 #
@@ -109,7 +109,7 @@ Again, you will need to change the paths in the Perl script along with the year/
 #There is an NCL script (check_SW.ncl) if you want to see what the interpolation is doing.
 #--------------------------------------------------
 
-3.9 Run the HRLDAS pre-processor code.
+3.8 Run the HRLDAS pre-processor code.
 
 At this point, you should have all the GLDAS output extracted into different directories at /extracted_GLDAS_data_path/. Now it's finally time to run the first step of the HRLDAS.
 `cd /root_path/hrldas/hrldas/HRLDAS_forcing/`
