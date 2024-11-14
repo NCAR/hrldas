@@ -22,7 +22,7 @@ vars_name= ["SWE_inst","CanopInt_inst","AvgSurfT_inst","SoilMoi","SoilTMP"]
 for var in range(len(vars_name)):
     if vars_name[var] == "SoilMoi" or vars_name[var] == "SoilTMP":
         os.system("ncks -v "+vars_name[var]+"0_10cm_inst " +filename+" "+ results_dir+"/INIT/GLDAS_"+vars_name[var]+"_000-010_"+date+"00")
-        os.system("ncks -v "+vars_name[var]+"10_40cm_inst " +filename+" "+ results_dir+"/INIT//GLDAS_"+vars_name[var]+"_010-040_"+date+"00")
+        os.system("ncks -v "+vars_name[var]+"10_40cm_inst " +filename+" "+ results_dir+"/INIT/GLDAS_"+vars_name[var]+"_010-040_"+date+"00")
         os.system("ncks -v "+vars_name[var]+"40_100cm_inst " +filename+" "+ results_dir+"/INIT/GLDAS_"+vars_name[var]+"_040-100_"+date+"00")
         os.system("ncks -v "+vars_name[var]+"100_200cm_inst " +filename+" "+ results_dir+"/INIT/GLDAS_"+vars_name[var]+"_100-200_"+date+"00")
     else:
