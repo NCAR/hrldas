@@ -93,6 +93,7 @@ OBJS = \
         ../../noahmp/src/SnowLayerDivideMod.o \
         ../../noahmp/src/SnowLayerWaterComboMod.o \
         ../../noahmp/src/SnowpackCompactionMod.o \
+        ../../noahmp/src/SnowpackCompactionARMod.o \
         ../../noahmp/src/SnowpackHydrologyMod.o \
         ../../noahmp/src/SnowWaterMainMod.o \
         ../../noahmp/src/SoilHydraulicPropertyMod.o \
