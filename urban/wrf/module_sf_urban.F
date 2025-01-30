@@ -877,7 +877,7 @@ use module_wrf_error
        SG1=SX*VFGS*(1.-ALBG)
        SB1=SX*VFWS*(1.-ALBB)
        SG2=SB1*ALBB/(1.-ALBB)*VFGW*(1.-ALBG)
-       SB2=SG1*ALBG/(1.-ALBG)*VFWG*(1.-ALBB)
+       SB2=SG1*ALBG/(1.-ALBG)*VFWG*(1.-ALBB) + SB1*ALBB*VFWW
 
      ELSE                              ! shadow effects model
 
@@ -923,7 +923,7 @@ use module_wrf_error
        SG1=SD*(RW-SLX)/RW*(1.-ALBG)+SQ*VFGS*(1.-ALBG)
        SB1=SD*SLX/W*(1.-ALBB)+SQ*VFWS*(1.-ALBB)
        SG2=SB1*ALBB/(1.-ALBB)*VFGW*(1.-ALBG)
-       SB2=SG1*ALBG/(1.-ALBG)*VFWG*(1.-ALBB)
+       SB2=SG1*ALBG/(1.-ALBG)*VFWG*(1.-ALBB) + SB1*ALBB*VFWW
 
      END IF
 
@@ -1133,7 +1133,7 @@ use module_wrf_error
           
        CALL TDFCND (DF1,SMR(KZ), QUARTZ, SMCMAX )
        DF1 = DF1 * EXP(-2.0 * SHDFAC)  
-       RGR = EPSV*(RX-SIG*(TGRP**4.)/60.)
+       RGR = EPSV*(RX-SIG*(TA**4.)/60.)
        RGRR= (SGR+RGR) * 697.7 * 60.
        RCH = RHOO*CPP*CHGR
        RR1 = EPSV*(TA**4) * 6.48E-8 / (PS* CHGR) + 1.0
@@ -1635,7 +1635,7 @@ ENDIF
         PSIM=ALOG((Z+Z0)/Z0) &
             -ALOG((X+1.)**2.*(X**2.+1.)) &
             +2.*ATAN(X) &
-            +ALOG((X+1.)**2.*(X0**2.+1.)) &
+            +ALOG((X0+1.)**2.*(X0**2.+1.)) &
             -2.*ATAN(X0)
         FAIH=1./SQRT(1.-16.*XXX)
         PSIH=ALOG((Z+Z0)/Z0)+0.4*B1 &
@@ -3057,13 +3057,13 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
 ! LECH'S SURFACE FUNCTIONS
 ! ----------------------------------------------------------------------
       PSLMU (ZZ)= -0.96* log (1.0-4.5* ZZ)
-      PSLMS (ZZ)= ZZ * RRIC -2.076* (1. -1./ (ZZ +1.))
+      PSLMS (ZZ)= (ZZ/RFC) -2.076* (1. -1./ (ZZ +1.))
       PSLHU (ZZ)= -0.96* log (1.0-4.5* ZZ)
 
 ! ----------------------------------------------------------------------
 ! PAULSON'S SURFACE FUNCTIONS
 ! ----------------------------------------------------------------------
-      PSLHS (ZZ)= ZZ * RFAC -2.076* (1. -1./ (ZZ +1.))
+      PSLHS (ZZ)= ZZ * RFAC -2.076* (1. - exp(-1.2 * ZZ))
       PSPMU (XX)= -2.* log ( (XX +1.)*0.5) - log ( (XX * XX +1.)*0.5)   &
      &        +2.* ATAN (XX)                                            &
      &- PIHF
