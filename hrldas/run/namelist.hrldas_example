@@ -35,6 +35,7 @@
  SUPERCOOLED_WATER_OPTION          = 1
  RADIATIVE_TRANSFER_OPTION         = 3
  SNOW_ALBEDO_OPTION                = 2
+ SNOW_COMPACTION_OPTION            = 2
  PCP_PARTITION_OPTION              = 1
  SNOW_THERMAL_CONDUCTIVITY         = 1
  TBOT_OPTION                       = 2
@@ -50,24 +51,26 @@
 
  FORCING_TIMESTEP = 3600
  NOAH_TIMESTEP    = 1800
+ SOIL_TIMESTEP    = 0.0  ! 0 -> use main NoahMP timestep
  OUTPUT_TIMESTEP  = 3600
 
- SPLIT_OUTPUT_COUNT = 1
- SKIP_FIRST_OUTPUT = .false.
+ SPLIT_OUTPUT_COUNT      = 1
+ SKIP_FIRST_OUTPUT       = .false.
  RESTART_FREQUENCY_HOURS = 24
+ NOAHMP_OUTPUT           = 0 ! 0 -> standard output, 1 -> with additional process output
 
 ! XSTART = 40
 ! XEND   = 380
 ! YSTART = 77
 ! YEND   = 201
 
- NSOIL=4
- soil_thick_input(1) = 0.10
+ NSOIL = 4
+ soil_thick_input(1) = 0.10 ! unit of meter
  soil_thick_input(2) = 0.30
  soil_thick_input(3) = 0.60
  soil_thick_input(4) = 1.00
 
- ZLVL = 10.0
+ ZLVL = 10.0 ! forcing height, unit of meter
 
  SF_URBAN_PHYSICS = 0
  USE_WUDAPT_LCZ = 0
