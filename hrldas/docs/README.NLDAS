@@ -8,29 +8,27 @@ Steps for running a HRLDAS simulation using NLDAS for forcing. Confirm that your
 
 2. Compile HRLDAS
 
-Place the HRLDAS tar file where you will be running the model. 
+2.1 Download the model code where you will be running the model:
 
-tar xvf HRLDAS-v3.x.tar
+`git clone --recurse-submodules https://github.com/NCAR/hrldas`
 
-I will refer to this location as /root_path/HRLDAS-v3.x
+2.2 Configure and Compile:
 
-In /root_path/HRLDAS-v3.x, modify user_build_options to link to the proper compilers and paths.
+`cd ./hrldas/hrldas`
 
- To compile with parallel version
-  edit the file 'user_build_options'
-  uncommment the compiler section with MPI (available for pgf90 and ifort compilers)
+`./configure`
 
- To compile with sequential version
-  edit the file 'user_build_options'
-  uncommment the compiler section without MPI
+Type your compiler option in number in the command line. A new configuration file user_build_options will appear in the directory. Go into the file and edit the correct path to necessary libraries.
 
-type 'make'
+After editing the user_build_options file, we can now compile the model with a simple command:
+
+`make`
 
 If successful, there should be two executables created
 
 HRLDAS_forcing/create_forcing.exe
 
-and 
+and
 
 run/hrldas.exe
 
@@ -38,7 +36,7 @@ run/hrldas.exe
 
 3. Prepare NLDAS-based forcing data.
 
-This step can be quite involved for a first-time user. It involves converting NLDAS output in GRIB format to NetCDF forcing files in HRLDAS format. This will be done in the /root_path/HRLDAS-v3.x/HRLDAS_forcing/ directory. In that directory you will find another directory named examples/ that contains some useful scripts for doing the NLDAS steps below.
+This step can be quite involved for a first-time user. It involves converting NLDAS output in GRIB format to NetCDF forcing files in HRLDAS format. This will be done in the /root_path/hrldas/HRLDAS_forcing/ directory. In that directory you will find another directory named examples/ that contains some useful scripts for doing the NLDAS steps below.
 
 Required programs and libraries:
 
@@ -103,7 +101,7 @@ If you are space-limited, at this point you can remove the raw NLDAS files. You 
 
 At this point, you should have all the NARR output extracted into different directories at /extracted_NARR_data_path/. Now it's finally time to run the first step of the HRLDAS.
 
-cd /root_path/HRLDAS-v3.x/HRLDAS_COLLECT_DATA/run
+cd /root_path/hrldas/HRLDAS_COLLECT_DATA/run
 
 In the examples/NARR/ directory there is a namelist.input file that is consistent with the NARR procedure described above. You can modify this file for your case and place it in the pre-processor run directory:
 
@@ -164,7 +162,7 @@ In your OUTPUTDIR, you should now have all your LDASIN files.
 
 The hard part is over. Go to the HRLDAS Run directory:
 
-cd /root_path/HRLDAS-v3.x/run
+cd /root_path/hrldas/run
 
 4.1 Modify the namelist
 
