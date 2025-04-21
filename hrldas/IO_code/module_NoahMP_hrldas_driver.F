@@ -429,6 +429,12 @@ contains
           call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "PEXPXY"     ,NoahmpIO%PEXPXY     )
        endif
 
+       ! for wetland scheme
+       if ( NoahmpIO%IOPT_WETLAND > 0 ) then
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FSATXY"     , NoahmpIO%FSATXY    )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "WSURFXY"    , NoahmpIO%WSURFXY   )
+       endif
+
        ! below for urban model
        if ( NoahmpIO%SF_URBAN_PHYSICS > 0 ) then
           call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "SH_URB2D"  ,     NoahmpIO%SH_URB2D  )
@@ -1425,6 +1431,7 @@ subroutine lsm_restart()
   call add_to_restart(NoahmpIO%ACC_ETRANXY ,"ACC_ETRAN" )
   call add_to_restart(NoahmpIO%ACC_EDIRXY  ,"ACC_EDIR"  )
   call add_to_restart(NoahmpIO%ACC_GLAFLWXY,"ACC_GLAFLW")
+
  ! irrigation scheme
   if ( NoahmpIO%IOPT_IRR > 0 ) then
      call add_to_restart(NoahmpIO%IRNUMSI   , "IRNUMSI")
@@ -1439,6 +1446,7 @@ subroutine lsm_restart()
      call add_to_restart(NoahmpIO%IRELOSS   , "IRELOSS")
      call add_to_restart(NoahmpIO%IRRSPLH   , "IRRSPLH")
   endif
+
   ! below for MMF groundwater scheme
   if ( NoahmpIO%IOPT_RUNSUB == 5 ) then
      call add_to_restart(NoahmpIO%SMOISEQ     , "SMOISEQ"  , layers="SOIL"  )
@@ -1451,12 +1459,19 @@ subroutine lsm_restart()
      call add_to_restart(NoahmpIO%RECHXY      , "RECHXY"     )
      call add_to_restart(NoahmpIO%QRFXY       , "QRFXY"      )
      call add_to_restart(NoahmpIO%QSPRINGXY   , "QSPRINGXY"  )
-     call add_to_restart(NoahmpIO%FDEPTHXY    , "FDEPTHXY"  )
-     call add_to_restart(NoahmpIO%RIVERCONDXY , "RIVERCONDXY"  )
-     call add_to_restart(NoahmpIO%RIVERBEDXY  , "RIVERBEDXY"  )
-     call add_to_restart(NoahmpIO%EQZWT       , "EQZWT"  )
-     call add_to_restart(NoahmpIO%PEXPXY      , "PEXPXY"  )
+     call add_to_restart(NoahmpIO%FDEPTHXY    , "FDEPTHXY"   )
+     call add_to_restart(NoahmpIO%RIVERCONDXY , "RIVERCONDXY")
+     call add_to_restart(NoahmpIO%RIVERBEDXY  , "RIVERBEDXY" )
+     call add_to_restart(NoahmpIO%EQZWT       , "EQZWT"      )
+     call add_to_restart(NoahmpIO%PEXPXY      , "PEXPXY"     )
   endif
+
+  ! for wetland scheme
+  if ( NoahmpIO%IOPT_WETLAND > 0 ) then
+     call add_to_restart(NoahmpIO%FSATXY      , "FSATXY"     )
+     call add_to_restart(NoahmpIO%WSURFXY     , "WSURFXY"    )
+  endif
+
   ! below for urban model
   if ( NoahmpIO%SF_URBAN_PHYSICS > 0 ) then
       call add_to_restart(     NoahmpIO%SH_URB2D  ,      "SH_URB2D" )
