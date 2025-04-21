@@ -294,6 +294,16 @@ contains
     endif
 
 !------------------------------------------------------------------------
+! For surface wetland scheme, IOPT_WETLAND = 1 or 2, read in necessary extra fields 
+!------------------------------------------------------------------------
+    if (NoahmpIO%IOPT_WETLAND == 2) then ! use wetland_option=2 for reading wetland extra fields
+       NoahmpIO%FSATMX = 0.38
+       NoahmpIO%WCAP   = 0.1
+       call READ_WETLAND_INPUT(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
+                               NoahmpIO%FSATMX,NoahmpIO%WCAP)
+    endif
+
+!------------------------------------------------------------------------
 ! For SF_URBAN_PHYSICS > 0 read 2D map of urban parameters
 !------------------------------------------------------------------------
 
@@ -383,6 +393,7 @@ contains
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_ECAN"  , NoahmpIO%ACC_ECANXY  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_ETRAN" , NoahmpIO%ACC_ETRANXY )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_EDIR"  , NoahmpIO%ACC_EDIRXY  )
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_GLAFLW", NoahmpIO%ACC_GLAFLWXY)
 
        ! below for irrigation scheme
        if ( NoahmpIO%IOPT_IRR > 0 ) then
@@ -1228,6 +1239,7 @@ contains
               call add_to_output(NoahmpIO%ACC_ECANXY  ,"ACC_ECAN"  , "accumulated net canopy evaporation within soil timestep", "mm")
               call add_to_output(NoahmpIO%ACC_ETRANXY ,"ACC_ETRAN" , "accumulated transpiration within soil timestep"         , "mm")
               call add_to_output(NoahmpIO%ACC_EDIRXY  ,"ACC_EDIR"  , "accumulated net ground evaporation within soil timestep", "mm")
+              call add_to_output(NoahmpIO%ACC_GLAFLWXY,"ACC_GLAFLW", "accumuated glacier excessive flow per soil timestep"    , "mm")
               ! additional energy terms
               call add_to_output(NoahmpIO%PAHXY      , "PAH"     , "Precipitation advected heat flux"                         , "W/m2"    )
               call add_to_output(NoahmpIO%PAHGXY     , "PAHG"    , "Precipitation advected heat flux to below-canopy ground"  , "W/m2"    )
@@ -1270,7 +1282,12 @@ contains
               call add_to_output(NoahmpIO%QSLATXY    , "QSLAT"    , "accumulated lateral flow"                                     , "mm"     )
               call add_to_output(NoahmpIO%QLATXY     , "QLAT"     , "instantaneous lateral flow"                                   , "m"      )
             endif
-           
+            ! Wetland model
+            if ( NoahmpIO%IOPT_WETLAND > 0 ) then
+              call add_to_output(NoahmpIO%FSATXY     , "FSAT"    , "saturated fraction of the grid"                           , "-" )
+              call add_to_output(NoahmpIO%WSURFXY    , "WSURF"   , "Wetland Water Storage"                                    , "mm")
+            endif
+
            ! For now, no urban output variables included
 
            enddo DEFINE_MODE_LOOP
@@ -1407,6 +1424,7 @@ subroutine lsm_restart()
   call add_to_restart(NoahmpIO%ACC_ECANXY  ,"ACC_ECAN"  )
   call add_to_restart(NoahmpIO%ACC_ETRANXY ,"ACC_ETRAN" )
   call add_to_restart(NoahmpIO%ACC_EDIRXY  ,"ACC_EDIR"  )
+  call add_to_restart(NoahmpIO%ACC_GLAFLWXY,"ACC_GLAFLW")
  ! irrigation scheme
   if ( NoahmpIO%IOPT_IRR > 0 ) then
      call add_to_restart(NoahmpIO%IRNUMSI   , "IRNUMSI")
