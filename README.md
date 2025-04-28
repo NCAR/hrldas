@@ -5,7 +5,7 @@
 
 The High-Resolution Land Data Assimilation System (HRLDAS) is a widely-used open-source offline community framework/driver of land surface models (LSMs). HRLDAS uses a combination of observed and analyzed meterological forcing (precipitation, shortwave and longwave radiation, surface wind, specific humidity, temperature, surface pressure) to drive a LSM to simulate the evolution of land surface states. The system has been developed to leverage the WRF pre-processed input data (e.g., WPS geo_em* file) and conduct computationally-efficient model run to generate more accurate initial land state conditions and/or produce the offline LSM simulations alone for scientific studies.
 
-This is the offical HRLDAS/Noah-MP unified Github repository for code downloading and contribution. Note that the HRLDAS/Noah-MP model is a community model developed with contributions from the entire scientific community. For maintenance and release of this GitHub, please contact: Cenlin He (cenlinhe@ucar.edu) and Fei Chen (feichen@ucar.edu).
+This is the offical HRLDAS/Noah-MP unified Github repository for code downloading and contribution. Note that the HRLDAS/Noah-MP model is a community model developed with contributions from the entire scientific community. For maintenance and release of this GitHub, please contact: Cenlin He (cenlinhe@ucar.edu).
 
 HRLDAS model website: https://ral.ucar.edu/solutions/products/high-resolution-land-data-assimilation-system-hrldas
 
@@ -18,7 +18,7 @@ git clone --recurse-submodules https://github.com/NCAR/hrldas
 If the "--recurse-submodules" is not specified, the Noah-MP source code will not be downloaded.
 
 
-## New: Release of HRLDAS/Noah-MP version 5.0 (Refactored/Modernized version)
+## Release of HRLDAS/Noah-MP version 5.0 (Refactored/Modernized version)
 
 This is a new HRLDAS version 5.0 that is coupled with the modernized/refactored Noah-MP model version 5.0. To work with the refactored Noah-MP code structure, some substantial changes have also been made to the HRLDAS code and data structures since this release. Particularly, a new "NoahmpIO" data type has been created, which has been defined in the HRLDAS/Noah-MP interface (driver) part in Noah-MP model repository. All future HRLDAS/Noah-MP developments and updates will be made only to this modernized/refactored version. More detailed information about the model refactoring/modernization is provided in the Noah-MP model repository (https://github.com/NCAR/noahmp) and the new technical documentation (http://dx.doi.org/10.5065/ew8g-yr95).
 
@@ -29,10 +29,22 @@ Technical documentation freely available at http://dx.doi.org/10.5065/ew8g-yr95
 
 **To cite the technical documentation**:  He, C., P. Valayamkunnath, M. Barlage, F. Chen, D. Gochis, R. Cabell, T. Schneider, R. Rasmussen, G.-Y. Niu, Z.-L. Yang, D. Niyogi, and M. Ek (2023): The Community Noah-MP Land Surface Modeling System Technical Description Version 5.0, (No. NCAR/TN-575+STR). doi:10.5065/ew8g-yr95
 
+**HRLDAS/Noah-MP version 5.0 model description paper**:  He, C., Valayamkunnath, P., Barlage, M., Chen, F., Gochis, D., Cabell, R., Schneider, T., Rasmussen, R., Niu, G.-Y., Yang, Z.-L., Niyogi, D., and Ek, M.: Modernizing the open-source community Noah with multi-parameterization options (Noah-MP) land surface model (version 5.0) with enhanced modularity, interoperability, and applicability, Geosci. Model Dev., 16, 5131–5151, https://doi.org/10.5194/gmd-16-5131-2023, 2023.
+
 **Original HRLDAS model description paper**: Fei Chen, Kevin W. Manning, Margaret A. LeMone, Stanley B. Trier, Joseph G. Alfieri, Rita Roberts, Mukul Tewari, Dev Niyogi, Thomas W. Horst, Steven P. Oncley, Jeffrey B. Basara, and Peter D. Blanken, 2007: Description and Evaluation of the Characteristics of the NCAR High-Resolution Land Data Assimilation System. J. Appl. Meteor. Climatol., 46, 694–713.
 doi: http://dx.doi.org/10.1175/JAM2463.1
 
-**HRLDAS/Noah-MP version 5.0 model description paper**:  He, C., Valayamkunnath, P., Barlage, M., Chen, F., Gochis, D., Cabell, R., Schneider, T., Rasmussen, R., Niu, G.-Y., Yang, Z.-L., Niyogi, D., and Ek, M.: Modernizing the open-source community Noah with multi-parameterization options (Noah-MP) land surface model (version 5.0) with enhanced modularity, interoperability, and applicability, Geosci. Model Dev., 16, 5131–5151, https://doi.org/10.5194/gmd-16-5131-2023, 2023.
+**Noah-MP Workshop Summary & Future Priorities**: He, C., Chen, F., Barlage, M., Yang, Z.-L., Wegiel, J. W., Niu, G.-Y., Gochis, D., Mocko, D. M., Abolafia-Rosenzweig, R., Zhang, Z., Lin, T.-S., Valayamkunnath, P., Ek, M., and Niyogi, D. (2023): Enhancing the community Noah-MP land model capabilities for Earth sciences and applications, Bull. Amer. Meteor. Soc., E2023–E2029, https://doi.org/10.1175/BAMS-D-23-0249.1
+
+
+## Noah-MP Strategic Plan Committee
+
+Cenlin He, Prasanth Valayamkunnath, Michael Barlage, David Mocko, Guo-Yue Niu, Myung-Seo Koo, Fei Chen, Jerry Wiegel, Zong-Liang Yang, Dev Niyogi, Xuemei Wang, Gonzalo Miguez-Macho
+
+
+## Noah-MP Code Review Committee
+
+The current code review committee list is here: https://docs.google.com/spreadsheets/d/13kGfVbf5TmFJm-wjis1ZQjmt7eCXFLfbZaqXkvPSi14/edit?gid=0#gid=0
 
 
 ## HRLDAS GitHub structure

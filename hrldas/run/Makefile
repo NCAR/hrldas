@@ -94,6 +94,7 @@ OBJS = \
         ../../noahmp/src/SnowLayerDivideMod.o \
         ../../noahmp/src/SnowLayerWaterComboMod.o \
         ../../noahmp/src/SnowpackCompactionMod.o \
+        ../../noahmp/src/SnowpackCompactionAR24Mod.o \
         ../../noahmp/src/SnowpackHydrologyMod.o \
         ../../noahmp/src/SnowWaterMainMod.o \
         ../../noahmp/src/SoilHydraulicPropertyMod.o \
@@ -188,7 +189,9 @@ OBJS = \
         ../../noahmp/src/SurfaceEmissivityGlacierMod.o \
         ../../noahmp/src/SurfaceEnergyFluxGlacierMod.o \
         ../../noahmp/src/SurfaceRadiationGlacierMod.o \
-        ../../noahmp/src/WaterMainGlacierMod.o
+        ../../noahmp/src/RunoffSurfaceWetlandMod.o \
+        ../../noahmp/src/WetlandWaterZhang22Mod.o \
+	../../noahmp/src/WaterMainGlacierMod.o
 
 CMD = hrldas.exe
 all:	$(CMD)
