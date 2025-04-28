@@ -13,6 +13,7 @@ module module_NoahMP_hrldas_driver
   use NoahmpUrbanDriverMainMod, only : noahmp_urban
   use module_sf_urban,          only : urban_param_init, urban_var_init
   use module_date_utilities
+  use SnowInputSnicarMod
 
 #ifdef MPP_LAND
   use module_mpp_land, only: MPP_LAND_PAR_INI, mpp_land_init, getLocalXY, mpp_land_bcast_char
@@ -272,6 +273,13 @@ contains
     endif
 
 !------------------------------------------------------------------------
+! For IOPT_ALB = 3 (SNICAR), read in necessary fileds and parameters
+!------------------------------------------------------------------------
+    if (NoahmpIO%IOPT_ALB == 3) then
+       call SnowInputSnicar(NoahmpIO)
+    endif
+
+!------------------------------------------------------------------------
 ! For OPT_CROP=1 (crop model), read in necessary extra fields
 !------------------------------------------------------------------------
 
@@ -352,7 +360,7 @@ contains
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ALBOLD"  , NoahmpIO%ALBOLDXY )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CM"      , NoahmpIO%CMXY     )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CH"      , NoahmpIO%CHXY     )
-       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ISNOW"   , NoahmpIO%ISNOWXY  )                                            
+       call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ISNOW"   , NoahmpIO%ISNOWXY  ) 
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CANLIQ"  , NoahmpIO%CANLIQXY )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CANICE"  , NoahmpIO%CANICEXY )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNEQV"   , NoahmpIO%SNOW     )
@@ -394,6 +402,24 @@ contains
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_ETRAN" , NoahmpIO%ACC_ETRANXY )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_EDIR"  , NoahmpIO%ACC_EDIRXY  )
        call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ACC_GLAFLW", NoahmpIO%ACC_GLAFLWXY)
+
+       ! below for SNICAR snow albedo scheme
+       if (NoahmpIO%IOPT_ALB == 3)then
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNRDS"   , NoahmpIO%SNRDSXY  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "SNFR"    , NoahmpIO%SNFRXY   )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ALBSOILDIR", NoahmpIO%ALBSOILDIRXY)
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "ALBSOILDIF", NoahmpIO%ALBSOILDIFXY)
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "BCPHI"   , NoahmpIO%BCPHIXY  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "BCPHO"   , NoahmpIO%BCPHOXY  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "OCPHI"   , NoahmpIO%OCPHIXY  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "OCPHO"   , NoahmpIO%OCPHOXY  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DUST1"   , NoahmpIO%DUST1XY  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DUST2"   , NoahmpIO%DUST2XY  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DUST3"   , NoahmpIO%DUST3XY  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DUST4"   , NoahmpIO%DUST4XY  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DUST5"   , NoahmpIO%DUST5XY  )
+       endif
+
 
        ! below for irrigation scheme
        if ( NoahmpIO%IOPT_IRR > 0 ) then
@@ -733,6 +759,7 @@ contains
     NoahmpIO%NTIME       = (NoahmpIO%KHOUR)*3600.0/nint(NoahmpIO%dtbl)*(NoahmpIO%spinup_loops+1)
     NoahmpIO%spinup_loop = 0
     NoahmpIO%reset_spinup_date = .false.
+    NoahmpIO%reset_spinup_datea = .false.
 
     print*, "NTIME = ", NoahmpIO%NTIME , "KHOUR=",NoahmpIO%KHOUR,"dtbl = ", NoahmpIO%dtbl
   
@@ -807,20 +834,20 @@ contains
      if(finemesh .ne. 0) goto 991
 
      if(forc_typ .eq. 0) then
-        call READFORC_HRLDAS(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,    &
-                             NoahmpIO%OLDDATE,NoahmpIO%XSTART, NoahmpIO%XEND,        &
-                             NoahmpIO%YSTART, NoahmpIO%YEND,                         &
-                             NoahmpIO%forcing_name_T, NoahmpIO%forcing_name_Q,       &
-                             NoahmpIO%forcing_name_U, NoahmpIO%forcing_name_V,       &
-                             NoahmpIO%forcing_name_P, NoahmpIO%forcing_name_LW,      &
-                             NoahmpIO%forcing_name_SW,NoahmpIO%forcing_name_PR,      &
-                             NoahmpIO%forcing_name_SN,NoahmpIO%T_PHY(:,1,:),         &
-                             NoahmpIO%QV_CURR(:,1,:),NoahmpIO%U_PHY(:,1,:),          &
-                             NoahmpIO%V_PHY(:,1,:),NoahmpIO%P8W(:,1,:), NoahmpIO%GLW,&
-                             NoahmpIO%SWDOWN, NoahmpIO%RAINBL, NoahmpIO%SNOWBL,      &
-                             NoahmpIO%VEGFRA, NoahmpIO%update_veg, NoahmpIO%LAI,     &
-                             NoahmpIO%update_lai, NoahmpIO%reset_spinup_date,        &
-                             NoahmpIO%startdate)
+        call READFORC_HRLDAS(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,     &
+                             NoahmpIO%OLDDATE,NoahmpIO%XSTART, NoahmpIO%XEND,         &
+                             NoahmpIO%YSTART, NoahmpIO%YEND,                          &
+                             NoahmpIO%forcing_name_T, NoahmpIO%forcing_name_Q,        &
+                             NoahmpIO%forcing_name_U, NoahmpIO%forcing_name_V,        &
+                             NoahmpIO%forcing_name_P, NoahmpIO%forcing_name_LW,       &
+                             NoahmpIO%forcing_name_SW,NoahmpIO%forcing_name_PR,       &
+                             NoahmpIO%forcing_name_SN,NoahmpIO%T_PHY(:,1,:),          &
+                             NoahmpIO%QV_CURR(:,1,:),NoahmpIO%U_PHY(:,1,:),           &
+                             NoahmpIO%V_PHY(:,1,:),NoahmpIO%P8W(:,1,:), NoahmpIO%GLW, &
+                             NoahmpIO%SWDOWN, NoahmpIO%RAINBL, NoahmpIO%SNOWBL,       &
+                             NoahmpIO%VEGFRA, NoahmpIO%update_veg, NoahmpIO%LAI,      &
+                             NoahmpIO%update_lai, NoahmpIO%reset_spinup_date,         &
+                             NoahmpIO%startdate, NoahmpIO%DirFrac, NoahmpIO%VisFrac   )
                              
              NoahmpIO%VEGFRA = NoahmpIO%VEGFRA * 100.0
      else
@@ -838,21 +865,32 @@ contains
      endif
 
 #else
-     call READFORC_HRLDAS(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,                               &
-                          NoahmpIO%OLDDATE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,  &
-                          NoahmpIO%forcing_name_T,NoahmpIO%forcing_name_Q,NoahmpIO%forcing_name_U,           &
-                          NoahmpIO%forcing_name_V,NoahmpIO%forcing_name_P,NoahmpIO%forcing_name_LW,          &
-                          NoahmpIO%forcing_name_SW,NoahmpIO%forcing_name_PR,NoahmpIO%forcing_name_SN,        &
-                          NoahmpIO%T_PHY(:,1,:),NoahmpIO%QV_CURR(:,1,:),NoahmpIO%U_PHY(:,1,:),               &
-                          NoahmpIO%V_PHY(:,1,:),NoahmpIO%P8W(:,1,:), NoahmpIO%GLW, NoahmpIO%SWDOWN,          &
-                          NoahmpIO%RAINBL, NoahmpIO%SNOWBL, NoahmpIO%VEGFRA, NoahmpIO%update_veg,            &
-                          NoahmpIO%LAI, NoahmpIO%update_lai, NoahmpIO%reset_spinup_date, NoahmpIO%startdate)
+     call READFORC_HRLDAS(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,                                  &
+                          NoahmpIO%OLDDATE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,     &
+                          NoahmpIO%forcing_name_T,NoahmpIO%forcing_name_Q,NoahmpIO%forcing_name_U,              &
+                          NoahmpIO%forcing_name_V,NoahmpIO%forcing_name_P,NoahmpIO%forcing_name_LW,             &
+                          NoahmpIO%forcing_name_SW,NoahmpIO%forcing_name_PR,NoahmpIO%forcing_name_SN,           &
+                          NoahmpIO%T_PHY(:,1,:),NoahmpIO%QV_CURR(:,1,:),NoahmpIO%U_PHY(:,1,:),                  &
+                          NoahmpIO%V_PHY(:,1,:),NoahmpIO%P8W(:,1,:), NoahmpIO%GLW, NoahmpIO%SWDOWN,             &
+                          NoahmpIO%RAINBL, NoahmpIO%SNOWBL, NoahmpIO%VEGFRA, NoahmpIO%update_veg,               &
+                          NoahmpIO%LAI, NoahmpIO%update_lai, NoahmpIO%reset_spinup_date, NoahmpIO%startdate,    &
+                          NoahmpIO%DirFrac, NoahmpIO%VisFrac )    
           
        if(maxval(NoahmpIO%VEGFRA) <= 1 ) then
            NoahmpIO%VEGFRA = NoahmpIO%VEGFRA * 100.   ! added for input vegfra as a fraction (0~1)
        endif
 
 #endif
+       if (NoahmpIO%IOPT_ALB == 3 .and. NoahmpIO%SNICAR_AEROSOL_READTABLE == .false.) then
+          call READFORC_AEROSOL(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,               &
+             NoahmpIO%OLDDATE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,     &
+             NoahmpIO%reset_spinup_datea, NoahmpIO%startdate,                                       &
+             NoahmpIO%forcing_name_BCPHI, NoahmpIO%forcing_name_BCPHO, NoahmpIO%forcing_name_OCPHI,&
+             NoahmpIO%forcing_name_OCPHO, NoahmpIO%forcing_name_DUST1, NoahmpIO%forcing_name_DUST2,&
+             NoahmpIO%forcing_name_DUST3, NoahmpIO%forcing_name_DUST4, NoahmpIO%forcing_name_DUST5, NoahmpIO%DepBChydrophiXY,   &
+             NoahmpIO%DepBChydrophoXY, NoahmpIO%DepOChydrophiXY, NoahmpIO%DepOChydrophoXY,         &
+             NoahmpIO%DepDust1XY, NoahmpIO%DepDust2XY, NoahmpIO%DepDust3XY, NoahmpIO%DepDust4XY, NoahmpIO%DepDust5XY    )
+       endif
 
 991  continue
 
@@ -1104,8 +1142,9 @@ contains
                                      NoahmpIO%xstartpar, NoahmpIO%ystartpar,                           &
                                      NoahmpIO%iswater, NoahmpIO%mapproj, NoahmpIO%lat1, NoahmpIO%lon1, &
                                      NoahmpIO%dx, NoahmpIO%dy, NoahmpIO%truelat1, NoahmpIO%truelat2,   &
-                                     NoahmpIO%cen_lon, NoahmpIO%NSOIL, NoahmpIO%nsnow, NoahmpIO%dzs,   &
-                                     NoahmpIO%startdate, NoahmpIO%olddate, NoahmpIO%spinup_loop,       &
+                                     NoahmpIO%cen_lon, NoahmpIO%NSOIL, NoahmpIO%nsnow, NoahmpIO%NUMRAD,&
+                                     NoahmpIO%dzs, NoahmpIO%startdate, NoahmpIO%olddate,               &                                    
+                                     NoahmpIO%spinup_loop,                                             &                                    
                                      NoahmpIO%spinup_loops, NoahmpIO%IVGTYP, NoahmpIO%ISLTYP)
 
            DEFINE_MODE_LOOP : do imode = 1, 2
@@ -1184,6 +1223,11 @@ contains
               call add_to_output(NoahmpIO%SMOIS      , "SOIL_M"  , "volumetric soil moisture"             , "m3/m3"          , "SOIL")
               call add_to_output(NoahmpIO%SH2O       , "SOIL_W"  , "liquid volumetric soil moisture"      , "m3/m3"          , "SOIL")
               call add_to_output(NoahmpIO%TSNOXY     , "SNOW_T"  , "snow temperature"                     , "K"              , "SNOW")
+              call add_to_output(NoahmpIO%ALBSNOWDIRXY, "ALBSNOWDIR" , "Snow albedo (direct)"             , "-"              , "RADN")
+              call add_to_output(NoahmpIO%ALBSNOWDIFXY, "ALBSNOWDIF" , "Snow albedo (diffuse)"            , "-"              , "RADN")
+              call add_to_output(NoahmpIO%ALBSFCDIRXY , "ALBSFCDIR"  , "Surface albedo (direct)"          , "-"              , "RADN")
+              call add_to_output(NoahmpIO%ALBSFCDIFXY , "ALBSFCDIF"  , "Surface albedo (diffuse)"         , "-"              , "RADN")
+
             ! Snow - 2D terms
               call add_to_output(NoahmpIO%SNOWH      , "SNOWH"   , "Snow depth"                           , "m"                     )
               call add_to_output(NoahmpIO%SNOW       , "SNEQV"   , "Snow water equivalent"                , "mm"                    )
@@ -1265,6 +1309,18 @@ contains
               call add_to_output(NoahmpIO%FORCZLSM   , "FORCZLSM", "lowest model forcing height into LSM"                     , "m"       )
               call add_to_output(NoahmpIO%FORCWLSM   , "FORCWLSM", "lowest model wind speed into LSM"                         , "m/s"     )
             endif
+
+            ! SNICAR snow albedo scheme
+            if (NoahmpIO%IOPT_ALB == 3)then
+              call add_to_output(NoahmpIO%SNRDSXY    , "SNRDS"   , "Snow layer effective grain radius"    , "m-6"            , "SNOW")
+              call add_to_output(NoahmpIO%SNFRXY     , "SNFR"    , "Snow layer rate of freezing"          , "mm/s"           , "SNOW")
+              call add_to_output(NoahmpIO%ALBSOILDIRXY, "ALBSOILDIR"  , "Soil albedo (direct)"            , "-"              , "RADN")
+              call add_to_output(NoahmpIO%ALBSOILDIFXY, "ALBSOILDIF"  , "Soil albedo (diffuse)"           , "-"              , "RADN")
+            endif
+
+            call add_to_output(NoahmpIO%VisFrac   , "VISFRAC", "Fraction of visible band radiation"                         , "-"     )
+            call add_to_output(NoahmpIO%DirFrac   , "DIRFRAC", "Fraction of direct radiation"                         , "-"     )
+
             ! Irrigation
             if ( NoahmpIO%IOPT_IRR > 0 ) then
               call add_to_output(NoahmpIO%IRNUMSI    , "IRNUMSI" , "Sprinkler irrigation count"                               , "-"       )
@@ -1341,7 +1397,8 @@ contains
        NoahmpIO%spinup_loop = NoahmpIO%spinup_loop + 1
        call geth_newdate(NoahmpIO%olddate, NoahmpIO%startdate, nint(NoahmpIO%dtbl))
        NoahmpIO%reset_spinup_date = .true.
-     endif
+       NoahmpIO%reset_spinup_datea = .true.
+     end if
 
 ! update the timer
      call system_clock(count=NoahmpIO%clock_count_2, count_rate=NoahmpIO%clock_rate)
@@ -1371,9 +1428,10 @@ subroutine lsm_restart()
   call prepare_restart_file (trim(NoahmpIO%outdir), version, NoahmpIO%igrid, NoahmpIO%llanduse,       &
                              NoahmpIO%olddate, NoahmpIO%startdate, NoahmpIO%ixfull, NoahmpIO%jxfull,  &
                              NoahmpIO%ixpar, NoahmpIO%jxpar, NoahmpIO%xstartpar, NoahmpIO%ystartpar,  &                               
-                             NoahmpIO%NSOIL, NoahmpIO%nsnow, NoahmpIO%max_urban_dim, NoahmpIO%dx,     &
-                             NoahmpIO%dy, NoahmpIO%truelat1, NoahmpIO%truelat2, NoahmpIO%mapproj,     &
-                             NoahmpIO%lat1, NoahmpIO%lon1, NoahmpIO%cen_lon, NoahmpIO%iswater, NoahmpIO%ivgtyp)
+                             NoahmpIO%NSOIL, NoahmpIO%nsnow, NoahmpIO%NUMRAD, NoahmpIO%max_urban_dim, &
+                             NoahmpIO%dx, NoahmpIO%dy, NoahmpIO%truelat1, NoahmpIO%truelat2,          &
+                             NoahmpIO%mapproj, NoahmpIO%lat1, NoahmpIO%lon1, NoahmpIO%cen_lon,        &
+                             NoahmpIO%iswater, NoahmpIO%ivgtyp)
   
   call add_to_restart(NoahmpIO%TSLB      , "SOIL_T", layers="SOIL")
   call add_to_restart(NoahmpIO%TSNOXY    , "SNOW_T", layers="SNOW")
@@ -1381,7 +1439,7 @@ subroutine lsm_restart()
   call add_to_restart(NoahmpIO%SH2O      , "SH2O"  , layers="SOIL")
   call add_to_restart(NoahmpIO%ZSNSOXY   , "ZSNSO" , layers="SOSN")
   call add_to_restart(NoahmpIO%SNICEXY   , "SNICE" , layers="SNOW")
-  call add_to_restart(NoahmpIO%SNLIQXY   , "SNLIQ" , layers="SNOW")
+  call add_to_restart(NoahmpIO%SNLIQXY   , "SNLIQ" , layers="SNOW")  
   call add_to_restart(NoahmpIO%FWETXY    , "FWET"  )
   call add_to_restart(NoahmpIO%SNEQVOXY  , "SNEQVO")
   call add_to_restart(NoahmpIO%EAHXY     , "EAH"   )
@@ -1431,6 +1489,23 @@ subroutine lsm_restart()
   call add_to_restart(NoahmpIO%ACC_ETRANXY ,"ACC_ETRAN" )
   call add_to_restart(NoahmpIO%ACC_EDIRXY  ,"ACC_EDIR"  )
   call add_to_restart(NoahmpIO%ACC_GLAFLWXY,"ACC_GLAFLW")
+
+  ! SNICAR snow albedo scheme
+  if (NoahmpIO%IOPT_ALB == 3)then
+     call add_to_restart(NoahmpIO%SNFRXY    , "SNFR"  , layers="SNOW")
+     call add_to_restart(NoahmpIO%SNRDSXY   , "SNRDS" , layers="SNOW")
+     call add_to_restart(NoahmpIO%ALBSOILDIRXY   , "ALBSOILDIR" , layers="RADN")
+     call add_to_restart(NoahmpIO%ALBSOILDIFXY   , "ALBSOILDIF" , layers="RADN")
+     call add_to_restart(NoahmpIO%BCPHIXY   , "BCPHI" , layers="SNOW")
+     call add_to_restart(NoahmpIO%BCPHOXY   , "BCPHO" , layers="SNOW")
+     call add_to_restart(NoahmpIO%OCPHIXY   , "OCPHI" , layers="SNOW")
+     call add_to_restart(NoahmpIO%OCPHOXY   , "OCPHO" , layers="SNOW")
+     call add_to_restart(NoahmpIO%DUST1XY   , "DUST1" , layers="SNOW")
+     call add_to_restart(NoahmpIO%DUST2XY   , "DUST2" , layers="SNOW")
+     call add_to_restart(NoahmpIO%DUST3XY   , "DUST3" , layers="SNOW")
+     call add_to_restart(NoahmpIO%DUST4XY   , "DUST4" , layers="SNOW")
+     call add_to_restart(NoahmpIO%DUST5XY   , "DUST5" , layers="SNOW")
+  endif
 
  ! irrigation scheme
   if ( NoahmpIO%IOPT_IRR > 0 ) then

@@ -1,0 +1,1 @@
+../../noahmp/parameters/snicar_optics_480bnd_c012422.nc
