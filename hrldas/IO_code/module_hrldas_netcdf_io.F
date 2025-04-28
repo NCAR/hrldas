@@ -120,7 +120,7 @@ contains
     integer,          intent(in) :: rank
     character(len=*), intent(in) :: outdir
 
-    real(kind=kind_noahmp)                         :: xrand
+    real(kind=kind_noahmp)       :: xrand
     character(len=256)           :: testfile
     integer                      :: ierr
 
@@ -275,13 +275,13 @@ contains
     integer,            intent(out)   :: isurban   ! vegetation category corresponding to urban areas
     integer,            intent(out)   :: isice     ! vegetation category corresponding to ice areas
     character(len=256), intent(out)   :: llanduse  ! Landuse dataset (USGS or MODI)
-    real(kind=kind_noahmp),               intent(out)   :: dx
-    real(kind=kind_noahmp),               intent(out)   :: dy
-    real(kind=kind_noahmp),               intent(out)   :: truelat1
-    real(kind=kind_noahmp),               intent(out)   :: truelat2
-    real(kind=kind_noahmp),               intent(out)   :: cen_lon
-    real(kind=kind_noahmp),               intent(out)   :: lat1
-    real(kind=kind_noahmp),               intent(out)   :: lon1
+    real(kind=kind_noahmp), intent(out)   :: dx
+    real(kind=kind_noahmp), intent(out)   :: dy
+    real(kind=kind_noahmp), intent(out)   :: truelat1
+    real(kind=kind_noahmp), intent(out)   :: truelat2
+    real(kind=kind_noahmp), intent(out)   :: cen_lon
+    real(kind=kind_noahmp), intent(out)   :: lat1
+    real(kind=kind_noahmp), intent(out)   :: lon1
 #ifdef _PARALLEL_
     real(kind=kind_noahmp), pointer,   dimension(:,:)   :: dum2d_ptr
 #endif
@@ -1716,7 +1716,7 @@ contains
     integer,                                           intent(in)  :: xstart, xend
     integer,                                           intent(in)  :: ystart, yend
     integer,                                           intent(in)  :: nsoil
-    real(kind=kind_noahmp),    dimension(nsoil),                         intent(in)  :: sldpth
+    real(kind=kind_noahmp),    dimension(nsoil),       intent(in)  :: sldpth
     character(len=*),                                  intent(in)  :: target_date
     
     integer,                                           intent(out) :: ldasin_version
@@ -2059,8 +2059,10 @@ contains
   subroutine READFORC_HRLDAS(flnm_template, forcing_timestep, target_date, xstart, xend, ystart, yend,  &
        forcing_name_T,forcing_name_Q,forcing_name_U,forcing_name_V,forcing_name_P, &
        forcing_name_LW,forcing_name_SW,forcing_name_PR,forcing_name_SN, &
+       forcing_name_DirFrac, forcing_name_VisFrac, &
        t,q,u,v,p,lw,sw,pcp,snow,vegfra,update_veg,lai,update_lai,reset_spinup_date,startdate,&
-       raddir,radvis) 
+       raddir,radvis)
+
     use kwm_string_utilities
     implicit none
 
@@ -2078,21 +2080,22 @@ contains
     character(len=256),                 intent(in)  :: forcing_name_SW
     character(len=256),                 intent(in)  :: forcing_name_PR
     character(len=256),                 intent(in)  :: forcing_name_SN
+    character(len=256),                 intent(in)  :: forcing_name_DirFrac
+    character(len=256),                 intent(in)  :: forcing_name_VisFrac
 
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: t
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: q
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: u
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: v
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: p
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: lw
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: sw
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: pcp
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: snow
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(inout) :: lai    !Barlage v3.7: change to inout
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(inout) :: vegfra
-
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out) :: raddir
-    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out) :: radvis
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: t
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: q
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: u
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: v
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: p
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: lw
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: sw
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: pcp
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: snow
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: lai    !Barlage v3.7: change to inout
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: vegfra
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: raddir
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: radvis
     logical,                            intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
     logical,                                              intent(inout) :: reset_spinup_date
     character(len=256) :: flnm
@@ -2209,9 +2212,8 @@ contains
 
        nextread%raddir = 0.7
        nextread%radvis = 0.5
-       call get_2d_netcdf("RadDirFrac", ncid, nextread%raddir,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
-       call get_2d_netcdf("RadVisFrac", ncid, nextread%radvis,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
-
+       call get_2d_netcdf(trim(forcing_name_DirFrac), ncid, nextread%raddir,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_VisFrac), ncid, nextread%radvis,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
  
        if(update_veg) then    ! Barlage v3.7: update only if dveg option is appropriate
        
@@ -2312,6 +2314,7 @@ contains
        forcing_name_BCPHI,forcing_name_BCPHO,forcing_name_OCPHI,forcing_name_OCPHO,                    &
        forcing_name_DUST1,forcing_name_DUST2,forcing_name_DUST3,forcing_name_DUST4,forcing_name_DUST5, &
        bcphi,bcpho,ocphi,ocpho,dust1,dust2,dust3,dust4,dust5)
+
     use kwm_string_utilities
     implicit none
 
@@ -2583,7 +2586,7 @@ contains
   subroutine allocate_inputstructa(instructa, xstart, xend, ystart, yend)
 
     implicit none
-    type(inputstructa)   :: instructa
+    type(inputstructa)  :: instructa
     integer, intent(in) :: xstart
     integer, intent(in) :: xend
     integer, intent(in) :: ystart
@@ -2939,17 +2942,17 @@ contains
     integer,                                  intent(in) :: ystartpar
     integer,                                  intent(in) :: iswater
     integer,                                  intent(in) :: mapproj
-    real(kind=kind_noahmp),                                     intent(in) :: lat1
-    real(kind=kind_noahmp),                                     intent(in) :: lon1
-    real(kind=kind_noahmp),                                     intent(in) :: dx
-    real(kind=kind_noahmp),                                     intent(in) :: dy
-    real(kind=kind_noahmp),                                     intent(in) :: truelat1
-    real(kind=kind_noahmp),                                     intent(in) :: truelat2
-    real(kind=kind_noahmp),                                     intent(in) :: cen_lon
+    real(kind=kind_noahmp),                   intent(in) :: lat1
+    real(kind=kind_noahmp),                   intent(in) :: lon1
+    real(kind=kind_noahmp),                   intent(in) :: dx
+    real(kind=kind_noahmp),                   intent(in) :: dy
+    real(kind=kind_noahmp),                   intent(in) :: truelat1
+    real(kind=kind_noahmp),                   intent(in) :: truelat2
+    real(kind=kind_noahmp),                   intent(in) :: cen_lon
     integer,                                  intent(in) :: nsoil
     integer,                                  intent(in) :: nsnow
     integer,                                  intent(in) :: nrad
-    real(kind=kind_noahmp),             dimension(nsoil),       intent(in) :: sldpth
+    real(kind=kind_noahmp), dimension(nsoil), intent(in) :: sldpth
     character(len=19),                        intent(in) :: startdate
     character(len=19),                        intent(in) :: date
     integer,                                  intent(in) :: spinup_loop
@@ -3001,17 +3004,17 @@ contains
     integer,                                  intent(in) :: ystartpar
     integer,                                  intent(in) :: iswater
     integer,                                  intent(in) :: mapproj
-    real(kind=kind_noahmp),                                     intent(in) :: lat1
-    real(kind=kind_noahmp),                                     intent(in) :: lon1
-    real(kind=kind_noahmp),                                     intent(in) :: dx
-    real(kind=kind_noahmp),                                     intent(in) :: dy
-    real(kind=kind_noahmp),                                     intent(in) :: truelat1
-    real(kind=kind_noahmp),                                     intent(in) :: truelat2
-    real(kind=kind_noahmp),                                     intent(in) :: cen_lon
+    real(kind=kind_noahmp),                   intent(in) :: lat1
+    real(kind=kind_noahmp),                   intent(in) :: lon1
+    real(kind=kind_noahmp),                   intent(in) :: dx
+    real(kind=kind_noahmp),                   intent(in) :: dy
+    real(kind=kind_noahmp),                   intent(in) :: truelat1
+    real(kind=kind_noahmp),                   intent(in) :: truelat2
+    real(kind=kind_noahmp),                   intent(in) :: cen_lon
     integer,                                  intent(in) :: nsoil
     integer,                                  intent(in) :: nsnow 
     integer,                                  intent(in) :: nrad
-    real(kind=kind_noahmp),             dimension(nsoil),       intent(in) :: sldpth
+    real(kind=kind_noahmp), dimension(nsoil), intent(in) :: sldpth
     character(len=19),                        intent(in) :: startdate
     character(len=19),                        intent(in) :: date
     integer,                                  intent(in) :: spinup_loop
@@ -3459,8 +3462,8 @@ contains
     integer,                                                    intent(in) :: nsoil
     integer,                                                    intent(in) :: iswater
     integer, dimension(ix, jx),                                 intent(in) :: vegtyp
-    real(kind=kind_noahmp),    dimension(ix, nsoil, jx),                          intent(in) :: vardata
-    real(kind=kind_noahmp),    dimension(ix, nsoil, jx)                                      :: xdum
+    real(kind=kind_noahmp),    dimension(ix, nsoil, jx),        intent(in) :: vardata
+    real(kind=kind_noahmp),    dimension(ix, nsoil, jx)                    :: xdum
     integer                                                                :: iret
     integer                                                                :: varid
     integer                                                                :: n
@@ -3568,10 +3571,10 @@ contains
     integer,                               intent(in) :: nsnow
     integer,                               intent(in) :: nrad
     integer,                               intent(in) :: num_urban_layers
-    real(kind=kind_noahmp),                                  intent(in) :: dx, dy
-    real(kind=kind_noahmp),                                  intent(in) :: truelat1, truelat2
+    real(kind=kind_noahmp),                intent(in) :: dx, dy
+    real(kind=kind_noahmp),                intent(in) :: truelat1, truelat2
     integer,                               intent(in) :: mapproj
-    real(kind=kind_noahmp),                                  intent(in) :: lat1, lon1, cen_lon
+    real(kind=kind_noahmp),                intent(in) :: lat1, lon1, cen_lon
     integer,                               intent(in) :: iswater
     integer, dimension(ixpar,jxpar),       intent(in) :: vegtyp
 
@@ -3683,8 +3686,8 @@ contains
 #ifdef MPP_LAND
   subroutine add_to_restart_2d_float_mpp(array, name, units, description)
     implicit none
-    real(kind=kind_noahmp),            dimension(:,:),                              intent(in) :: array
-    real(kind=kind_noahmp),            dimension(global_nx,global_ny) :: garray
+    real(kind=kind_noahmp),            dimension(:,:),            intent(in) :: array
+    real(kind=kind_noahmp),            dimension(global_nx,global_ny)        :: garray
     character(len=*),                                             intent(in) :: name
     character(len=*), optional,                                   intent(in) :: units
     character(len=*), optional,                                   intent(in) :: description
@@ -3697,8 +3700,8 @@ contains
 
   subroutine add_to_restart_2d_integer_mpp(array, name, units, description)
     implicit none
-    integer,            dimension(:,:),                              intent(in) :: array
-    integer,            dimension(global_nx,global_ny) :: garray
+    integer,            dimension(:,:),                           intent(in) :: array
+    integer,            dimension(global_nx,global_ny)                       :: garray
     character(len=*),                                             intent(in) :: name
     character(len=*), optional,                                   intent(in) :: units
     character(len=*), optional,                                   intent(in) :: description
@@ -3711,7 +3714,7 @@ contains
 
   subroutine add_to_restart_3d_mpp(array, name, units, description, layers)
     implicit none
-    real(kind=kind_noahmp),            dimension(:,:,:),                            intent(in) :: array
+    real(kind=kind_noahmp),            dimension(:,:,:),          intent(in) :: array
     character(len=*),                                             intent(in) :: name
     character(len=*), optional,                                   intent(in) :: units
     character(len=*), optional,                                   intent(in) :: description
@@ -3737,7 +3740,7 @@ contains
 
   subroutine add_to_restart_2d_float(array, name, units, description)
     implicit none
-    real(kind=kind_noahmp),            dimension(:,:),                              intent(in) :: array
+    real(kind=kind_noahmp),            dimension(:,:),            intent(in) :: array
     character(len=*),                                             intent(in) :: name
     character(len=*), optional,                                   intent(in) :: units
     character(len=*), optional,                                   intent(in) :: description

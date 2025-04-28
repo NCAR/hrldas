@@ -108,6 +108,8 @@
                                                              !      if FORCING_NAME_SN is present, it is assumed to be
 							     !       <= total precipitation
 							     !      must set PCP_PARTITION_OPTION = 4
+ FORCING_NAME_DIRFRAC                                        !    Forcing variable name for downward solar radiation direct fraction
+ FORCING_NAME_VISFRAC                                        !    Forcing variable name for downward solar radiation visible fraction
  FORCING_NAME_BCPHI                                          !    Forcing variable name for hydrophillic black carbon   [default = "BCPHI"]
  FORCING_NAME_BCPHO                                          !    Forcing variable name for hydrophobic black carbon    [default = "BCPHO"] 
  FORCING_NAME_OCPHI                                          !    Forcing variable name for hydrophillic organic carbon [default = "OCPHI"]
@@ -121,6 +123,9 @@
  EXTERNAL_VEG_FILENAME_TEMPLATE                              ! defunct
  EXTERNAL_LAI_FILENAME_TEMPLATE                              ! defunct
  AGDATA_FLNM                                                 ! 2D fields for spatially-varying irrigation parameters [default = ""]
+ TDINPUT_FLNM                                                ! 2D fields for spatially-varying tile drainage parameters [default = ""]
+ SNICAR_OPTIC_FLNM                                           ! SNICAR optical property input data file [default="snicar_optics_5bnd_c013122.nc"]
+ SNICAR_AGE_FLNM                                             ! SNICAR snow aging input data file [default="snicar_drdt_bst_fit_60_c070416.nc"]
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -198,6 +203,10 @@
 		                                             !   2 -> CLASS
                                                              !   3 -> SNICAR
 
+ SNOW_COMPACTION_OPTION            = 2                       ! options for ground snowpack compaction [default = 2]
+                                                             !   1 -> original scheme from Anderson 1976
+                                                             !   2 -> updated scheme from Abolafia-Rosenzweigh et al. (2024)
+
  SNOW_THERMAL_CONDUCTIVITY         = 1                       ! options for snow thermal conductivity   [default = 1]
                                                              ! **1 -> Stieglitz (Yen,1965) scheme
                                                              !   2 -> Anderson (1976) scheme
@@ -267,6 +276,11 @@
                                                              !   1 -> Simple drainage
                                                              !   2 -> Hooghoudt's equation based tile drainage
 
+ WETLAND_OPTION                    = 0                       ! options for wetland model [default = 0]
+                                                             ! wetland water budget model in (Zhang et al. 2022 WRR)
+                                                             !   1 -> Uniform fixed wetland parameters from table
+                                                             !   2 -> 2-D, read parameters from the input file
+
  SOIL_TIMESTEP                     = 0.0,                    ! Noah-MP soil process timestep (seconds) for solving soil water and temperature
                                                              !   0 -> default, the same as main NoahMP model timestep
                                                              !   N * dt_noahmp -> longer than main NoahMP model timestep (often used for WRF coupled run)
@@ -274,6 +288,8 @@
  NOAHMP_OUTPUT                     = 0,                      ! NoahMP output level
                                                              !   0 -> standard output
                                                              !   1 -> standard output with additional water and energy budget term output
+
+ ! The following SNICAR options are only effective when SNOW_ALBEDO_OPTION = 3
 
  SNICAR_BANDNUMBER_OPTION          = 1                       ! number of wavelength bands used in SNICAR snow albedo calculation
                                                              ! **1 -> 5
@@ -316,12 +332,12 @@
                                                              ! **.true.  -> internal mixing for hydrophilic BC
 
  SNICAR_SNOWDUST_INTMIX            = .true.                 ! option to activate dust-snow internal mixing in SNICAR (He et al. 2017 JC)
-                                                             !   .false. -> external mixing for all dust
-                                                             ! **.true.  -> internal mixing for all dust
+                                                             ! **.false. -> external mixing for all dust
+                                                             !   .true.  -> internal mixing for all dust
 
  SNICAR_USE_OC                     = .true.                 ! option to activate OC in snow in SNICAR
-                                                             !   .false. -> without organic carbon in snow
-                                                             ! **.true.  -> with organic carbon in snow
+                                                             ! **.false. -> without organic carbon in snow
+                                                             !   .true.  -> with organic carbon in snow
 
  SNICAR_AEROSOL_READTABLE          = .false.                 ! option to read aerosol deposition fluxes from table or not
                                                              ! **.false. -> data read from NetCDF forcing file
