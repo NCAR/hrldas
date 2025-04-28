@@ -182,7 +182,9 @@ OBJS = \
         ../../noahmp/src/SurfaceEmissivityGlacierMod.o \
         ../../noahmp/src/SurfaceEnergyFluxGlacierMod.o \
         ../../noahmp/src/SurfaceRadiationGlacierMod.o \
-        ../../noahmp/src/WaterMainGlacierMod.o
+        ../../noahmp/src/RunoffSurfaceWetlandMod.o \
+        ../../noahmp/src/WetlandWaterZhang22Mod.o \
+	../../noahmp/src/WaterMainGlacierMod.o
 
 CMD = hrldas.exe
 all:	$(CMD)
