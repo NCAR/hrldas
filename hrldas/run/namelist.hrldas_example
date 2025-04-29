@@ -73,6 +73,8 @@
  SNICAR_SNOWDUST_INTMIX            = .false.
  SNICAR_USE_OC                     = .false.
  SNICAR_AEROSOL_READTABLE          = .false.
+ SNICAR_OPTIC_FLNM                 = "snicar_optics_5bnd_c013122.nc"
+ SNICAR_AGE_FLNM                   = "snicar_drdt_bst_fit_60_c070416.nc"
 
  FORCING_TIMESTEP = 3600
  NOAH_TIMESTEP    = 1800
