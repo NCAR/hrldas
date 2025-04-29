@@ -1165,8 +1165,6 @@ contains
               call add_to_output(NoahmpIO%COSZEN     , "COSZ"    , "Cosine of zenith angle"               , "-"                     )
               call add_to_output(NoahmpIO%GLW        , "LWFORC"  , "Longwave forcing"                     , "W/m2"                  )
               call add_to_output(NoahmpIO%RAINBL     , "RAINRATE", "Precipitation rate"                   , "mm/timestep"           )
-              !call add_to_output(NoahmpIO%RadSwVisFrac , "SWVISFRAC", "Fraction of visible band downward solar radiation", "-"      )
-              !call add_to_output(NoahmpIO%RadSwDirFrac , "SWDIRFRAC", "Fraction of downward solar direct radiation",   "-"          )
             ! Grid energy budget terms
               call add_to_output(NoahmpIO%EMISS      , "EMISS"   , "Grid emissivity"                      , "-"                     )
               call add_to_output(NoahmpIO%FSAXY      , "FSA"     , "Total absorbed SW radiation"          , "W/m2"                  )         
@@ -1243,8 +1241,26 @@ contains
               call add_to_output(NoahmpIO%ACSNOM     , "ACSNOM"  , "accumulated snow melt water"          , "mm"                    )
             ! SNICAR snow albedo scheme
             if (NoahmpIO%IOPT_ALB == 3)then
-              call add_to_output(NoahmpIO%SNRDSXY    , "SNRDS"   , "Snow layer effective grain radius"    , "m-6"            , "SNOW")
-              call add_to_output(NoahmpIO%SNFRXY     , "SNFR"    , "Snow layer rate of freezing"          , "mm/s"           , "SNOW")
+              call add_to_output(NoahmpIO%SNRDSXY    , "SNRDS"   , "Snow layer effective grain radius"    , "m-6"           , "SNOW")
+              call add_to_output(NoahmpIO%SNFRXY     , "SNFR"    , "Snow layer rate of freezing"          , "mm/s"          , "SNOW")
+              call add_to_output(NoahmpIO%BCPHIXY    , "BCPHI_Mass","hydrophilic BC mass in snow"         , "kg/m2"         , "SNOW")
+              call add_to_output(NoahmpIO%BCPHOXY    , "BCPHO_Mass","hydrophobic BC mass in snow"         , "kg/m2"         , "SNOW")
+              call add_to_output(NoahmpIO%OCPHIXY    , "OCPHI_Mass","hydrophilic OC mass in snow"         , "kg/m2"         , "SNOW")
+              call add_to_output(NoahmpIO%OCPHOXY    , "OCPHO_Mass","hydrophobic OC mass in snow"         , "kg/m2"         , "SNOW")
+              call add_to_output(NoahmpIO%DUST1XY    , "DUST1_Mass","dust size bin 1 mass in snow"        , "kg/m2"         , "SNOW")
+              call add_to_output(NoahmpIO%DUST2XY    , "DUST2_Mass","dust size bin 2 mass in snow"        , "kg/m2"         , "SNOW")
+              call add_to_output(NoahmpIO%DUST3XY    , "DUST3_Mass","dust size bin 3 mass in snow"        , "kg/m2"         , "SNOW")
+              call add_to_output(NoahmpIO%DUST4XY    , "DUST4_Mass","dust size bin 4 mass in snow"        , "kg/m2"         , "SNOW")
+              call add_to_output(NoahmpIO%DUST5XY    , "DUST5_Mass","dust size bin 5 mass in snow"        , "kg/m2"         , "SNOW")
+              call add_to_output(NoahmpIO%MassConcBCPHIXY, "BCPHI_MassConc","hydrophilic BC mass concentration in snow", "kg/kg", "SNOW")
+              call add_to_output(NoahmpIO%MassConcBCPHOXY, "BCPHO_MassConc","hydrophobic BC mass concentration in snow", "kg/kg", "SNOW")
+              call add_to_output(NoahmpIO%MassConcOCPHIXY, "OCPHI_MassConc","hydrophilic OC mass concentration in snow", "kg/kg", "SNOW")
+              call add_to_output(NoahmpIO%MassConcOCPHOXY, "OCPHO_MassConc","hydrophobic OC mass concentration in snow", "kg/kg", "SNOW")
+              call add_to_output(NoahmpIO%MassConcDUST1XY, "DUST1_MassConc","dust size bin 1 mass concentration in snow", "kg/kg", "SNOW")
+              call add_to_output(NoahmpIO%MassConcDUST2XY, "DUST2_MassConc","dust size bin 2 mass concentration in snow", "kg/kg", "SNOW")
+              call add_to_output(NoahmpIO%MassConcDUST3XY, "DUST3_MassConc","dust size bin 3 mass concentration in snow", "kg/kg", "SNOW")
+              call add_to_output(NoahmpIO%MassConcDUST4XY, "DUST4_MassConc","dust size bin 4 mass concentration in snow", "kg/kg", "SNOW")
+              call add_to_output(NoahmpIO%MassConcDUST5XY, "DUST5_MassConc","dust size bin 5 mass concentration in snow", "kg/kg", "SNOW")
             endif
             ! Exchange coefficients
               call add_to_output(NoahmpIO%CMXY       , "CM"      , "Momentum drag coefficient"            , "m/s"                   )
@@ -1317,6 +1333,8 @@ contains
               call add_to_output(NoahmpIO%FORCPLSM   , "FORCPLSM", "lowest model pressure into LSM"                           , "Pa"      )
               call add_to_output(NoahmpIO%FORCZLSM   , "FORCZLSM", "lowest model forcing height into LSM"                     , "m"       )
               call add_to_output(NoahmpIO%FORCWLSM   , "FORCWLSM", "lowest model wind speed into LSM"                         , "m/s"     )
+              call add_to_output(NoahmpIO%RadSwVisFrac , "SWVISFRAC", "Fraction of visible band downward solar radiation", "-"      )
+              call add_to_output(NoahmpIO%RadSwDirFrac , "SWDIRFRAC", "Fraction of downward solar direct radiation",   "-"          )
             endif
 
             ! Irrigation
