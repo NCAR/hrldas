@@ -1185,6 +1185,7 @@ contains
               call add_to_output(NoahmpIO%WAXY       , "WA"      , "Water in aquifer"                     , "mm"                    )
               call add_to_output(NoahmpIO%WTXY       , "WT"      , "Water in aquifer and saturated soil"  , "mm"                    )
               call add_to_output(NoahmpIO%QTDRAIN    , "QTDRAIN" , "Accumulated tile drainage"            , "mm"                    )
+              call add_to_output(NoahmpIO%PONDINGXY  , "PONDING" , "total surface ponding per time step"            , "mm/s"        )
             ! Additional needed to close the canopy energy budget
               call add_to_output(NoahmpIO%SAVXY      , "SAV"     , "Solar radiation absorbed by canopy"   , "W/m2"                  )
               call add_to_output(NoahmpIO%TRXY       , "TR"      , "Transpiration heat"                   , "W/m2"                  )
@@ -1239,6 +1240,8 @@ contains
               call add_to_output(NoahmpIO%SNOWC      , "FSNO"    , "Snow-cover fraction on the ground"    , "-"                     )
               call add_to_output(NoahmpIO%ACSNOW     , "ACSNOW"  , "accumulated snow fall"                , "mm"                    )
               call add_to_output(NoahmpIO%ACSNOM     , "ACSNOM"  , "accumulated snow melt water"          , "mm"                    )
+              call add_to_output(NoahmpIO%QSNBOTXY   , "QSNBOT"  , "water (melt+rain through) out of snow bottom"   , "mm/s"        )
+              call add_to_output(NoahmpIO%QMELTXY    , "QMELT"   , "snow melt due to phase change"                  , "mm/s"        )
             ! SNICAR snow albedo scheme
             if (NoahmpIO%IOPT_ALB == 3)then
               call add_to_output(NoahmpIO%SNRDSXY    , "SNRDS"   , "Snow layer effective grain radius"    , "m-6"           , "SNOW")
@@ -1302,9 +1305,6 @@ contains
               call add_to_output(NoahmpIO%QDEWCXY    , "QDEWC"   , "canopy snow dew rate"                           , "mm/s"        )
               call add_to_output(NoahmpIO%QFRZCXY    , "QFRZC"   , "refreezing rate of canopy liquid water"         , "mm/s"        )
               call add_to_output(NoahmpIO%QMELTCXY   , "QMELTC"  , "melting rate of canopy snow"                    , "mm/s"        )
-              call add_to_output(NoahmpIO%QSNBOTXY   , "QSNBOT"  , "water (melt+rain through) out of snow bottom"   , "mm/s"        )
-              call add_to_output(NoahmpIO%QMELTXY    , "QMELT"   , "snow melt due to phase change"                  , "mm/s"        )
-              call add_to_output(NoahmpIO%PONDINGXY  , "PONDING" , "total surface ponding per time step"            , "mm/s"        )
               call add_to_output(NoahmpIO%FPICEXY    , "FPICE"   , "snow fraction in precipitation"                 , "-"           )
               call add_to_output(NoahmpIO%ACC_QINSURXY,"ACC_QINSUR", "accumuated water flux to soil within soil timestep"     , "m/s*dt_soil/dt_main")
               call add_to_output(NoahmpIO%ACC_QSEVAXY ,"ACC_QSEVA" , "accumulated soil surface evap rate within soil timestep", "m/s*dt_soil/dt_main")
