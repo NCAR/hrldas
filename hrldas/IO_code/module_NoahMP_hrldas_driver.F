@@ -1414,7 +1414,7 @@ contains
        call geth_newdate(NoahmpIO%olddate, NoahmpIO%startdate, nint(NoahmpIO%dtbl))
        NoahmpIO%reset_spinup_date = .true.
        NoahmpIO%reset_spinup_datea = .true.
-     end if
+     endif
 
 ! update the timer
      call system_clock(count=NoahmpIO%clock_count_2, count_rate=NoahmpIO%clock_rate)

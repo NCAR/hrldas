@@ -779,8 +779,8 @@ contains
 
     character(len=*),          intent(in)  :: wrfinput_flnm
     integer,                   intent(in)  :: xstart, xend, ystart, yend
-    real,    dimension(xstart:xend,  ystart:yend), intent(out) :: fsatmx
-    real,    dimension(xstart:xend,  ystart:yend), intent(out) :: wcap
+    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(out) :: fsatmx
+    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(out) :: wcap
 
     character(len=256) :: units
     character(len=24)  :: name
@@ -901,7 +901,7 @@ contains
     implicit none
     character(len=*),                            intent(in)  :: wrfinput_flnm
     integer,                                     intent(in)  :: xstart, xend, ystart, yend
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: urban_fraction
+    real(kind=kind_noahmp),  dimension(xstart:xend,ystart:yend), intent(out) :: urban_fraction
     character(len=24)                                        :: name
     integer                                                  :: ierr,iret
     integer                                                  :: ncid, varid
