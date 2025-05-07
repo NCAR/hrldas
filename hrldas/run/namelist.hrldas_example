@@ -24,6 +24,17 @@
  FORCING_NAME_SW = "SWDOWN"
  FORCING_NAME_PR = "RAINRATE"
 
+ ! the following forcing is only needed for SNICAR snow albedo option
+ FORCING_NAME_BCPHI = "BCPHI"
+ FORCING_NAME_BCPHO = "BCPHO"
+ FORCING_NAME_OCPHI = "OCPHI"
+ FORCING_NAME_OCPHO = "OCPHO"
+ FORCING_NAME_DUST1 = "DUST1"
+ FORCING_NAME_DUST2 = "DUST2"
+ FORCING_NAME_DUST3 = "DUST3"
+ FORCING_NAME_DUST4 = "DUST4"
+ FORCING_NAME_DUST5 = "DUST5"
+
  DYNAMIC_VEG_OPTION                = 4
  CANOPY_STOMATAL_RESISTANCE_OPTION = 1
  BTR_OPTION                        = 1
@@ -50,6 +61,21 @@
  TILE_DRAINAGE_OPTION              = 0
  WETLAND_OPTION                    = 0
 
+ ! the following options only work for SNICAR snow albedo scheme
+ SNICAR_BANDNUMBER_OPTION          = 1
+ SNICAR_SOLARSPEC_OPTION           = 1
+ SNICAR_SNOWOPTICS_OPTION          = 3
+ SNICAR_DUSTOPTICS_OPTION          = 1
+ SNICAR_RTSOLVER_OPTION            = 2
+ SNICAR_SNOWSHAPE_OPTION           = 3
+ SNICAR_USE_AEROSOL                = .true.
+ SNICAR_SNOWBC_INTMIX              = .true.
+ SNICAR_SNOWDUST_INTMIX            = .false.
+ SNICAR_USE_OC                     = .false.
+ SNICAR_AEROSOL_READTABLE          = .false.
+ SNICAR_OPTIC_FLNM                 = "snicar_optics_5bnd_c013122.nc"
+ SNICAR_AGE_FLNM                   = "snicar_drdt_bst_fit_60_c070416.nc"
+
  FORCING_TIMESTEP = 3600
  NOAH_TIMESTEP    = 1800
  SOIL_TIMESTEP    = 0.0  ! 0 -> use main NoahMP timestep
@@ -75,6 +101,5 @@
 
  SF_URBAN_PHYSICS = 0
  USE_WUDAPT_LCZ = 0
- 
-/
 
+/

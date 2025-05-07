@@ -35,19 +35,20 @@
  SUPERCOOLED_WATER_OPTION          = 1
  RADIATIVE_TRANSFER_OPTION         = 3
  SNOW_COMPACTION_OPTION            = 2
- SNOW_ALBEDO_OPTION                = 2
+ SNOW_ALBEDO_OPTION                = 1
  PCP_PARTITION_OPTION              = 1
  SNOW_THERMAL_CONDUCTIVITY         = 1
  TBOT_OPTION                       = 2
- TEMP_TIME_SCHEME_OPTION           = 1
+ TEMP_TIME_SCHEME_OPTION           = 3
  GLACIER_OPTION                    = 1
- SURFACE_RESISTANCE_OPTION         = 1
+ SURFACE_RESISTANCE_OPTION         = 4
  SOIL_DATA_OPTION                  = 1
  PEDOTRANSFER_OPTION               = 1
  CROP_OPTION                       = 0
  IRRIGATION_OPTION                 = 0
  IRRIGATION_METHOD                 = 0
  TILE_DRAINAGE_OPTION              = 0
+ WETLAND_OPTION                    = 0
 
  FORCING_TIMESTEP = 1800
  NOAH_TIMESTEP    = 1800

@@ -10,6 +10,7 @@ use module_wrf_error
  USE module_sf_urban
  USE module_sf_bem
  USE module_bep_bem_helper, ONLY: nurbm
+ use Machine, only : kind_noahmp
 
 ! SGClarke 09/11/2008
 ! Access urban_param.tbl values through calling urban_param_init in module_physics_init
@@ -43,14 +44,14 @@ use module_wrf_error
       integer ngb_u            !Number of grid levels in the ground below building (BEM)
       parameter (ngb_u=10)
 
-      real dz_u                ! Urban grid resolution
+      real(kind=kind_noahmp) dz_u                ! Urban grid resolution
       parameter (dz_u=5.)
 
       integer nbui_max         !maximum number of types of buildings in an urban class
       parameter (nbui_max=15)   !must be less or equal than nz_um 
 
 
-      real h_water
+      real(kind=kind_noahmp) h_water
       parameter(h_water=0.0009722) !mm of irrigation per hour
 
 !---------------------------------------------------------------------------------
@@ -70,17 +71,17 @@ use module_wrf_error
 !  Constant used in the BEP module
 ! -----------------------------------------------------------------------
            
-      real vk                 ! von Karman constant
-      real g_u                ! Gravity acceleration
-      real pi                 !
-      real r                  ! Perfect gas constant
-      real cp_u               ! Specific heat at constant pressure
-      real rcp_u              !
-      real sigma              !
-      real p0                 ! Reference pressure at the sea level
-      real latent             ! Latent heat of vaporization [J/kg] (used in BEM)
-      real dgmax              ! Maximum ground water holding capacity (mm)
-      real drmax              ! Maximum ground roof holding capacity (mm)
+      real(kind=kind_noahmp) vk                 ! von Karman constant
+      real(kind=kind_noahmp) g_u                ! Gravity acceleration
+      real(kind=kind_noahmp) pi                 !
+      real(kind=kind_noahmp) r                  ! Perfect gas constant
+      real(kind=kind_noahmp) cp_u               ! Specific heat at constant pressure
+      real(kind=kind_noahmp) rcp_u              !
+      real(kind=kind_noahmp) sigma              !
+      real(kind=kind_noahmp) p0                 ! Reference pressure at the sea level
+      real(kind=kind_noahmp) latent             ! Latent heat of vaporization [J/kg] (used in BEM)
+      real(kind=kind_noahmp) dgmax              ! Maximum ground water holding capacity (mm)
+      real(kind=kind_noahmp) drmax              ! Maximum ground roof holding capacity (mm)
 
       parameter(vk=0.40,g_u=9.81,pi=3.141592653,r=287.,cp_u=1004.)        
       parameter(rcp_u=r/cp_u,sigma=5.67e-08,p0=1.e+5,latent=2.45e+06,dgmax=1.,drmax=1.)
@@ -132,29 +133,29 @@ use module_wrf_error
                                     itimestep
  
 
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme )::   DZ8W
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme )::   P_PHY
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme )::   RHO
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme )::   TH_PHY
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme )::   T_PHY
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme )::   U_PHY
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme )::   V_PHY
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme )::   U
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme )::   V
-   REAL, DIMENSION( ims:ime , jms:jme )        ::   GLW
-   REAL, DIMENSION( ims:ime , jms:jme )        ::   swdown
-   REAL, DIMENSION( ims:ime , jms:jme )        ::   swddir
-   REAL, DIMENSION( ims:ime , jms:jme )        ::   swddif
-    REAL, DIMENSION( ims:ime, jms:jme )         ::   UST
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, kms:kme, jms:jme )::   DZ8W
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, kms:kme, jms:jme )::   P_PHY
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, kms:kme, jms:jme )::   RHO
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, kms:kme, jms:jme )::   TH_PHY
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, kms:kme, jms:jme )::   T_PHY
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, kms:kme, jms:jme )::   U_PHY
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, kms:kme, jms:jme )::   V_PHY
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, kms:kme, jms:jme )::   U
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, kms:kme, jms:jme )::   V
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime , jms:jme )        ::   GLW
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime , jms:jme )        ::   swdown
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime , jms:jme )        ::   swddir
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime , jms:jme )        ::   swddif
+    REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme )         ::   UST
    INTEGER, DIMENSION( ims:ime , jms:jme ), INTENT(IN )::   UTYPE_URB2D
-   REAL, DIMENSION( ims:ime , jms:jme ), INTENT(IN )::   FRC_URB2D
-   REAL, INTENT(IN  )   ::                                   GMT 
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime , jms:jme ), INTENT(IN )::   FRC_URB2D
+   REAL(kind=kind_noahmp), INTENT(IN  )   ::                                   GMT 
    INTEGER, INTENT(IN  ) ::                               JULDAY
-   REAL, DIMENSION( ims:ime, jms:jme ),                           &
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ),                           &
          INTENT(IN   )  ::                           XLAT, XLONG
-   REAL, INTENT(IN) :: DECLIN_URB
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(IN) :: COSZ_URB2D
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(IN) :: OMG_URB2D
+   REAL(kind=kind_noahmp), INTENT(IN) :: DECLIN_URB
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(IN) :: COSZ_URB2D
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(IN) :: OMG_URB2D
    INTEGER, INTENT(IN  ) :: urban_map_zrd
    INTEGER, INTENT(IN  ) :: urban_map_zwd
    INTEGER, INTENT(IN  ) :: urban_map_gd
@@ -167,54 +168,54 @@ use module_wrf_error
    INTEGER, INTENT(IN  ) :: num_urban_ndm
    INTEGER, INTENT(IN) :: num_urban_hi
    INTEGER , INTENT(IN)        ::     urban_map_zgrd
-   REAL, DIMENSION( ims:ime, 1:urban_map_zrd, jms:jme ), INTENT(INOUT) :: trb_urb4d
-   REAL, DIMENSION( ims:ime, 1:urban_map_zwd, jms:jme ), INTENT(INOUT) :: tw1_urb4d
-   REAL, DIMENSION( ims:ime, 1:urban_map_zwd, jms:jme ), INTENT(INOUT) :: tw2_urb4d
-   REAL, DIMENSION( ims:ime, 1:urban_map_gd , jms:jme ), INTENT(INOUT) :: tgb_urb4d
-   REAL, DIMENSION( ims:ime, 1:urban_map_zgrd, jms:jme ), INTENT(INOUT) :: trv_urb4d
-   REAL, DIMENSION( ims:ime, 1:urban_map_zgrd, jms:jme ), INTENT(INOUT) :: qr_urb4d
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: qgr_urb3d
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: tgr_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ), INTENT(INOUT) :: drain_urb4d
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(IN) :: rainbl
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: draingr_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zrd, jms:jme ), INTENT(INOUT) :: trb_urb4d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zwd, jms:jme ), INTENT(INOUT) :: tw1_urb4d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zwd, jms:jme ), INTENT(INOUT) :: tw2_urb4d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_gd , jms:jme ), INTENT(INOUT) :: tgb_urb4d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zgrd, jms:jme ), INTENT(INOUT) :: trv_urb4d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zgrd, jms:jme ), INTENT(INOUT) :: qr_urb4d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: qgr_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: tgr_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ), INTENT(INOUT) :: drain_urb4d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(IN) :: rainbl
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: draingr_urb3d
 !New variables used for BEM
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme ):: qv_phy
-   REAL, DIMENSION( ims:ime, 1:urban_map_bd, jms:jme ), INTENT(INOUT) :: tlev_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_bd , jms:jme ), INTENT(INOUT) :: qlev_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ), INTENT(INOUT) :: tw1lev_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ), INTENT(INOUT) :: tw2lev_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_gbd, jms:jme ), INTENT(INOUT) :: tglev_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_fbd, jms:jme ), INTENT(INOUT) :: tflev_urb3d
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: lf_ac_urb3d
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: sf_ac_urb3d
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: cm_ac_urb3d
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: ep_pv_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ), INTENT(INOUT) :: t_pv_urb3d
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: sfvent_urb3d
-   REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: lfvent_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ), INTENT(INOUT) :: sfwin1_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ), INTENT(INOUT) :: sfwin2_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, kms:kme, jms:jme ):: qv_phy
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_bd, jms:jme ), INTENT(INOUT) :: tlev_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_bd , jms:jme ), INTENT(INOUT) :: qlev_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ), INTENT(INOUT) :: tw1lev_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ), INTENT(INOUT) :: tw2lev_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_gbd, jms:jme ), INTENT(INOUT) :: tglev_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_fbd, jms:jme ), INTENT(INOUT) :: tflev_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: lf_ac_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: sf_ac_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: cm_ac_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: ep_pv_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ), INTENT(INOUT) :: t_pv_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: sfvent_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: lfvent_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ), INTENT(INOUT) :: sfwin1_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_wd , jms:jme ), INTENT(INOUT) :: sfwin2_urb3d
 
 !End variables
-   REAL, DIMENSION( ims:ime, 1:urban_map_zd , jms:jme ), INTENT(INOUT) :: sfw1_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_zd , jms:jme ), INTENT(INOUT) :: sfw2_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ), INTENT(INOUT) :: sfr_urb3d
-   REAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ), INTENT(INOUT) :: sfg_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ), INTENT(INOUT) :: sfrv_urb3d
-   REAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ), INTENT(INOUT) :: lfrv_urb3d
-   REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: dgr_urb3d !GRZ
-   REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ),INTENT(INOUT) :: dg_urb3d !GRZ
-   REAL, OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: lfr_urb3d !GRZ
-   REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ),INTENT(INOUT) :: lfg_urb3d !G
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zd , jms:jme ), INTENT(INOUT) :: sfw1_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zd , jms:jme ), INTENT(INOUT) :: sfw2_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ), INTENT(INOUT) :: sfr_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ), INTENT(INOUT) :: sfg_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ), INTENT(INOUT) :: sfrv_urb3d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ), INTENT(INOUT) :: lfrv_urb3d
+   REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: dgr_urb3d !GRZ
+   REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ),INTENT(INOUT) :: dg_urb3d !GRZ
+   REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:urban_map_zdf, jms:jme ),INTENT(INOUT) :: lfr_urb3d !GRZ
+   REAL(kind=kind_noahmp), OPTIONAL, DIMENSION( ims:ime, 1:num_urban_ndm, jms:jme ),INTENT(INOUT) :: lfg_urb3d !G
 
-   REAL, DIMENSION( ims:ime, 1:num_urban_hi, jms:jme ), INTENT(IN) :: hi_urb2d
-   REAL, DIMENSION( ims:ime,jms:jme), INTENT(IN) :: lp_urb2d
-   REAL, DIMENSION( ims:ime,jms:jme), INTENT(IN) :: lb_urb2d
-   REAL, DIMENSION( ims:ime,jms:jme), INTENT(IN) :: hgt_urb2d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime, 1:num_urban_hi, jms:jme ), INTENT(IN) :: hi_urb2d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime,jms:jme), INTENT(IN) :: lp_urb2d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime,jms:jme), INTENT(IN) :: lb_urb2d
+   REAL(kind=kind_noahmp), DIMENSION( ims:ime,jms:jme), INTENT(IN) :: hgt_urb2d
 
-   real z(ims:ime,kms:kme,jms:jme)            ! Vertical coordinates
-   REAL, INTENT(IN )::   DT      ! Time step
+   real(kind=kind_noahmp) z(ims:ime,kms:kme,jms:jme)            ! Vertical coordinates
+   REAL(kind=kind_noahmp), INTENT(IN )::   DT      ! Time step
 
 !------------------------------------------------------------------------
 !     Output
@@ -222,194 +223,194 @@ use module_wrf_error
 !
 !    Implicit and explicit components of the source and sink terms at each levels,
 !     the fluxes can be computed as follow: FX = A*X + B   example: t_fluxes = a_t * pt + b_t
-      real a_u(ims:ime,kms:kme,jms:jme)         ! Implicit component for the momemtum in X-direction (center)
-      real a_v(ims:ime,kms:kme,jms:jme)         ! Implicit component for the momemtum in Y-direction (center)
-      real a_t(ims:ime,kms:kme,jms:jme)         ! Implicit component for the temperature
-      real a_e(ims:ime,kms:kme,jms:jme)         ! Implicit component for the TKE
-      real b_u(ims:ime,kms:kme,jms:jme)         ! Explicit component for the momemtum in X-direction (center)
-      real b_v(ims:ime,kms:kme,jms:jme)         ! Explicit component for the momemtum in Y-direction (center)
-      real b_t(ims:ime,kms:kme,jms:jme)         ! Explicit component for the temperature
-      real b_e(ims:ime,kms:kme,jms:jme)         ! Explicit component for the TKE
-      real b_q(ims:ime,kms:kme,jms:jme)         ! Explicit component for the Humidity
-      real dlg(ims:ime,kms:kme,jms:jme)         ! Height above ground (L_ground in formula (24) of the BLM paper). 
-      real dl_u(ims:ime,kms:kme,jms:jme)        ! Length scale (lb in formula (22) ofthe BLM paper).
+      real(kind=kind_noahmp) a_u(ims:ime,kms:kme,jms:jme)         ! Implicit component for the momemtum in X-direction (center)
+      real(kind=kind_noahmp) a_v(ims:ime,kms:kme,jms:jme)         ! Implicit component for the momemtum in Y-direction (center)
+      real(kind=kind_noahmp) a_t(ims:ime,kms:kme,jms:jme)         ! Implicit component for the temperature
+      real(kind=kind_noahmp) a_e(ims:ime,kms:kme,jms:jme)         ! Implicit component for the TKE
+      real(kind=kind_noahmp) b_u(ims:ime,kms:kme,jms:jme)         ! Explicit component for the momemtum in X-direction (center)
+      real(kind=kind_noahmp) b_v(ims:ime,kms:kme,jms:jme)         ! Explicit component for the momemtum in Y-direction (center)
+      real(kind=kind_noahmp) b_t(ims:ime,kms:kme,jms:jme)         ! Explicit component for the temperature
+      real(kind=kind_noahmp) b_e(ims:ime,kms:kme,jms:jme)         ! Explicit component for the TKE
+      real(kind=kind_noahmp) b_q(ims:ime,kms:kme,jms:jme)         ! Explicit component for the Humidity
+      real(kind=kind_noahmp) dlg(ims:ime,kms:kme,jms:jme)         ! Height above ground (L_ground in formula (24) of the BLM paper). 
+      real(kind=kind_noahmp) dl_u(ims:ime,kms:kme,jms:jme)        ! Length scale (lb in formula (22) ofthe BLM paper).
 ! urban surface and volumes        
-      real sf(ims:ime,kms:kme,jms:jme)           ! surface of the urban grid cells
-      real vl(ims:ime,kms:kme,jms:jme)             ! volume of the urban grid cells
+      real(kind=kind_noahmp) sf(ims:ime,kms:kme,jms:jme)           ! surface of the urban grid cells
+      real(kind=kind_noahmp) vl(ims:ime,kms:kme,jms:jme)             ! volume of the urban grid cells
 ! urban fluxes
-      real rl_up(its:ite,jts:jte) ! upward long wave radiation
-      real rs_abs(its:ite,jts:jte) ! absorbed short wave radiation
-      real emiss(its:ite,jts:jte)  ! emissivity averaged for urban surfaces
-      real grdflx_urb(its:ite,jts:jte)  ! ground heat flux for urban areas
+      real(kind=kind_noahmp) rl_up(its:ite,jts:jte) ! upward long wave radiation
+      real(kind=kind_noahmp) rs_abs(its:ite,jts:jte) ! absorbed short wave radiation
+      real(kind=kind_noahmp) emiss(its:ite,jts:jte)  ! emissivity averaged for urban surfaces
+      real(kind=kind_noahmp) grdflx_urb(its:ite,jts:jte)  ! ground heat flux for urban areas
 !------------------------------------------------------------------------
 !     Local
 !------------------------------------------------------------------------
-      real hi_urb(its:ite,1:nz_um,jts:jte) ! Height histograms of buildings
-      real hi_urb1D(nz_um)                 ! Height histograms of buildings
-      real ss_urb(nz_um,nurbmax)           ! Probability that a building has an height equal to z
-      real pb_urb(nz_um)                   ! Probability that a building has an height greater or equal to z
-      real hb_u(nz_um)                     ! Bulding's heights
+      real(kind=kind_noahmp) hi_urb(its:ite,1:nz_um,jts:jte) ! Height histograms of buildings
+      real(kind=kind_noahmp) hi_urb1D(nz_um)                 ! Height histograms of buildings
+      real(kind=kind_noahmp) ss_urb(nz_um,nurbmax)           ! Probability that a building has an height equal to z
+      real(kind=kind_noahmp) pb_urb(nz_um)                   ! Probability that a building has an height greater or equal to z
+      real(kind=kind_noahmp) hb_u(nz_um)                     ! Bulding's heights
       integer nz_urb(nurbmax)              ! Number of layer in the urban grid
       integer nzurban(nurbmax)
 
 !    Building parameters      
-      real alag_u(nurbmax)                    ! Ground thermal diffusivity [m^2 s^-1]
-      real alaw_u(nurbmax)                    ! Wall thermal diffusivity [m^2 s^-1]
-      real alar_u(nurbmax)                    ! Roof thermal diffusivity [m^2 s^-1]
-      real csg_u(nurbmax)                     ! Specific heat of the ground material [J m^3 K^-1]
-      real csw_u(nurbmax)                     ! Specific heat of the wall material [J m^3 K^-1]
-      real csr_u(nurbmax)                     ! Specific heat of the roof material [J m^3 K^-1]
-      real twini_u(nurbmax)                   ! Initial temperature inside the building's wall [K]
-      real trini_u(nurbmax)                   ! Initial temperature inside the building's roof [K]
-      real tgini_u(nurbmax)                   ! Initial road temperature
+      real(kind=kind_noahmp) alag_u(nurbmax)                    ! Ground thermal diffusivity [m^2 s^-1]
+      real(kind=kind_noahmp) alaw_u(nurbmax)                    ! Wall thermal diffusivity [m^2 s^-1]
+      real(kind=kind_noahmp) alar_u(nurbmax)                    ! Roof thermal diffusivity [m^2 s^-1]
+      real(kind=kind_noahmp) csg_u(nurbmax)                     ! Specific heat of the ground material [J m^3 K^-1]
+      real(kind=kind_noahmp) csw_u(nurbmax)                     ! Specific heat of the wall material [J m^3 K^-1]
+      real(kind=kind_noahmp) csr_u(nurbmax)                     ! Specific heat of the roof material [J m^3 K^-1]
+      real(kind=kind_noahmp) twini_u(nurbmax)                   ! Initial temperature inside the building's wall [K]
+      real(kind=kind_noahmp) trini_u(nurbmax)                   ! Initial temperature inside the building's roof [K]
+      real(kind=kind_noahmp) tgini_u(nurbmax)                   ! Initial road temperature
 
 !
 !   Building materials
 !
 
-      real csg(ng_u)           ! Specific heat of the ground material [J m^3 K^-1]
-      real csw(nwr_u)          ! Specific heat of the wall material for the current urban class [J m^3 K^-1]
-      real csr(nwr_u)          ! Specific heat of the roof material for the current urban class [J m^3 K^-1]
-      real csgb(ngb_u)         ! Specific heat of the ground material below the buildings at each ground levels[J m^3 K^-1]
-      real csf(nf_u)           ! Specific heat of the floors materials in the buildings at each levels[J m^3 K^-1]
-      real alar(nwr_u+1)       ! Roof thermal diffusivity for the current urban class [W/m K]
-      real alaw(nwr_u+1)       ! Walls thermal diffusivity for the current urban class [W/m K]
-      real alag(ng_u)          ! Ground thermal diffusivity for the current urban class [m^2 s^-1] 
-      real alagb(ngb_u+1)      ! Ground thermal diffusivity below the building at each wall layer [W/m K]
-      real alaf(nf_u+1)        ! Floor thermal diffusivity at each wall layers [W/m K]  
-      real dzr(nwr_u)          ! Layer sizes in the roofs [m]
-      real dzf(nf_u)           ! Layer sizes in the floors[m]
-      real dzw(nwr_u)          ! Layer sizes in the walls [m]
-      real dzgb(ngb_u)         ! Layer sizes in the ground below the buildings [m]
+      real(kind=kind_noahmp) csg(ng_u)           ! Specific heat of the ground material [J m^3 K^-1]
+      real(kind=kind_noahmp) csw(nwr_u)          ! Specific heat of the wall material for the current urban class [J m^3 K^-1]
+      real(kind=kind_noahmp) csr(nwr_u)          ! Specific heat of the roof material for the current urban class [J m^3 K^-1]
+      real(kind=kind_noahmp) csgb(ngb_u)         ! Specific heat of the ground material below the buildings at each ground levels[J m^3 K^-1]
+      real(kind=kind_noahmp) csf(nf_u)           ! Specific heat of the floors materials in the buildings at each levels[J m^3 K^-1]
+      real(kind=kind_noahmp) alar(nwr_u+1)       ! Roof thermal diffusivity for the current urban class [W/m K]
+      real(kind=kind_noahmp) alaw(nwr_u+1)       ! Walls thermal diffusivity for the current urban class [W/m K]
+      real(kind=kind_noahmp) alag(ng_u)          ! Ground thermal diffusivity for the current urban class [m^2 s^-1] 
+      real(kind=kind_noahmp) alagb(ngb_u+1)      ! Ground thermal diffusivity below the building at each wall layer [W/m K]
+      real(kind=kind_noahmp) alaf(nf_u+1)        ! Floor thermal diffusivity at each wall layers [W/m K]  
+      real(kind=kind_noahmp) dzr(nwr_u)          ! Layer sizes in the roofs [m]
+      real(kind=kind_noahmp) dzf(nf_u)           ! Layer sizes in the floors[m]
+      real(kind=kind_noahmp) dzw(nwr_u)          ! Layer sizes in the walls [m]
+      real(kind=kind_noahmp) dzgb(ngb_u)         ! Layer sizes in the ground below the buildings [m]
 
 !
 !New street and radiation parameters
 
 
-      real bs(ndm)              ! Building width for the current urban class
-      real ws(ndm)              ! Street widths of the current urban class
-      real strd(ndm)            ! Street lengths for the current urban class
-      real drst(ndm)            ! street directions for the current urban class
-      real ss(nz_um)            ! Probability to have a building with height h
-      real pb(nz_um)            ! Probability to have a building with an height equal
-      real HFGR_D(nz_um)
+      real(kind=kind_noahmp) bs(ndm)              ! Building width for the current urban class
+      real(kind=kind_noahmp) ws(ndm)              ! Street widths of the current urban class
+      real(kind=kind_noahmp) strd(ndm)            ! Street lengths for the current urban class
+      real(kind=kind_noahmp) drst(ndm)            ! street directions for the current urban class
+      real(kind=kind_noahmp) ss(nz_um)            ! Probability to have a building with height h
+      real(kind=kind_noahmp) pb(nz_um)            ! Probability to have a building with an height equal
+      real(kind=kind_noahmp) HFGR_D(nz_um)
 !New roughness and buildings parameters
 !
-      real z0(ndm,nz_um)        ! Roughness lengths "profiles"
-      real bs_urb(ndm,nurbmax)  ! Building width
-      real ws_urb(ndm,nurbmax)  ! Street width
+      real(kind=kind_noahmp) z0(ndm,nz_um)        ! Roughness lengths "profiles"
+      real(kind=kind_noahmp) bs_urb(ndm,nurbmax)  ! Building width
+      real(kind=kind_noahmp) ws_urb(ndm,nurbmax)  ! Street width
 
 !
 ! for twini_u, and trini_u the initial value at the deepest level is kept constant during the simulation
 !
 !    Radiation paramters
-      real albg_u(nurbmax)                    ! Albedo of the ground
-      real albw_u(nurbmax)                    ! Albedo of the wall
-      real albr_u(nurbmax)                    ! Albedo of the roof
-      real albwin_u(nurbmax)                  ! Albedo of the windows
-      real emwind_u(nurbmax)                  ! Emissivity of windows
-      real emg_u(nurbmax)                     ! Emissivity of ground
-      real emw_u(nurbmax)                     ! Emissivity of wall
-      real emr_u(nurbmax)                     ! Emissivity of roof
-      real gr_frac_roof_u(nurbmax)
-      real pv_frac_roof_u(nurbmax)
+      real(kind=kind_noahmp) albg_u(nurbmax)                    ! Albedo of the ground
+      real(kind=kind_noahmp) albw_u(nurbmax)                    ! Albedo of the wall
+      real(kind=kind_noahmp) albr_u(nurbmax)                    ! Albedo of the roof
+      real(kind=kind_noahmp) albwin_u(nurbmax)                  ! Albedo of the windows
+      real(kind=kind_noahmp) emwind_u(nurbmax)                  ! Emissivity of windows
+      real(kind=kind_noahmp) emg_u(nurbmax)                     ! Emissivity of ground
+      real(kind=kind_noahmp) emw_u(nurbmax)                     ! Emissivity of wall
+      real(kind=kind_noahmp) emr_u(nurbmax)                     ! Emissivity of roof
+      real(kind=kind_noahmp) gr_frac_roof_u(nurbmax)
+      real(kind=kind_noahmp) pv_frac_roof_u(nurbmax)
       integer gr_flag_u
       integer gr_type_u
 
 !   fww_u,fwg_u,fgw_u,fsw_u,fsg_u are the view factors used to compute the long wave
 !   and the short wave radiation. 
-      real fww_u(nz_um,nz_um,ndm,nurbmax)       !  from wall to wall
-      real fwg_u(nz_um,ndm,nurbmax)             !  from wall to ground
-      real fgw_u(nz_um,ndm,nurbmax)             !  from ground to wall
-      real fsw_u(nz_um,ndm,nurbmax)             !  from sky to wall
-      real fws_u(nz_um,ndm,nurbmax)             !  from sky to wall
-      real fsg_u(ndm,nurbmax)                   !  from sky to ground
+      real(kind=kind_noahmp) fww_u(nz_um,nz_um,ndm,nurbmax)       !  from wall to wall
+      real(kind=kind_noahmp) fwg_u(nz_um,ndm,nurbmax)             !  from wall to ground
+      real(kind=kind_noahmp) fgw_u(nz_um,ndm,nurbmax)             !  from ground to wall
+      real(kind=kind_noahmp) fsw_u(nz_um,ndm,nurbmax)             !  from sky to wall
+      real(kind=kind_noahmp) fws_u(nz_um,ndm,nurbmax)             !  from sky to wall
+      real(kind=kind_noahmp) fsg_u(ndm,nurbmax)                   !  from sky to ground
 
 !    Roughness parameters
-      real z0g_u(nurbmax)       ! The ground's roughness length
-      real z0r_u(nurbmax)       ! The roof's roughness length
+      real(kind=kind_noahmp) z0g_u(nurbmax)       ! The ground's roughness length
+      real(kind=kind_noahmp) z0r_u(nurbmax)       ! The roof's roughness length
 
 !    Street parameters
       integer nd_u(nurbmax)     ! Number of street direction for each urban class 
-      real strd_u(ndm,nurbmax)  ! Street length (fix to greater value to the horizontal length of the cells)
-      real drst_u(ndm,nurbmax)  ! Street direction
-      real ws_u(ndm,nurbmax)    ! Street width
-      real bs_u(ndm,nurbmax)    ! Building width
-      real h_b(nz_um,nurbmax)   ! Bulding's heights
-      real d_b(nz_um,nurbmax)   ! Probability that a building has an height h_b
-      real ss_u(nz_um,nurbmax)! Probability that a building has an height equal to z
-      real pb_u(nz_um,nurbmax)! Probability that a building has an height greater or equal to z
+      real(kind=kind_noahmp) strd_u(ndm,nurbmax)  ! Street length (fix to greater value to the horizontal length of the cells)
+      real(kind=kind_noahmp) drst_u(ndm,nurbmax)  ! Street direction
+      real(kind=kind_noahmp) ws_u(ndm,nurbmax)    ! Street width
+      real(kind=kind_noahmp) bs_u(ndm,nurbmax)    ! Building width
+      real(kind=kind_noahmp) h_b(nz_um,nurbmax)   ! Bulding's heights
+      real(kind=kind_noahmp) d_b(nz_um,nurbmax)   ! Probability that a building has an height h_b
+      real(kind=kind_noahmp) ss_u(nz_um,nurbmax)! Probability that a building has an height equal to z
+      real(kind=kind_noahmp) pb_u(nz_um,nurbmax)! Probability that a building has an height greater or equal to z
 
 
 !    Grid parameters
       integer nz_u(nurbmax)     ! Number of layer in the urban grid
       
-      real z_u(nz_um)         ! Height of the urban grid levels
+      real(kind=kind_noahmp) z_u(nz_um)         ! Height of the urban grid levels
 !FS
-      real cop_u(nurbmax)
-      real bldac_frc_u(nurbmax)
-      real cooled_frc_u(nurbmax)
-      real pwin_u(nurbmax)
-      real beta_u(nurbmax)
+      real(kind=kind_noahmp) cop_u(nurbmax)
+      real(kind=kind_noahmp) bldac_frc_u(nurbmax)
+      real(kind=kind_noahmp) cooled_frc_u(nurbmax)
+      real(kind=kind_noahmp) pwin_u(nurbmax)
+      real(kind=kind_noahmp) beta_u(nurbmax)
       integer sw_cond_u(nurbmax)
-      real time_on_u(nurbmax)
-      real time_off_u(nurbmax)
-      real targtemp_u(nurbmax)
-      real gaptemp_u(nurbmax)
-      real targhum_u(nurbmax)
-      real gaphum_u(nurbmax)
-      real perflo_u(nurbmax)
-      real hsesf_u(nurbmax)
-      real hsequip(24)
-      real irho(24)
+      real(kind=kind_noahmp) time_on_u(nurbmax)
+      real(kind=kind_noahmp) time_off_u(nurbmax)
+      real(kind=kind_noahmp) targtemp_u(nurbmax)
+      real(kind=kind_noahmp) gaptemp_u(nurbmax)
+      real(kind=kind_noahmp) targhum_u(nurbmax)
+      real(kind=kind_noahmp) gaphum_u(nurbmax)
+      real(kind=kind_noahmp) perflo_u(nurbmax)
+      real(kind=kind_noahmp) hsesf_u(nurbmax)
+      real(kind=kind_noahmp) hsequip(24)
+      real(kind=kind_noahmp) irho(24)
 ! 1D array used for the input and output of the routine "urban"
 
-      real z1D(kms:kme)               ! vertical coordinates
-      real ua1D(kms:kme)                ! wind speed in the x directions
-      real va1D(kms:kme)                ! wind speed in the y directions
-      real pt1D(kms:kme)                ! potential temperature
-      real da1D(kms:kme)                ! air density
-      real pr1D(kms:kme)                ! air pressure
-      real pt01D(kms:kme)               ! reference potential temperature
-      real zr1D                    ! zenith angle
-      real deltar1D                ! declination of the sun
-      real ah1D                    ! hour angle (it should come from the radiation routine)
-      real rs1D                    ! solar radiation
-      real rld1D                   ! downward flux of the longwave radiation
-      real swddir1D
-      real swddif1D                ! short wave diffuse solar radiation _gl
+      real(kind=kind_noahmp) z1D(kms:kme)               ! vertical coordinates
+      real(kind=kind_noahmp) ua1D(kms:kme)                ! wind speed in the x directions
+      real(kind=kind_noahmp) va1D(kms:kme)                ! wind speed in the y directions
+      real(kind=kind_noahmp) pt1D(kms:kme)                ! potential temperature
+      real(kind=kind_noahmp) da1D(kms:kme)                ! air density
+      real(kind=kind_noahmp) pr1D(kms:kme)                ! air pressure
+      real(kind=kind_noahmp) pt01D(kms:kme)               ! reference potential temperature
+      real(kind=kind_noahmp) zr1D                    ! zenith angle
+      real(kind=kind_noahmp) deltar1D                ! declination of the sun
+      real(kind=kind_noahmp) ah1D                    ! hour angle (it should come from the radiation routine)
+      real(kind=kind_noahmp) rs1D                    ! solar radiation
+      real(kind=kind_noahmp) rld1D                   ! downward flux of the longwave radiation
+      real(kind=kind_noahmp) swddir1D
+      real(kind=kind_noahmp) swddif1D                ! short wave diffuse solar radiation _gl
 
 
 
-      real tw1D(2*ndm,nz_um,nwr_u,nbui_max) ! temperature in each layer of the wall
-      real tg1D(ndm,ng_u)                   ! temperature in each layer of the ground
-      real tr1D(ndm,nz_um,nwr_u)   ! temperature in each layer of the roof
-      real trv1D(ndm,nz_um,ngr_u)   ! temperature in each layer of the GREEN roof
-      real qr1D(ndm,nz_um,ngr_u)   ! humidity in each layer of the GREEN roof
+      real(kind=kind_noahmp) tw1D(2*ndm,nz_um,nwr_u,nbui_max) ! temperature in each layer of the wall
+      real(kind=kind_noahmp) tg1D(ndm,ng_u)                   ! temperature in each layer of the ground
+      real(kind=kind_noahmp) tr1D(ndm,nz_um,nwr_u)   ! temperature in each layer of the roof
+      real(kind=kind_noahmp) trv1D(ndm,nz_um,ngr_u)   ! temperature in each layer of the GREEN roof
+      real(kind=kind_noahmp) qr1D(ndm,nz_um,ngr_u)   ! humidity in each layer of the GREEN roof
 
 !
 !New variable for BEM
 !
-      real tlev1D(nz_um,nbui_max)            ! temperature in each floor and in each different type of building
-      real qlev1D(nz_um,nbui_max)            ! specific humidity in each floor and in each different type of building
-      real twlev1D(2*ndm,nz_um,nbui_max)     ! temperature in each window in each floor in each different type of building
-      real tglev1D(ndm,ngb_u,nbui_max)       ! temperature in each layer of the ground below of a type of building
-      real tflev1D(ndm,nf_u,nz_um-1,nbui_max)! temperature in each layer of the floors in each building
-      real lflev1D(nz_um,nz_um)           ! latent heat flux due to the air conditioning systems
-      real sflev1D(nz_um,nz_um)           ! sensible heat flux due to the air conditioning systems
-      real lfvlev1D(nz_um,nz_um)          ! latent heat flux due to ventilation
-      real sfvlev1D(nz_um,nz_um)          ! sensible heat flux due to ventilation
-      real sfwin1D(2*ndm,nz_um,nbui_max)     ! sensible heat flux from windows
-      real consumlev1D(nz_um,nz_um)       ! consumption due to the air conditioning systems
-      real eppvlev1D(nz_um)               ! electricity production of PV panels 
-      real tair1D(nz_um)
-      real tpvlev1D(ndm,nz_um)
-      real qv1D(kms:kme)                  ! specific humidity
-      real meso_urb                       ! constant to link meso and urban scales [m-2]
-      real meso_urb_ac
-      real roof_frac                       ! Surface fraction occupied by roof 
-      real d_urb(nz_um)    
-      real sf_ac
+      real(kind=kind_noahmp) tlev1D(nz_um,nbui_max)            ! temperature in each floor and in each different type of building
+      real(kind=kind_noahmp) qlev1D(nz_um,nbui_max)            ! specific humidity in each floor and in each different type of building
+      real(kind=kind_noahmp) twlev1D(2*ndm,nz_um,nbui_max)     ! temperature in each window in each floor in each different type of building
+      real(kind=kind_noahmp) tglev1D(ndm,ngb_u,nbui_max)       ! temperature in each layer of the ground below of a type of building
+      real(kind=kind_noahmp) tflev1D(ndm,nf_u,nz_um-1,nbui_max)! temperature in each layer of the floors in each building
+      real(kind=kind_noahmp) lflev1D(nz_um,nz_um)           ! latent heat flux due to the air conditioning systems
+      real(kind=kind_noahmp) sflev1D(nz_um,nz_um)           ! sensible heat flux due to the air conditioning systems
+      real(kind=kind_noahmp) lfvlev1D(nz_um,nz_um)          ! latent heat flux due to ventilation
+      real(kind=kind_noahmp) sfvlev1D(nz_um,nz_um)          ! sensible heat flux due to ventilation
+      real(kind=kind_noahmp) sfwin1D(2*ndm,nz_um,nbui_max)     ! sensible heat flux from windows
+      real(kind=kind_noahmp) consumlev1D(nz_um,nz_um)       ! consumption due to the air conditioning systems
+      real(kind=kind_noahmp) eppvlev1D(nz_um)               ! electricity production of PV panels 
+      real(kind=kind_noahmp) tair1D(nz_um)
+      real(kind=kind_noahmp) tpvlev1D(ndm,nz_um)
+      real(kind=kind_noahmp) qv1D(kms:kme)                  ! specific humidity
+      real(kind=kind_noahmp) meso_urb                       ! constant to link meso and urban scales [m-2]
+      real(kind=kind_noahmp) meso_urb_ac
+      real(kind=kind_noahmp) roof_frac                       ! Surface fraction occupied by roof 
+      real(kind=kind_noahmp) d_urb(nz_um)    
+      real(kind=kind_noahmp) sf_ac
       integer ibui,nbui
       integer nlev(nz_um)
  
@@ -417,36 +418,36 @@ use module_wrf_error
 !End new variables
 !
 
-      real sfw1D(2*ndm,nz_um,nbui_max)      ! sensible heat flux from walls
-      real sfg1D(ndm)              ! sensible heat flux from ground (road)
-      real sfr1D(ndm,nz_um)      ! sensible heat flux from roofs
-      real sfrpv1D(ndm,nz_um)
+      real(kind=kind_noahmp) sfw1D(2*ndm,nz_um,nbui_max)      ! sensible heat flux from walls
+      real(kind=kind_noahmp) sfg1D(ndm)              ! sensible heat flux from ground (road)
+      real(kind=kind_noahmp) sfr1D(ndm,nz_um)      ! sensible heat flux from roofs
+      real(kind=kind_noahmp) sfrpv1D(ndm,nz_um)
 
-      real tpv1D(nbui_max)
-      real sfr_indoor1D(nbui_max) 
-      real sfrv1D(ndm,nz_um)      ! sensible heat flux from roofs
-      real lfrv1D(ndm,nz_um)      ! latent heat flux from roofs
-      real dg1D(ndm)              ! water depth from ground
-      real dgr1D(ndm,nz_um)      ! water depth from roofs
-      real lfg1D(ndm)              ! latent heat flux from ground (road)
-      real lfr1D(ndm,nz_um)      ! latent heat flux from roofs
-      real drain1D(ndm,nz_um)      ! sensible heat flux from roofs
-      real sf1D(kms:kme)              ! surface of the urban grid cells
-      real vl1D(kms:kme)                ! volume of the urban grid cells
-      real a_u1D(kms:kme)               ! Implicit component of the momentum sources or sinks in the X-direction
-      real a_v1D(kms:kme)               ! Implicit component of the momentum sources or sinks in the Y-direction
-      real a_t1D(kms:kme)               ! Implicit component of the heat sources or sinks
-      real a_e1D(kms:kme)               ! Implicit component of the TKE sources or sinks
-      real b_u1D(kms:kme)               ! Explicit component of the momentum sources or sinks in the X-direction
-      real b_v1D(kms:kme)               ! Explicit component of the momentum sources or sinks in the Y-direction
-      real b_t1D(kms:kme)               ! Explicit component of the heat sources or sinks
-      real b_ac1D(kms:kme)
-      real b_e1D(kms:kme)               ! Explicit component of the TKE sources or sinks
-      real b_q1D(kms:kme)               ! Explicit component of the Humidity sources or sinks
-      real dlg1D(kms:kme)               ! Height above ground (L_ground in formula (24) of the BLM paper). 
-      real dl_u1D(kms:kme)              ! Length scale (lb in formula (22) ofthe BLM paper)
-      real gfr1D(ndm,nz_um)
-      real time_bep
+      real(kind=kind_noahmp) tpv1D(nbui_max)
+      real(kind=kind_noahmp) sfr_indoor1D(nbui_max) 
+      real(kind=kind_noahmp) sfrv1D(ndm,nz_um)      ! sensible heat flux from roofs
+      real(kind=kind_noahmp) lfrv1D(ndm,nz_um)      ! latent heat flux from roofs
+      real(kind=kind_noahmp) dg1D(ndm)              ! water depth from ground
+      real(kind=kind_noahmp) dgr1D(ndm,nz_um)      ! water depth from roofs
+      real(kind=kind_noahmp) lfg1D(ndm)              ! latent heat flux from ground (road)
+      real(kind=kind_noahmp) lfr1D(ndm,nz_um)      ! latent heat flux from roofs
+      real(kind=kind_noahmp) drain1D(ndm,nz_um)      ! sensible heat flux from roofs
+      real(kind=kind_noahmp) sf1D(kms:kme)              ! surface of the urban grid cells
+      real(kind=kind_noahmp) vl1D(kms:kme)                ! volume of the urban grid cells
+      real(kind=kind_noahmp) a_u1D(kms:kme)               ! Implicit component of the momentum sources or sinks in the X-direction
+      real(kind=kind_noahmp) a_v1D(kms:kme)               ! Implicit component of the momentum sources or sinks in the Y-direction
+      real(kind=kind_noahmp) a_t1D(kms:kme)               ! Implicit component of the heat sources or sinks
+      real(kind=kind_noahmp) a_e1D(kms:kme)               ! Implicit component of the TKE sources or sinks
+      real(kind=kind_noahmp) b_u1D(kms:kme)               ! Explicit component of the momentum sources or sinks in the X-direction
+      real(kind=kind_noahmp) b_v1D(kms:kme)               ! Explicit component of the momentum sources or sinks in the Y-direction
+      real(kind=kind_noahmp) b_t1D(kms:kme)               ! Explicit component of the heat sources or sinks
+      real(kind=kind_noahmp) b_ac1D(kms:kme)
+      real(kind=kind_noahmp) b_e1D(kms:kme)               ! Explicit component of the TKE sources or sinks
+      real(kind=kind_noahmp) b_q1D(kms:kme)               ! Explicit component of the Humidity sources or sinks
+      real(kind=kind_noahmp) dlg1D(kms:kme)               ! Height above ground (L_ground in formula (24) of the BLM paper). 
+      real(kind=kind_noahmp) dl_u1D(kms:kme)              ! Length scale (lb in formula (22) ofthe BLM paper)
+      real(kind=kind_noahmp) gfr1D(ndm,nz_um)
+      real(kind=kind_noahmp) time_bep
 ! arrays used to collapse indexes
       integer ind_zwd(nbui_max,nz_um,nwr_u,ndm)
       integer ind_gd(ng_u,ndm)
@@ -1197,103 +1198,103 @@ do iz= kts,kte
 
 !!    integer nz                 ! Number of vertical levels
       integer kms,kme,kts,kte,ix,iy,itimestep
-      real z(kms:kme)               ! Altitude above the ground of the cell interfaces.
-      real ua(kms:kme)                ! Wind speed in the x direction
-      real va(kms:kme)                ! Wind speed in the y direction
-      real pt(kms:kme)                ! Potential temperature
-      real da(kms:kme)                ! Air density
-      real pr(kms:kme)                ! Air pressure
-      real pt0(kms:kme)               ! Reference potential temperature (could be equal to "pt")
-      real qv(kms:kme)              ! Specific humidity
-      real dt                    ! Time step
-      real zr                    ! Zenith angle
-      real deltar                ! Declination of the sun
-      real ah                    ! Hour angle
-      real rs                    ! Solar radiation
-      real rld                   ! Downward flux of the longwave radiation
-      real xlat                  ! Latitude
-      real swddir                ! short wave direct solar radiation   !_gl
-      real swddif                ! short wave diffuse solar radiation  !_gl
+      real(kind=kind_noahmp) z(kms:kme)               ! Altitude above the ground of the cell interfaces.
+      real(kind=kind_noahmp) ua(kms:kme)                ! Wind speed in the x direction
+      real(kind=kind_noahmp) va(kms:kme)                ! Wind speed in the y direction
+      real(kind=kind_noahmp) pt(kms:kme)                ! Potential temperature
+      real(kind=kind_noahmp) da(kms:kme)                ! Air density
+      real(kind=kind_noahmp) pr(kms:kme)                ! Air pressure
+      real(kind=kind_noahmp) pt0(kms:kme)               ! Reference potential temperature (could be equal to "pt")
+      real(kind=kind_noahmp) qv(kms:kme)              ! Specific humidity
+      real(kind=kind_noahmp) dt                    ! Time step
+      real(kind=kind_noahmp) zr                    ! Zenith angle
+      real(kind=kind_noahmp) deltar                ! Declination of the sun
+      real(kind=kind_noahmp) ah                    ! Hour angle
+      real(kind=kind_noahmp) rs                    ! Solar radiation
+      real(kind=kind_noahmp) rld                   ! Downward flux of the longwave radiation
+      real(kind=kind_noahmp) xlat                  ! Latitude
+      real(kind=kind_noahmp) swddir                ! short wave direct solar radiation   !_gl
+      real(kind=kind_noahmp) swddif                ! short wave diffuse solar radiation  !_gl
 
 ! Data relative to the "urban grid"
 
       integer iurb               ! Current urban class
 
 !    Radiation parameters
-      real albg                  ! Albedo of the ground
-      real albw                  ! Albedo of the wall
-      real albr                  ! Albedo of the roof
-      real albwin                ! Albedo of the windows
-      real emwind                ! Emissivity of windows
-      real emg                   ! Emissivity of ground
-      real emw                   ! Emissivity of wall
-      real emr                   ! Emissivity of roof
+      real(kind=kind_noahmp) albg                  ! Albedo of the ground
+      real(kind=kind_noahmp) albw                  ! Albedo of the wall
+      real(kind=kind_noahmp) albr                  ! Albedo of the roof
+      real(kind=kind_noahmp) albwin                ! Albedo of the windows
+      real(kind=kind_noahmp) emwind                ! Emissivity of windows
+      real(kind=kind_noahmp) emg                   ! Emissivity of ground
+      real(kind=kind_noahmp) emw                   ! Emissivity of wall
+      real(kind=kind_noahmp) emr                   ! Emissivity of roof
 
 
 !    fww,fwg,fgw,fsw,fsg are the view factors used to compute the long and 
 !    short wave radation. 
 !    The calculation of these factor is explained in the Appendix A of the BLM paper
-      real fww(nz_um,nz_um,ndm,nurbm)  !  from wall to wall
-      real fwg(nz_um,ndm,nurbm)        !  from wall to ground
-      real fgw(nz_um,ndm,nurbm)        !  from ground to wall
-      real fsw(nz_um,ndm,nurbm)        !  from sky to wall
-      real fws(nz_um,ndm,nurbm)        !  from wall to sky
-      real fsg(ndm,nurbm)              !  from sky to ground
+      real(kind=kind_noahmp) fww(nz_um,nz_um,ndm,nurbm)  !  from wall to wall
+      real(kind=kind_noahmp) fwg(nz_um,ndm,nurbm)        !  from wall to ground
+      real(kind=kind_noahmp) fgw(nz_um,ndm,nurbm)        !  from ground to wall
+      real(kind=kind_noahmp) fsw(nz_um,ndm,nurbm)        !  from sky to wall
+      real(kind=kind_noahmp) fws(nz_um,ndm,nurbm)        !  from wall to sky
+      real(kind=kind_noahmp) fsg(ndm,nurbm)              !  from sky to ground
       
 !    Street parameters
       integer ndu                  ! Number of street direction for each urban class 
-      real bs_u(ndm,nurbm)         ! Building width
+      real(kind=kind_noahmp) bs_u(ndm,nurbm)         ! Building width
         
 !    Grid parameters
       integer nzu           ! Number of layer in the urban grid
-      real z_u(nz_um)       ! Height of the urban grid levels
+      real(kind=kind_noahmp) z_u(nz_um)       ! Height of the urban grid levels
 !FS
-      real cop_u(nurbm)
-      real pwin_u(nurbm)
-      real beta_u(nurbm)
+      real(kind=kind_noahmp) cop_u(nurbm)
+      real(kind=kind_noahmp) pwin_u(nurbm)
+      real(kind=kind_noahmp) beta_u(nurbm)
       integer sw_cond_u(nurbm)
-      real time_on_u(nurbm)
-      real time_off_u(nurbm)
-      real targtemp_u(nurbm)
-      real gaptemp_u(nurbm)
-      real targhum_u(nurbm)
-      real gaphum_u(nurbm)
-      real perflo_u(nurbm)
-      real hsesf_u(nurbm)
-      real hsequip(24)
-      real irho(24)
-      real gr_frac_roof
-      real pv_frac_roof
+      real(kind=kind_noahmp) time_on_u(nurbm)
+      real(kind=kind_noahmp) time_off_u(nurbm)
+      real(kind=kind_noahmp) targtemp_u(nurbm)
+      real(kind=kind_noahmp) gaptemp_u(nurbm)
+      real(kind=kind_noahmp) targhum_u(nurbm)
+      real(kind=kind_noahmp) gaphum_u(nurbm)
+      real(kind=kind_noahmp) perflo_u(nurbm)
+      real(kind=kind_noahmp) hsesf_u(nurbm)
+      real(kind=kind_noahmp) hsequip(24)
+      real(kind=kind_noahmp) irho(24)
+      real(kind=kind_noahmp) gr_frac_roof
+      real(kind=kind_noahmp) pv_frac_roof
       integer gr_flag
       integer gr_type
-      real tpv(nbui_max)
-     real  sfpv(nbui_max)
-     real sfr_indoor(nbui_max)
+      real(kind=kind_noahmp) tpv(nbui_max)
+     real(kind=kind_noahmp)  sfpv(nbui_max)
+     real(kind=kind_noahmp) sfr_indoor(nbui_max)
 ! ----------------------------------------------------------------------
 ! INPUT-OUTPUT
 ! ----------------------------------------------------------------------
 
 ! Data relative to the "urban grid" which should be stored from the current time step to the next one
 
-      real tw(2*ndm,nz_um,nwr_u,nbui_max)  ! Temperature in each layer of the wall [K]
-      real tr(ndm,nz_um,nwr_u)  ! Temperature in each layer of the roof [K]
-      real tg(ndm,ng_u)          ! Temperature in each layer of the ground [K]
-      real trv(ndm,nz_um,ngr_u)  ! Temperature in each layer of the green roof [K]
-      real sfw(2*ndm,nz_um,nbui_max)      ! Sensible heat flux from walls
-      real sfg(ndm)              ! Sensible heat flux from ground (road)
-      real sfr(ndm,nz_um)      ! Sensible heat flux from roofs
-      real sfrv(ndm,nz_um)      ! Sensible heat flux from green roofs
-      real lfrv(ndm,nz_um)      ! Latent heat flux from green roofs
-      real dg(ndm)              ! water depth ground (road)
-      real dgr(ndm,nz_um)      ! water depth roofs
-      real lfr(ndm,nz_um)      ! Latent heat flux from roofs
-      real lfg(ndm)              ! Latent heat flux from ground (road)
-      real drain(ndm,nz_um)        ! Green roof drainage
-      real rainbl              ! Rainfall 
-      real gfg(ndm)             ! Heat flux transferred from the surface of the ground (road) towards the interior
-      real gfr(ndm,nz_um)     ! Heat flux transferred from the surface of the roof towards the interior
-      real gfw(2*ndm,nz_um,nbui_max)     ! Heat flux transfered from the surface of the walls towards the interior
-      real qr(ndm,nz_um,ngr_u)  ! Green Roof soil moisture
+      real(kind=kind_noahmp) tw(2*ndm,nz_um,nwr_u,nbui_max)  ! Temperature in each layer of the wall [K]
+      real(kind=kind_noahmp) tr(ndm,nz_um,nwr_u)  ! Temperature in each layer of the roof [K]
+      real(kind=kind_noahmp) tg(ndm,ng_u)          ! Temperature in each layer of the ground [K]
+      real(kind=kind_noahmp) trv(ndm,nz_um,ngr_u)  ! Temperature in each layer of the green roof [K]
+      real(kind=kind_noahmp) sfw(2*ndm,nz_um,nbui_max)      ! Sensible heat flux from walls
+      real(kind=kind_noahmp) sfg(ndm)              ! Sensible heat flux from ground (road)
+      real(kind=kind_noahmp) sfr(ndm,nz_um)      ! Sensible heat flux from roofs
+      real(kind=kind_noahmp) sfrv(ndm,nz_um)      ! Sensible heat flux from green roofs
+      real(kind=kind_noahmp) lfrv(ndm,nz_um)      ! Latent heat flux from green roofs
+      real(kind=kind_noahmp) dg(ndm)              ! water depth ground (road)
+      real(kind=kind_noahmp) dgr(ndm,nz_um)      ! water depth roofs
+      real(kind=kind_noahmp) lfr(ndm,nz_um)      ! Latent heat flux from roofs
+      real(kind=kind_noahmp) lfg(ndm)              ! Latent heat flux from ground (road)
+      real(kind=kind_noahmp) drain(ndm,nz_um)        ! Green roof drainage
+      real(kind=kind_noahmp) rainbl              ! Rainfall 
+      real(kind=kind_noahmp) gfg(ndm)             ! Heat flux transferred from the surface of the ground (road) towards the interior
+      real(kind=kind_noahmp) gfr(ndm,nz_um)     ! Heat flux transferred from the surface of the roof towards the interior
+      real(kind=kind_noahmp) gfw(2*ndm,nz_um,nbui_max)     ! Heat flux transfered from the surface of the walls towards the interior
+      real(kind=kind_noahmp) qr(ndm,nz_um,ngr_u)  ! Green Roof soil moisture
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
@@ -1302,99 +1303,99 @@ do iz= kts,kte
 
 ! Data relative to the "mesoscale grid"
 
-      real sf(kms:kme)             ! Surface of the "mesoscale grid" cells taking into account the buildings
-      real vl(kms:kme)               ! Volume of the "mesoscale grid" cells taking into account the buildings
+      real(kind=kind_noahmp) sf(kms:kme)             ! Surface of the "mesoscale grid" cells taking into account the buildings
+      real(kind=kind_noahmp) vl(kms:kme)               ! Volume of the "mesoscale grid" cells taking into account the buildings
      
 !    Implicit and explicit components of the source and sink terms at each levels,
 !     the fluxes can be computed as follow: FX = A*X + B   example: Heat fluxes = a_t * pt + b_t
-      real a_u(kms:kme)              ! Implicit component of the momentum sources or sinks in the X-direction
-      real a_v(kms:kme)              ! Implicit component of the momentum sources or sinks in the Y-direction
-      real a_t(kms:kme)              ! Implicit component of the heat sources or sinks
-      real a_e(kms:kme)              ! Implicit component of the TKE sources or sinks
-      real b_u(kms:kme)              ! Explicit component of the momentum sources or sinks in the X-direction
-      real b_v(kms:kme)              ! Explicit component of the momentum sources or sinks in the Y-direction
-      real b_t(kms:kme)              ! Explicit component of the heat sources or sinks
-      real b_ac(kms:kme)
-      real b_e(kms:kme)              ! Explicit component of the TKE sources or sinks
-      real b_q(kms:kme)              ! Explicit component of the humidity sources or sinks
-      real dlg(kms:kme)              ! Height above ground (L_ground in formula (24) of the BLM paper). 
-      real dl_u(kms:kme)             ! Length scale (lb in formula (22) ofthe BLM paper).
+      real(kind=kind_noahmp) a_u(kms:kme)              ! Implicit component of the momentum sources or sinks in the X-direction
+      real(kind=kind_noahmp) a_v(kms:kme)              ! Implicit component of the momentum sources or sinks in the Y-direction
+      real(kind=kind_noahmp) a_t(kms:kme)              ! Implicit component of the heat sources or sinks
+      real(kind=kind_noahmp) a_e(kms:kme)              ! Implicit component of the TKE sources or sinks
+      real(kind=kind_noahmp) b_u(kms:kme)              ! Explicit component of the momentum sources or sinks in the X-direction
+      real(kind=kind_noahmp) b_v(kms:kme)              ! Explicit component of the momentum sources or sinks in the Y-direction
+      real(kind=kind_noahmp) b_t(kms:kme)              ! Explicit component of the heat sources or sinks
+      real(kind=kind_noahmp) b_ac(kms:kme)
+      real(kind=kind_noahmp) b_e(kms:kme)              ! Explicit component of the TKE sources or sinks
+      real(kind=kind_noahmp) b_q(kms:kme)              ! Explicit component of the humidity sources or sinks
+      real(kind=kind_noahmp) dlg(kms:kme)              ! Height above ground (L_ground in formula (24) of the BLM paper). 
+      real(kind=kind_noahmp) dl_u(kms:kme)             ! Length scale (lb in formula (22) ofthe BLM paper).
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
 
-      real dz(kms:kme)               ! vertical space steps of the "mesoscale grid"
+      real(kind=kind_noahmp) dz(kms:kme)               ! vertical space steps of the "mesoscale grid"
 ! Data interpolated from the "mesoscale grid" to the "urban grid"
 
-      real ua_u(nz_um)          ! Wind speed in the x direction
-      real va_u(nz_um)          ! Wind speed in the y direction
-      real pt_u(nz_um)          ! Potential temperature
-      real da_u(nz_um)          ! Air density
-      real pt0_u(nz_um)         ! Reference potential temperature
-      real pr_u(nz_um)          ! Air pressure
-      real qv_u(nz_um)          !Specific humidity
+      real(kind=kind_noahmp) ua_u(nz_um)          ! Wind speed in the x direction
+      real(kind=kind_noahmp) va_u(nz_um)          ! Wind speed in the y direction
+      real(kind=kind_noahmp) pt_u(nz_um)          ! Potential temperature
+      real(kind=kind_noahmp) da_u(nz_um)          ! Air density
+      real(kind=kind_noahmp) pt0_u(nz_um)         ! Reference potential temperature
+      real(kind=kind_noahmp) pr_u(nz_um)          ! Air pressure
+      real(kind=kind_noahmp) qv_u(nz_um)          !Specific humidity
 
 ! Data defining the building and street charateristics
 
-      real alag(ng_u)           ! Ground thermal diffusivity for the current urban class [m^2 s^-1] 
+      real(kind=kind_noahmp) alag(ng_u)           ! Ground thermal diffusivity for the current urban class [m^2 s^-1] 
       
-      real csg(ng_u)            ! Specific heat of the ground material of the current urban class [J m^3 K^-1]
-      real csr(nwr_u)            ! Specific heat of the roof material for the current urban class [J m^3 K^-1]
-      real csw(nwr_u)            ! Specific heat of the wall material for the current urban class [J m^3 K^-1]
+      real(kind=kind_noahmp) csg(ng_u)            ! Specific heat of the ground material of the current urban class [J m^3 K^-1]
+      real(kind=kind_noahmp) csr(nwr_u)            ! Specific heat of the roof material for the current urban class [J m^3 K^-1]
+      real(kind=kind_noahmp) csw(nwr_u)            ! Specific heat of the wall material for the current urban class [J m^3 K^-1]
 
-      real z0(ndm,nz_um)      ! Roughness lengths "profiles"
-      real ws(ndm)              ! Street widths of the current urban class
-      real bs(ndm)              ! Building widths of the current urban class
-      real strd(ndm)            ! Street lengths for the current urban class
-      real drst(ndm)            ! Street directions for the current urban class
-      real ss(nz_um)          ! Probability to have a building with height h
-      real pb(nz_um)          ! Probability to have a building with an height equal
-      real cdrag(nz_um)
-      real alp
+      real(kind=kind_noahmp) z0(ndm,nz_um)      ! Roughness lengths "profiles"
+      real(kind=kind_noahmp) ws(ndm)              ! Street widths of the current urban class
+      real(kind=kind_noahmp) bs(ndm)              ! Building widths of the current urban class
+      real(kind=kind_noahmp) strd(ndm)            ! Street lengths for the current urban class
+      real(kind=kind_noahmp) drst(ndm)            ! Street directions for the current urban class
+      real(kind=kind_noahmp) ss(nz_um)          ! Probability to have a building with height h
+      real(kind=kind_noahmp) pb(nz_um)          ! Probability to have a building with an height equal
+      real(kind=kind_noahmp) cdrag(nz_um)
+      real(kind=kind_noahmp) alp
 
 ! Solar radiation at each level of the "urban grid"
 
-     real rsg(ndm)             ! Short wave radiation from the ground
-      real rsw(2*ndm,nz_um)     ! Short wave radiation from the walls
-      real rsd(2*ndm,nz_um)     ! Direct Short wave radiation received by the walls
-      real rlg(ndm)             ! Long wave radiation from the ground
-      real rlw(2*ndm,nz_um)     ! Long wave radiation from the walls
+     real(kind=kind_noahmp) rsg(ndm)             ! Short wave radiation from the ground
+      real(kind=kind_noahmp) rsw(2*ndm,nz_um)     ! Short wave radiation from the walls
+      real(kind=kind_noahmp) rsd(2*ndm,nz_um)     ! Direct Short wave radiation received by the walls
+      real(kind=kind_noahmp) rlg(ndm)             ! Long wave radiation from the ground
+      real(kind=kind_noahmp) rlw(2*ndm,nz_um)     ! Long wave radiation from the walls
 
 ! Potential temperature of the surfaces at each level of the "urban grid"
 
-      real ptg(ndm)             ! Ground potential temperatures 
-      real ptr(ndm,nz_um)     ! Roof potential temperatures 
-      real ptrv(ndm,nz_um)     ! Roof potential temperatures 
-      real ptw(2*ndm,nz_um,nbui_max)     ! Walls potential temperatures 
+      real(kind=kind_noahmp) ptg(ndm)             ! Ground potential temperatures 
+      real(kind=kind_noahmp) ptr(ndm,nz_um)     ! Roof potential temperatures 
+      real(kind=kind_noahmp) ptrv(ndm,nz_um)     ! Roof potential temperatures 
+      real(kind=kind_noahmp) ptw(2*ndm,nz_um,nbui_max)     ! Walls potential temperatures 
 
-      real tg_av(ndm) 
+      real(kind=kind_noahmp) tg_av(ndm) 
 ! Explicit and implicit component of the momentum, temperature and TKE sources or sinks on
 ! vertical surfaces (walls) ans horizontal surfaces (roofs and street)
 ! The fluxes can be computed as follow: Fluxes of X = A*X + B
 ! Example: Momentum fluxes on vertical surfaces = uva_u * ua_u + uvb_u
 
-      real uhb_u(ndm,nz_um)   ! U (wind component) Horizontal surfaces, B (explicit) term
-      real uva_u(2*ndm,nz_um)   ! U (wind component)   Vertical surfaces, A (implicit) term
-      real uvb_u(2*ndm,nz_um)   ! U (wind component)   Vertical surfaces, B (explicit) term
-      real vhb_u(ndm,nz_um)   ! V (wind component) Horizontal surfaces, B (explicit) term
-      real vva_u(2*ndm,nz_um)   ! V (wind component)   Vertical surfaces, A (implicit) term
-      real vvb_u(2*ndm,nz_um)   ! V (wind component)   Vertical surfaces, B (explicit) term
-      real thb_u(ndm,nz_um)   ! Temperature        Horizontal surfaces, B (explicit) term
-      real tva_u(2*ndm,nz_um)   ! Temperature          Vertical surfaces, A (implicit) term
-      real tvb_u(2*ndm,nz_um)   ! Temperature          Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) uhb_u(ndm,nz_um)   ! U (wind component) Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) uva_u(2*ndm,nz_um)   ! U (wind component)   Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) uvb_u(2*ndm,nz_um)   ! U (wind component)   Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) vhb_u(ndm,nz_um)   ! V (wind component) Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) vva_u(2*ndm,nz_um)   ! V (wind component)   Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) vvb_u(2*ndm,nz_um)   ! V (wind component)   Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) thb_u(ndm,nz_um)   ! Temperature        Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) tva_u(2*ndm,nz_um)   ! Temperature          Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) tvb_u(2*ndm,nz_um)   ! Temperature          Vertical surfaces, B (explicit) term
 
 
- real tvb_ac(2*ndm,nz_um)
-      real ehb_u(ndm,nz_um)   ! Energy (TKE)       Horizontal surfaces, B (explicit) term
-      real evb_u(2*ndm,nz_um)   ! Energy (TKE)         Vertical surfaces, B (explicit) term
-      real qhb_u(ndm,nz_um)     ! Humidity      Horizontal surfaces, B (explicit) term
-      real qvb_u(2*ndm,nz_um)   ! Humidity      Vertical surfaces, B (explicit) term      
+ real(kind=kind_noahmp) tvb_ac(2*ndm,nz_um)
+      real(kind=kind_noahmp) ehb_u(ndm,nz_um)   ! Energy (TKE)       Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) evb_u(2*ndm,nz_um)   ! Energy (TKE)         Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) qhb_u(ndm,nz_um)     ! Humidity      Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) qvb_u(2*ndm,nz_um)   ! Humidity      Vertical surfaces, B (explicit) term      
 !
-      real rs_abs ! solar radiation absorbed by urban surfaces 
-      real rl_up ! longwave radiation emitted by urban surface to the atmosphere 
-      real emiss ! mean emissivity of the urban surface
-      real grdflx_urb ! ground heat flux
-      real dt_int ! internal time step
+      real(kind=kind_noahmp) rs_abs ! solar radiation absorbed by urban surfaces 
+      real(kind=kind_noahmp) rl_up ! longwave radiation emitted by urban surface to the atmosphere 
+      real(kind=kind_noahmp) emiss ! mean emissivity of the urban surface
+      real(kind=kind_noahmp) grdflx_urb ! ground heat flux
+      real(kind=kind_noahmp) dt_int ! internal time step
       integer nt_int ! number of internal time step
       integer iz,id, it_int,it
       integer iw
@@ -1403,82 +1404,82 @@ do iz= kts,kte
 !New variables uses in BEM
 !----------------------------------------
    
-      real tmp_u(nz_um)     !Air Temperature [K]
+      real(kind=kind_noahmp) tmp_u(nz_um)     !Air Temperature [K]
 
-      real dzw(nwr_u)       !Layer sizes in the walls
-      real dzr(nwr_u)       !Layer sizes in the roofs
-      real dzf(nf_u)        !Layer sizes in the floors
-      real dzgb(ngb_u)      !Layer sizes in the ground below the buildings
+      real(kind=kind_noahmp) dzw(nwr_u)       !Layer sizes in the walls
+      real(kind=kind_noahmp) dzr(nwr_u)       !Layer sizes in the roofs
+      real(kind=kind_noahmp) dzf(nf_u)        !Layer sizes in the floors
+      real(kind=kind_noahmp) dzgb(ngb_u)      !Layer sizes in the ground below the buildings
 
-      real csgb(ngb_u)      !Specific heat of the ground material below the buildings 
+      real(kind=kind_noahmp) csgb(ngb_u)      !Specific heat of the ground material below the buildings 
 
-      real csf(nf_u)        !Specific heat of the floors materials in the buildings 
+      real(kind=kind_noahmp) csf(nf_u)        !Specific heat of the floors materials in the buildings 
                             !of the current urban class at each levels[J m^3 K^-1]
-      real alar(nwr_u+1)    ! Roof thermal diffusivity for the current urban class [W/m K]
-      real alaw(nwr_u+1)    ! Walls thermal diffusivity for the current urban class [W/m K] 
-      real alaf(nf_u+1)     ! Floor thermal diffusivity at each wall layers [W/m K]     
-      real alagb(ngb_u+1)   ! Ground thermal diffusivity below the building at each wall layer [W/m K] 
+      real(kind=kind_noahmp) alar(nwr_u+1)    ! Roof thermal diffusivity for the current urban class [W/m K]
+      real(kind=kind_noahmp) alaw(nwr_u+1)    ! Walls thermal diffusivity for the current urban class [W/m K] 
+      real(kind=kind_noahmp) alaf(nf_u+1)     ! Floor thermal diffusivity at each wall layers [W/m K]     
+      real(kind=kind_noahmp) alagb(ngb_u+1)   ! Ground thermal diffusivity below the building at each wall layer [W/m K] 
 
-      real sfrb(ndm,nbui_max)        ! Sensible heat flux from roofs [W/m2]
-      real sfrbpv(ndm,nbui_max)      ! Sensible heat flux from PV panels [W/m2]
-      real sfrpv(ndm,nz_um)          ! Sensible heat flux from PV panels [W/m2]
-      real sfrvb(ndm,nbui_max)        ! Sensible heat flux from roofs [W/m2]
-      real lfrvb(ndm,nbui_max)        ! Sensible heat flux from roofs [W/m2]
-      real lfrb(ndm,nbui_max)        ! Sensible heat flux from roofs [W/m2]
+      real(kind=kind_noahmp) sfrb(ndm,nbui_max)        ! Sensible heat flux from roofs [W/m2]
+      real(kind=kind_noahmp) sfrbpv(ndm,nbui_max)      ! Sensible heat flux from PV panels [W/m2]
+      real(kind=kind_noahmp) sfrpv(ndm,nz_um)          ! Sensible heat flux from PV panels [W/m2]
+      real(kind=kind_noahmp) sfrvb(ndm,nbui_max)        ! Sensible heat flux from roofs [W/m2]
+      real(kind=kind_noahmp) lfrvb(ndm,nbui_max)        ! Sensible heat flux from roofs [W/m2]
+      real(kind=kind_noahmp) lfrb(ndm,nbui_max)        ! Sensible heat flux from roofs [W/m2]
   
-      real gfrb(ndm,nbui_max)        ! Heat flux flowing inside the roofs [W/m2]
-      real sfwb1D(2*ndm,nz_um)    !Sensible heat flux from the walls [W/m2] 
-      real sfwin(2*ndm,nz_um,nbui_max)!Sensible heat flux from windows [W/m2]
-      real sfwinb1D(2*ndm,nz_um)  !Sensible heat flux from windows [W/m2]
-      real gfwb1D(2*ndm,nz_um)    !Heat flux flowing inside the walls [W/m2]
+      real(kind=kind_noahmp) gfrb(ndm,nbui_max)        ! Heat flux flowing inside the roofs [W/m2]
+      real(kind=kind_noahmp) sfwb1D(2*ndm,nz_um)    !Sensible heat flux from the walls [W/m2] 
+      real(kind=kind_noahmp) sfwin(2*ndm,nz_um,nbui_max)!Sensible heat flux from windows [W/m2]
+      real(kind=kind_noahmp) sfwinb1D(2*ndm,nz_um)  !Sensible heat flux from windows [W/m2]
+      real(kind=kind_noahmp) gfwb1D(2*ndm,nz_um)    !Heat flux flowing inside the walls [W/m2]
 
-      real qlev(nz_um,nbui_max)      !specific humidity [kg/kg]
-      real qlevb1D(nz_um)         !specific humidity [kg/kg] 
-      real tlev(nz_um,nbui_max)      !Indoor temperature [K]
-      real tlevb1D(nz_um)         !Indoor temperature [K]
-      real twb1D(2*ndm,nwr_u,nz_um)     !Wall temperature in BEM [K]      
-      real twlev(2*ndm,nz_um,nbui_max)     !Window temperature in BEM [K]
-      real twlevb1D(2*ndm,nz_um)        !Window temperature in BEM [K]
-      real tglev(ndm,ngb_u,nbui_max)        !Ground temperature below a building in BEM [K]
-      real tglevb1D(ngb_u)               !Ground temperature below a building in BEM [K]
-      real tflev(ndm,nf_u,nz_um-1,nbui_max)!Floor temperature in BEM[K]
-      real tflevb1D(nf_u,nz_um-1)       !Floor temperature in BEM[K]
-      real trb(ndm,nwr_u,nbui_max)         !Roof temperature in BEM [K]
-      real trvb(ndm,ngr_u,nbui_max)         !Roof temperature in BEM [K]
-      real trb1D(nwr_u) 
+      real(kind=kind_noahmp) qlev(nz_um,nbui_max)      !specific humidity [kg/kg]
+      real(kind=kind_noahmp) qlevb1D(nz_um)         !specific humidity [kg/kg] 
+      real(kind=kind_noahmp) tlev(nz_um,nbui_max)      !Indoor temperature [K]
+      real(kind=kind_noahmp) tlevb1D(nz_um)         !Indoor temperature [K]
+      real(kind=kind_noahmp) twb1D(2*ndm,nwr_u,nz_um)     !Wall temperature in BEM [K]      
+      real(kind=kind_noahmp) twlev(2*ndm,nz_um,nbui_max)     !Window temperature in BEM [K]
+      real(kind=kind_noahmp) twlevb1D(2*ndm,nz_um)        !Window temperature in BEM [K]
+      real(kind=kind_noahmp) tglev(ndm,ngb_u,nbui_max)        !Ground temperature below a building in BEM [K]
+      real(kind=kind_noahmp) tglevb1D(ngb_u)               !Ground temperature below a building in BEM [K]
+      real(kind=kind_noahmp) tflev(ndm,nf_u,nz_um-1,nbui_max)!Floor temperature in BEM[K]
+      real(kind=kind_noahmp) tflevb1D(nf_u,nz_um-1)       !Floor temperature in BEM[K]
+      real(kind=kind_noahmp) trb(ndm,nwr_u,nbui_max)         !Roof temperature in BEM [K]
+      real(kind=kind_noahmp) trvb(ndm,ngr_u,nbui_max)         !Roof temperature in BEM [K]
+      real(kind=kind_noahmp) trb1D(nwr_u) 
 
-      real sflev(nz_um,nz_um)     ! sensible heat flux due to the air conditioning systems [W]
-      real lflev(nz_um,nz_um)     ! latent heat flux due to the air conditioning systems  [W]
-      real consumlev(nz_um,nz_um) ! consumption due to the air conditioning systems [W]
-      real sflev1D(nz_um)         ! sensible heat flux due to the air conditioning systems [W]
-      real lflev1D(nz_um)         ! latent heat flux due to the air conditioning systems  [W]
-      real consumlev1D(nz_um)     ! consumption due to the air conditioning systems [W]
-      real eppvlev(nz_um)         ! Electricity production of PV panels [W]
-	   real tpvlev(ndm,nz_um)
-      real tpvlevb(ndm,nbui_max)        ! Sensible heat flux from roofs [W/m2]
-      real sfvlev(nz_um,nz_um)    ! sensible heat flux due to ventilation [W]
-      real lfvlev(nz_um,nz_um)    ! latent heat flux due to ventilation [W]
-      real sfvlev1D(nz_um)        ! sensible heat flux due to ventilation [W]
-      real lfvlev1D(nz_um)        ! Latent heat flux due to ventilation [W]
+      real(kind=kind_noahmp) sflev(nz_um,nz_um)     ! sensible heat flux due to the air conditioning systems [W]
+      real(kind=kind_noahmp) lflev(nz_um,nz_um)     ! latent heat flux due to the air conditioning systems  [W]
+      real(kind=kind_noahmp) consumlev(nz_um,nz_um) ! consumption due to the air conditioning systems [W]
+      real(kind=kind_noahmp) sflev1D(nz_um)         ! sensible heat flux due to the air conditioning systems [W]
+      real(kind=kind_noahmp) lflev1D(nz_um)         ! latent heat flux due to the air conditioning systems  [W]
+      real(kind=kind_noahmp) consumlev1D(nz_um)     ! consumption due to the air conditioning systems [W]
+      real(kind=kind_noahmp) eppvlev(nz_um)         ! Electricity production of PV panels [W]
+	   real(kind=kind_noahmp) tpvlev(ndm,nz_um)
+      real(kind=kind_noahmp) tpvlevb(ndm,nbui_max)        ! Sensible heat flux from roofs [W/m2]
+      real(kind=kind_noahmp) sfvlev(nz_um,nz_um)    ! sensible heat flux due to ventilation [W]
+      real(kind=kind_noahmp) lfvlev(nz_um,nz_um)    ! latent heat flux due to ventilation [W]
+      real(kind=kind_noahmp) sfvlev1D(nz_um)        ! sensible heat flux due to ventilation [W]
+      real(kind=kind_noahmp) lfvlev1D(nz_um)        ! Latent heat flux due to ventilation [W]
 
-      real ptwin(2*ndm,nz_um,nbui_max)  ! window potential temperature
-      real tw_av(2*ndm,nz_um)        ! Averaged temperature of the wall surfaces
-      real twlev_av(2*ndm,nz_um)     ! Averaged temperature of the windows
-      real sfw_av(2*ndm,nz_um)       ! Averaged sensible heat from walls
-      real sfwind_av(2*ndm,nz_um)    ! Averaged sensible heat from windows
+      real(kind=kind_noahmp) ptwin(2*ndm,nz_um,nbui_max)  ! window potential temperature
+      real(kind=kind_noahmp) tw_av(2*ndm,nz_um)        ! Averaged temperature of the wall surfaces
+      real(kind=kind_noahmp) twlev_av(2*ndm,nz_um)     ! Averaged temperature of the windows
+      real(kind=kind_noahmp) sfw_av(2*ndm,nz_um)       ! Averaged sensible heat from walls
+      real(kind=kind_noahmp) sfwind_av(2*ndm,nz_um)    ! Averaged sensible heat from windows
       integer flag_pvp
       integer nbui                !Total number of different type of buildings in an urban class
       integer nlev(nz_um)         !Number of levels in each different type of buildings in an urban class
       integer ibui,ily  
-      real :: nhourday   ! Number of hours from midnight, local time
-      real :: st4,gamma,fp,lmr,smr,prova
-      real hfgr(ndm,nz_um)!heat flux green roof
-      real hfgrb(ndm,nbui_max)
-      real irri_per_ts
-      real irri_now 
-      real tr_av(ndm,nz_um)
-      real tr_avb(ndm,nbui_max)
-      real sfr_avb(ndm,nbui_max)
+      real(kind=kind_noahmp) :: nhourday   ! Number of hours from midnight, local time
+      real(kind=kind_noahmp) :: st4,gamma,fp,lmr,smr,prova
+      real(kind=kind_noahmp) hfgr(ndm,nz_um)!heat flux green roof
+      real(kind=kind_noahmp) hfgrb(ndm,nbui_max)
+      real(kind=kind_noahmp) irri_per_ts
+      real(kind=kind_noahmp) irri_now 
+      real(kind=kind_noahmp) tr_av(ndm,nz_um)
+      real(kind=kind_noahmp) tr_avb(ndm,nbui_max)
+      real(kind=kind_noahmp) sfr_avb(ndm,nbui_max)
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
 ! ----------------------------------------------------------------------
@@ -1894,63 +1895,63 @@ do iz= kts,kte
       integer nzu                  ! Number of vertical urban levels in the current class
       integer ndu                  ! Number of street direction for the current urban class
       integer nzurb                ! Number of vertical urban levels in the current class
-      real alag_u(nurbm)           ! Ground thermal diffusivity [m^2 s^-1]
-      real alar_u(nurbm)           ! Roof thermal diffusivity [m^2 s^-1]
-      real alaw_u(nurbm)           ! Wall thermal diffusivity [m^2 s^-1]
-      real bs_u(ndm,nurbm)         ! Building width
-      real csg_u(nurbm)            ! Specific heat of the ground material [J m^3 K^-1]
-      real csr_u(nurbm)            ! Specific heat of the roof material [J m^3 K^-1]
-      real csw_u(nurbm)            ! Specific heat of the wall material [J m^3 K^-1]
-      real drst_u(ndm,nurbm)       ! Street direction
-      real strd_u(ndm,nurbm)       ! Street length 
-      real ws_u(ndm,nurbm)         ! Street width
-      real z0g_u(nurbm)            ! The ground's roughness length
-      real z0r_u(nurbm)            ! The roof's roughness length
-      real ss_u(nz_um,nurbm)       ! The probability that a building has an height equal to "z"
-      real pb_u(nz_um,nurbm)       ! The probability that a building has an height greater or equal to "z"
-      real lp_urb                ! Building plan area density
-      real lb_urb                ! Building surface area to plan area ratio
-      real hgt_urb               ! Average building height weighted by building plan area [m]
-      real frc_urb               ! Urban fraction
+      real(kind=kind_noahmp) alag_u(nurbm)           ! Ground thermal diffusivity [m^2 s^-1]
+      real(kind=kind_noahmp) alar_u(nurbm)           ! Roof thermal diffusivity [m^2 s^-1]
+      real(kind=kind_noahmp) alaw_u(nurbm)           ! Wall thermal diffusivity [m^2 s^-1]
+      real(kind=kind_noahmp) bs_u(ndm,nurbm)         ! Building width
+      real(kind=kind_noahmp) csg_u(nurbm)            ! Specific heat of the ground material [J m^3 K^-1]
+      real(kind=kind_noahmp) csr_u(nurbm)            ! Specific heat of the roof material [J m^3 K^-1]
+      real(kind=kind_noahmp) csw_u(nurbm)            ! Specific heat of the wall material [J m^3 K^-1]
+      real(kind=kind_noahmp) drst_u(ndm,nurbm)       ! Street direction
+      real(kind=kind_noahmp) strd_u(ndm,nurbm)       ! Street length 
+      real(kind=kind_noahmp) ws_u(ndm,nurbm)         ! Street width
+      real(kind=kind_noahmp) z0g_u(nurbm)            ! The ground's roughness length
+      real(kind=kind_noahmp) z0r_u(nurbm)            ! The roof's roughness length
+      real(kind=kind_noahmp) ss_u(nz_um,nurbm)       ! The probability that a building has an height equal to "z"
+      real(kind=kind_noahmp) pb_u(nz_um,nurbm)       ! The probability that a building has an height greater or equal to "z"
+      real(kind=kind_noahmp) lp_urb                ! Building plan area density
+      real(kind=kind_noahmp) lb_urb                ! Building surface area to plan area ratio
+      real(kind=kind_noahmp) hgt_urb               ! Average building height weighted by building plan area [m]
+      real(kind=kind_noahmp) frc_urb               ! Urban fraction
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-      real alag(ng_u)           ! Ground thermal diffusivity at each ground levels
-      real csg(ng_u)            ! Specific heat of the ground material at each ground levels
-      real bs(ndm)              ! Building width for the current urban class
-      real drst(ndm)            ! street directions for the current urban class
-      real strd(ndm)            ! Street lengths for the current urban class
-      real ws(ndm)              ! Street widths of the current urban class
-      real z0(ndm,nz_um)      ! Roughness lengths "profiles"
-      real ss(nz_um)          ! Probability to have a building with height h
-      real pb(nz_um)          ! Probability to have a building with an height greater or equal to "z"
+      real(kind=kind_noahmp) alag(ng_u)           ! Ground thermal diffusivity at each ground levels
+      real(kind=kind_noahmp) csg(ng_u)            ! Specific heat of the ground material at each ground levels
+      real(kind=kind_noahmp) bs(ndm)              ! Building width for the current urban class
+      real(kind=kind_noahmp) drst(ndm)            ! street directions for the current urban class
+      real(kind=kind_noahmp) strd(ndm)            ! Street lengths for the current urban class
+      real(kind=kind_noahmp) ws(ndm)              ! Street widths of the current urban class
+      real(kind=kind_noahmp) z0(ndm,nz_um)      ! Roughness lengths "profiles"
+      real(kind=kind_noahmp) ss(nz_um)          ! Probability to have a building with height h
+      real(kind=kind_noahmp) pb(nz_um)          ! Probability to have a building with an height greater or equal to "z"
       integer nzurban
 
 !-----------------------------------------------------------------------------
 !INPUT/OUTPUT
 !-----------------------------------------------------------------------------
 
-      real dzw(nwr_u)       !Layer sizes in the walls [m]
-      real dzr(nwr_u)       !Layer sizes in the roofs [m]
-      real dzf(nf_u)        !Layer sizes in the floors [m]
-      real dzgb(ngb_u)      !layer sizes in the ground below the buildings [m]
+      real(kind=kind_noahmp) dzw(nwr_u)       !Layer sizes in the walls [m]
+      real(kind=kind_noahmp) dzr(nwr_u)       !Layer sizes in the roofs [m]
+      real(kind=kind_noahmp) dzf(nf_u)        !Layer sizes in the floors [m]
+      real(kind=kind_noahmp) dzgb(ngb_u)      !layer sizes in the ground below the buildings [m]
 
-      real csr(nwr_u)       ! Specific heat of the roof material at each roof levels
-      real csw(nwr_u)       ! Specific heat of the wall material at each wall levels
+      real(kind=kind_noahmp) csr(nwr_u)       ! Specific heat of the roof material at each roof levels
+      real(kind=kind_noahmp) csw(nwr_u)       ! Specific heat of the wall material at each wall levels
 
-      real csf(nf_u)        !Specific heat of the floors materials in the buildings 
+      real(kind=kind_noahmp) csf(nf_u)        !Specific heat of the floors materials in the buildings 
                             !of the current urban class [J m^3 K^-1]
-      real csgb(ngb_u)      !Specific heat of the ground material below the buildings 
+      real(kind=kind_noahmp) csgb(ngb_u)      !Specific heat of the ground material below the buildings 
                             !of the current urban class [J m^3 K^-1]
-      real alar(nwr_u+1)    ! Roof thermal diffusivity at each roof levels [W/ m K]
-      real alaw(nwr_u+1)    ! Wall thermal diffusivity at each wall levels [W/ m K]
-      real alaf(nf_u+1)     ! Floor thermal diffusivity at each wall levels [W/m K]
-      real alagb(ngb_u+1)   ! Ground thermal diffusivity below the building at each wall levels [W/m K]
-      real bs_urb(ndm,nurbm)         ! Building width
-      real ws_urb(ndm,nurbm)         ! Street width
-      real ss_urb(nz_um,nurbm)       ! The probability that a building has an height equal to "z"
-      real pb_urb(nz_um)             ! Probability that a building has an height greater or equal to z
+      real(kind=kind_noahmp) alar(nwr_u+1)    ! Roof thermal diffusivity at each roof levels [W/ m K]
+      real(kind=kind_noahmp) alaw(nwr_u+1)    ! Wall thermal diffusivity at each wall levels [W/ m K]
+      real(kind=kind_noahmp) alaf(nf_u+1)     ! Floor thermal diffusivity at each wall levels [W/m K]
+      real(kind=kind_noahmp) alagb(ngb_u+1)   ! Ground thermal diffusivity below the building at each wall levels [W/m K]
+      real(kind=kind_noahmp) bs_urb(ndm,nurbm)         ! Building width
+      real(kind=kind_noahmp) ws_urb(ndm,nurbm)         ! Street width
+      real(kind=kind_noahmp) ss_urb(nz_um,nurbm)       ! The probability that a building has an height equal to "z"
+      real(kind=kind_noahmp) pb_urb(nz_um)             ! Probability that a building has an height greater or equal to z
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
@@ -2113,23 +2114,23 @@ do iz= kts,kte
 ! ----------------------------------------------------------------------
 ! Data relative to the "mesoscale grid"
       integer kts,kte,kms,kme            
-      real z(kms:kme)          ! Altitude of the cell interface
-      real c(kms:kme)            ! Parameter which has to be interpolated
+      real(kind=kind_noahmp) z(kms:kme)          ! Altitude of the cell interface
+      real(kind=kind_noahmp) c(kms:kme)            ! Parameter which has to be interpolated
 ! Data relative to the "urban grid"
       integer nz_u          ! Number of levels
 !!    real z_u(nz_u+1)      ! Altitude of the cell interface
-      real z_u(nz_um)      ! Altitude of the cell interface
+      real(kind=kind_noahmp) z_u(nz_um)      ! Altitude of the cell interface
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
 !!    real c_u(nz_u)        ! Interpolated paramters in the "urban grid"
-      real c_u(nz_um)        ! Interpolated paramters in the "urban grid"      
+      real(kind=kind_noahmp) c_u(nz_um)        ! Interpolated paramters in the "urban grid"      
  
 ! LOCAL:
 ! ----------------------------------------------------------------------
       integer iz_u,iz
-      real ctot,dz
+      real(kind=kind_noahmp) ctot,dz
 
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -2157,23 +2158,23 @@ do iz= kts,kte
 !
 !INPUT VARIABLES
 !
-      real tw(2*ndm,nz_um,nwr_u,nbui_max)        ! Temperature in each layer of the wall [K]
-      real twlev(2*ndm,nz_um,nbui_max)     ! Window temperature in BEM [K]
-      real pb(nz_um)                    ! Probability to have a building with an height equal or greater h
-      real ss(nz_um)                    ! Probability to have a building with height h
-      real sfw(2*ndm,nz_um,nbui_max)             ! Surface fluxes from the walls
-      real sfwin(2*ndm,nz_um,nbui_max)     ! Surface fluxes from the windows
+      real(kind=kind_noahmp) tw(2*ndm,nz_um,nwr_u,nbui_max)        ! Temperature in each layer of the wall [K]
+      real(kind=kind_noahmp) twlev(2*ndm,nz_um,nbui_max)     ! Window temperature in BEM [K]
+      real(kind=kind_noahmp) pb(nz_um)                    ! Probability to have a building with an height equal or greater h
+      real(kind=kind_noahmp) ss(nz_um)                    ! Probability to have a building with height h
+      real(kind=kind_noahmp) sfw(2*ndm,nz_um,nbui_max)             ! Surface fluxes from the walls
+      real(kind=kind_noahmp) sfwin(2*ndm,nz_um,nbui_max)     ! Surface fluxes from the windows
 !
 !OUTPUT VARIABLES
 !
-      real tw_av(2*ndm,nz_um)           ! Averaged temperature of the wall surfaces
-      real twlev_av(2*ndm,nz_um)        ! Averaged temperature of the windows
-      real sfw_av(2*ndm,nz_um)          ! Averaged sensible heat from walls
-      real sfwind_av(2*ndm,nz_um)       ! Averaged sensible heat from windows
+      real(kind=kind_noahmp) tw_av(2*ndm,nz_um)           ! Averaged temperature of the wall surfaces
+      real(kind=kind_noahmp) twlev_av(2*ndm,nz_um)        ! Averaged temperature of the windows
+      real(kind=kind_noahmp) sfw_av(2*ndm,nz_um)          ! Averaged sensible heat from walls
+      real(kind=kind_noahmp) sfwind_av(2*ndm,nz_um)       ! Averaged sensible heat from windows
 !
 !LOCAL VARIABLES
 !
-      real d_urb(nz_um)    
+      real(kind=kind_noahmp) d_urb(nz_um)    
       integer nlev(nz_um)            
       integer id,iz
       integer nbui,ibui
@@ -2249,49 +2250,49 @@ do iz= kts,kte
       integer iurb              ! current urban class
       integer nd                ! Number of street direction for the current urban class
       integer nz_u              ! Number of layer in the urban grid
-      real z(nz_um)           ! Height of the urban grid levels
-      real ws(ndm)              ! Street widths of the current urban class
-      real drst(ndm)            ! street directions for the current urban class
-      real strd(ndm)            ! Street lengths for the current urban class
-      real ss(nz_um)          ! probability to have a building with height h
-      real pb(nz_um)          ! probability to have a building with an height equal
-      real tw(2*ndm,nz_um)    ! Temperature in each layer of the wall [K]
-      real tg_av(ndm)         ! Temperature in each layer of the ground [K]
-      real albg                 ! Albedo of the ground for the current urban class
-      real albw                 ! Albedo of the wall for the current urban class
-      real emg                  ! Emissivity of ground for the current urban class
-      real emw                  ! Emissivity of wall for the current urban class
-      real fgw(nz_um,ndm,nurbm)       ! View factors from ground to wall
-      real fsg(ndm,nurbm)             ! View factors from sky to ground
-      real fsw(nz_um,ndm,nurbm)       ! View factors from sky to wall
-      real fws(nz_um,ndm,nurbm)       ! View factors from wall to sky
-      real fwg(nz_um,ndm,nurbm)       ! View factors from wall to ground
-      real fww(nz_um,nz_um,ndm,nurbm) ! View factors from wall to wall
-      real ah                   ! Hour angle (it should come from the radiation routine)
-      real zr                   ! zenith angle
-      real deltar               ! Declination of the sun
-      real rs                   ! solar radiation
-      real rl                   ! downward flux of the longwave radiation
-      real xlat                 ! latitudine
-      real swddir               ! short wave direct solar radiation  _gl
-      real swddif               ! short wave diffuse solar radiation _gl
+      real(kind=kind_noahmp) z(nz_um)           ! Height of the urban grid levels
+      real(kind=kind_noahmp) ws(ndm)              ! Street widths of the current urban class
+      real(kind=kind_noahmp) drst(ndm)            ! street directions for the current urban class
+      real(kind=kind_noahmp) strd(ndm)            ! Street lengths for the current urban class
+      real(kind=kind_noahmp) ss(nz_um)          ! probability to have a building with height h
+      real(kind=kind_noahmp) pb(nz_um)          ! probability to have a building with an height equal
+      real(kind=kind_noahmp) tw(2*ndm,nz_um)    ! Temperature in each layer of the wall [K]
+      real(kind=kind_noahmp) tg_av(ndm)         ! Temperature in each layer of the ground [K]
+      real(kind=kind_noahmp) albg                 ! Albedo of the ground for the current urban class
+      real(kind=kind_noahmp) albw                 ! Albedo of the wall for the current urban class
+      real(kind=kind_noahmp) emg                  ! Emissivity of ground for the current urban class
+      real(kind=kind_noahmp) emw                  ! Emissivity of wall for the current urban class
+      real(kind=kind_noahmp) fgw(nz_um,ndm,nurbm)       ! View factors from ground to wall
+      real(kind=kind_noahmp) fsg(ndm,nurbm)             ! View factors from sky to ground
+      real(kind=kind_noahmp) fsw(nz_um,ndm,nurbm)       ! View factors from sky to wall
+      real(kind=kind_noahmp) fws(nz_um,ndm,nurbm)       ! View factors from wall to sky
+      real(kind=kind_noahmp) fwg(nz_um,ndm,nurbm)       ! View factors from wall to ground
+      real(kind=kind_noahmp) fww(nz_um,nz_um,ndm,nurbm) ! View factors from wall to wall
+      real(kind=kind_noahmp) ah                   ! Hour angle (it should come from the radiation routine)
+      real(kind=kind_noahmp) zr                   ! zenith angle
+      real(kind=kind_noahmp) deltar               ! Declination of the sun
+      real(kind=kind_noahmp) rs                   ! solar radiation
+      real(kind=kind_noahmp) rl                   ! downward flux of the longwave radiation
+      real(kind=kind_noahmp) xlat                 ! latitudine
+      real(kind=kind_noahmp) swddir               ! short wave direct solar radiation  _gl
+      real(kind=kind_noahmp) swddif               ! short wave diffuse solar radiation _gl
 
 !
 !New variables BEM
 !
-      real twlev(2*ndm,nz_um)         ! Window temperature in BEM [K]
-      real pwin                       ! Coverage area fraction of windows in the walls of the buildings 
-      real albwin                     ! Albedo of the windows for the current urban class
-      real emwin                      ! Emissivity of the windows for the current urban class
-      real alb_av                     ! Averaged albedo (window and wall)
+      real(kind=kind_noahmp) twlev(2*ndm,nz_um)         ! Window temperature in BEM [K]
+      real(kind=kind_noahmp) pwin                       ! Coverage area fraction of windows in the walls of the buildings 
+      real(kind=kind_noahmp) albwin                     ! Albedo of the windows for the current urban class
+      real(kind=kind_noahmp) emwin                      ! Emissivity of the windows for the current urban class
+      real(kind=kind_noahmp) alb_av                     ! Averaged albedo (window and wall)
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-      real rlg(ndm)             ! Long wave radiation at the ground
-      real rlw(2*ndm,nz_um)     ! Long wave radiation at the walls
-      real rsg(ndm)             ! Short wave radiation at the ground
-      real rsw(2*ndm,nz_um)     ! Short wave radiation at the walls
-      real rsd(2*ndm,nz_um)     ! Direct Short wave radiation at the walls
+      real(kind=kind_noahmp) rlg(ndm)             ! Long wave radiation at the ground
+      real(kind=kind_noahmp) rlw(2*ndm,nz_um)     ! Long wave radiation at the walls
+      real(kind=kind_noahmp) rsg(ndm)             ! Short wave radiation at the ground
+      real(kind=kind_noahmp) rsw(2*ndm,nz_um)     ! Short wave radiation at the walls
+      real(kind=kind_noahmp) rsd(2*ndm,nz_um)     ! Direct Short wave radiation at the walls
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
@@ -2339,45 +2340,45 @@ do iz= kts,kte
 ! ----------------------------------------------------------------------
 
       integer nd                ! Number of street direction for the current urban class
-      real alag(ng_u)           ! Ground thermal diffusivity for the current urban class [m^2 s^-1] 
+      real(kind=kind_noahmp) alag(ng_u)           ! Ground thermal diffusivity for the current urban class [m^2 s^-1] 
 
-      real albg                 ! Albedo of the ground for the current urban class
+      real(kind=kind_noahmp) albg                 ! Albedo of the ground for the current urban class
 
-      real csg(ng_u)            ! Specific heat of the ground material of the current urban class [J m^3 K^-1]
+      real(kind=kind_noahmp) csg(ng_u)            ! Specific heat of the ground material of the current urban class [J m^3 K^-1]
 
-      real dt                   ! Time step
-      real emg                  ! Emissivity of ground for the current urban class
+      real(kind=kind_noahmp) dt                   ! Time step
+      real(kind=kind_noahmp) emg                  ! Emissivity of ground for the current urban class
 
-      real pr(nz_um)            ! Air pressure
+      real(kind=kind_noahmp) pr(nz_um)            ! Air pressure
       
-      real rl                   ! Downward flux of the longwave radiation
-      real rlg(ndm)             ! Long wave radiation at the ground
+      real(kind=kind_noahmp) rl                   ! Downward flux of the longwave radiation
+      real(kind=kind_noahmp) rlg(ndm)             ! Long wave radiation at the ground
      
-      real rsg(ndm)             ! Short wave radiation at the ground
+      real(kind=kind_noahmp) rsg(ndm)             ! Short wave radiation at the ground
       
-      real sfg(ndm)             ! Sensible heat flux from ground (road)
+      real(kind=kind_noahmp) sfg(ndm)             ! Sensible heat flux from ground (road)
 
-      real lfg(ndm)             ! Latent heat flux from ground (road)
+      real(kind=kind_noahmp) lfg(ndm)             ! Latent heat flux from ground (road)
 
-      real gfg(ndm)             ! Heat flux transferred from the surface of the ground (road) toward the interior
+      real(kind=kind_noahmp) gfg(ndm)             ! Heat flux transferred from the surface of the ground (road) toward the interior
 
-      real tg(ndm,ng_u)         ! Temperature in each layer of the ground [K]
+      real(kind=kind_noahmp) tg(ndm,ng_u)         ! Temperature in each layer of the ground [K]
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-      real ptg(ndm)             ! Ground potential temperatures 
+      real(kind=kind_noahmp) ptg(ndm)             ! Ground potential temperatures 
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
       integer id,ig,ir,iw,iz
 
-      real rtg(ndm)             ! Total radiation at ground(road) surface (solar+incoming long+outgoing long)
+      real(kind=kind_noahmp) rtg(ndm)             ! Total radiation at ground(road) surface (solar+incoming long+outgoing long)
 
-      real tg_tmp(ng_u)
+      real(kind=kind_noahmp) tg_tmp(ng_u)
 
-      real dzg_u(ng_u)          ! Layer sizes in the ground
+      real(kind=kind_noahmp) dzg_u(ng_u)          ! Layer sizes in the ground
       
       data dzg_u /0.2,0.12,0.08,0.05,0.03,0.02,0.02,0.01,0.005,0.0025/
 
@@ -2428,78 +2429,78 @@ do iz= kts,kte
 ! ----------------------------------------------------------------------
 ! INPUT:
 ! ----------------------------------------------------------------------
-      real rainbl
+      real(kind=kind_noahmp) rainbl
       integer nd                ! Number of street direction for the current urban class
 
       integer nzu                ! Number of urban layers
-      real irho(24)                ! Which hour of irrigation\
+      real(kind=kind_noahmp) irho(24)                ! Which hour of irrigation\
 
 
-      real alar           ! Roof thermal diffusivity for the current urban class [m^2 s^-1] 
-      real pv_frac_roof
-      real csr
+      real(kind=kind_noahmp) alar           ! Roof thermal diffusivity for the current urban class [m^2 s^-1] 
+      real(kind=kind_noahmp) pv_frac_roof
+      real(kind=kind_noahmp) csr
 
-      real dzr          ! Layer sizes in the roofs [m]
+      real(kind=kind_noahmp) dzr          ! Layer sizes in the roofs [m]
 
-      real dt                   ! Time step
+      real(kind=kind_noahmp) dt                   ! Time step
 
-      real pr(nz_um)            ! Air pressure
+      real(kind=kind_noahmp) pr(nz_um)            ! Air pressure
 
-      real rl                   ! Downward flux of the longwave radiation
+      real(kind=kind_noahmp) rl                   ! Downward flux of the longwave radiation
 
-      real rsr                 ! Short wave radiation at the ground
+      real(kind=kind_noahmp) rsr                 ! Short wave radiation at the ground
 
-     real tpvlev(ndm,nz_um)      
+     real(kind=kind_noahmp) tpvlev(ndm,nz_um)      
 
-      real sfrv(ndm,nz_um)             ! Sensible heat flux from ground (road)
+      real(kind=kind_noahmp) sfrv(ndm,nz_um)             ! Sensible heat flux from ground (road)
 
-      real lfrv(ndm,nz_um)             ! Latent heat flux from ground (road)
+      real(kind=kind_noahmp) lfrv(ndm,nz_um)             ! Latent heat flux from ground (road)
 
-      real gfr(ndm,nz_um)             ! Heat flux transferred from the surface of the ground (road) toward the interior
+      real(kind=kind_noahmp) gfr(ndm,nz_um)             ! Heat flux transferred from the surface of the ground (road) toward the interior
 
-      real trv(ndm,nz_um,ngr_u)         ! Temperature in each layer of the green roof [K]
+      real(kind=kind_noahmp) trv(ndm,nz_um,ngr_u)         ! Temperature in each layer of the green roof [K]
 
-      real qr(ndm,nz_um,ngr_u)         ! Humidity in each layer of the green roof
+      real(kind=kind_noahmp) qr(ndm,nz_um,ngr_u)         ! Humidity in each layer of the green roof
 
-      real tr(ndm,nz_um,nwr_u)         !Roof temperature in BEM [K]
+      real(kind=kind_noahmp) tr(ndm,nz_um,nwr_u)         !Roof temperature in BEM [K]
  
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-      real ptrv(ndm,nz_um)             ! Ground potential temperatures 
+      real(kind=kind_noahmp) ptrv(ndm,nz_um)             ! Ground potential temperatures 
       
-      real hfgroof(ndm,nz_um)
+      real(kind=kind_noahmp) hfgroof(ndm,nz_um)
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
       integer id,ig,ir,iw,iz
 
-      real alagr(ngr_u)           ! Green Roof thermal diffusivity for the current urban class [m^2 s^-1] 
+      real(kind=kind_noahmp) alagr(ngr_u)           ! Green Roof thermal diffusivity for the current urban class [m^2 s^-1] 
 
-      real rtr(ndm,nz_um)             ! Total radiation at ground(road) surface (solar+incoming long+outgoing long)
+      real(kind=kind_noahmp) rtr(ndm,nz_um)             ! Total radiation at ground(road) surface (solar+incoming long+outgoing long)
 
-      real tr_tmp(ngr_u)
+      real(kind=kind_noahmp) tr_tmp(ngr_u)
 
-      real qr_tmp(ngr_u)
-      real qr_tmp_old(ngr_u)
-      real dzgr_u(ngr_u)          ! Layer sizes in the green roof
+      real(kind=kind_noahmp) qr_tmp(ngr_u)
+      real(kind=kind_noahmp) qr_tmp_old(ngr_u)
+      real(kind=kind_noahmp) dzgr_u(ngr_u)          ! Layer sizes in the green roof
 !MODIFICA
       data dzgr_u /0.1,0.003,0.06,0.003,0.05,0.04,0.02,0.0125,0.005,0.0025/
-      real cs(ngr_u)  ! Specific heat of the ground material
-      real cw
+      real(kind=kind_noahmp) cs(ngr_u)  ! Specific heat of the ground material
+      real(kind=kind_noahmp) cw
       parameter(cw=4.295e6)
-      real s(ngr_u)
-      real d(ngr_u)
-      real k(ngr_u)
-      real qr_m     ! mean soil moisture between layers
-      real qrmax(ngr_u)
-      real smax(ngr_u)
-      real kmax(ngr_u)
-      real b(ngr_u)
-      real cd(ngr_u)
-      real csa(4)
-      real ka(4)
-      real qref
+      real(kind=kind_noahmp) s(ngr_u)
+      real(kind=kind_noahmp) d(ngr_u)
+      real(kind=kind_noahmp) k(ngr_u)
+      real(kind=kind_noahmp) qr_m     ! mean soil moisture between layers
+      real(kind=kind_noahmp) qrmax(ngr_u)
+      real(kind=kind_noahmp) smax(ngr_u)
+      real(kind=kind_noahmp) kmax(ngr_u)
+      real(kind=kind_noahmp) b(ngr_u)
+      real(kind=kind_noahmp) cd(ngr_u)
+      real(kind=kind_noahmp) csa(4)
+      real(kind=kind_noahmp) ka(4)
+      real(kind=kind_noahmp) qref
       parameter(qref=0.37)
       data qrmax /0.0,0.0,0.0,0.0,0.439,0.37,0.37,0.37,0.37,0.37/
       data smax /0,0,0,0,-0.01,-0.1,-0.1,-0.1,-0.1,-0.1/
@@ -2508,11 +2509,11 @@ do iz= kts,kte
       data cd /0,0,0,0,331500,1.342e6,1.342e6,1.342e6,1.342e6,1.342e6/
       data csa /7.5e4,2.1e6,4.48e4,2.1e6/
       data ka /0.035,0.7,0.024,0.7/
-      real em_gr(1)
-      real alb_gr(1)
-      real irri_now
+      real(kind=kind_noahmp) em_gr(1)
+      real(kind=kind_noahmp) alb_gr(1)
+      real(kind=kind_noahmp) irri_now
       integer gr_type
-      real drain(ndm,nz_um)
+      real(kind=kind_noahmp) drain(ndm,nz_um)
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
 
@@ -2618,48 +2619,48 @@ do iz= kts,kte
       integer nd                ! Number of street direction for the current urban class
       integer ix,iy
       integer nz                ! number of vertical space steps
-      real ua_u(nz_um)          ! Wind speed in the x direction on the urban grid
-      real va_u(nz_um)          ! Wind speed in the y direction on the urban grid
-      real da_u(nz_um)          ! air density on the urban grid
-      real qv_u(nz_um)          ! specific humidity on the urban grid
-      real pr_u(nz_um)          ! pressure on the urban grid
-      real tmp_u(nz_um)         ! temperaure on the urban grid
-      real drst(ndm)            ! Street directions for the current urban class
-      real dz
-      real pt_u(nz_um)          ! Potential temperature on the urban grid
-      real pt0_u(nz_um)         ! reference potential temperature on the urban grid
-      real ptg(ndm)             ! Ground potential temperatures 
-      real ptr(ndm,nz_um)       ! Roof potential temperatures 
-      real ptrv(ndm,nz_um)      ! Green Roof potential temperatures 
-      real ptw(2*ndm,nz_um,nbui_max)     ! Walls potential temperatures 
-      real ss(nz_um)            ! probability to have a building with height h
-      real pb(nz_um)
-      real cdrag(nz_um)
-      real z0(ndm,nz_um)        ! Roughness lengths "profiles"
-      real dt ! time step
+      real(kind=kind_noahmp) ua_u(nz_um)          ! Wind speed in the x direction on the urban grid
+      real(kind=kind_noahmp) va_u(nz_um)          ! Wind speed in the y direction on the urban grid
+      real(kind=kind_noahmp) da_u(nz_um)          ! air density on the urban grid
+      real(kind=kind_noahmp) qv_u(nz_um)          ! specific humidity on the urban grid
+      real(kind=kind_noahmp) pr_u(nz_um)          ! pressure on the urban grid
+      real(kind=kind_noahmp) tmp_u(nz_um)         ! temperaure on the urban grid
+      real(kind=kind_noahmp) drst(ndm)            ! Street directions for the current urban class
+      real(kind=kind_noahmp) dz
+      real(kind=kind_noahmp) pt_u(nz_um)          ! Potential temperature on the urban grid
+      real(kind=kind_noahmp) pt0_u(nz_um)         ! reference potential temperature on the urban grid
+      real(kind=kind_noahmp) ptg(ndm)             ! Ground potential temperatures 
+      real(kind=kind_noahmp) ptr(ndm,nz_um)       ! Roof potential temperatures 
+      real(kind=kind_noahmp) ptrv(ndm,nz_um)      ! Green Roof potential temperatures 
+      real(kind=kind_noahmp) ptw(2*ndm,nz_um,nbui_max)     ! Walls potential temperatures 
+      real(kind=kind_noahmp) ss(nz_um)            ! probability to have a building with height h
+      real(kind=kind_noahmp) pb(nz_um)
+      real(kind=kind_noahmp) cdrag(nz_um)
+      real(kind=kind_noahmp) z0(ndm,nz_um)        ! Roughness lengths "profiles"
+      real(kind=kind_noahmp) dt ! time step
       integer iurb              !Urban class
-      real rsg(ndm)             ! Solar Radiation
-      real rs                  ! Solar Radiation
-      real qr(ndm,nz_um,ngr_u)         ! Ground Soil Moisture
-      real trv(ndm,nz_um,ngr_u)         ! Ground Soil Moisture
-      real roof_frac
-      real road_frac
+      real(kind=kind_noahmp) rsg(ndm)             ! Solar Radiation
+      real(kind=kind_noahmp) rs                  ! Solar Radiation
+      real(kind=kind_noahmp) qr(ndm,nz_um,ngr_u)         ! Ground Soil Moisture
+      real(kind=kind_noahmp) trv(ndm,nz_um,ngr_u)         ! Ground Soil Moisture
+      real(kind=kind_noahmp) roof_frac
+      real(kind=kind_noahmp) road_frac
 !
 !New variables (BEM)
 !
-      real bs_u(ndm,nurbm)    ! Building width [m]
-      real dz_u               ! Urban grid resolution
-      real sflev(nz_um,nz_um)     ! sensible heat flux due to the air conditioning systems  [W]
-      real lflev(nz_um,nz_um)     ! latent heat flux due to the air conditioning systems  [W]
-      real sfvlev(nz_um,nz_um)    ! sensible heat flux due to ventilation [W]
-      real lfvlev(nz_um,nz_um)    ! latent heat flux due to ventilation [W]
-      real qvb_u(2*ndm,nz_um)
-      real qhb_u(ndm,nz_um)
-      real ptwin(2*ndm,nz_um,nbui_max)  ! window potential temperature
-      real pwin
-      real tvb_ac(2*ndm,nz_um)
-      real gr_frac_roof
-      real pv_frac_roof
+      real(kind=kind_noahmp) bs_u(ndm,nurbm)    ! Building width [m]
+      real(kind=kind_noahmp) dz_u               ! Urban grid resolution
+      real(kind=kind_noahmp) sflev(nz_um,nz_um)     ! sensible heat flux due to the air conditioning systems  [W]
+      real(kind=kind_noahmp) lflev(nz_um,nz_um)     ! latent heat flux due to the air conditioning systems  [W]
+      real(kind=kind_noahmp) sfvlev(nz_um,nz_um)    ! sensible heat flux due to ventilation [W]
+      real(kind=kind_noahmp) lfvlev(nz_um,nz_um)    ! latent heat flux due to ventilation [W]
+      real(kind=kind_noahmp) qvb_u(2*ndm,nz_um)
+      real(kind=kind_noahmp) qhb_u(ndm,nz_um)
+      real(kind=kind_noahmp) ptwin(2*ndm,nz_um,nbui_max)  ! window potential temperature
+      real(kind=kind_noahmp) pwin
+      real(kind=kind_noahmp) tvb_ac(2*ndm,nz_um)
+      real(kind=kind_noahmp) gr_frac_roof
+      real(kind=kind_noahmp) pv_frac_roof
       integer gr_flag,gr_type
 
 ! ----------------------------------------------------------------------
@@ -2670,58 +2671,58 @@ do iz= kts,kte
 ! The fluxes can be computed as follow: Fluxes of X = A*X + B
 !  Example: Momentum fluxes on vertical surfaces = uva_u * ua_u + uvb_u
 
-      real uhb_u(ndm,nz_um)   ! U (wind component) Horizontal surfaces, B (explicit) term
-      real uva_u(2*ndm,nz_um)   ! U (wind component)   Vertical surfaces, A (implicit) term
-      real uvb_u(2*ndm,nz_um)   ! U (wind component)   Vertical surfaces, B (explicit) term
-      real vhb_u(ndm,nz_um)   ! V (wind component) Horizontal surfaces, B (explicit) term
-      real vva_u(2*ndm,nz_um)   ! V (wind component)   Vertical surfaces, A (implicit) term
-      real vvb_u(2*ndm,nz_um)   ! V (wind component)   Vertical surfaces, B (explicit) term
-      real thb_u(ndm,nz_um)   ! Temperature        Horizontal surfaces, B (explicit) term
-      real tva_u(2*ndm,nz_um)   ! Temperature          Vertical surfaces, A (implicit) term
-      real tvb_u(2*ndm,nz_um)   ! Temperature          Vertical surfaces, B (explicit) term
-      real ehb_u(ndm,nz_um)   ! Energy (TKE)       Horizontal surfaces, B (explicit) term
-      real evb_u(2*ndm,nz_um)   ! Energy (TKE)         Vertical surfaces, B (explicit) term
-      real uhb(2*ndm,nz_um)
-      real vhb(2*ndm,nz_um)
-      real ehb(2*ndm,nz_um)
-      real sfw(2*ndm,nz_um,nbui_max)   ! sensible heat flux from walls
-      real sfwin(2*ndm,nz_um,nbui_max) ! sensible heat flux form windows
-      real sfr(ndm,nz_um)           ! sensible heat flux from roof
-      real sfrv(ndm,nz_um)           ! sensible heat flux from roof
-      real lfrv(ndm,nz_um)           ! Latent heat flux from roof
-      real dgr(ndm,nz_um)           ! sensible heat flux from roof
-      real dg(ndm)
-      real lfr(ndm,nz_um)           ! Latent heat flux from roof
-      real lfg(ndm)                 ! Latent heat flux from street
-      real sfrpv(ndm,nz_um)         ! sensible heat flux from PV panels
-      real sfg(ndm)                 ! sensible heat flux from street
+      real(kind=kind_noahmp) uhb_u(ndm,nz_um)   ! U (wind component) Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) uva_u(2*ndm,nz_um)   ! U (wind component)   Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) uvb_u(2*ndm,nz_um)   ! U (wind component)   Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) vhb_u(ndm,nz_um)   ! V (wind component) Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) vva_u(2*ndm,nz_um)   ! V (wind component)   Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) vvb_u(2*ndm,nz_um)   ! V (wind component)   Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) thb_u(ndm,nz_um)   ! Temperature        Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) tva_u(2*ndm,nz_um)   ! Temperature          Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) tvb_u(2*ndm,nz_um)   ! Temperature          Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) ehb_u(ndm,nz_um)   ! Energy (TKE)       Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) evb_u(2*ndm,nz_um)   ! Energy (TKE)         Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) uhb(2*ndm,nz_um)
+      real(kind=kind_noahmp) vhb(2*ndm,nz_um)
+      real(kind=kind_noahmp) ehb(2*ndm,nz_um)
+      real(kind=kind_noahmp) sfw(2*ndm,nz_um,nbui_max)   ! sensible heat flux from walls
+      real(kind=kind_noahmp) sfwin(2*ndm,nz_um,nbui_max) ! sensible heat flux form windows
+      real(kind=kind_noahmp) sfr(ndm,nz_um)           ! sensible heat flux from roof
+      real(kind=kind_noahmp) sfrv(ndm,nz_um)           ! sensible heat flux from roof
+      real(kind=kind_noahmp) lfrv(ndm,nz_um)           ! Latent heat flux from roof
+      real(kind=kind_noahmp) dgr(ndm,nz_um)           ! sensible heat flux from roof
+      real(kind=kind_noahmp) dg(ndm)
+      real(kind=kind_noahmp) lfr(ndm,nz_um)           ! Latent heat flux from roof
+      real(kind=kind_noahmp) lfg(ndm)                 ! Latent heat flux from street
+      real(kind=kind_noahmp) sfrpv(ndm,nz_um)         ! sensible heat flux from PV panels
+      real(kind=kind_noahmp) sfg(ndm)                 ! sensible heat flux from street
 
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
-      real d_urb(nz_um)
-      real uva_tmp
-      real vva_tmp
-      real uvb_tmp
-      real vvb_tmp 
-      real evb_tmp     
+      real(kind=kind_noahmp) d_urb(nz_um)
+      real(kind=kind_noahmp) uva_tmp
+      real(kind=kind_noahmp) vva_tmp
+      real(kind=kind_noahmp) uvb_tmp
+      real(kind=kind_noahmp) vvb_tmp 
+      real(kind=kind_noahmp) evb_tmp     
       integer nlev(nz_um)
       integer id,iz,ibui,nbui,il
-      real wfg     !Ground water pool fraction
-      real wfr     !Roof water pool fraction 
-      real uhbv(2*ndm,nz_um)
-      real vhbv(2*ndm,nz_um)
-      real ehbv(2*ndm,nz_um)
-      real z0v     !Vegetation roughness
+      real(kind=kind_noahmp) wfg     !Ground water pool fraction
+      real(kind=kind_noahmp) wfr     !Roof water pool fraction 
+      real(kind=kind_noahmp) uhbv(2*ndm,nz_um)
+      real(kind=kind_noahmp) vhbv(2*ndm,nz_um)
+      real(kind=kind_noahmp) ehbv(2*ndm,nz_um)
+      real(kind=kind_noahmp) z0v     !Vegetation roughness
       parameter(z0v=0.01)
-      real resg
-      real rsveg
-      real f1,f2,f3,f4
+      real(kind=kind_noahmp) resg
+      real(kind=kind_noahmp) rsveg
+      real(kind=kind_noahmp) f1,f2,f3,f4
       integer rsv(2)
-      real qr_tmp(ngr_u)
+      real(kind=kind_noahmp) qr_tmp(ngr_u)
       data rsv /0,1/
-      real fh,ric,utot
+      real(kind=kind_noahmp) fh,ric,utot
 !------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
 ! ----------------------------------------------------------------------
@@ -2912,61 +2913,61 @@ do iz= kts,kte
 ! ----------------------------------------------------------------------
 ! Data relative to the "mesoscale grid"
       integer kms,kme,kts,kte               
-      real z(kms:kme)              ! Altitude above the ground of the cell interface
-      real dz(kms:kme)               ! Vertical space steps
+      real(kind=kind_noahmp) z(kms:kme)              ! Altitude above the ground of the cell interface
+      real(kind=kind_noahmp) dz(kms:kme)               ! Vertical space steps
 
 ! Data relative to the "uban grid"
       integer nz_u              ! Number of layer in the urban grid
       integer nd                ! Number of street direction for the current urban class
-      real bs(ndm)              ! Building widths of the current urban class
-      real ws(ndm)              ! Street widths of the current urban class
-      real z_u(nz_um)         ! Height of the urban grid levels
-      real pb(nz_um)          ! Probability to have a building with an height equal
-      real ss(nz_um)          ! Probability to have a building with height h
-      real uhb_u(ndm,nz_um)   ! U (x-wind component) Horizontal surfaces, B (explicit) term
-      real uva_u(2*ndm,nz_um)   ! U (x-wind component) Vertical surfaces, A (implicit) term
-      real uvb_u(2*ndm,nz_um)   ! U (x-wind component) Vertical surfaces, B (explicit) term
-      real vhb_u(ndm,nz_um)   ! V (y-wind component) Horizontal surfaces, B (explicit) term
-      real vva_u(2*ndm,nz_um)   ! V (y-wind component) Vertical surfaces, A (implicit) term
-      real vvb_u(2*ndm,nz_um)   ! V (y-wind component) Vertical surfaces, B (explicit) term
-      real thb_u(ndm,nz_um)   ! Temperature        Horizontal surfaces, B (explicit) term
-      real tva_u(2*ndm,nz_um)   ! Temperature          Vertical surfaces, A (implicit) term
-      real tvb_u(2*ndm,nz_um)   ! Temperature          Vertical surfaces, B (explicit) term
-      real tvb_ac(2*ndm,nz_um)
-      real ehb_u(ndm,nz_um)   ! Energy (TKE)       Horizontal surfaces, B (explicit) term
-      real evb_u(2*ndm,nz_um)   ! Energy (TKE)         Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) bs(ndm)              ! Building widths of the current urban class
+      real(kind=kind_noahmp) ws(ndm)              ! Street widths of the current urban class
+      real(kind=kind_noahmp) z_u(nz_um)         ! Height of the urban grid levels
+      real(kind=kind_noahmp) pb(nz_um)          ! Probability to have a building with an height equal
+      real(kind=kind_noahmp) ss(nz_um)          ! Probability to have a building with height h
+      real(kind=kind_noahmp) uhb_u(ndm,nz_um)   ! U (x-wind component) Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) uva_u(2*ndm,nz_um)   ! U (x-wind component) Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) uvb_u(2*ndm,nz_um)   ! U (x-wind component) Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) vhb_u(ndm,nz_um)   ! V (y-wind component) Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) vva_u(2*ndm,nz_um)   ! V (y-wind component) Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) vvb_u(2*ndm,nz_um)   ! V (y-wind component) Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) thb_u(ndm,nz_um)   ! Temperature        Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) tva_u(2*ndm,nz_um)   ! Temperature          Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) tvb_u(2*ndm,nz_um)   ! Temperature          Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) tvb_ac(2*ndm,nz_um)
+      real(kind=kind_noahmp) ehb_u(ndm,nz_um)   ! Energy (TKE)       Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) evb_u(2*ndm,nz_um)   ! Energy (TKE)         Vertical surfaces, B (explicit) term
 !
 !New variables for BEM
 !
-      real qhb_u(ndm,nz_um)
-      real qvb_u(2*ndm,nz_um)
+      real(kind=kind_noahmp) qhb_u(ndm,nz_um)
+      real(kind=kind_noahmp) qvb_u(2*ndm,nz_um)
      
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
 ! Data relative to the "mesoscale grid"
-      real sf(kms:kme)             ! Surface of the "mesoscale grid" cells taking into account the buildings
-      real vl(kms:kme)               ! Volume of the "mesoscale grid" cells taking into account the buildings
-      real a_u(kms:kme)              ! Implicit component of the momentum sources or sinks in the X-direction
-      real a_v(kms:kme)              ! Implicit component of the momentum sources or sinks in the Y-direction
-      real a_t(kms:kme)              ! Implicit component of the heat sources or sinks
-      real a_e(kms:kme)              ! Implicit component of the TKE sources or sinks
-      real b_u(kms:kme)              ! Explicit component of the momentum sources or sinks in the X-direction
-      real b_v(kms:kme)              ! Explicit component of the momentum sources or sinks in the Y-direction
-      real b_t(kms:kme)              ! Explicit component of the heat sources or sinks
-      real b_ac(kms:kme)
-      real b_e(kms:kme)              ! Explicit component of the TKE sources or sinks
-      real b_q(kms:kme)               ! Explicit component of the humidity sources or sinks
+      real(kind=kind_noahmp) sf(kms:kme)             ! Surface of the "mesoscale grid" cells taking into account the buildings
+      real(kind=kind_noahmp) vl(kms:kme)               ! Volume of the "mesoscale grid" cells taking into account the buildings
+      real(kind=kind_noahmp) a_u(kms:kme)              ! Implicit component of the momentum sources or sinks in the X-direction
+      real(kind=kind_noahmp) a_v(kms:kme)              ! Implicit component of the momentum sources or sinks in the Y-direction
+      real(kind=kind_noahmp) a_t(kms:kme)              ! Implicit component of the heat sources or sinks
+      real(kind=kind_noahmp) a_e(kms:kme)              ! Implicit component of the TKE sources or sinks
+      real(kind=kind_noahmp) b_u(kms:kme)              ! Explicit component of the momentum sources or sinks in the X-direction
+      real(kind=kind_noahmp) b_v(kms:kme)              ! Explicit component of the momentum sources or sinks in the Y-direction
+      real(kind=kind_noahmp) b_t(kms:kme)              ! Explicit component of the heat sources or sinks
+      real(kind=kind_noahmp) b_ac(kms:kme)
+      real(kind=kind_noahmp) b_e(kms:kme)              ! Explicit component of the TKE sources or sinks
+      real(kind=kind_noahmp) b_q(kms:kme)               ! Explicit component of the humidity sources or sinks
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
-      real dzz
-      real fact
+      real(kind=kind_noahmp) dzz
+      real(kind=kind_noahmp) fact
       integer id,iz,iz_u
-      real se,sr,st,su,sv,sq
-      real uet(kms:kme)                ! Contribution to TKE due to walls
-      real veb,vta,vtb,vte,vtot,vua,vub,vva,vvb,vqb,vtb_ac
+      real(kind=kind_noahmp) se,sr,st,su,sv,sq
+      real(kind=kind_noahmp )uet(kms:kme)                ! Contribution to TKE due to walls
+      real(kind=kind_noahmp) veb,vta,vtb,vte,vtot,vua,vub,vva,vvb,vqb,vtb_ac
 
 
 ! ----------------------------------------------------------------------
@@ -3132,28 +3133,28 @@ do iz= kts,kte
 ! INPUT:
 ! ----------------------------------------------------------------------     
       integer kms,kme,kts,kte                
-      real z(kms:kme)              ! Altitude above the ground of the cell interface
+      real(kind=kind_noahmp) z(kms:kme)              ! Altitude above the ground of the cell interface
       integer nd                ! Number of street direction for the current urban class
       integer nz_u              ! Number of levels in the "urban grid"
-      real z_u(nz_um)         ! Height of the urban grid levels
-      real bs(ndm)              ! Building widths of the current urban class
-      real ss(nz_um)          ! Probability to have a building with height h
-      real ws(ndm)              ! Street widths of the current urban class
+      real(kind=kind_noahmp) z_u(nz_um)         ! Height of the urban grid levels
+      real(kind=kind_noahmp) bs(ndm)              ! Building widths of the current urban class
+      real(kind=kind_noahmp) ss(nz_um)          ! Probability to have a building with height h
+      real(kind=kind_noahmp) ws(ndm)              ! Street widths of the current urban class
 
 
 ! ----------------------------------------------------------------------     
 ! OUTPUT:
 ! ----------------------------------------------------------------------     
-      real dlg(kms:kme)              ! Height above ground (L_ground in formula (24) of the BLM paper). 
-      real dl_u(kms:kme)             ! Length scale (lb in formula (22) ofthe BLM paper).
+      real(kind=kind_noahmp) dlg(kms:kme)              ! Height above ground (L_ground in formula (24) of the BLM paper). 
+      real(kind=kind_noahmp) dl_u(kms:kme)             ! Length scale (lb in formula (22) ofthe BLM paper).
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
-      real dlgtmp
+      real(kind=kind_noahmp) dlgtmp
       integer id,iz,iz_u
-      real sftot
-      real ulu,ssl
+      real(kind=kind_noahmp) sftot
+      real(kind=kind_noahmp) ulu,ssl
 
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -3217,28 +3218,28 @@ do iz= kts,kte
 ! ----------------------------------------------------------------------
       integer nd                ! Number of street direction for the current urban class
       integer nz_u              ! number of vertical layers defined in the urban grid
-      real ah                   ! Hour angle (it should come from the radiation routine)
-      real deltar               ! Declination of the sun
-      real drst(ndm)            ! street directions for the current urban class
-      real swddir                   ! solar radiation
-      real ss(nz_um)          ! probability to have a building with height h
-      real pb(nz_um)          ! Probability that a building has an height greater or equal to h
-      real ws(ndm)              ! Street width of the current urban class
-      real z(nz_um)           ! Height of the urban grid levels
-      real zr                   ! zenith angle
-      real xlat
-      real xlat_r
+      real(kind=kind_noahmp) ah                   ! Hour angle (it should come from the radiation routine)
+      real(kind=kind_noahmp) deltar               ! Declination of the sun
+      real(kind=kind_noahmp) drst(ndm)            ! street directions for the current urban class
+      real(kind=kind_noahmp) swddir                   ! solar radiation
+      real(kind=kind_noahmp) ss(nz_um)          ! probability to have a building with height h
+      real(kind=kind_noahmp) pb(nz_um)          ! Probability that a building has an height greater or equal to h
+      real(kind=kind_noahmp) ws(ndm)              ! Street width of the current urban class
+      real(kind=kind_noahmp) z(nz_um)           ! Height of the urban grid levels
+      real(kind=kind_noahmp) zr                   ! zenith angle
+      real(kind=kind_noahmp) xlat
+      real(kind=kind_noahmp) xlat_r
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-      real rsg(ndm)             ! Short wave radiation at the ground
-      real rsw(2*ndm,nz_um)     ! Short wave radiation at the walls
+      real(kind=kind_noahmp) rsg(ndm)             ! Short wave radiation at the ground
+      real(kind=kind_noahmp) rsw(2*ndm,nz_um)     ! Short wave radiation at the walls
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
       integer id,iz,jz
-      real aae,aaw,bbb,phix,rd,rtot,wsd
+      real(kind=kind_noahmp) aae,aaw,bbb,phix,rd,rtot,wsd
       
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -3355,17 +3356,17 @@ do iz= kts,kte
 ! ----------------------------------------------------------------------
 ! INPUT:
 ! ----------------------------------------------------------------------
-      real aa                   ! Angle between the sun direction and the face of the wall (A12)
-      real hu                   ! Height of the building that generates the shadow
-      real phix                 ! Solar zenith angle
-      real ws                   ! Width of the street
-      real z1                   ! Height of the level z(iz)
-      real z2                   ! Height of the level z(iz+1)
+      real(kind=kind_noahmp) aa                   ! Angle between the sun direction and the face of the wall (A12)
+      real(kind=kind_noahmp) hu                   ! Height of the building that generates the shadow
+      real(kind=kind_noahmp) phix                 ! Solar zenith angle
+      real(kind=kind_noahmp) ws                   ! Width of the street
+      real(kind=kind_noahmp) z1                   ! Height of the level z(iz)
+      real(kind=kind_noahmp) z2                   ! Height of the level z(iz+1)
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-      real rd                   ! Ratio between (x1-x2)/(z2-z1), see Fig. 1A. 
+      real(kind=kind_noahmp) rd                   ! Ratio between (x1-x2)/(z2-z1), see Fig. 1A. 
                                 ! Multiplying rd by rs (radiation flux 
                                 ! density on a horizontal surface) gives 
                                 ! the radiation flux density on the 
@@ -3373,7 +3374,7 @@ do iz= kts,kte
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
-      real x1,x2                ! x1,x2 see Fig. A1.
+      real(kind=kind_noahmp) x1,x2                ! x1,x2 see Fig. A1.
 
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -3410,40 +3411,40 @@ do iz= kts,kte
 ! ----------------------------------------------------------------------
 ! INPUT:
 ! ----------------------------------------------------------------------
-      real emg                        ! Emissivity of ground for the current urban class
-      real emw                        ! Emissivity of wall for the current urban class
-      real fgw(nz_um,ndm,nurbm)       ! View factors from ground to wall
-      real fsg(ndm,nurbm)             ! View factors from sky to ground
-      real fsw(nz_um,ndm,nurbm)       ! View factors from sky to wall
-      real fwg(nz_um,ndm,nurbm)       ! View factors from wall to ground
-      real fww(nz_um,nz_um,ndm,nurbm) ! View factors from wall to wall
+      real(kind=kind_noahmp) emg                        ! Emissivity of ground for the current urban class
+      real(kind=kind_noahmp) emw                        ! Emissivity of wall for the current urban class
+      real(kind=kind_noahmp) fgw(nz_um,ndm,nurbm)       ! View factors from ground to wall
+      real(kind=kind_noahmp) fsg(ndm,nurbm)             ! View factors from sky to ground
+      real(kind=kind_noahmp) fsw(nz_um,ndm,nurbm)       ! View factors from sky to wall
+      real(kind=kind_noahmp) fwg(nz_um,ndm,nurbm)       ! View factors from wall to ground
+      real(kind=kind_noahmp) fww(nz_um,nz_um,ndm,nurbm) ! View factors from wall to wall
       integer id                      ! Current street direction
       integer iurb                    ! Current urban class
       integer nz_u                    ! Number of layer in the urban grid
-      real pb(nz_um)                  ! Probability to have a building with an height equal
-      real rl                         ! Downward flux of the longwave radiation
-      real tg_av(ndm)               ! Temperature in each layer of the ground [K]
-      real tw(2*ndm,nz_um)            ! Temperature in each layer of the wall [K]
+      real(kind=kind_noahmp) pb(nz_um)                  ! Probability to have a building with an height equal
+      real(kind=kind_noahmp) rl                         ! Downward flux of the longwave radiation
+      real(kind=kind_noahmp) tg_av(ndm)               ! Temperature in each layer of the ground [K]
+      real(kind=kind_noahmp) tw(2*ndm,nz_um)            ! Temperature in each layer of the wall [K]
 !
 !New Variables for BEM
 !
-      real twlev(2*ndm,nz_um)         ! Window temperature in BEM [K]
-      real emwin                      ! Emissivity of windows
-      real pwin                       ! Coverage area fraction of windows in the walls of the buildings (BEM)
+      real(kind=kind_noahmp) twlev(2*ndm,nz_um)         ! Window temperature in BEM [K]
+      real(kind=kind_noahmp) emwin                      ! Emissivity of windows
+      real(kind=kind_noahmp) pwin                       ! Coverage area fraction of windows in the walls of the buildings (BEM)
       
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-      real rlg(ndm)                   ! Long wave radiation at the ground
-      real rlw(2*ndm,nz_um)           ! Long wave radiation at the walls
+      real(kind=kind_noahmp) rlg(ndm)                   ! Long wave radiation at the ground
+      real(kind=kind_noahmp) rlw(2*ndm,nz_um)           ! Long wave radiation at the walls
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
       integer i,j
-      real aaa(2*nz_um+1,2*nz_um+1)   ! terms of the matrix
-      real bbb(2*nz_um+1)             ! terms of the vector
+      real(kind=kind_noahmp) aaa(2*nz_um+1,2*nz_um+1)   ! terms of the matrix
+      real(kind=kind_noahmp) bbb(2*nz_um+1)             ! terms of the vector
 
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -3567,31 +3568,31 @@ do iz= kts,kte
 ! ----------------------------------------------------------------------
 ! INPUT:
 ! ----------------------------------------------------------------------
-      real albg                 ! Albedo of the ground for the current urban class
-      real albw                 ! Albedo of the wall for the current urban class
-      real rsdif                ! diffused short wave radiation
-      real fgw(nz_um,ndm,nurbm)       ! View factors from ground to wall
-      real fwg(nz_um,ndm,nurbm)       ! View factors from wall to ground
-      real fww(nz_um,nz_um,ndm,nurbm) ! View factors from wall to wall
-      real fsg(ndm,nurbm)             ! View factors from sky to ground
-      real fsw(nz_um,ndm,nurbm)       ! View factors from sky to wall
+      real(kind=kind_noahmp) albg                 ! Albedo of the ground for the current urban class
+      real(kind=kind_noahmp) albw                 ! Albedo of the wall for the current urban class
+      real(kind=kind_noahmp) rsdif                ! diffused short wave radiation
+      real(kind=kind_noahmp) fgw(nz_um,ndm,nurbm)       ! View factors from ground to wall
+      real(kind=kind_noahmp) fwg(nz_um,ndm,nurbm)       ! View factors from wall to ground
+      real(kind=kind_noahmp) fww(nz_um,nz_um,ndm,nurbm) ! View factors from wall to wall
+      real(kind=kind_noahmp) fsg(ndm,nurbm)             ! View factors from sky to ground
+      real(kind=kind_noahmp) fsw(nz_um,ndm,nurbm)       ! View factors from sky to wall
       integer id                ! current street direction 
       integer iurb              ! current urban class
       integer nz_u              ! Number of layer in the urban grid
-      real pb(nz_um)          ! probability to have a building with an height equal
+      real(kind=kind_noahmp) pb(nz_um)          ! probability to have a building with an height equal
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-      real rsg(ndm)             ! Short wave radiation at the ground
-      real rsw(2*ndm,nz_um)     ! Short wave radiation at the walls
+      real(kind=kind_noahmp) rsg(ndm)             ! Short wave radiation at the ground
+      real(kind=kind_noahmp) rsw(2*ndm,nz_um)     ! Short wave radiation at the walls
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
       integer i,j
-      real aaa(2*nz_um+1,2*nz_um+1)  ! terms of the matrix
-      real bbb(2*nz_um+1)            ! terms of the vector
+      real(kind=kind_noahmp) aaa(2*nz_um+1,2*nz_um+1)  ! terms of the matrix
+      real(kind=kind_noahmp) bbb(2*nz_um+1)            ! terms of the vector
 
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -3683,12 +3684,12 @@ do iz= kts,kte
 ! INPUT:
 ! ----------------------------------------------------------------------
       integer np
-      real a(np,np)
+      real(kind=kind_noahmp) a(np,np)
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-      real b(np)
+      real(kind=kind_noahmp) b(np)
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
@@ -3696,11 +3697,11 @@ do iz= kts,kte
       integer nmax
       parameter (nmax=150)
 
-      real big,dum
+      real(kind=kind_noahmp) big,dum
       integer i,icol,irow
       integer j,k,l,ll,n
       integer ipiv(nmax)
-      real pivinv
+      real(kind=kind_noahmp) pivinv
 
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -3794,16 +3795,16 @@ do iz= kts,kte
 ! INPUT:
 ! ----------------------------------------------------------------------
       integer nz                ! Number of layers
-      real dt                   ! Time step
-      real lf                   ! Latent heat flux at the surface
-      real qv(nz)               ! Moisture in each layer [K]
-      real dz(nz)               ! Layer sizes [m]
-      real rainbl               ! Rainfall [mm]
-      real d(nz)                ! Soil water diffusivity
-      real k(nz)                ! Hydraulic conductivity
-      real gr                   ! Dummy variable 
-      real drain
-      real irri_now
+      real(kind=kind_noahmp) dt                   ! Time step
+      real(kind=kind_noahmp) lf                   ! Latent heat flux at the surface
+      real(kind=kind_noahmp) qv(nz)               ! Moisture in each layer [K]
+      real(kind=kind_noahmp) dz(nz)               ! Layer sizes [m]
+      real(kind=kind_noahmp) rainbl               ! Rainfall [mm]
+      real(kind=kind_noahmp) d(nz)                ! Soil water diffusivity
+      real(kind=kind_noahmp) k(nz)                ! Hydraulic conductivity
+      real(kind=kind_noahmp) gr                   ! Dummy variable 
+      real(kind=kind_noahmp) drain
+      real(kind=kind_noahmp) irri_now
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
@@ -3813,11 +3814,11 @@ do iz= kts,kte
 ! LOCAL:
 ! ----------------------------------------------------------------------
       integer iz
-      real a(nz,3)
-      real alpha
-      real c(nz)
-      real cddz(nz+2)
-      real dw     !water density Kg/m3
+      real(kind=kind_noahmp) a(nz,3)
+      real(kind=kind_noahmp) alpha
+      real(kind=kind_noahmp) c(nz)
+      real(kind=kind_noahmp) cddz(nz+2)
+      real(kind=kind_noahmp) dw     !water density Kg/m3
       parameter(dw=1000.)
 !----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -3882,39 +3883,39 @@ do iz= kts,kte
 ! INPUT:
 ! ----------------------------------------------------------------------
       integer nz                ! Number of layers
-      real ala(nz)              ! Thermal diffusivity in each layers [m^2 s^-1] 
-      real alb                  ! Albedo of the surface
-      real cs(nz)               ! Specific heat of the material [J m^3 K^-1]
-      real dt                   ! Time step
-      real em                   ! Emissivity of the surface
-      real press                ! Pressure at ground level
-      real rl                   ! Downward flux of the longwave radiation
-      real rs                   ! Solar radiation
-      real sf                   ! Sensible heat flux at the surface
-      real lf                   ! Latent heat flux at the surface
-      real temp(nz)             ! Temperature in each layer [K]
-      real dz(nz)               ! Layer sizes [m]
-      real heflro                ! Heat flux between roof and green roof 
-      real rs_eff
-      real rl_eff
-      real tpv
-      real pv_frac_roof
+      real(kind=kind_noahmp) ala(nz)              ! Thermal diffusivity in each layers [m^2 s^-1] 
+      real(kind=kind_noahmp) alb                  ! Albedo of the surface
+      real(kind=kind_noahmp) cs(nz)               ! Specific heat of the material [J m^3 K^-1]
+      real(kind=kind_noahmp) dt                   ! Time step
+      real(kind=kind_noahmp) em                   ! Emissivity of the surface
+      real(kind=kind_noahmp) press                ! Pressure at ground level
+      real(kind=kind_noahmp) rl                   ! Downward flux of the longwave radiation
+      real(kind=kind_noahmp) rs                   ! Solar radiation
+      real(kind=kind_noahmp) sf                   ! Sensible heat flux at the surface
+      real(kind=kind_noahmp) lf                   ! Latent heat flux at the surface
+      real(kind=kind_noahmp) temp(nz)             ! Temperature in each layer [K]
+      real(kind=kind_noahmp) dz(nz)               ! Layer sizes [m]
+      real(kind=kind_noahmp) heflro                ! Heat flux between roof and green roof 
+      real(kind=kind_noahmp) rs_eff
+      real(kind=kind_noahmp) rl_eff
+      real(kind=kind_noahmp) tpv
+      real(kind=kind_noahmp) pv_frac_roof
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-      real gf                   ! Heat flux transferred from the surface toward the interior
-      real pt                   ! Potential temperature at the surface
-      real rt                   ! Total radiation at the surface (solar+incoming long+outgoing long)
+      real(kind=kind_noahmp) gf                   ! Heat flux transferred from the surface toward the interior
+      real(kind=kind_noahmp) pt                   ! Potential temperature at the surface
+      real(kind=kind_noahmp) rt                   ! Total radiation at the surface (solar+incoming long+outgoing long)
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
       integer iz
-      real a(nz,3)
-      real alpha
-      real c(nz)
-      real cddz(nz+2)
-      real tsig
+      real(kind=kind_noahmp) a(nz,3)
+      real(kind=kind_noahmp) alpha
+      real(kind=kind_noahmp) c(nz)
+      real(kind=kind_noahmp) cddz(nz+2)
+      real(kind=kind_noahmp) tsig
 
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -3980,35 +3981,35 @@ do iz= kts,kte
 ! INPUT:
 ! ----------------------------------------------------------------------
       integer nz                ! Number of layers
-      real ala(nz)              ! Thermal diffusivity in each layers [m^2 s^-1] 
-      real alb                  ! Albedo of the surface
-      real cs(nz)               ! Specific heat of the material [J m^3 K^-1]
-      real dt                   ! Time step
-      real em                   ! Emissivity of the surface
-      real press                ! Pressure at ground level
-      real rl                   ! Downward flux of the longwave radiation
-      real rs                   ! Solar radiation
-      real sf                   ! Sensible heat flux at the surface
-      real lf                   ! Latent heat flux at the surface
-      real temp(nz)             ! Temperature in each layer [K]
-      real dz(nz)               ! Layer sizes [m]
+      real(kind=kind_noahmp) ala(nz)              ! Thermal diffusivity in each layers [m^2 s^-1] 
+      real(kind=kind_noahmp) alb                  ! Albedo of the surface
+      real(kind=kind_noahmp) cs(nz)               ! Specific heat of the material [J m^3 K^-1]
+      real(kind=kind_noahmp) dt                   ! Time step
+      real(kind=kind_noahmp) em                   ! Emissivity of the surface
+      real(kind=kind_noahmp) press                ! Pressure at ground level
+      real(kind=kind_noahmp) rl                   ! Downward flux of the longwave radiation
+      real(kind=kind_noahmp) rs                   ! Solar radiation
+      real(kind=kind_noahmp) sf                   ! Sensible heat flux at the surface
+      real(kind=kind_noahmp) lf                   ! Latent heat flux at the surface
+      real(kind=kind_noahmp) temp(nz)             ! Temperature in each layer [K]
+      real(kind=kind_noahmp) dz(nz)               ! Layer sizes [m]
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-      real gf                   ! Heat flux transferred from the surface toward the interior
-      real pt                   ! Potential temperature at the surface
-      real rt                   ! Total radiation at the surface (solar+incoming long+outgoing long)
+      real(kind=kind_noahmp) gf                   ! Heat flux transferred from the surface toward the interior
+      real(kind=kind_noahmp) pt                   ! Potential temperature at the surface
+      real(kind=kind_noahmp) rt                   ! Total radiation at the surface (solar+incoming long+outgoing long)
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
       integer iz
-      real a(nz,3)
-      real alpha
-      real c(nz)
-      real cddz(nz+2)
-      real tsig
+      real(kind=kind_noahmp) a(nz,3)
+      real(kind=kind_noahmp) alpha
+      real(kind=kind_noahmp) c(nz)
+      real(kind=kind_noahmp) cddz(nz+2)
+      real(kind=kind_noahmp) tsig
 
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -4066,15 +4067,15 @@ do iz= kts,kte
 ! INPUT:
 ! ----------------------------------------------------------------------
        integer n
-       real a(n,3)              !  a(*,1) lower diagonal (Ai,i-1)
+       real(kind=kind_noahmp) a(n,3)              !  a(*,1) lower diagonal (Ai,i-1)
                                 !  a(*,2) principal diagonal (Ai,i)
                                 !  a(*,3) upper diagonal (Ai,i+1)
-       real c(n)
+       real(kind=kind_noahmp) c(n)
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
-       real x(n)    
+       real(kind=kind_noahmp) x(n)    
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
@@ -4116,15 +4117,15 @@ do iz= kts,kte
          
 ! INPUT:
 ! -----
-      real drst                 ! street directions for the current urban class
-      real da                   ! air density
-      real pt                   ! potential temperature
-      real ptw                  ! Walls potential temperatures 
-      real ptwin                ! Windows potential temperatures
-      real ua                   ! wind speed
-      real va                   ! wind speed
-      real dt                   !time step
-      real cdrag
+      real(kind=kind_noahmp) drst                 ! street directions for the current urban class
+      real(kind=kind_noahmp) da                   ! air density
+      real(kind=kind_noahmp) pt                   ! potential temperature
+      real(kind=kind_noahmp) ptw                  ! Walls potential temperatures 
+      real(kind=kind_noahmp) ptwin                ! Windows potential temperatures
+      real(kind=kind_noahmp) ua                   ! wind speed
+      real(kind=kind_noahmp) va                   ! wind speed
+      real(kind=kind_noahmp) dt                   !time step
+      real(kind=kind_noahmp) cdrag
 ! OUTPUT:
 ! ------
 ! Explicit and implicit component of the momentum, temperature and TKE sources or sinks on
@@ -4132,22 +4133,22 @@ do iz= kts,kte
 ! The fluxes can be computed as follow: Fluxes of X = A*X + B
 ! Example: Momentum fluxes on vertical surfaces = uva_u * ua_u + uvb_u
 
-      real uva                  ! U (wind component)   Vertical surfaces, A (implicit) term
-      real uvb                  ! U (wind component)   Vertical surfaces, B (explicit) term
-      real vva                  ! V (wind component)   Vertical surfaces, A (implicit) term
-      real vvb                  ! V (wind component)   Vertical surfaces, B (explicit) term
-      real tva                  ! Temperature          Vertical surfaces, A (implicit) term
-      real tvb                  ! Temperature          Vertical surfaces, B (explicit) term
-      real evb                  ! Energy (TKE)         Vertical surfaces, B (explicit) term
-      real sfw                  ! Surfaces fluxes from the walls
-      real sfwin                ! Surfaces fluxes from the windows
+      real(kind=kind_noahmp) uva                  ! U (wind component)   Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) uvb                  ! U (wind component)   Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) vva                  ! V (wind component)   Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) vvb                  ! V (wind component)   Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) tva                  ! Temperature          Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) tvb                  ! Temperature          Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) evb                  ! Energy (TKE)         Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) sfw                  ! Surfaces fluxes from the walls
+      real(kind=kind_noahmp) sfwin                ! Surfaces fluxes from the windows
 
 ! LOCAL:
 ! -----
-      real hc
-      real hcwin
-      real u_ort
-      real vett
+      real(kind=kind_noahmp) hc
+      real(kind=kind_noahmp) hcwin
+      real(kind=kind_noahmp) u_ort
+      real(kind=kind_noahmp) vett
 
 
 ! -------------------------
@@ -4211,18 +4212,18 @@ do iz= kts,kte
 
       implicit none
 
-      real dz                   ! first vertical level
-      real pt                   ! potential temperature
-      real pt0                  ! reference potential temperature
-      real ptg                  ! ground potential temperature
-      real ua                   ! wind speed
-      real va                   ! wind speed
-      real z0                   ! Roughness length
-      real da                   ! air density
-      real qv                   ! specific humidity
-      real pr                   ! pressure
-      real rsg                  ! solar radiation
-      real qg(ng_u)         ! Ground Soil Moisture
+      real(kind=kind_noahmp) dz                   ! first vertical level
+      real(kind=kind_noahmp) pt                   ! potential temperature
+      real(kind=kind_noahmp) pt0                  ! reference potential temperature
+      real(kind=kind_noahmp) ptg                  ! ground potential temperature
+      real(kind=kind_noahmp) ua                   ! wind speed
+      real(kind=kind_noahmp) va                   ! wind speed
+      real(kind=kind_noahmp) z0                   ! Roughness length
+      real(kind=kind_noahmp) da                   ! air density
+      real(kind=kind_noahmp) qv                   ! specific humidity
+      real(kind=kind_noahmp) pr                   ! pressure
+      real(kind=kind_noahmp) rsg                  ! solar radiation
+      real(kind=kind_noahmp) qg(ng_u)         ! Ground Soil Moisture
 
      
 
@@ -4233,64 +4234,64 @@ do iz= kts,kte
 !  surfaces (roofs and street)
 ! The fluxes can be computed as follow: Fluxes of X = B
 !  Example: Momentum fluxes on horizontal surfaces =  uhb_u
-      real uhb                  ! U (wind component) Horizontal surfaces, B (explicit) term
-      real vhb                  ! V (wind component) Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) uhb                  ! U (wind component) Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) vhb                  ! V (wind component) Horizontal surfaces, B (explicit) term
 !     real thb                  ! Temperature        Horizontal surfaces, B (explicit) term
-      real tva                  ! Temperature          Vertical surfaces, A (implicit) term
-      real tvb                  ! Temperature          Vertical surfaces, B (explicit) term
-      real ehb                  ! Energy (TKE)       Horizontal surfaces, B (explicit) term
-      real sf
-      real lf
+      real(kind=kind_noahmp) tva                  ! Temperature          Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) tvb                  ! Temperature          Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) ehb                  ! Energy (TKE)       Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) sf
+      real(kind=kind_noahmp) lf
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
-      real aa,ah
-      real z0t
-      real al
-      real buu
-      real c
-      real fbuw
-      real fbpt
-      real fh
-      real fm
-      real ric
-      real tstar
-      real qstar
-      real ustar
-      real utot
-      real wstar
-      real zz
-      real qvsg,qvs,es,esa,fbqq
-      real b,cm,ch,rr,tol
+      real(kind=kind_noahmp) aa,ah
+      real(kind=kind_noahmp) z0t
+      real(kind=kind_noahmp) al
+      real(kind=kind_noahmp) buu
+      real(kind=kind_noahmp) c
+      real(kind=kind_noahmp) fbuw
+      real(kind=kind_noahmp) fbpt
+      real(kind=kind_noahmp) fh
+      real(kind=kind_noahmp) fm
+      real(kind=kind_noahmp) ric
+      real(kind=kind_noahmp) tstar
+      real(kind=kind_noahmp) qstar
+      real(kind=kind_noahmp) ustar
+      real(kind=kind_noahmp) utot
+      real(kind=kind_noahmp) wstar
+      real(kind=kind_noahmp) zz
+      real(kind=kind_noahmp) qvsg,qvs,es,esa,fbqq
+      real(kind=kind_noahmp) b,cm,ch,rr,tol
       parameter(b=9.4,cm=7.4,ch=5.3,rr=0.74,tol=.001)
 
-      real f
-      real f1
-      real f2
-      real f3
-      real f4
-      real ta          ! surface air temperature
-      real tmp                  ! ground temperature
-      real rsveg       ! Stomatal resistance 
-      real resg
-      real lai         ! leaf area index
-      real sdlim       ! radiation limit at which photosyntesis start W/m2
+      real(kind=kind_noahmp) f
+      real(kind=kind_noahmp) f1
+      real(kind=kind_noahmp) f2
+      real(kind=kind_noahmp) f3
+      real(kind=kind_noahmp) f4
+      real(kind=kind_noahmp) ta          ! surface air temperature
+      real(kind=kind_noahmp) tmp                  ! ground temperature
+      real(kind=kind_noahmp) rsveg       ! Stomatal resistance 
+      real(kind=kind_noahmp) resg
+      real(kind=kind_noahmp) lai         ! leaf area index
+      real(kind=kind_noahmp) sdlim       ! radiation limit at which photosyntesis start W/m2
       parameter(sdlim=100.)
-      real rsmin ! Minimum stomatal resistance 
-      real rsmax ! Maximun stomatal resistance 
-      real qw
+      real(kind=kind_noahmp) rsmin ! Minimum stomatal resistance 
+      real(kind=kind_noahmp) rsmax ! Maximun stomatal resistance 
+      real(kind=kind_noahmp) qw
       parameter(qw=0.06)
-      real qref
+      real(kind=kind_noahmp) qref
       parameter(qref=0.37)  
-      real hs
+      real(kind=kind_noahmp) hs
       parameter(hs=36.35)
  
-      real dzg_u(ng_u)          ! Layer sizes in the ground
+      real(kind=kind_noahmp) dzg_u(ng_u)          ! Layer sizes in the ground
 
       data dzg_u /0.2,0.12,0.08,0.05,0.03,0.02,0.02,0.01,0.005,0.0025/
       
-      real gx,dzg_tot
+      real(kind=kind_noahmp) gx,dzg_tot
       integer gr_type,iz
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -4411,20 +4412,20 @@ do iz= kts,kte
 
       implicit none
 
-      real dz                   ! first vertical level
-      real pt                   ! potential temperature
-      real pt0                  ! reference potential temperature
-      real ptg                  ! ground potential temperature
-      real ua                   ! wind speed
-      real va                   ! wind speed
-      real z0                   ! Roughness length
-      real da                   ! air density
-      real qv                   ! specific humidity
-      real pr                   ! pressure
-      real rsg                  ! solar radiation
-      real qr(ngr_u)         ! Ground Soil Moisture
-      real pv_frac_roof
-      real rs_eff
+      real(kind=kind_noahmp) dz                   ! first vertical level
+      real(kind=kind_noahmp) pt                   ! potential temperature
+      real(kind=kind_noahmp) pt0                  ! reference potential temperature
+      real(kind=kind_noahmp) ptg                  ! ground potential temperature
+      real(kind=kind_noahmp) ua                   ! wind speed
+      real(kind=kind_noahmp) va                   ! wind speed
+      real(kind=kind_noahmp) z0                   ! Roughness length
+      real(kind=kind_noahmp) da                   ! air density
+      real(kind=kind_noahmp) qv                   ! specific humidity
+      real(kind=kind_noahmp) pr                   ! pressure
+      real(kind=kind_noahmp) rsg                  ! solar radiation
+      real(kind=kind_noahmp) qr(ngr_u)         ! Ground Soil Moisture
+      real(kind=kind_noahmp) pv_frac_roof
+      real(kind=kind_noahmp) rs_eff
 
 ! ----------------------------------------------------------------------
 ! OUTPUT:
@@ -4433,64 +4434,64 @@ do iz= kts,kte
 !  surfaces (roofs and street)
 ! The fluxes can be computed as follow: Fluxes of X = B
 !  Example: Momentum fluxes on horizontal surfaces =  uhb_u
-      real uhb                  ! U (wind component) Horizontal surfaces, B (explicit) term
-      real vhb                  ! V (wind component) Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) uhb                  ! U (wind component) Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) vhb                  ! V (wind component) Horizontal surfaces, B (explicit) term
 !     real thb                  ! Temperature        Horizontal surfaces, B (explicit) term
-      real tva                  ! Temperature          Vertical surfaces, A (implicit) term
-      real tvb                  ! Temperature          Vertical surfaces, B (explicit) term
-      real ehb                  ! Energy (TKE)       Horizontal surfaces, B (explicit) term
-      real sf
-      real lf
+      real(kind=kind_noahmp) tva                  ! Temperature          Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) tvb                  ! Temperature          Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) ehb                  ! Energy (TKE)       Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) sf
+      real(kind=kind_noahmp) lf
 
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
-      real aa,ah
-      real al
-      real buu
-      real c
-      real fbuw
-      real fbpt
-      real fh
-      real fm
-      real ric
-      real tstar
-      real qstar
-      real ustar
-      real utot
-      real wstar
-      real zz
-      real z0t
-      real qvsg,qvs,es,esa,fbqq
-      real b,cm,ch,rr,tol
+      real(kind=kind_noahmp) aa,ah
+      real(kind=kind_noahmp) al
+      real(kind=kind_noahmp) buu
+      real(kind=kind_noahmp) c
+      real(kind=kind_noahmp) fbuw
+      real(kind=kind_noahmp) fbpt
+      real(kind=kind_noahmp) fh
+      real(kind=kind_noahmp) fm
+      real(kind=kind_noahmp) ric
+      real(kind=kind_noahmp) tstar
+      real(kind=kind_noahmp) qstar
+      real(kind=kind_noahmp) ustar
+      real(kind=kind_noahmp) utot
+      real(kind=kind_noahmp) wstar
+      real(kind=kind_noahmp) zz
+      real(kind=kind_noahmp) z0t
+      real(kind=kind_noahmp) qvsg,qvs,es,esa,fbqq
+      real(kind=kind_noahmp) b,cm,ch,rr,tol
       parameter(b=9.4,cm=7.4,ch=5.3,rr=0.74,tol=.001)
 
-      real f
-      real f1
-      real f2
-      real f3
-      real f4
-      real ta          ! surface air temperature
-      real tmp                  ! ground temperature
-      real rsveg       ! Stomatal resistance 
-      real resg
-      real lai         ! leaft area index
-      real sdlim       ! radiation limit at which photosyntesis start W/m2
+      real(kind=kind_noahmp) f
+      real(kind=kind_noahmp) f1
+      real(kind=kind_noahmp) f2
+      real(kind=kind_noahmp) f3
+      real(kind=kind_noahmp) f4
+      real(kind=kind_noahmp) ta          ! surface air temperature
+      real(kind=kind_noahmp) tmp                  ! ground temperature
+      real(kind=kind_noahmp) rsveg       ! Stomatal resistance 
+      real(kind=kind_noahmp) resg
+      real(kind=kind_noahmp) lai         ! leaft area index
+      real(kind=kind_noahmp) sdlim       ! radiation limit at which photosyntesis start W/m2
       parameter(sdlim=100.)
-      real rsmin
-      real rsmax ! Maximun stomatal resistance 
-      real qw    ! Wilting point
+      real(kind=kind_noahmp) rsmin
+      real(kind=kind_noahmp) rsmax ! Maximun stomatal resistance 
+      real(kind=kind_noahmp) qw    ! Wilting point
       parameter(qw=0.06) 
-      real qref  ! Field capacity
+      real(kind=kind_noahmp) qref  ! Field capacity
       parameter(qref=0.37)
-      real hs
+      real(kind=kind_noahmp) hs
       parameter(hs=36.35)
 
-      real dzgr_u(ngr_u)          ! Layer sizes in the ground
+      real(kind=kind_noahmp) dzgr_u(ngr_u)          ! Layer sizes in the ground
 
       data dzgr_u /0.1,0.003,0.06,0.003,0.05,0.04,0.02,0.0125,0.005,0.0025/
 
-      real gx,dzgr_tot
+      real(kind=kind_noahmp) gx,dzgr_tot
       integer gr_type,iz
 ! ----------------------------------------------------------------------
 ! END VARIABLES DEFINITIONS
@@ -4602,16 +4603,16 @@ do iz= kts,kte
 ! ----------------------------------------------------------------------
 
       implicit none
-      real pr
-      real dz                   ! first vertical level
-      real pt                   ! potential temperature
-      real pt0                  ! reference potential temperature
-      real ptg                  ! ground potential temperature
-      real ua                   ! wind speed
-      real va                   ! wind speed
-      real z0                   ! Roughness length
-      real da                   ! air density
-      real qv
+      real(kind=kind_noahmp) pr
+      real(kind=kind_noahmp) dz                   ! first vertical level
+      real(kind=kind_noahmp) pt                   ! potential temperature
+      real(kind=kind_noahmp) pt0                  ! reference potential temperature
+      real(kind=kind_noahmp) ptg                  ! ground potential temperature
+      real(kind=kind_noahmp) ua                   ! wind speed
+      real(kind=kind_noahmp) va                   ! wind speed
+      real(kind=kind_noahmp) z0                   ! Roughness length
+      real(kind=kind_noahmp) da                   ! air density
+      real(kind=kind_noahmp) qv
 ! ----------------------------------------------------------------------
 ! OUTPUT:
 ! ----------------------------------------------------------------------
@@ -4619,35 +4620,35 @@ do iz= kts,kte
 !  surfaces (roofs and street)
 ! The fluxes can be computed as follow: Fluxes of X = B
 !  Example: Momentum fluxes on horizontal surfaces =  uhb_u
-      real uhb                  ! U (wind component) Horizontal surfaces, B (explicit) term
-      real vhb                  ! V (wind component) Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) uhb                  ! U (wind component) Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) vhb                  ! V (wind component) Horizontal surfaces, B (explicit) term
 !     real thb                  ! Temperature        Horizontal surfaces, B (explicit) term
-      real tva                  ! Temperature          Vertical surfaces, A (implicit) term
-      real tvb                  ! Temperature          Vertical surfaces, B (explicit) term
-      real ehb                  ! Energy (TKE)       Horizontal surfaces, B (explicit) term
-      real sf
-      real lf
+      real(kind=kind_noahmp) tva                  ! Temperature          Vertical surfaces, A (implicit) term
+      real(kind=kind_noahmp) tvb                  ! Temperature          Vertical surfaces, B (explicit) term
+      real(kind=kind_noahmp) ehb                  ! Energy (TKE)       Horizontal surfaces, B (explicit) term
+      real(kind=kind_noahmp) sf
+      real(kind=kind_noahmp) lf
        
 ! ----------------------------------------------------------------------
 ! LOCAL:
 ! ----------------------------------------------------------------------
-      real aa
-      real al
-      real buu
-      real c
-      real fbuw
-      real fbpt
-      real fh
-      real fm
-      real ric
-      real tstar
-      real ustar
-      real qstar
-      real utot
-      real wstar
-      real zz
-      real qvsg,qvs,es,esa,fbqq,tmp,resg
-      real b,cm,ch,rr,tol
+      real(kind=kind_noahmp) aa
+      real(kind=kind_noahmp) al
+      real(kind=kind_noahmp) buu
+      real(kind=kind_noahmp) c
+      real(kind=kind_noahmp) fbuw
+      real(kind=kind_noahmp) fbpt
+      real(kind=kind_noahmp) fh
+      real(kind=kind_noahmp) fm
+      real(kind=kind_noahmp) ric
+      real(kind=kind_noahmp) tstar
+      real(kind=kind_noahmp) ustar
+      real(kind=kind_noahmp) qstar
+      real(kind=kind_noahmp) utot
+      real(kind=kind_noahmp) wstar
+      real(kind=kind_noahmp) zz
+      real(kind=kind_noahmp) qvsg,qvs,es,esa,fbqq,tmp,resg
+      real(kind=kind_noahmp) b,cm,ch,rr,tol
       parameter(b=9.4,cm=7.4,ch=5.3,rr=0.74,tol=.001)
 
 ! ----------------------------------------------------------------------
@@ -4724,18 +4725,18 @@ do iz= kts,kte
 
 !    Street parameters
       integer nd_u(nurbm)     ! Number of street direction for each urban class
-      real h_b(nz_um,nurbm)   ! Bulding's heights [m]
-      real d_b(nz_um,nurbm)   ! The probability that a building has an height h_b
+      real(kind=kind_noahmp) h_b(nz_um,nurbm)   ! Bulding's heights [m]
+      real(kind=kind_noahmp) d_b(nz_um,nurbm)   ! The probability that a building has an height h_b
 ! -----------------------------------------------------------------------
 !     Output
 !------------------------------------------------------------------------
 
-      real ss_u(nz_um,nurbm)     ! The probability that a building has an height equal to z
-      real pb_u(nz_um,nurbm)     ! The probability that a building has an height greater or equal to z
+      real(kind=kind_noahmp) ss_u(nz_um,nurbm)     ! The probability that a building has an height equal to z
+      real(kind=kind_noahmp) pb_u(nz_um,nurbm)     ! The probability that a building has an height greater or equal to z
 
 !    Grid parameters
       integer nz_u(nurbm)     ! Number of layer in the urban grid
-      real z_u(nz_um)       ! Height of the urban grid levels
+      real(kind=kind_noahmp) z_u(nz_um)       ! Height of the urban grid levels
 
 
 ! -----------------------------------------------------------------------
@@ -4744,8 +4745,8 @@ do iz= kts,kte
 
       integer iz_u,id,ilu,iurb
 
-      real dtot
-      real hbmax
+      real(kind=kind_noahmp) dtot
+      real(kind=kind_noahmp) hbmax
 
 ! -----------------------------------------------------------------------
 !     This routine initialise the urban paramters for the BEP module
@@ -4836,9 +4837,9 @@ do iz= kts,kte
       integer iurb            ! Number of the urban class
       integer nz_u            ! Number of levels in the urban grid
       integer id              ! Street direction number
-      real ws                 ! Street width
-      real z(nz_um)         ! Height of the urban grid levels
-      real dxy                ! Street lenght
+      real(kind=kind_noahmp) ws                 ! Street width
+      real(kind=kind_noahmp) z(nz_um)         ! Height of the urban grid levels
+      real(kind=kind_noahmp) dxy                ! Street lenght
 
 
 ! -----------------------------------------------------------------------
@@ -4849,12 +4850,12 @@ do iz= kts,kte
 !   and the short wave radation. They are the part of radiation from a surface
 !   or from the sky to another surface.
 
-      real fww(nz_um,nz_um,ndm,nurbm)            !  from wall to wall
-      real fwg(nz_um,ndm,nurbm)                  !  from wall to ground
-      real fgw(nz_um,ndm,nurbm)                  !  from ground to wall
-      real fsw(nz_um,ndm,nurbm)                  !  from sky to wall
-      real fws(nz_um,ndm,nurbm)                  !  from wall to sky
-      real fsg(ndm,nurbm)                        !  from sky to ground
+      real(kind=kind_noahmp) fww(nz_um,nz_um,ndm,nurbm)            !  from wall to wall
+      real(kind=kind_noahmp) fwg(nz_um,ndm,nurbm)                  !  from wall to ground
+      real(kind=kind_noahmp) fgw(nz_um,ndm,nurbm)                  !  from ground to wall
+      real(kind=kind_noahmp) fsw(nz_um,ndm,nurbm)                  !  from sky to wall
+      real(kind=kind_noahmp) fws(nz_um,ndm,nurbm)                  !  from wall to sky
+      real(kind=kind_noahmp) fsg(ndm,nurbm)                        !  from sky to ground
 
 
 ! -----------------------------------------------------------------------
@@ -4863,10 +4864,10 @@ do iz= kts,kte
 
       integer jz,iz
 
-      real hut
-      real f1,f2,f12,f23,f123,ftot
-      real fprl,fnrm
-      real a1,a2,a3,a4,a12,a23,a123
+      real(kind=kind_noahmp) hut
+      real(kind=kind_noahmp) f1,f2,f12,f23,f123,ftot
+      real(kind=kind_noahmp) fprl,fnrm
+      real(kind=kind_noahmp) a1,a2,a3,a4,a12,a23,a123
 
 ! -----------------------------------------------------------------------
 !     This routine calculates the view factors
@@ -4994,9 +4995,9 @@ do iz= kts,kte
 
      
             
-      real a,b,c
-      real x,y
-      real fprl
+      real(kind=kind_noahmp) a,b,c
+      real(kind=kind_noahmp) x,y
+      real(kind=kind_noahmp) fprl
 
 
       x=a/c
@@ -5024,9 +5025,9 @@ do iz= kts,kte
 
 
 
-      real a,b,c
-      real x,y,z,a1,a2,a3,a4,a5,a6
-      real fnrm
+      real(kind=kind_noahmp) a,b,c
+      real(kind=kind_noahmp) x,y,z,a1,a2,a3,a4,a5,a6
+      real(kind=kind_noahmp) fnrm
       
       x=a/b
       y=c/b
@@ -5064,60 +5065,60 @@ do iz= kts,kte
       implicit none
       integer iurb            ! urban class number
 !    Building parameters      
-      real alag_u(nurbm)      ! Ground thermal diffusivity [m^2 s^-1]
-      real alaw_u(nurbm)      ! Wall thermal diffusivity [m^2 s^-1]
-      real alar_u(nurbm)      ! Roof thermal diffusivity [m^2 s^-1]
-      real csg_u(nurbm)       ! Specific heat of the ground material [J m^3 K^-1]
-      real csw_u(nurbm)       ! Specific heat of the wall material [J m^3 K^-1]
-      real csr_u(nurbm)       ! Specific heat of the roof material [J m^3 K^-1]
-      real twini_u(nurbm)     ! Temperature inside the buildings behind the wall [K]
-      real trini_u(nurbm)     ! Temperature inside the buildings behind the roof [K]
-      real tgini_u(nurbm)     ! Initial road temperature
+      real(kind=kind_noahmp) alag_u(nurbm)      ! Ground thermal diffusivity [m^2 s^-1]
+      real(kind=kind_noahmp) alaw_u(nurbm)      ! Wall thermal diffusivity [m^2 s^-1]
+      real(kind=kind_noahmp) alar_u(nurbm)      ! Roof thermal diffusivity [m^2 s^-1]
+      real(kind=kind_noahmp) csg_u(nurbm)       ! Specific heat of the ground material [J m^3 K^-1]
+      real(kind=kind_noahmp) csw_u(nurbm)       ! Specific heat of the wall material [J m^3 K^-1]
+      real(kind=kind_noahmp) csr_u(nurbm)       ! Specific heat of the roof material [J m^3 K^-1]
+      real(kind=kind_noahmp) twini_u(nurbm)     ! Temperature inside the buildings behind the wall [K]
+      real(kind=kind_noahmp) trini_u(nurbm)     ! Temperature inside the buildings behind the roof [K]
+      real(kind=kind_noahmp) tgini_u(nurbm)     ! Initial road temperature
 
 !    Radiation parameters
-      real albg_u(nurbm)      ! Albedo of the ground
-      real albw_u(nurbm)      ! Albedo of the wall
-      real albr_u(nurbm)      ! Albedo of the roof
-      real albwin_u(nurbm)    ! Albedo of the window
-      real emg_u(nurbm)       ! Emissivity of ground
-      real emw_u(nurbm)       ! Emissivity of wall
-      real emr_u(nurbm)       ! Emissivity of roof
-      real emwind_u(nurbm)    ! Emissivity of windows
+      real(kind=kind_noahmp) albg_u(nurbm)      ! Albedo of the ground
+      real(kind=kind_noahmp) albw_u(nurbm)      ! Albedo of the wall
+      real(kind=kind_noahmp) albr_u(nurbm)      ! Albedo of the roof
+      real(kind=kind_noahmp) albwin_u(nurbm)    ! Albedo of the window
+      real(kind=kind_noahmp) emg_u(nurbm)       ! Emissivity of ground
+      real(kind=kind_noahmp) emw_u(nurbm)       ! Emissivity of wall
+      real(kind=kind_noahmp) emr_u(nurbm)       ! Emissivity of roof
+      real(kind=kind_noahmp) emwind_u(nurbm)    ! Emissivity of windows
 
 !    Roughness parameters
-      real z0g_u(nurbm)       ! The ground's roughness length      
-      real z0r_u(nurbm)       ! The roof's roughness length
+      real(kind=kind_noahmp) z0g_u(nurbm)       ! The ground's roughness length      
+      real(kind=kind_noahmp) z0r_u(nurbm)       ! The roof's roughness length
 
 !    Street parameters
       integer nd_u(nurbm)     ! Number of street direction for each urban class
 
-      real strd_u(ndm,nurbm)  ! Street length (fix to greater value to the horizontal length of the cells)
-      real drst_u(ndm,nurbm)  ! Street direction [degree]
-      real ws_u(ndm,nurbm)    ! Street width [m]
-      real bs_u(ndm,nurbm)    ! Building width [m]
-      real h_b(nz_um,nurbm)   ! Bulding's heights [m]
-      real d_b(nz_um,nurbm)   ! The probability that a building has an height h_b
+      real(kind=kind_noahmp) strd_u(ndm,nurbm)  ! Street length (fix to greater value to the horizontal length of the cells)
+      real(kind=kind_noahmp) drst_u(ndm,nurbm)  ! Street direction [degree]
+      real(kind=kind_noahmp) ws_u(ndm,nurbm)    ! Street width [m]
+      real(kind=kind_noahmp) bs_u(ndm,nurbm)    ! Building width [m]
+      real(kind=kind_noahmp) h_b(nz_um,nurbm)   ! Bulding's heights [m]
+      real(kind=kind_noahmp) d_b(nz_um,nurbm)   ! The probability that a building has an height h_b
 
       integer i,iu
       integer nurb ! number of urban classes used
-        real, intent(out) :: bldac_frc_u(nurbm)
-      real, intent(out) :: cooled_frc_u(nurbm)
-      real, intent(out) :: cop_u(nurbm)
-      real, intent(out) :: pwin_u(nurbm)
-      real, intent(out) :: beta_u(nurbm)
+        real(kind=kind_noahmp), intent(out) :: bldac_frc_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: cooled_frc_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: cop_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: pwin_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: beta_u(nurbm)
       integer, intent(out) :: sw_cond_u(nurbm)
-      real, intent(out) :: time_on_u(nurbm)
-      real, intent(out) :: time_off_u(nurbm)
-      real, intent(out) :: targtemp_u(nurbm)
-      real, intent(out) :: gaptemp_u(nurbm)
-      real, intent(out) :: targhum_u(nurbm)
-      real, intent(out) :: gaphum_u(nurbm)
-      real, intent(out) :: perflo_u(nurbm)
-      real, intent(out) :: gr_frac_roof_u(nurbm)
-      real, intent(out) :: pv_frac_roof_u(nurbm)
-      real, intent(out) :: hsesf_u(nurbm)
-      real, intent(out) :: hsequip(24)
-      real, intent(out) :: irho(24)
+      real(kind=kind_noahmp), intent(out) :: time_on_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: time_off_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: targtemp_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: gaptemp_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: targhum_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: gaphum_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: perflo_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: gr_frac_roof_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: pv_frac_roof_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: hsesf_u(nurbm)
+      real(kind=kind_noahmp), intent(out) :: hsequip(24)
+      real(kind=kind_noahmp), intent(out) :: irho(24)
       integer, intent(out) :: gr_flag_u,gr_type_u
 !
 !Initialize some variables
@@ -5230,59 +5231,59 @@ do iz= kts,kte
 !
 !INPUT VARIABLES
 !
-      real rsw(2*ndm,nz_um)        ! Short wave radiation at the wall for a given canyon direction [W/m2]
-      real rlw(2*ndm,nz_um)         ! Long wave radiation at the walls for a given canyon direction [W/m2]
-      real rsg(ndm)                   ! Short wave radiation at the canyon for a given canyon direction [W/m2]
-      real rlg(ndm)                   ! Long wave radiation at the ground for a given canyon direction [W/m2]
-      real rs                        ! Short wave radiation at the horizontal surface from the sun [W/m2]  
-      real sfw(2*ndm,nz_um)      ! Sensible heat flux from walls [W/m2]
-      real sfg(ndm)              ! Sensible heat flux from ground (road) [W/m2]
-      real lfg(ndm)
-      real sfr(ndm,nz_um)      ! Sensible heat flux from roofs [W/m2]   
-      real lfr(ndm,nz_um)
-      real lfrv(ndm,nz_um)
-      real sfrv(ndm,nz_um)
-      real gr_frac_roof
-      real rld                        ! Long wave radiation from the sky [W/m2]
-      real albg_u                    ! albedo of the ground/street
-      real albw_u                    ! albedo of the walls
-      real albr_u                    ! albedo of the roof 
-      real ws(ndm)                        ! width of the street
-      real bs(ndm)
+      real(kind=kind_noahmp) rsw(2*ndm,nz_um)        ! Short wave radiation at the wall for a given canyon direction [W/m2]
+      real(kind=kind_noahmp) rlw(2*ndm,nz_um)         ! Long wave radiation at the walls for a given canyon direction [W/m2]
+      real(kind=kind_noahmp) rsg(ndm)                   ! Short wave radiation at the canyon for a given canyon direction [W/m2]
+      real(kind=kind_noahmp) rlg(ndm)                   ! Long wave radiation at the ground for a given canyon direction [W/m2]
+      real(kind=kind_noahmp) rs                        ! Short wave radiation at the horizontal surface from the sun [W/m2]  
+      real(kind=kind_noahmp) sfw(2*ndm,nz_um)      ! Sensible heat flux from walls [W/m2]
+      real(kind=kind_noahmp) sfg(ndm)              ! Sensible heat flux from ground (road) [W/m2]
+      real(kind=kind_noahmp) lfg(ndm)
+      real(kind=kind_noahmp) sfr(ndm,nz_um)      ! Sensible heat flux from roofs [W/m2]   
+      real(kind=kind_noahmp) lfr(ndm,nz_um)
+      real(kind=kind_noahmp) lfrv(ndm,nz_um)
+      real(kind=kind_noahmp) sfrv(ndm,nz_um)
+      real(kind=kind_noahmp) gr_frac_roof
+      real(kind=kind_noahmp) rld                        ! Long wave radiation from the sky [W/m2]
+      real(kind=kind_noahmp) albg_u                    ! albedo of the ground/street
+      real(kind=kind_noahmp) albw_u                    ! albedo of the walls
+      real(kind=kind_noahmp) albr_u                    ! albedo of the roof 
+      real(kind=kind_noahmp) ws(ndm)                        ! width of the street
+      real(kind=kind_noahmp) bs(ndm)
                         ! building size
-      real pb(nz_um)                ! Probability to have a building with an height equal or higher   
+      real(kind=kind_noahmp) pb(nz_um)                ! Probability to have a building with an height equal or higher   
       integer nzu
-      real ss(nz_um)                ! Probability to have a building of a given height
-      real sigma                       
-      real emg_u                       ! emissivity of the street
-      real emw_u                       ! emissivity of the wall
-      real emr_u                       ! emissivity of the roof
-      real tw(2*ndm,nz_um)  ! Temperature in each layer of the wall [K]
-      real tr_av(ndm,nz_um)  ! Temperature in each layer of the roof [K]
-      real tpvlev(ndm,nz_um)
-      real pv_frac_roof
-      real tg_av(ndm)          ! Temperature in each layer of the ground [K]
+      real(kind=kind_noahmp) ss(nz_um)                ! Probability to have a building of a given height
+      real(kind=kind_noahmp) sigma                       
+      real(kind=kind_noahmp) emg_u                       ! emissivity of the street
+      real(kind=kind_noahmp) emw_u                       ! emissivity of the wall
+      real(kind=kind_noahmp) emr_u                       ! emissivity of the roof
+      real(kind=kind_noahmp) tw(2*ndm,nz_um)  ! Temperature in each layer of the wall [K]
+      real(kind=kind_noahmp) tr_av(ndm,nz_um)  ! Temperature in each layer of the roof [K]
+      real(kind=kind_noahmp) tpvlev(ndm,nz_um)
+      real(kind=kind_noahmp) pv_frac_roof
+      real(kind=kind_noahmp) tg_av(ndm)          ! Temperature in each layer of the ground [K]
       integer id ! street direction
       integer ndu ! number of street directions
 !
 !New variables BEM
 !
-      real emwind               !Emissivity of the windows
-      real albwind              !Albedo of the windows
-      real twlev(2*ndm,nz_um)   !Averaged Temperature of the windows 
-      real pwin                 !Coverage area fraction of the windows
-      real gflwin               !Heat stored for the windows
-      real sfwind(2*ndm,nz_um)  !Sensible heat flux from windows [W/m2]
+      real(kind=kind_noahmp) emwind               !Emissivity of the windows
+      real(kind=kind_noahmp) albwind              !Albedo of the windows
+      real(kind=kind_noahmp) twlev(2*ndm,nz_um)   !Averaged Temperature of the windows 
+      real(kind=kind_noahmp) pwin                 !Coverage area fraction of the windows
+      real(kind=kind_noahmp) gflwin               !Heat stored for the windows
+      real(kind=kind_noahmp) sfwind(2*ndm,nz_um)  !Sensible heat flux from windows [W/m2]
 
 !OUTPUT/INPUT
-      real rs_abs  ! absrobed solar radiationfor this street direction
-      real rl_up   ! upward longwave radiation for this street direction
-      real emiss ! mean emissivity
-      real grdflx_urb ! ground heat flux 
+      real(kind=kind_noahmp) rs_abs  ! absrobed solar radiationfor this street direction
+      real(kind=kind_noahmp) rl_up   ! upward longwave radiation for this street direction
+      real(kind=kind_noahmp) emiss ! mean emissivity
+      real(kind=kind_noahmp) grdflx_urb ! ground heat flux 
 !LOCAL
       integer iz,iw
-      real rl_inc,rl_emit
-      real gfl
+      real(kind=kind_noahmp) rl_inc,rl_emit
+      real(kind=kind_noahmp) gfl
       integer ix,iy,iwrong
 
          iwrong=1
@@ -5375,22 +5376,22 @@ do iz= kts,kte
         
 !Output
 !------
-         real albwin	        ! albedo of the window  
+         real(kind=kind_noahmp) albwin	        ! albedo of the window  
 !Local
 !-----
-	 real a,b,c		!Polynomial coefficients
-	 real alfa,delta,gama	!Polynomial powers
-	 real g0	        !transmittance when the angle 
+	 real(kind=kind_noahmp) a,b,c		!Polynomial coefficients
+	 real(kind=kind_noahmp) alfa,delta,gama	!Polynomial powers
+	 real(kind=kind_noahmp) g0	        !transmittance when the angle 
                                 !of incidence is normal to the surface.
-         real asup,ainf
-	 real fonc
+         real(kind=kind_noahmp) asup,ainf
+	 real(kind=kind_noahmp) fonc
 
 !Constants
 !--------------------
          
-         real epsilon              !accuracy of the integration
+         real(kind=kind_noahmp) epsilon              !accuracy of the integration
          parameter (epsilon=1.e-07) 
-         real n1,n2                !Index of refraction for glasses and air
+         real(kind=kind_noahmp) n1,n2                !Index of refraction for glasses and air
          parameter(n1=1.,n2=1.5)
          integer intg,k
 !--------------------------------------------------------------------		
@@ -5442,9 +5443,9 @@ do iz= kts,kte
 
         implicit none
 !
-        real x,aa,bb,cc
-        real alf,delt,gam
-        real fonc
+        real(kind=kind_noahmp) x,aa,bb,cc
+        real(kind=kind_noahmp) alf,delt,gam
+        real(kind=kind_noahmp) fonc
   
         fonc=(((aa*(x**alf))/(pi**alf))+   &
              ((bb*(x**delt))/(pi**delt))+  &
@@ -5464,12 +5465,12 @@ do iz= kts,kte
       integer ndu     ! Number of street direction for each urban class
       integer iurb
 
-      real strd(ndm)        ! Street length (fix to greater value to the horizontal length of the cells)
-      real ws(ndm)          ! Street width [m]
+      real(kind=kind_noahmp) strd(ndm)        ! Street length (fix to greater value to the horizontal length of the cells)
+      real(kind=kind_noahmp) ws(ndm)          ! Street width [m]
 
 !    Grid parameters
       integer nzu          ! Number of layer in the urban grid
-      real z_u(nz_um)       ! Height of the urban grid levels
+      real(kind=kind_noahmp) z_u(nz_um)       ! Height of the urban grid levels
 ! -----------------------------------------------------------------------
 !     Output
 !------------------------------------------------------------------------
@@ -5478,12 +5479,12 @@ do iz= kts,kte
 !   and the short wave radation. They are the part of radiation from a surface
 !   or from the sky to another surface.
 
-      real fww_u(nz_um,nz_um,ndm,nurbm)         !  from wall to wall
-      real fwg_u(nz_um,ndm,nurbm)               !  from wall to ground
-      real fgw_u(nz_um,ndm,nurbm)               !  from ground to wall
-      real fsw_u(nz_um,ndm,nurbm)               !  from sky to wall
-      real fws_u(nz_um,ndm,nurbm)               !  from sky to wall
-      real fsg_u(ndm,nurbm)                     !  from sky to ground
+      real(kind=kind_noahmp) fww_u(nz_um,nz_um,ndm,nurbm)         !  from wall to wall
+      real(kind=kind_noahmp) fwg_u(nz_um,ndm,nurbm)               !  from wall to ground
+      real(kind=kind_noahmp) fgw_u(nz_um,ndm,nurbm)               !  from ground to wall
+      real(kind=kind_noahmp) fsw_u(nz_um,ndm,nurbm)               !  from sky to wall
+      real(kind=kind_noahmp) fws_u(nz_um,ndm,nurbm)               !  from sky to wall
+      real(kind=kind_noahmp) fsg_u(ndm,nurbm)                     !  from sky to ground
 
 ! -----------------------------------------------------------------------
 !     Local
@@ -5522,18 +5523,18 @@ do iz= kts,kte
 !-----------------------------------------------------------------------
 !    Street parameters
 !
-      real hi_urb1D(nz_um)    ! The probability that a building has an height h_b
+      real(kind=kind_noahmp) hi_urb1D(nz_um)    ! The probability that a building has an height h_b
       integer iurb            ! Number of the urban class
 !
 !     Grid parameters
 !
-      real z_u(nz_um)         ! Height of the urban grid levels
+      real(kind=kind_noahmp) z_u(nz_um)         ! Height of the urban grid levels
 ! -----------------------------------------------------------------------
 !     Output
 !------------------------------------------------------------------------
 
-      real ss_u(nz_um,nurbm)  ! The probability that a building has an height equal to z
-      real pb_u(nz_um)        ! The probability that a building has an height greater or equal to z
+      real(kind=kind_noahmp) ss_u(nz_um,nurbm)  ! The probability that a building has an height equal to z
+      real(kind=kind_noahmp) pb_u(nz_um)        ! The probability that a building has an height greater or equal to z
 !        
 !    Grid parameters
 !
@@ -5542,11 +5543,11 @@ do iz= kts,kte
 ! -----------------------------------------------------------------------
 !     Local
 !------------------------------------------------------------------------
-      real hb_u(nz_um)        ! Bulding's heights [m]
+      real(kind=kind_noahmp) hb_u(nz_um)        ! Bulding's heights [m]
       integer iz_u,id,ilu
 
-      real dtot
-      real hbmax
+      real(kind=kind_noahmp) dtot
+      real(kind=kind_noahmp) hbmax
 
 !------------------------------------------------------------------------
 
