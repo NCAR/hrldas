@@ -205,7 +205,11 @@
 
  SNOW_COMPACTION_OPTION            = 2                       ! options for ground snowpack compaction [default = 2]
                                                              !   1 -> original scheme from Anderson 1976
-                                                             !   2 -> updated scheme from Abolafia-Rosenzweigh et al. (2024)
+                                                             ! **2 -> updated scheme from Abolafia-Rosenzweigh et al. (2024)
+
+ SNOW_COVER_OPTION                 = 2                       ! options for ground snow cover fraction [default = 2]
+                                                             !   1 -> original scheme from Niu and Yang (2007) using veg-class based MPTABLE parameters
+                                                             ! **2 -> enhanced scheme from Abolafia-Rosenzweig et al. (2025) adding scale-dependency to ground SCF parameters
 
  SNOW_THERMAL_CONDUCTIVITY         = 1                       ! options for snow thermal conductivity   [default = 1]
                                                              ! **1 -> Stieglitz (Yen,1965) scheme
@@ -253,50 +257,50 @@
 
  CROP_OPTION                       = 0,     		     ! options for crop model   [default = 0]
                                                              ! geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
-                                                 	     !   0 -> No crop model, will run default dynamic vegetation
+                                                 	     ! **0 -> No crop model, will run default dynamic vegetation
                                                      	     !   1 -> Liu, et al. 2016
 
  IRRIGATION_OPTION                 = 0,        		     ! options for irrigation scheme  [default = 0]
                                                              ! geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
-                                                     	     !   0 -> No irrigation
+                                                     	     ! **0 -> No irrigation
                                                      	     !   1 -> Irrigation ON
                                                      	     !   2 -> irrigation trigger based on crop season Planting and harvesting dates
                                                      	     !   3 -> irrigation trigger based on LAI threshold
 
  IRRIGATION_METHOD                 = 0,        		     ! options for irrigation method (only if opt_irr > 0)  [default = 0]
                                                              ! geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
-                                                     	     !   0 -> method based on geo_em fractions (all three methods are ON)
+                                                     	     ! **0 -> method based on geo_em fractions (all three methods are ON)
                                                      	     !   1 -> sprinkler method
                                                      	     !   2 -> micro/drip irrigation
                                                      	     !   3 -> surface flooding
 
  TILE_DRAINAGE_OPTION              = 0,                      ! options for tile drainage [default = 0] (currently only tested & works with opt_run=3)
                                                              ! geogrid must have been run with GEOGRID.TBL.ARW.noahmp, use with caution
-                                                             !   0 -> No tile drainage
+                                                             ! **0 -> No tile drainage
                                                              !   1 -> Simple drainage
                                                              !   2 -> Hooghoudt's equation based tile drainage
 
  WETLAND_OPTION                    = 0                       ! options for wetland model [default = 0]
                                                              ! wetland water budget model in (Zhang et al. 2022 WRR)
-                                                             !   0 -> no wetland scheme
+                                                             ! **0 -> no wetland scheme
                                                              !   1 -> Uniform fixed wetland parameters from table
                                                              !   2 -> 2-D, read parameters from the input file
 
  SOIL_TIMESTEP                     = 0.0,                    ! Noah-MP soil process timestep (seconds) for solving soil water and temperature
-                                                             !   0 -> default, the same as main NoahMP model timestep
+                                                             ! **0.0 -> default, the same as main NoahMP model timestep
                                                              !   N * dt_noahmp -> longer than main NoahMP model timestep (often used for WRF coupled run)
 
  NOAHMP_OUTPUT                     = 0,                      ! NoahMP output level
-                                                             !   0 -> standard output
+                                                             ! **0 -> standard output
                                                              !   1 -> standard output with additional water and energy budget term output
 
  ! The following SNICAR options are only effective when SNOW_ALBEDO_OPTION = 3
 
- SNICAR_BANDNUMBER_OPTION          = 1                       ! number of wavelength bands used in SNICAR snow albedo calculation
+ SNICAR_BANDNUMBER_OPTION          = 1                       ! number of wavelength bands used in SNICAR snow albedo calculation [default = 1]
                                                              ! **1 -> 5
                                                              !   2 -> 480
 
- SNICAR_SOLARSPEC_OPTION           = 1                       ! type of downward solar radiation spectrum for SNICAR snow albedo calculation
+ SNICAR_SOLARSPEC_OPTION           = 1                       ! type of downward solar radiation spectrum for SNICAR snow albedo calculation [default = 1]
                                                              ! **1 -> mid-latitude winter
                                                              !   2 -> mid-latitude summer
                                                              !   3 -> sub-Arctic winter
@@ -304,43 +308,43 @@
                                                              !   5 -> Summit,Greenland,summer
                                                              !   6 -> High Mountain summer
 
- SNICAR_SNOWOPTICS_OPTION          = 3                       ! snow optics type using different refractive index databases in SNICAR
+ SNICAR_SNOWOPTICS_OPTION          = 3                       ! snow optics type using different refractive index databases in SNICAR [default = 3]
                                                              !   1 -> Warren (1984)
                                                              !   2 -> Warren and Brandt (2008)
                                                              ! **3 -> Picard et al (2016)
 
- SNICAR_DUSTOPTICS_OPTION          = 1                       ! dust optics type for SNICAR snow albedo calculation
+ SNICAR_DUSTOPTICS_OPTION          = 1                       ! dust optics type for SNICAR snow albedo calculation [default = 1]
                                                              ! **1 -> Saharan dust (Balkanski et al., 2007, central hematite)
                                                              !   2 -> San Juan Mountains dust, CO (Skiles et al, 2017)
                                                              !   3 -> Greenland dust (Polashenski et al., 2015, central absorptivity)
 
- SNICAR_RTSOLVER_OPTION            = 2                       ! option for two different SNICAR radiative transfer solver
+ SNICAR_RTSOLVER_OPTION            = 2                       ! option for two different SNICAR radiative transfer solver [default = 2]
                                                              !   1 -> Toon et a 1989 2-stream (Flanner et al. 2007)
                                                              ! **2 -> Adding-doubling 2-stream (Dang et al.2019)
 
- SNICAR_SNOWSHAPE_OPTION           = 3                       ! option for snow grain shape in SNICAR (He et al. 2017 JC)
+ SNICAR_SNOWSHAPE_OPTION           = 3                       ! option for snow grain shape in SNICAR (He et al. 2017 JC) [default = 3]
                                                              !   1 -> sphere 
                                                              !   2 -> spheroid 
                                                              ! **3 -> hexagonal plate
                                                              !   4 -> Koch snowflake
 
- SNICAR_USE_AEROSOL                = .true.                  ! option to turn on/off aerosol deposition flux effect in snow in SNICAR
+ SNICAR_USE_AEROSOL                = .true.                  ! option to turn on/off aerosol deposition flux effect in snow in SNICAR [default = true]
                                                              !   .false. -> without aerosol deposition flux effect
                                                              ! **.true.  -> with aerosol deposition flux effect
 
- SNICAR_SNOWBC_INTMIX              = .true.                  ! option to activate BC-snow internal mixing in SNICAR (He et al. 2017 JC)
+ SNICAR_SNOWBC_INTMIX              = .true.                  ! option to activate BC-snow internal mixing in SNICAR (He et al. 2017 JC) [default = true]
                                                              !   .false. -> external mixing for all BC
                                                              ! **.true.  -> internal mixing for hydrophilic BC
 
- SNICAR_SNOWDUST_INTMIX            = .false.                 ! option to activate dust-snow internal mixing in SNICAR (He et al. 2017 JC)
+ SNICAR_SNOWDUST_INTMIX            = .false.                 ! option to activate dust-snow internal mixing in SNICAR (He et al. 2017 JC) [default = false]
                                                              ! **.false. -> external mixing for all dust
                                                              !   .true.  -> internal mixing for all dust
 
- SNICAR_USE_OC                     = .false.                 ! option to activate OC in snow in SNICAR
+ SNICAR_USE_OC                     = .false.                 ! option to activate OC in snow in SNICAR [default = false]
                                                              ! **.false. -> without organic carbon in snow
                                                              !   .true.  -> with organic carbon in snow
 
- SNICAR_AEROSOL_READTABLE          = .false.                 ! option to read aerosol deposition fluxes from table or not
+ SNICAR_AEROSOL_READTABLE          = .false.                 ! option to read aerosol deposition fluxes from table or not [default = false]
                                                              ! **.false. -> data read from NetCDF forcing file
                                                              !   .true.  -> data read from table
 /

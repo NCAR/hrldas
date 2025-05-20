@@ -150,6 +150,7 @@ OBJS = \
         ../../noahmp/src/SoilWaterSupercoolKoren99Mod.o \
         ../../noahmp/src/SoilWaterSupercoolNiu06Mod.o \
         ../../noahmp/src/SnowCoverGroundNiu07Mod.o \
+        ../../noahmp/src/SnowCoverGroundAR25Mod.o \
         ../../noahmp/src/GroundRoughnessPropertyMod.o \
         ../../noahmp/src/SurfaceEmissivityMod.o \
         ../../noahmp/src/PsychrometricVariableMod.o \
