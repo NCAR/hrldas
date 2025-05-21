@@ -36,7 +36,7 @@
  RADIATIVE_TRANSFER_OPTION         = 3
  SNOW_COMPACTION_OPTION            = 2
  SNOW_ALBEDO_OPTION                = 1
- SNOW_COVER_OPTION                 = 2
+ SNOW_COVER_OPTION                 = 1
  PCP_PARTITION_OPTION              = 1
  SNOW_THERMAL_CONDUCTIVITY         = 1
  TBOT_OPTION                       = 2

@@ -207,9 +207,9 @@
                                                              !   1 -> original scheme from Anderson 1976
                                                              ! **2 -> updated scheme from Abolafia-Rosenzweigh et al. (2024)
 
- SNOW_COVER_OPTION                 = 2                       ! options for ground snow cover fraction [default = 2]
-                                                             !   1 -> original scheme from Niu and Yang (2007) using veg-class based MPTABLE parameters
-                                                             ! **2 -> enhanced scheme from Abolafia-Rosenzweig et al. (2025) adding scale-dependency to ground SCF parameters
+ SNOW_COVER_OPTION                 = 1                       ! options for ground snow cover fraction [default = 2]
+                                                             ! **1 -> original scheme from Niu and Yang (2007) using veg-class based MPTABLE parameters
+                                                             !   2 -> enhanced scheme from Abolafia-Rosenzweig et al. (2025) adding scale-dependency to ground SCF parameters
 
  SNOW_THERMAL_CONDUCTIVITY         = 1                       ! options for snow thermal conductivity   [default = 1]
                                                              ! **1 -> Stieglitz (Yen,1965) scheme
