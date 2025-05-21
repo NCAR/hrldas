@@ -279,7 +279,7 @@ contains
 
        ! For Cassini projection, module_llxy assumes a spherical earth
        ! with circumference EARTH_CIRC_M
-       latinc = 360.0*dx/EARTH_CIRC_M
+       latinc = 360.0*dy/EARTH_CIRC_M
        loninc = 360.0*dx/EARTH_CIRC_M
 
        call map_set(PROJ_CASSINI, geo_em%proj, lat1=la1, lon1=lo1, latinc=latinc, loninc=loninc, &
