@@ -261,7 +261,7 @@ MODULE module_llxy
    END SUBROUTINE map_init
 
 
-   SUBROUTINE map_set(proj_code, proj, lat1, lon1, lat0, lon0, knowni, knownj, dx, latinc, &
+   SUBROUTINE map_set(proj_code, proj, lat1, lon1, lat0, lon0, knowni, knownj, dx, dy, latinc, &
                       loninc, stdlon, truelat1, truelat2, nlat, nlon, ixdim, jydim, &
                       stagger, phi, lambda, r_earth)
       ! Given a partially filled proj_info structure, this routine computes
@@ -290,6 +290,7 @@ MODULE module_llxy
       REAL, INTENT(IN), OPTIONAL        :: lat0
       REAL, INTENT(IN), OPTIONAL        :: lon0
       REAL, INTENT(IN), OPTIONAL        :: dx
+      REAL, INTENT(IN), OPTIONAL        :: dy
       REAL, INTENT(IN), OPTIONAL        :: stdlon
       REAL, INTENT(IN), OPTIONAL        :: truelat1
       REAL, INTENT(IN), OPTIONAL        :: truelat2
@@ -314,9 +315,10 @@ MODULE module_llxy
               .NOT.PRESENT(knowni) .OR. &
               .NOT.PRESENT(knownj) .OR. &
               .NOT.PRESENT(stdlon) .OR. &
-              .NOT.PRESENT(dx) ) THEN
+              .NOT.PRESENT(dx) .OR. &
+              .NOT.PRESENT(dy) ) THEN
             PRINT '(A,I2)', 'The following are mandatory parameters for projection code : ', proj_code
-            PRINT '(A)', ' truelat1, truelat2, lat1, lon1, knowni, knownj, stdlon, dx'
+            PRINT '(A)', ' truelat1, truelat2, lat1, lon1, knowni, knownj, stdlon, dx, dy'
             STOP 'MAP_INIT'
          END IF
       ELSE IF ( proj_code == PROJ_PS ) THEN
@@ -326,9 +328,10 @@ MODULE module_llxy
               .NOT.PRESENT(knowni) .OR. &
               .NOT.PRESENT(knownj) .OR. &
               .NOT.PRESENT(stdlon) .OR. &
-              .NOT.PRESENT(dx) ) THEN
+              .NOT.PRESENT(dx) .OR. &
+              .NOT.PRESENT(dy) ) THEN
             PRINT '(A,I2)', 'The following are mandatory parameters for projection code : ', proj_code
-            PRINT '(A)', ' truelat1, lat1, lon1, knonwi, knownj, stdlon, dx'
+            PRINT '(A)', ' truelat1, lat1, lon1, knonwi, knownj, stdlon, dx, dy'
             STOP 'MAP_INIT'
          END IF
       ELSE IF ( proj_code == PROJ_PS_WGS84 ) THEN
@@ -362,9 +365,10 @@ MODULE module_llxy
               .NOT.PRESENT(lon1) .OR. &
               .NOT.PRESENT(knowni) .OR. &
               .NOT.PRESENT(knownj) .OR. &
-              .NOT.PRESENT(dx) ) THEN
+              .NOT.PRESENT(dx) .OR. &
+              .NOT.PRESENT(dy) ) THEN
             PRINT '(A,I2)', 'The following are mandatory parameters for projection code : ', proj_code
-            PRINT '(A)', ' truelat1, lat1, lon1, knowni, knownj, dx'
+            PRINT '(A)', ' truelat1, lat1, lon1, knowni, knownj, dx, dy'
             STOP 'MAP_INIT'
          END IF
       ELSE IF ( proj_code == PROJ_LATLON ) THEN
@@ -395,9 +399,11 @@ MODULE module_llxy
               .NOT.PRESENT(lon0) .OR. &
               .NOT.PRESENT(knowni) .OR. &
               .NOT.PRESENT(knownj) .OR. &
-              .NOT.PRESENT(stdlon) ) THEN
+              .NOT.PRESENT(stdlon)  .OR. &
+              .NOT.PRESENT(dx) .OR. &
+              .NOT.PRESENT(dy) ) THEN
             PRINT '(A,I2)', 'The following are mandatory parameters for projection code : ', proj_code
-            PRINT '(A)', ' latinc, loninc, lat1, lon1, knowni, knownj, lat0, lon0, stdlon'
+            PRINT '(A)', ' latinc, loninc, lat1, lon1, knowni, knownj, lat0, lon0, stdlon, dx, dy'
             STOP 'MAP_INIT'
          END IF
       ELSE IF ( proj_code == PROJ_GAUSS ) THEN
@@ -476,7 +482,14 @@ MODULE module_llxy
             STOP 'MAP_INIT'
          ENDIF
       ENDIF
-  
+
+      IF ( PRESENT(dy) ) THEN
+         IF ((dy .LE. 0.).AND.(proj_code .NE. PROJ_LATLON)) THEN
+            PRINT '(A)', 'Require grid spacing (dy) in meters be positive'
+            STOP 'MAP_INIT'
+         ENDIF
+      ENDIF
+ 
       IF ( PRESENT(stdlon) ) THEN
          dummy_stdlon = stdlon
          IF ((ABS(dummy_stdlon) > 180.).AND.(proj_code /= PROJ_MERC)) THEN
@@ -512,6 +525,7 @@ MODULE module_llxy
       IF ( PRESENT(knowni) )   proj%knowni   = knowni
       IF ( PRESENT(knownj) )   proj%knownj   = knownj
       IF ( PRESENT(dx) )       proj%dx       = dx
+      IF ( PRESENT(dy) )       proj%dy       = dy
       IF ( PRESENT(stdlon) )   proj%stdlon   = dummy_stdlon
       IF ( PRESENT(truelat1) ) proj%truelat1 = truelat1
       IF ( PRESENT(truelat2) ) proj%truelat2 = truelat2
