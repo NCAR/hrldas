@@ -490,10 +490,7 @@ ILOOP : DO I = its, ite
     ENDDO
     FRC_URB  = FRC_URB2D(I,J)
     LB_URB   = LB_URB2D(I,J)
-    CHECK    = 0
-    IF (I.EQ.73.AND.J.EQ.125)THEN
-      CHECK = 1
-    END IF
+    check    = 0
 
 ! Call urban
 
