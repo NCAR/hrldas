@@ -1,7 +1,7 @@
 module module_hrldas_netcdf_io
   use module_date_utilities
   use netcdf
-
+  use Machine, only : kind_noahmp
 #ifdef MPP_LAND
   use module_mpp_land, only:mpp_land_bcast_int1, decompose_data_real, mpp_land_bcast_real1, decompose_data_int, &
                   io_id, global_nx, global_ny, my_id, write_io_real, write_io_int, write_io_real3d,decompose_data_real3d, &
@@ -18,18 +18,33 @@ module module_hrldas_netcdf_io
 
   type inputstruct
      character(len=19)             :: read_date
-     real, pointer, dimension(:,:) :: t
-     real, pointer, dimension(:,:) :: q
-     real, pointer, dimension(:,:) :: u
-     real, pointer, dimension(:,:) :: v
-     real, pointer, dimension(:,:) :: p
-     real, pointer, dimension(:,:) :: lw
-     real, pointer, dimension(:,:) :: sw
-     real, pointer, dimension(:,:) :: pcp
-     real, pointer, dimension(:,:) :: snow
-     real, pointer, dimension(:,:) :: vegfra
-     real, pointer, dimension(:,:) :: lai
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: t
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: q
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: u
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: v
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: p
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: lw
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: sw
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: pcp
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: snow
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: raddir
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: radvis
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: vegfra
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: lai
   end type inputstruct
+
+  type inputstructa
+     character(len=19)             :: read_date
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: bcphi
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: bcpho
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: ocphi
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: ocpho
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: dust1
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: dust2
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: dust3
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: dust4
+     real(kind=kind_noahmp), pointer, dimension(:,:) :: dust5
+  end type inputstructa
 
   character(len=256), private :: restart_filename_remember
   integer, private :: iswater_remember
@@ -43,7 +58,7 @@ module module_hrldas_netcdf_io
   integer, private :: dimid_times_remember
   integer, private :: dimid_layers_remember
   integer, private :: dimid_snow_layers_remember
-
+  integer, private :: dimid_numrad_layers_remember
   interface prepare_output_file
 #ifdef MPP_LAND
      module procedure prepare_output_file_mpp
@@ -105,7 +120,7 @@ contains
     integer,          intent(in) :: rank
     character(len=*), intent(in) :: outdir
 
-    real                         :: xrand
+    real(kind=kind_noahmp)       :: xrand
     character(len=256)           :: testfile
     integer                      :: ierr
 
@@ -260,18 +275,18 @@ contains
     integer,            intent(out)   :: isurban   ! vegetation category corresponding to urban areas
     integer,            intent(out)   :: isice     ! vegetation category corresponding to ice areas
     character(len=256), intent(out)   :: llanduse  ! Landuse dataset (USGS or MODI)
-    real,               intent(out)   :: dx
-    real,               intent(out)   :: dy
-    real,               intent(out)   :: truelat1
-    real,               intent(out)   :: truelat2
-    real,               intent(out)   :: cen_lon
-    real,               intent(out)   :: lat1
-    real,               intent(out)   :: lon1
+    real(kind=kind_noahmp), intent(out)   :: dx
+    real(kind=kind_noahmp), intent(out)   :: dy
+    real(kind=kind_noahmp), intent(out)   :: truelat1
+    real(kind=kind_noahmp), intent(out)   :: truelat2
+    real(kind=kind_noahmp), intent(out)   :: cen_lon
+    real(kind=kind_noahmp), intent(out)   :: lat1
+    real(kind=kind_noahmp), intent(out)   :: lon1
 #ifdef _PARALLEL_
-    real, pointer,   dimension(:,:)   :: dum2d_ptr
+    real(kind=kind_noahmp), pointer,   dimension(:,:)   :: dum2d_ptr
 #endif
     integer :: ncid, dimid, varid, ierr
-    real, allocatable, dimension(:,:) :: dum2d
+    real(kind=kind_noahmp), allocatable, dimension(:,:) :: dum2d
     character(len=256) :: units
     integer :: i
     integer :: rank
@@ -412,19 +427,19 @@ contains
     integer,                   intent(in)  :: iswater
     integer,                   intent(in)  :: islake
     integer, dimension(xstart:xend,ystart:yend), intent(out) :: vegtyp, soltyp
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: terrain
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: tbot_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: latitude
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: longitude
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: xland
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: seaice
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: msftx
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: msfty
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: terrain
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: tbot_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: latitude
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: longitude
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: xland
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: seaice
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: msftx
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: msfty
 
     character(len=256) :: units
     integer :: ierr
     integer :: ncid
-    real, dimension(xstart:xend,ystart:yend) :: xdum
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend) :: xdum
     integer :: rank
 
 #ifdef _PARALLEL_  
@@ -516,15 +531,15 @@ contains
     implicit none
     character(len=*),          intent(in)  :: wrfinput_flnm
     integer,                   intent(in)  :: xstart, xend, ystart, yend
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: fdepth
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: eqzwt
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: rechclim
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: riverbed
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: fdepth
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: eqzwt
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: rechclim
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: riverbed
     
     character(len=256) :: units
     integer :: ierr
     integer :: ncid
-    real, dimension(xstart:xend,ystart:yend) :: xdum
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend) :: xdum
     integer :: rank
 
 #ifdef _PARALLEL_  
@@ -583,10 +598,10 @@ contains
     implicit none
     character(len=*),                            intent(in)  :: agdata_flnm
     integer,                                     intent(in)  :: xstart, xend, ystart, yend
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: irfract   
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: sifract    
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: mifract    
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: fifract
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: irfract   
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: sifract    
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: mifract    
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: fifract
 
     character(len=24)                                        :: name
     integer                                                  :: ierr,iret
@@ -666,19 +681,21 @@ contains
        xstart, xend,                                                   &
        ystart, yend,                                                   &
        croptype,planting,harvest,season_gdd)
+
     implicit none
+
     character(len=*),          intent(in)  :: wrfinput_flnm
     integer,                   intent(in)  :: xstart, xend, ystart, yend
-    real,    dimension(xstart:xend,5,ystart:yend), intent(out) :: croptype
-    real,    dimension(xstart:xend,  ystart:yend), intent(out) :: planting
-    real,    dimension(xstart:xend,  ystart:yend), intent(out) :: harvest
-    real,    dimension(xstart:xend,  ystart:yend), intent(out) :: season_gdd
+    real(kind=kind_noahmp),    dimension(xstart:xend,5,ystart:yend), intent(out) :: croptype
+    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(out) :: planting
+    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(out) :: harvest
+    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(out) :: season_gdd
     
     character(len=256) :: units
     character(len=24)  :: name
     integer :: ierr,iret
     integer :: ncid, varid, icrop
-    real, dimension(xstart:xend,ystart:yend,5) :: xdum
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend,5) :: xdum
     integer :: rank
 
 #ifdef _PARALLEL_  
@@ -753,6 +770,75 @@ contains
 
 !---------------------------------------------------------------------------------------------------------
 
+  subroutine read_wetland_input(wrfinput_flnm,                         &
+       xstart, xend,                                                   &
+       ystart, yend,                                                   &
+       fsatmx, wcap)
+
+    implicit none
+
+    character(len=*),          intent(in)  :: wrfinput_flnm
+    integer,                   intent(in)  :: xstart, xend, ystart, yend
+    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(out) :: fsatmx
+    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(out) :: wcap
+
+    character(len=256) :: units
+    character(len=24)  :: name
+    integer :: ierr,iret
+    integer :: ncid, varid
+    integer :: rank
+
+#ifdef _PARALLEL_  
+    call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+    if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
+#else
+    rank = 0
+#endif
+
+
+    ! Open the NetCDF file.
+    if (rank == 0) write(*,'("wrfinput_flnm: ''", A, "''")') trim(wrfinput_flnm)
+#ifdef _PARALLEL_
+    ierr = nf90_open_par(wrfinput_flnm, NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+#else
+    ierr = nf90_open(wrfinput_flnm, NF90_NOWRITE, ncid)
+#endif
+    if (ierr /= 0) then
+       write(*,'("read_wetland_input:  Problem opening wrfinput file: ''", A, "''")') trim(wrfinput_flnm)
+#ifdef _PARALLEL_
+       call mpi_finalize(ierr)
+       if (ierr /= 0) write(*, '("Problem with MPI_finalize.")')
+#endif
+       stop
+    endif
+
+! Get maximum saturated fraction (FSATMX)
+    name = "FSATMX"
+    iret = nf90_inq_varid(ncid,  name,  varid)
+    if (iret == 0) then
+      ierr = nf90_get_var(ncid, varid, fsatmx, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
+    else
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using default values."
+    endif
+
+! Get maximum water storeage (WSTORE)
+    name = "WCAP"
+    iret = nf90_inq_varid(ncid,  name,  varid)
+    if (iret == 0) then
+      ierr = nf90_get_var(ncid, varid, wcap, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
+    else
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using default values."
+    endif
+
+
+! Close the NetCDF file
+    ierr = nf90_close(ncid)
+    if (ierr /= 0) stop "MODULE_NOAHLSM_HRLDAS_INPUT:  read_wetland_input:  NF90_CLOSE"
+
+  end subroutine read_wetland_input
+
+!---------------------------------------------------------------------------------------------------------
+
   subroutine read_tile_drain_map(tdinput_flnm,                            &
        xstart, xend,                                                      &
        ystart, yend,                                                      &
@@ -761,7 +847,7 @@ contains
     implicit none
     character(len=*),                            intent(in)  :: tdinput_flnm
     integer,                                     intent(in)  :: xstart, xend, ystart, yend
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: td_fraction
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out) :: td_fraction
     character(len=24)                                        :: name
     integer                                                  :: ierr,iret
     integer                                                  :: ncid, varid
@@ -815,7 +901,7 @@ contains
     implicit none
     character(len=*),                            intent(in)  :: wrfinput_flnm
     integer,                                     intent(in)  :: xstart, xend, ystart, yend
-    real,    dimension(xstart:xend,ystart:yend), intent(out) :: urban_fraction
+    real(kind=kind_noahmp),  dimension(xstart:xend,ystart:yend), intent(out) :: urban_fraction
     character(len=24)                                        :: name
     integer                                                  :: ierr,iret
     integer                                                  :: ncid, varid
@@ -873,46 +959,46 @@ contains
     character(len=*),          intent(in)  :: spatial_filename
     integer,                   intent(in)  :: xstart, xend, ystart, yend
     integer,                   intent(in)  :: nsoil
-    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: bexp_3d
-    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smcdry_3d
-    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smcwlt_3d
-    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smcref_3d
-    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smcmax_3d
-    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: dksat_3d
-    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: dwsat_3d
-    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: psisat_3d
-    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: quartz_3d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: refdk_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: refkdt_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: irr_frac_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: irr_har_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: irr_lai_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: irr_mad_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: filoss_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: sprir_rate_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: micir_rate_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: firtfac_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: ir_rain_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: bvic_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: axaj_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: bxaj_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: xxaj_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: bdvic_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: gdvic_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: bbvic_2d
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: klatfac
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: tdsmcfac
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: tddc
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: tddcoef
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: tdddrain
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: tdradi
-    real,    dimension(xstart:xend,ystart:yend), intent(out)       :: tdspac
+    real(kind=kind_noahmp),    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: bexp_3d
+    real(kind=kind_noahmp),    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smcdry_3d
+    real(kind=kind_noahmp),    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smcwlt_3d
+    real(kind=kind_noahmp),    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smcref_3d
+    real(kind=kind_noahmp),    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smcmax_3d
+    real(kind=kind_noahmp),    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: dksat_3d
+    real(kind=kind_noahmp),    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: dwsat_3d
+    real(kind=kind_noahmp),    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: psisat_3d
+    real(kind=kind_noahmp),    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: quartz_3d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: refdk_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: refkdt_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: irr_frac_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: irr_har_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: irr_lai_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: irr_mad_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: filoss_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: sprir_rate_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: micir_rate_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: firtfac_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: ir_rain_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: bvic_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: axaj_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: bxaj_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: xxaj_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: bdvic_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: gdvic_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: bbvic_2d
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: klatfac
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: tdsmcfac
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: tddc
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: tddcoef
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: tdddrain
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: tdradi
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend), intent(out)       :: tdspac
  
     character(len=24)  :: name
     character(len=256) :: units
     integer :: ierr,iret, varid,isoil
     integer :: ncid
-    real, dimension(xstart:xend,ystart:yend,nsoil) :: xdum
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend,nsoil) :: xdum
 
     ierr = nf90_open(spatial_filename, NF90_NOWRITE, ncid)
     if (ierr /= 0) then
@@ -1318,9 +1404,9 @@ contains
     integer, dimension(xstart:xend      ,ystart:yend), intent(in)  :: ivgtyp
     integer,                   intent(in)  :: isice
     integer,                   intent(in)  :: iswater
-    real,    dimension(xstart:xend,2*nsoil,ystart:yend), intent(out) :: soilcomp
+    real(kind=kind_noahmp),    dimension(xstart:xend,2*nsoil,ystart:yend), intent(out) :: soilcomp
     
-    real,    dimension(xstart:xend,ystart:yend,2*nsoil) :: soilcomp_in
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend,2*nsoil) :: soilcomp_in
     
     character(len=24)  :: name
     character(len=256) :: units
@@ -1378,10 +1464,10 @@ contains
     integer,                   intent(in)  :: xstart, xend, ystart, yend
     integer,                   intent(in)  :: nsoil
     integer, dimension(xstart:xend      ,ystart:yend), intent(in)    :: ivgtyp
-    real, dimension(xstart:xend,ystart:yend), intent(inout) :: soilcl1
-    real, dimension(xstart:xend,ystart:yend), intent(inout) :: soilcl2
-    real, dimension(xstart:xend,ystart:yend), intent(inout) :: soilcl3
-    real, dimension(xstart:xend,ystart:yend), intent(inout) :: soilcl4
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: soilcl1
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: soilcl2
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: soilcl3
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: soilcl4
     integer,                   intent(in)  :: isice
     integer,                   intent(in)  :: iswater
 
@@ -1476,7 +1562,7 @@ contains
     implicit none
     integer, intent(in) :: ncid
     integer, intent(in) :: xstart, xend, ystart, yend
-    real, dimension(xstart:xend,ystart:yend), intent(out) :: array
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: array
     character(len=256), intent(out) :: units
     integer :: iret, varid
     character(len=24), parameter :: name = "IVGTYP"
@@ -1504,7 +1590,7 @@ contains
     implicit none
     integer, intent(in) :: ncid
     integer, intent(in) :: xstart, xend, ystart, yend
-    real, dimension(xstart:xend,ystart:yend), intent(out) :: array
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: array
     character(len=256), intent(out) :: units
     integer :: iret, varid
     character(len=24), parameter :: name = "ISLTYP"
@@ -1529,9 +1615,9 @@ contains
     integer, intent(in) :: ncid
     integer, intent(in) :: xstart, xend, ystart, yend
 #ifdef MPP_LAND
-    real, dimension(xstart:xend,ystart:yend), intent(inout) :: array
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: array
 #else
-    real, dimension(xstart:xend,ystart:yend), intent(out) :: array
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: array
 #endif
     character(len=*), intent(out) :: units
     integer :: iret, varid
@@ -1541,7 +1627,7 @@ contains
     logical, intent(in) :: fatal_if_error 
     integer, intent(out) :: ierr
 #ifdef MPP_LAND
-    real:: g_array(global_nx,global_ny)
+    real(kind=kind_noahmp):: g_array(global_nx,global_ny)
 #endif
     units = " "
     
@@ -1615,7 +1701,7 @@ contains
     integer, intent(in) :: ncid
     integer, intent(in) :: nsoil
     integer, intent(in) :: xstart, xend, ystart, yend
-    real, dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: array
+    real(kind=kind_noahmp), dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: array
     character(len=256), intent(out) :: units
     ! FATAL_IF_ERROR:  an input code value:
     !      .TRUE. if an error in reading the data should stop the program.
@@ -1625,10 +1711,10 @@ contains
 
     integer :: iret, varid, isoil
 #ifdef MPP_LAND
-    real:: g_array(global_nx,nsoil,global_ny)
-    real:: insoil(global_nx,global_ny,nsoil)
+    real(kind=kind_noahmp):: g_array(global_nx,nsoil,global_ny)
+    real(kind=kind_noahmp):: insoil(global_nx,global_ny,nsoil)
 #else
-    real:: insoil(xstart:xend,ystart:yend,nsoil)
+    real(kind=kind_noahmp):: insoil(xstart:xend,ystart:yend,nsoil)
 #endif
 
     units = " "
@@ -1701,16 +1787,16 @@ contains
     integer,                                           intent(in)  :: xstart, xend
     integer,                                           intent(in)  :: ystart, yend
     integer,                                           intent(in)  :: nsoil
-    real,    dimension(nsoil),                         intent(in)  :: sldpth
+    real(kind=kind_noahmp),    dimension(nsoil),       intent(in)  :: sldpth
     character(len=*),                                  intent(in)  :: target_date
     
     integer,                                           intent(out) :: ldasin_version
-    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smc
-    real,    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: stc
-    real,    dimension(xstart:xend,ystart:yend),       intent(out) :: cmc
-    real,    dimension(xstart:xend,ystart:yend),       intent(out) :: t1
-    real,    dimension(xstart:xend,ystart:yend),       intent(out) :: weasd
-    real,    dimension(xstart:xend,ystart:yend),       intent(out) :: snodep
+    real(kind=kind_noahmp),    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: smc
+    real(kind=kind_noahmp),    dimension(xstart:xend,nsoil,ystart:yend), intent(out) :: stc
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend),       intent(out) :: cmc
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend),       intent(out) :: t1
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend),       intent(out) :: weasd
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend),       intent(out) :: snodep
     logical,                                           intent(out) :: fndsnowh
 
     character(len=256) :: titlestr
@@ -1720,12 +1806,12 @@ contains
 
     integer :: ierr, ncid, ierr_snodep, varid
     integer :: idx, isoil
-    real, dimension(100) :: layer_bottom
-    real, dimension(100) :: layer_top
-    real, dimension(nsoil)   :: dzs
+    real(kind=kind_noahmp), dimension(100) :: layer_bottom
+    real(kind=kind_noahmp), dimension(100) :: layer_top
+    real(kind=kind_noahmp), dimension(nsoil)   :: dzs
 
-    real, dimension(xstart:xend, ystart:yend, nsoil) :: insoil
-    real, dimension(xstart:xend, nsoil, ystart:yend) :: soildummy
+    real(kind=kind_noahmp), dimension(xstart:xend, ystart:yend, nsoil) :: insoil
+    real(kind=kind_noahmp), dimension(xstart:xend, nsoil, ystart:yend) :: soildummy
     integer :: rank
 
     !
@@ -1851,15 +1937,15 @@ contains
   subroutine init_interp(xstart, xend, ystart, yend, nsoil, sldpth, var, nvar, src, layer_bottom, layer_top)
     implicit none
     integer, intent(in)    :: xstart, xend, ystart, yend, nsoil, nvar
-    real, dimension(nsoil) :: sldpth ! the thickness of each layer
-    real, dimension(xstart:xend, nsoil, ystart:yend), intent(out) :: var
-    real, dimension(xstart:xend, nvar, ystart:yend ), intent(in)  :: src
-    real, dimension(nvar),                            intent(in)  :: layer_bottom ! The depth from the surface of each layer bottom.
-    real, dimension(nvar),                            intent(in)  :: layer_top    ! The depth from the surface of each layer top.
+    real(kind=kind_noahmp), dimension(nsoil) :: sldpth ! the thickness of each layer
+    real(kind=kind_noahmp), dimension(xstart:xend, nsoil, ystart:yend), intent(out) :: var
+    real(kind=kind_noahmp), dimension(xstart:xend, nvar, ystart:yend ), intent(in)  :: src
+    real(kind=kind_noahmp), dimension(nvar),                            intent(in)  :: layer_bottom ! The depth from the surface of each layer bottom.
+    real(kind=kind_noahmp), dimension(nvar),                            intent(in)  :: layer_top    ! The depth from the surface of each layer top.
     integer :: i, j, k, kk, ktop, kbottom
-    real, dimension(nsoil) :: dst_centerpoint
-    real, dimension(nvar)  :: src_centerpoint
-    real :: fraction
+    real(kind=kind_noahmp), dimension(nsoil) :: dst_centerpoint
+    real(kind=kind_noahmp), dimension(nvar)  :: src_centerpoint
+    real(kind=kind_noahmp) :: fraction
     integer :: ierr
     integer :: rank
 
@@ -1977,10 +2063,10 @@ contains
     integer,                                           intent(in)  :: ystart, yend
     character(len=*),                                  intent(in)  :: target_date
     integer, dimension(xstart:xend,ystart:yend),       intent(in)  :: vegtyp
-    real,    dimension(xstart:xend,ystart:yend),       intent(out) :: vegfra
-    real,    dimension(xstart:xend,ystart:yend),       intent(out) :: lai
-    real,    dimension(xstart:xend,ystart:yend),       intent(out) :: gvfmin
-    real,    dimension(xstart:xend,ystart:yend),       intent(out) :: gvfmax
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend),       intent(out) :: vegfra
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend),       intent(out) :: lai
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend),       intent(out) :: gvfmin
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend),       intent(out) :: gvfmax
 
     character(len=8)   :: name
     character(len=256) :: units
@@ -2044,7 +2130,10 @@ contains
   subroutine READFORC_HRLDAS(flnm_template, forcing_timestep, target_date, xstart, xend, ystart, yend,  &
        forcing_name_T,forcing_name_Q,forcing_name_U,forcing_name_V,forcing_name_P, &
        forcing_name_LW,forcing_name_SW,forcing_name_PR,forcing_name_SN, &
-       t,q,u,v,p,lw,sw,pcp,snow,vegfra,update_veg,lai,update_lai,reset_spinup_date,startdate)
+       forcing_name_DirFrac, forcing_name_VisFrac, &
+       t,q,u,v,p,lw,sw,pcp,snow,vegfra,update_veg,lai,update_lai,reset_spinup_date,startdate,&
+       raddir,radvis)
+
     use kwm_string_utilities
     implicit none
 
@@ -2062,21 +2151,24 @@ contains
     character(len=256),                 intent(in)  :: forcing_name_SW
     character(len=256),                 intent(in)  :: forcing_name_PR
     character(len=256),                 intent(in)  :: forcing_name_SN
+    character(len=256),                 intent(in)  :: forcing_name_DirFrac
+    character(len=256),                 intent(in)  :: forcing_name_VisFrac
 
-    real,             dimension(xstart:xend,ystart:yend), intent(out)   :: t
-    real,             dimension(xstart:xend,ystart:yend), intent(out)   :: q
-    real,             dimension(xstart:xend,ystart:yend), intent(out)   :: u
-    real,             dimension(xstart:xend,ystart:yend), intent(out)   :: v
-    real,             dimension(xstart:xend,ystart:yend), intent(out)   :: p
-    real,             dimension(xstart:xend,ystart:yend), intent(out)   :: lw
-    real,             dimension(xstart:xend,ystart:yend), intent(out)   :: sw
-    real,             dimension(xstart:xend,ystart:yend), intent(out)   :: pcp
-    real,             dimension(xstart:xend,ystart:yend), intent(out)   :: snow
-    real,             dimension(xstart:xend,ystart:yend), intent(inout) :: lai    !Barlage v3.7: change to inout
-    real,             dimension(xstart:xend,ystart:yend), intent(inout) :: vegfra
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: t
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: q
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: u
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: v
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: p
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: lw
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: sw
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: pcp
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: snow
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: lai    !Barlage v3.7: change to inout
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: vegfra
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: raddir
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out)   :: radvis
     logical,                            intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
     logical,                                              intent(inout) :: reset_spinup_date
-
     character(len=256) :: flnm
     character(len=256) :: units
     character(len=256) :: nextflnm
@@ -2085,9 +2177,11 @@ contains
     integer :: rank
 
     type(inputstruct) :: lastread = inputstruct("0000-00-00_00:00:00", &
-         null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null() )
-    type(inputstruct) :: nextread= inputstruct("0000-00-00_00:00:00", &
-         null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null() )
+         null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), &
+         null(), null())
+    type(inputstruct) :: nextread = inputstruct("0000-00-00_00:00:00", &
+         null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), &
+         null(), null())
 
     if(reset_spinup_date) lastread%read_date = startdate
     reset_spinup_date = .false.
@@ -2186,7 +2280,12 @@ contains
        
        nextread%snow = 0.0  ! Assume zero in case not present
        call get_2d_netcdf(trim(forcing_name_SN), ncid, nextread%snow,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
-       
+
+       nextread%raddir = 0.7
+       nextread%radvis = 0.5
+       call get_2d_netcdf(trim(forcing_name_DirFrac), ncid, nextread%raddir,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_VisFrac), ncid, nextread%radvis,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+ 
        if(update_veg) then    ! Barlage v3.7: update only if dveg option is appropriate
        
          call get_2d_netcdf("VEGFRA",  ncid, nextread%vegfra,units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
@@ -2240,7 +2339,7 @@ contains
 
        ! Fill the t, q, u, v, ... arrays with data from the nextread structure.
        call copyfrom_inputstruct(nextread, t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, &
-                                 update_veg, update_lai, xstart, xend, ystart, yend)
+                                 update_veg, update_lai, xstart, xend, ystart, yend, raddir, radvis)
 
        ! Clear the old lastread data
        call clear_inputstruct(lastread)
@@ -2264,7 +2363,7 @@ contains
 
        ! Fill the t, q, u, v, ... arrays with data interpolated between lastread and nextread times.
        call interpolate_inputstruct(lastread, nextread, target_date, &
-            t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend)
+            t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend,raddir,radvis)
 
     else
 
@@ -2281,7 +2380,224 @@ contains
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
 
+  subroutine READFORC_AEROSOL(flnm_template, forcing_timestep, target_date, xstart, xend, ystart, yend,&
+       reset_spinup_date,startdate,                                                                    &
+       forcing_name_BCPHI,forcing_name_BCPHO,forcing_name_OCPHI,forcing_name_OCPHO,                    &
+       forcing_name_DUST1,forcing_name_DUST2,forcing_name_DUST3,forcing_name_DUST4,forcing_name_DUST5, &
+       bcphi,bcpho,ocphi,ocpho,dust1,dust2,dust3,dust4,dust5)
+
+    use kwm_string_utilities
+    implicit none
+
+    character(len=*),                   intent(in)  :: flnm_template
+    integer,                            intent(in)  :: forcing_timestep
+    integer,                            intent(in)  :: xstart, xend
+    integer,                            intent(in)  :: ystart, yend
+    character(len=19),                  intent(in)  :: target_date, startdate ! (YYYY-MM-DD_hh:mm:ss)
+    character(len=256),                 intent(in)  :: forcing_name_BCPHI
+    character(len=256),                 intent(in)  :: forcing_name_BCPHO
+    character(len=256),                 intent(in)  :: forcing_name_OCPHI
+    character(len=256),                 intent(in)  :: forcing_name_OCPHO
+    character(len=256),                 intent(in)  :: forcing_name_DUST1
+    character(len=256),                 intent(in)  :: forcing_name_DUST2
+    character(len=256),                 intent(in)  :: forcing_name_DUST3
+    character(len=256),                 intent(in)  :: forcing_name_DUST4
+    character(len=256),                 intent(in)  :: forcing_name_DUST5
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: bcphi
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: bcpho
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: ocphi
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: ocpho
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust1
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust2
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust3
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust4
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out)   :: dust5
+    logical,                            intent(inout) :: reset_spinup_date
+    character(len=256) :: flnm
+    character(len=256) :: units
+    character(len=256) :: nextflnm
+    integer :: ierr
+    integer :: ncid
+    integer :: rank
+
+    type(inputstructa) :: lastread = inputstructa("0000-00-00_00:00:00", &
+         null(), null(), null(), null(), null(), null(), null(), null(), null())
+    type(inputstructa) :: nextread= inputstructa("0000-00-00_00:00:00", &
+         null(), null(), null(), null(), null(), null(), null(), null(), null())
+
+    if(reset_spinup_date) lastread%read_date = startdate
+    reset_spinup_date = .false.
+#ifdef MPP_LAND
+     call mpp_land_bcast_char(19,target_date(1:19))
+     call mpp_land_bcast_char(19,nextread%read_date(1:19))
+#endif
+    if (target_date > nextread%read_date ) then
+       !
+       ! We've advanced beyond the date of the end-bracketing data in memory.
+       ! Read the next (later) forcing data, and put the data into the nextread
+       ! structure.
+       !
+       if (nextread%read_date /= "0000-00-00_00:00:00") then
+          ! Clear the old lastread data
+          call clear_inputstructa(lastread)
+
+          ! Copy nextread to lastread
+          lastread = nextread
+          ! Clear nextread
+          call nullify_inputstructa(nextread)
+       endif
+       ! Guess the next read date (from the last read date and the forcing timestep).
+       ! If there is no last date, assume we're at the beginning of our processing
+       ! and take the target_date as the first timestep, for which forcing data
+       ! must be available.
+#ifdef MPP_LAND
+     call mpp_land_bcast_char(19,lastread%read_date(1:19))
+#endif
+
+       if (lastread%read_date == "0000-00-00_00:00:00") then
+          nextread%read_date = target_date
+       else
+          call geth_newdate(nextread%read_date, lastread%read_date, forcing_timestep)
+       endif
+
+       ! Build a file name
+       flnm = flnm_template
+
+#ifdef MPP_LAND
+       if(my_id .eq. IO_id) then
+#endif
+
+       if(mod(forcing_timestep,3600) == 0) then
+         call strrep(flnm, "<date>", nextread%read_date(1:4)//nextread%read_date(6:7)//nextread%read_date(9:10)//nextread%read_date(12:13))
+       elseif(mod(forcing_timestep,60) == 0) then
+         call strrep(flnm, "<date>", nextread%read_date(1:4)//nextread%read_date(6:7)//nextread%read_date(9:10)//nextread%read_date(12:13)//nextread%read_date(15:16))
+       else
+         call strrep(flnm, "<date>", nextread%read_date(1:4)//nextread%read_date(6:7)//nextread%read_date(9:10)//nextread%read_date(12:13)//nextread%read_date(15:16)//nextread%read_date(18:19))
+       endif
+
+       ! Open the NetCDF file.
+#ifdef _PARALLEL_
+       ierr = nf90_open_par(flnm, NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+#else
+       ierr = nf90_open(flnm, NF90_NOWRITE, ncid)
+#endif
+       if (ierr /= 0) then
+#ifdef _PARALLEL_
+          call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+          if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
+          if (rank == 0) then
+#endif
+             write(*,'("A)  Problem opening netcdf file: ''", A, "''")') trim(flnm)
+#ifdef _PARALLEL_
+          endif
+          call mpi_finalize(ierr)
+#endif
+          stop
+       endif
+
+#ifdef MPP_LAND
+      endif
+#endif
+
+       ! Allocate space to hold data
+       call allocate_inputstructa(nextread, xstart, xend, ystart, yend)
+       nextread%bcphi = 0.0  ! Assume zero in case not present
+       nextread%bcpho = 0.0  ! Assume zero in case not present
+       nextread%ocphi = 0.0  ! Assume zero in case not present
+       nextread%ocpho = 0.0  ! Assume zero in case not present
+       nextread%dust1 = 0.0  ! Assume zero in case not present
+       nextread%dust2 = 0.0  ! Assume zero in case not present
+       nextread%dust3 = 0.0  ! Assume zero in case not present
+       nextread%dust4 = 0.0  ! Assume zero in case not present
+       nextread%dust5 = 0.0  ! Assume zero in case not present
+
+       call get_2d_netcdf(trim(forcing_name_BCPHI), ncid, nextread%bcphi,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_BCPHO), ncid, nextread%bcpho,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_OCPHI), ncid, nextread%ocphi,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_OCPHO), ncid, nextread%ocpho,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST1), ncid, nextread%dust1,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST2), ncid, nextread%dust2,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST3), ncid, nextread%dust3,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST4), ncid, nextread%dust4,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+       call get_2d_netcdf(trim(forcing_name_DUST5), ncid, nextread%dust5,  units, xstart, xend, ystart, yend, NOT_FATAL, ierr)
+#ifdef MPP_LAND
+       if(my_id .eq. IO_id) &
+#endif
+       ! Close the file
+       ierr = nf90_close(ncid)
+
+    endif
+
+#ifdef MPP_LAND
+     call mpp_land_bcast_char(19,target_date(1:19))
+#endif
+
+    if (target_date == nextread%read_date) then
+       !
+       ! We have advanced to the later date of our bracketing times for interpolation.
+       ! Take that data as is, no interpolation necessary, move that data into the
+       ! lastread structure, and return that data.
+       !
+       ! Fill the arrays with data from the nextread structure.
+
+       bcphi= nextread%bcphi
+       bcpho= nextread%bcpho
+       ocphi= nextread%ocphi
+       ocpho= nextread%ocpho
+       dust1= nextread%dust1
+       dust2= nextread%dust2
+       dust3= nextread%dust3
+       dust4= nextread%dust4
+       dust5= nextread%dust5
+
+       ! Clear the old lastread data
+       call clear_inputstructa(lastread)
+
+       ! Copy nextread to lastread
+       lastread = nextread
+
+       ! Set the nextread%read_date field to signal that we need to read
+       nextread%read_date = "0000-00-00_00:00:00"
+
+       ! Clear nextread
+       call nullify_inputstructa(nextread)
+
+    else if ( ( target_date > lastread%read_date ) .and. ( target_date < nextread%read_date ) ) then
+
+       !
+       ! We are at a Noah time step between the lastread data and the available nextread data.
+       ! Do temporal interpolation and return the interpolated data.  Keep lastread
+       ! and nextread as they were.
+       !
+       ! Fill the arrays with data interpolated between lastread and nextread times.
+
+       bcphi = lastread%bcphi
+       bcpho = lastread%bcpho
+       ocphi = lastread%ocphi
+       ocpho = lastread%ocpho
+       dust1 = lastread%dust1
+       dust2 = lastread%dust2
+       dust3 = lastread%dust3
+       dust4 = lastread%dust4
+       dust5 = lastread%dust5
+
+    else
+
+       print*, 'target_date        = ', target_date
+       print*, 'lastread%read_date = ', lastread%read_date
+       print*, 'nextread%read_date = ', nextread%read_date
+
+       STOP "We should not be here.  Problem with the logic of READFORC_SHORTER_TIMESTEP"
+
+    endif
+
+  end subroutine READFORC_AEROSOL
+
+!---------------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------------
+
   subroutine allocate_inputstruct(instruct, xstart, xend, ystart, yend)
+
     implicit none
     type(inputstruct)   :: instruct
     integer, intent(in) :: xstart
@@ -2323,6 +2639,13 @@ contains
 
     allocate(instruct%lai (xstart:xend,ystart:yend), stat=allostat )
     if (allostat/=0) stop "Problem allocating instruct%lai"
+
+    allocate(instruct%raddir (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%RadDir"
+
+    allocate(instruct%radvis (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%RadVis"
+
 #ifdef MPP_LAND
     instruct%lai = 0.0
 #endif
@@ -2331,13 +2654,56 @@ contains
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
 
+  subroutine allocate_inputstructa(instructa, xstart, xend, ystart, yend)
+
+    implicit none
+    type(inputstructa)  :: instructa
+    integer, intent(in) :: xstart
+    integer, intent(in) :: xend
+    integer, intent(in) :: ystart
+    integer, intent(in) :: yend
+
+    integer :: allostat
+
+    allocate(instructa%bcphi (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%bcphi"
+
+    allocate(instructa%bcpho (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%bcpho"
+
+    allocate(instructa%ocphi (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%ocphi"
+
+    allocate(instructa%ocpho (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%ocpho"
+
+    allocate(instructa%dust1 (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%dust1"
+
+    allocate(instructa%dust2 (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%dust2"
+
+    allocate(instructa%dust3 (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%dust3"
+
+    allocate(instructa%dust4 (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%dust4"
+
+    allocate(instructa%dust5 (xstart:xend,ystart:yend), stat=allostat )
+    if (allostat/=0) stop "Problem allocating instruct%dust5"
+
+  end subroutine allocate_inputstructa
+
+!---------------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------------
+
   subroutine copyfrom_inputstruct(instruct, t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, &
-                                  update_veg, update_lai, xstart, xend, ystart, yend)
+                                  update_veg, update_lai, xstart, xend, ystart, yend, raddir, radvis)
     implicit none
     type(inputstruct), intent(in) :: instruct
     integer,           intent(in) :: xstart, xend, ystart, yend
     logical,           intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
-    real, dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, raddir, radvis
     t    = instruct%t
     q    = instruct%q
     u    = instruct%u
@@ -2347,24 +2713,29 @@ contains
     sw   = instruct%sw
     snow = instruct%snow
     pcp  = instruct%pcp
+    raddir  = instruct%raddir
+    radvis  = instruct%radvis
+
     if(update_veg) vegfra = instruct%vegfra
     if(update_lai)   lai  = instruct%lai
+
   end subroutine copyfrom_inputstruct
 
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
 
   subroutine interpolate_inputstruct(instructA, instructB, target_date, &
-       t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend)
+       t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, update_veg, update_lai, xstart, xend, ystart, yend, raddir, radvis)
+
     implicit none
     type(inputstruct),                        intent(in)  :: instructA, instructB
     character(len=19),                        intent(in)  :: target_date
     integer,                                  intent(in)  :: xstart, xend, ystart, yend
     logical,                                  intent(in)  :: update_veg, update_lai  ! Barlage v3.7: for veg read control
-    real, dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: t, q, u, v, p, lw, sw, pcp, snow, vegfra, lai, raddir, radvis
 
     integer :: idts, idts2
-    real    :: fraction
+    real(kind=kind_noahmp)    :: fraction
 
     call geth_idts(target_date, instructA%read_date, idts)
     call geth_idts(instructB%read_date, instructA%read_date, idts2)
@@ -2379,14 +2750,19 @@ contains
     sw = ( instructA%sw * fraction ) + ( instructB%sw * (1.0-fraction) )
     snow = instructA%snow
     pcp = instructA%pcp
+    raddir = instructA%raddir
+    radvis = instructA%radvis
+
     if(update_veg) vegfra = instructA%vegfra
     if(update_lai)   lai  = instructA%lai
+
   end subroutine interpolate_inputstruct
 
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
 
   subroutine clear_inputstruct(instruct)
+
     implicit none
     type(inputstruct) :: instruct
 
@@ -2435,6 +2811,16 @@ contains
        nullify(instruct%snow)
     endif
 
+    if (associated(instruct%raddir)) then
+       deallocate(instruct%raddir)
+       nullify(instruct%raddir)
+    endif
+
+    if (associated(instruct%radvis)) then
+       deallocate(instruct%radvis)
+       nullify(instruct%radvis)
+    endif
+
     if (associated(instruct%vegfra)) then
        deallocate(instruct%vegfra)
        nullify(instruct%vegfra)
@@ -2445,6 +2831,60 @@ contains
        nullify(instruct%lai)
     endif
   end subroutine clear_inputstruct
+
+!---------------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------------
+
+  subroutine clear_inputstructa(instructa)
+    implicit none
+    type(inputstructa) :: instructa
+
+    if (associated(instructa%bcphi)) then
+       deallocate(instructa%bcphi)
+       nullify(instructa%bcphi)
+    endif
+
+    if (associated(instructa%bcpho)) then
+       deallocate(instructa%bcpho)
+       nullify(instructa%bcpho)
+    endif
+
+    if (associated(instructa%ocphi)) then
+       deallocate(instructa%ocphi)
+       nullify(instructa%ocphi)
+    endif
+
+    if (associated(instructa%ocpho)) then
+       deallocate(instructa%ocpho)
+       nullify(instructa%ocpho)
+    endif
+
+    if (associated(instructa%dust1)) then
+       deallocate(instructa%dust1)
+       nullify(instructa%dust1)
+    endif
+
+    if (associated(instructa%dust2)) then
+       deallocate(instructa%dust2)
+       nullify(instructa%dust2)
+    endif
+
+    if (associated(instructa%dust3)) then
+       deallocate(instructa%dust3)
+       nullify(instructa%dust3)
+    endif
+
+    if (associated(instructa%dust4)) then
+       deallocate(instructa%dust4)
+       nullify(instructa%dust4)
+    endif
+
+    if (associated(instructa%dust5)) then
+       deallocate(instructa%dust5)
+       nullify(instructa%dust5)
+    endif
+
+  end subroutine clear_inputstructa
 
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
@@ -2462,9 +2902,31 @@ contains
     nullify(instruct%sw)
     nullify(instruct%pcp)
     nullify(instruct%snow)
+    nullify(instruct%raddir)
+    nullify(instruct%radvis)
     nullify(instruct%vegfra)
     nullify(instruct%lai)
+
   end subroutine nullify_inputstruct
+
+!---------------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------------
+
+  subroutine nullify_inputstructa(instructa)
+    implicit none
+    type(inputstructa) :: instructa
+
+    nullify(instructa%bcphi)
+    nullify(instructa%bcpho)
+    nullify(instructa%ocphi)
+    nullify(instructa%ocpho)
+    nullify(instructa%dust1)
+    nullify(instructa%dust2)
+    nullify(instructa%dust3)
+    nullify(instructa%dust4)
+    nullify(instructa%dust5)
+
+  end subroutine nullify_inputstructa
 
 !---------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------
@@ -2476,8 +2938,8 @@ contains
     integer,                                              intent(in)  :: xstart, xend
     integer,                                              intent(in)  :: ystart, yend
     character(len=*),                                     intent(in)  :: target_date
-    real,             dimension(xstart:xend,ystart:yend), intent(out) :: weasd
-    real,             dimension(xstart:xend,ystart:yend), intent(out) :: snodep
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out) :: weasd
+    real(kind=kind_noahmp),             dimension(xstart:xend,ystart:yend), intent(out) :: snodep
 
     character(len=256) :: units
     integer :: ierr
@@ -2531,7 +2993,7 @@ contains
        output_timestep, llanduse, split_output_count, hgrid, &
        ixfull, jxfull, ixpar, jxpar, xstartpar, ystartpar, iswater,  &
        mapproj, lat1, lon1, dx, dy, truelat1, truelat2, cen_lon,     &
-       nsoil, nsnow, sldpth, startdate, date, spinup_loop, spinup_loops, &
+       nsoil, nsnow, nrad, sldpth, startdate, date, spinup_loop, spinup_loops, &
        vegtyp, soltyp)
 
     implicit none
@@ -2551,16 +3013,17 @@ contains
     integer,                                  intent(in) :: ystartpar
     integer,                                  intent(in) :: iswater
     integer,                                  intent(in) :: mapproj
-    real,                                     intent(in) :: lat1
-    real,                                     intent(in) :: lon1
-    real,                                     intent(in) :: dx
-    real,                                     intent(in) :: dy
-    real,                                     intent(in) :: truelat1
-    real,                                     intent(in) :: truelat2
-    real,                                     intent(in) :: cen_lon
+    real(kind=kind_noahmp),                   intent(in) :: lat1
+    real(kind=kind_noahmp),                   intent(in) :: lon1
+    real(kind=kind_noahmp),                   intent(in) :: dx
+    real(kind=kind_noahmp),                   intent(in) :: dy
+    real(kind=kind_noahmp),                   intent(in) :: truelat1
+    real(kind=kind_noahmp),                   intent(in) :: truelat2
+    real(kind=kind_noahmp),                   intent(in) :: cen_lon
     integer,                                  intent(in) :: nsoil
     integer,                                  intent(in) :: nsnow
-    real,             dimension(nsoil),       intent(in) :: sldpth
+    integer,                                  intent(in) :: nrad
+    real(kind=kind_noahmp), dimension(nsoil), intent(in) :: sldpth
     character(len=19),                        intent(in) :: startdate
     character(len=19),                        intent(in) :: date
     integer,                                  intent(in) :: spinup_loop
@@ -2579,7 +3042,7 @@ contains
        output_timestep, llanduse, split_output_count, hgrid, &
        global_nx, global_ny, global_nx, global_ny, xstartpar, ystartpar, iswater,  &
        mapproj, lat1, lon1, dx, dy, truelat1, truelat2, cen_lon,     &
-       nsoil, nsnow, sldpth, startdate, date, spinup_loop, spinup_loops, &
+       nsoil, nsnow, nrad, sldpth, startdate, date, spinup_loop, spinup_loops, &
        g_vegtyp, g_soltyp)
     end if
 
@@ -2590,7 +3053,7 @@ contains
        output_timestep, llanduse, split_output_count, hgrid, &
        ixfull, jxfull, ixpar, jxpar, xstartpar, ystartpar, iswater,  &
        mapproj, lat1, lon1, dx, dy, truelat1, truelat2, cen_lon,     &
-       nsoil, nsnow, sldpth, startdate, date, spinup_loop, spinup_loops, &
+       nsoil, nsnow, nrad, sldpth, startdate, date, spinup_loop, spinup_loops, &
        vegtyp, soltyp)
     ! To prepare the output file, we create the file, write dimensions and attributes, write the time variable.
     ! At the end of this routine, the output file is out of define mode.
@@ -2612,16 +3075,17 @@ contains
     integer,                                  intent(in) :: ystartpar
     integer,                                  intent(in) :: iswater
     integer,                                  intent(in) :: mapproj
-    real,                                     intent(in) :: lat1
-    real,                                     intent(in) :: lon1
-    real,                                     intent(in) :: dx
-    real,                                     intent(in) :: dy
-    real,                                     intent(in) :: truelat1
-    real,                                     intent(in) :: truelat2
-    real,                                     intent(in) :: cen_lon
+    real(kind=kind_noahmp),                   intent(in) :: lat1
+    real(kind=kind_noahmp),                   intent(in) :: lon1
+    real(kind=kind_noahmp),                   intent(in) :: dx
+    real(kind=kind_noahmp),                   intent(in) :: dy
+    real(kind=kind_noahmp),                   intent(in) :: truelat1
+    real(kind=kind_noahmp),                   intent(in) :: truelat2
+    real(kind=kind_noahmp),                   intent(in) :: cen_lon
     integer,                                  intent(in) :: nsoil
-    integer,                                  intent(in) :: nsnow
-    real,             dimension(nsoil),       intent(in) :: sldpth
+    integer,                                  intent(in) :: nsnow 
+    integer,                                  intent(in) :: nrad
+    real(kind=kind_noahmp), dimension(nsoil), intent(in) :: sldpth
     character(len=19),                        intent(in) :: startdate
     character(len=19),                        intent(in) :: date
     integer,                                  intent(in) :: spinup_loop
@@ -2632,7 +3096,7 @@ contains
     integer :: ncid
 
     integer :: dimid_ix, dimid_jx, dimid_times, dimid_datelen, varid, n
-    integer :: dimid_dum, dimid_layers, dimid_snow_layers
+    integer :: dimid_dum, dimid_layers, dimid_snow_layers, dimid_numrad_layers
     integer :: iret
     character(len=256) :: output_flnm
     character(len=19)  :: date19
@@ -2677,6 +3141,7 @@ contains
        iret = nf90_def_dim(ncid, "south_north_stag", jxfull+1, dimid_dum)
        iret = nf90_def_dim(ncid, "soil_layers_stag", nsoil, dimid_layers)
        iret = nf90_def_dim(ncid, "snow_layers", nsnow, dimid_snow_layers)
+       iret = nf90_def_dim(ncid, "rad_num", nrad, dimid_numrad_layers)
 
        iret = nf90_put_att(ncid, NF90_GLOBAL, "TITLE", "OUTPUT FROM HRLDAS "//version)
        iret = nf90_put_att(ncid, NF90_GLOBAL, "missing_value", -1.E33)
@@ -2717,6 +3182,8 @@ contains
     dimid_times_remember = dimid_times
     dimid_layers_remember = dimid_layers
     dimid_snow_layers_remember = dimid_snow_layers
+    dimid_numrad_layers_remember = dimid_numrad_layers
+
     iswater_remember = iswater
 
     allocate(vegtyp_remember(ixpar,jxpar))
@@ -2800,8 +3267,8 @@ contains
 #ifdef MPP_LAND
   subroutine add_to_output_2d_float_mpp ( array, name, description, units )
     implicit none
-    real, dimension(:,:), intent(in) :: array
-    real, dimension(global_nx,global_ny) :: garray
+    real(kind=kind_noahmp), dimension(:,:), intent(in) :: array
+    real(kind=kind_noahmp), dimension(global_nx,global_ny) :: garray
     character(len=*), intent(in) :: name, description, units
     call write_io_real(array,garray)
     if(my_id .eq. io_id) then
@@ -2822,12 +3289,12 @@ contains
 
   subroutine add_to_output_3d_mpp ( array, name, description, units, snow_or_soil )
     implicit none
-    real, dimension(:,:,:), intent(in) :: array
+    real(kind=kind_noahmp), dimension(:,:,:), intent(in) :: array
     character(len=*), intent(in) :: name, description, units
     character(len=4), intent(in) :: snow_or_soil
     integer :: k, klevel
 
-    real, allocatable, dimension(:,:,:) :: garray
+    real(kind=kind_noahmp), allocatable, dimension(:,:,:) :: garray
     klevel = size(array,2)
 
     allocate(garray(global_nx,klevel,global_ny))
@@ -2843,7 +3310,7 @@ contains
 
   subroutine add_to_output_2d_float ( array, name, description, units )
     implicit none
-    real, dimension(:,:), intent(in) :: array
+    real(kind=kind_noahmp), dimension(:,:), intent(in) :: array
     character(len=*), intent(in) :: name, description, units
     integer :: ixpar, jxpar
 
@@ -2883,7 +3350,7 @@ contains
 
   subroutine add_to_output_3d ( array, name, description, units, snow_or_soil )
     implicit none
-    real, dimension(:,:,:), intent(in) :: array
+    real(kind=kind_noahmp), dimension(:,:,:), intent(in) :: array
     character(len=*), intent(in) :: name, description, units
     character(len=4), intent(in) :: snow_or_soil
     integer :: ixpar, jxpar, kxpar
@@ -2894,6 +3361,8 @@ contains
           zdimid = dimid_layers_remember
        elseif (snow_or_soil == "SNOW") then
           zdimid = dimid_snow_layers_remember
+       elseif (snow_or_soil == "RADN") then
+          zdimid = dimid_numrad_layers_remember
        else
           write(*,'("SNOW_OR_SOIL unrecognized: ", A)') adjustl(trim(snow_or_soil))
           stop "SNOW_OR_SOIL"
@@ -2991,10 +3460,10 @@ contains
     integer,                   intent(in) :: xstart
     integer, dimension(ix,jx), intent(in) :: vegtyp
     integer,                   intent(in) :: iswater
-    real,    dimension(ix,jx), intent(in) :: vardata
+    real(kind=kind_noahmp),    dimension(ix,jx), intent(in) :: vardata
     logical,                   intent(in) :: restart_flag
 
-    real,    dimension(ix,jx)             :: xdum
+    real(kind=kind_noahmp),    dimension(ix,jx)             :: xdum
     integer                               :: iret
     integer                               :: varid
 
@@ -3064,8 +3533,8 @@ contains
     integer,                                                    intent(in) :: nsoil
     integer,                                                    intent(in) :: iswater
     integer, dimension(ix, jx),                                 intent(in) :: vegtyp
-    real,    dimension(ix, nsoil, jx),                          intent(in) :: vardata
-    real,    dimension(ix, nsoil, jx)                                      :: xdum
+    real(kind=kind_noahmp),    dimension(ix, nsoil, jx),        intent(in) :: vardata
+    real(kind=kind_noahmp),    dimension(ix, nsoil, jx)                    :: xdum
     integer                                                                :: iret
     integer                                                                :: varid
     integer                                                                :: n
@@ -3107,7 +3576,7 @@ contains
 #ifdef MPP_LAND
       subroutine prepare_restart_file_mpp(outdir, version, igrid, llanduse, olddate, startdate,  &
        ixfull, jxfull, ixpar, jxpar, xstartpar, ystartpar,                                    &
-       nsoil, nsnow, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,                       &
+       nsoil, nsnow, nrad, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,                       &
        iswater, vegtyp)
 
     implicit none
@@ -3126,11 +3595,12 @@ contains
     integer,                               intent(in) :: ystartpar
     integer,                               intent(in) :: nsoil
     integer,                               intent(in) :: nsnow
+    integer,                               intent(in) :: nrad
     integer,                               intent(in) :: num_urban_layers
-    real,                                  intent(in) :: dx, dy
-    real,                                  intent(in) :: truelat1, truelat2
+    real(kind=kind_noahmp),                intent(in) :: dx, dy
+    real(kind=kind_noahmp),                intent(in) :: truelat1, truelat2
     integer,                               intent(in) :: mapproj
-    real,                                  intent(in) :: lat1, lon1, cen_lon
+    real(kind=kind_noahmp),                intent(in) :: lat1, lon1, cen_lon
     integer,                               intent(in) :: iswater
     integer, dimension(ixpar,jxpar),       intent(in) :: vegtyp
     integer, dimension(global_nx,global_ny) :: gvegtyp
@@ -3139,7 +3609,7 @@ contains
     if(my_id .eq. io_id) then
       call prepare_restart_file_seq(outdir, version, igrid, llanduse, olddate, startdate,  &
        global_nx, global_ny, global_nx, global_ny, xstartpar, ystartpar,               &
-       nsoil, nsnow, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,         &
+       nsoil, nsnow, nrad, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,         &
        iswater, gvegtyp)
     endif 
 
@@ -3150,7 +3620,7 @@ contains
 
   subroutine prepare_restart_file_seq(outdir, version, igrid, llanduse, olddate, startdate,  &
        ixfull, jxfull, ixpar, jxpar, xstartpar, ystartpar,                                    &
-       nsoil, nsnow, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,                       &
+       nsoil, nsnow, nrad, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,  &
        iswater, vegtyp)
 
     implicit none
@@ -3170,11 +3640,12 @@ contains
     integer,                               intent(in) :: ystartpar
     integer,                               intent(in) :: nsoil
     integer,                               intent(in) :: nsnow
+    integer,                               intent(in) :: nrad
     integer,                               intent(in) :: num_urban_layers
-    real,                                  intent(in) :: dx, dy
-    real,                                  intent(in) :: truelat1, truelat2
+    real(kind=kind_noahmp),                intent(in) :: dx, dy
+    real(kind=kind_noahmp),                intent(in) :: truelat1, truelat2
     integer,                               intent(in) :: mapproj
-    real,                                  intent(in) :: lat1, lon1, cen_lon
+    real(kind=kind_noahmp),                intent(in) :: lat1, lon1, cen_lon
     integer,                               intent(in) :: iswater
     integer, dimension(ixpar,jxpar),       intent(in) :: vegtyp
 
@@ -3183,7 +3654,7 @@ contains
     character(len=256) :: output_flnm
     integer :: ierr
     integer :: varid
-    integer :: dimid_times, dimid_datelen, dimid_ix, dimid_jx, dimid_dum, dimid_layers, dimid_snow_layers, dimid_sosn_layers, dimid_urban
+    integer :: dimid_times, dimid_datelen, dimid_ix, dimid_jx, dimid_dum, dimid_layers, dimid_snow_layers, dimid_sosn_layers, dimid_urban,dimid_numrad_layers
     character(len=19) :: date19
     integer :: rank
 
@@ -3232,6 +3703,7 @@ contains
     ierr = nf90_def_dim(ncid, "snow_layers", nsnow, dimid_snow_layers)
     ierr = nf90_def_dim(ncid, "sosn_layers", nsnow+nsoil, dimid_sosn_layers)
     ierr = nf90_def_dim(ncid, "urban_layers", num_urban_layers, dimid_urban)
+    ierr = nf90_def_dim(ncid, "rad_layers", nrad, dimid_numrad_layers)
 
     ierr = nf90_put_att(ncid, NF90_GLOBAL, "TITLE", "RESTART FILE FROM HRLDAS "//version)
     ierr = nf90_put_att(ncid, NF90_GLOBAL, "missing_value", -1.E33)
@@ -3285,8 +3757,8 @@ contains
 #ifdef MPP_LAND
   subroutine add_to_restart_2d_float_mpp(array, name, units, description)
     implicit none
-    real,            dimension(:,:),                              intent(in) :: array
-    real,            dimension(global_nx,global_ny) :: garray
+    real(kind=kind_noahmp),            dimension(:,:),            intent(in) :: array
+    real(kind=kind_noahmp),            dimension(global_nx,global_ny)        :: garray
     character(len=*),                                             intent(in) :: name
     character(len=*), optional,                                   intent(in) :: units
     character(len=*), optional,                                   intent(in) :: description
@@ -3299,8 +3771,8 @@ contains
 
   subroutine add_to_restart_2d_integer_mpp(array, name, units, description)
     implicit none
-    integer,            dimension(:,:),                              intent(in) :: array
-    integer,            dimension(global_nx,global_ny) :: garray
+    integer,            dimension(:,:),                           intent(in) :: array
+    integer,            dimension(global_nx,global_ny)                       :: garray
     character(len=*),                                             intent(in) :: name
     character(len=*), optional,                                   intent(in) :: units
     character(len=*), optional,                                   intent(in) :: description
@@ -3313,14 +3785,14 @@ contains
 
   subroutine add_to_restart_3d_mpp(array, name, units, description, layers)
     implicit none
-    real,            dimension(:,:,:),                            intent(in) :: array
+    real(kind=kind_noahmp),            dimension(:,:,:),          intent(in) :: array
     character(len=*),                                             intent(in) :: name
     character(len=*), optional,                                   intent(in) :: units
     character(len=*), optional,                                   intent(in) :: description
     character(len=4), optional,                                   intent(in) :: layers
     integer  :: k, klevel
 
-    real, allocatable, dimension(:,:,:) :: garray
+    real(kind=kind_noahmp), allocatable, dimension(:,:,:) :: garray
     klevel = size(array,2)
     allocate(garray(global_nx,klevel,global_ny))
 
@@ -3339,7 +3811,7 @@ contains
 
   subroutine add_to_restart_2d_float(array, name, units, description)
     implicit none
-    real,            dimension(:,:),                              intent(in) :: array
+    real(kind=kind_noahmp),            dimension(:,:),            intent(in) :: array
     character(len=*),                                             intent(in) :: name
     character(len=*), optional,                                   intent(in) :: units
     character(len=*), optional,                                   intent(in) :: description
@@ -3487,7 +3959,7 @@ contains
 
   subroutine add_to_restart_3d(array, name, units, description, layers)
     implicit none
-    real,            dimension(:,:,:),                            intent(in) :: array
+    real(kind=kind_noahmp),            dimension(:,:,:),                            intent(in) :: array
     character(len=*),                                             intent(in) :: name
     character(len=*), optional,                                   intent(in) :: units
     character(len=*), optional,                                   intent(in) :: description
@@ -3561,6 +4033,9 @@ contains
     else if (output_layers == "URBN") then
        ierr = nf90_inq_dimid(ncid, "urban_layers", dimid_kx)
        call error_handler(ierr, "ADD_TO_RESTART:  nf90_inq_dimid for 'urban_layers'")
+    else if (output_layers == "RADN") then
+       ierr = nf90_inq_dimid(ncid, "rad_layers", dimid_kx)
+       call error_handler(ierr, "ADD_TO_RESTART:  nf90_inq_dimid for 'rad_layers'")
     else
        stop "PANIC!"
     endif
@@ -3695,8 +4170,8 @@ contains
     integer,                            intent(in) :: ixfull
     integer,                            intent(in) :: jxfull
     character(len=*),                   intent(in)  :: name
-    real,             dimension(parallel_xstart:parallel_xend,jxfull), intent(out) :: array 
-    real,             dimension(global_nx,global_ny):: garray 
+    real(kind=kind_noahmp),             dimension(parallel_xstart:parallel_xend,jxfull), intent(out) :: array 
+    real(kind=kind_noahmp),             dimension(global_nx,global_ny):: garray 
     integer,          optional,         intent(out) :: return_error
       if(my_id .eq. IO_id) then
           call get_from_restart_2d_float(1, global_nx, 1, global_nx, global_ny, name, garray, return_error)
@@ -3729,10 +4204,10 @@ contains
     integer,                            intent(in) :: ixfull
     integer,                            intent(in) :: jxfull
     character(len=*),                   intent(in)  :: name
-    real,             dimension(:,:,:), intent(out) :: array
+    real(kind=kind_noahmp),             dimension(:,:,:), intent(out) :: array
     integer,          optional,         intent(out) :: return_error
     integer :: klevel,k
-    real, allocatable, dimension(:,:,:) :: garray
+    real(kind=kind_noahmp), allocatable, dimension(:,:,:) :: garray
 
     klevel = size(array,2)
     allocate(garray(global_nx,klevel,global_ny))
@@ -3773,7 +4248,7 @@ contains
     integer,                            intent(in) :: ixfull
     integer,                            intent(in) :: jxfull
     character(len=*),                   intent(in)  :: name
-    real,             dimension(parallel_xstart:parallel_xend,jxfull), intent(out) :: array
+    real(kind=kind_noahmp),             dimension(parallel_xstart:parallel_xend,jxfull), intent(out) :: array
     integer,          optional,         intent(out) :: return_error
 
     integer :: ierr
@@ -3892,7 +4367,7 @@ contains
     integer,                            intent(in) :: ixfull
     integer,                            intent(in) :: jxfull
     character(len=*),                   intent(in)  :: name
-    real,             dimension(:,:,:), intent(out) :: array
+    real(kind=kind_noahmp),             dimension(:,:,:), intent(out) :: array
     integer,          optional,         intent(out) :: return_error
 
     integer :: ierr
@@ -3976,7 +4451,7 @@ contains
     integer,                                  intent(in)  :: xend
     integer,                                  intent(in)  :: ystart
     integer,                                  intent(in)  :: yend
-    real, dimension(xstart:xend,ystart:yend), intent(out) :: array
+    real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: array
     integer,                                  intent(out) :: ierr
 
     character(len=256) :: flnm

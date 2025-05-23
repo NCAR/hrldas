@@ -178,8 +178,8 @@ outfile = addfile(setup_filename+".nc","c")
 
 
 outfile@TITLE = "OUTPUT FROM VECTOR CREATION SCRIPTS: m.barlage v20150608" ;
-outfile@DX        = 1000.0  ; not used
-outfile@DY        = 1000.0  ; not used
+outfile@DX        = 1000.0  ; 
+outfile@DY        = 1000.0  ; 
 outfile@TRUELAT1  = 45.0    ; not used
 outfile@TRUELAT2  = 45.0    ; not used
 outfile@STAND_LON = 45.0    ; not used
