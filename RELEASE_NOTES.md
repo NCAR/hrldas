@@ -1,5 +1,57 @@
 # HRLDAS/Noah-MP model release notes
 
+## HRLDAS/Noah-MP version 5.1.0 release
+
+### Noah-MP LSM capabilities/enhancements
+
+- Please see Noah-MP code release notes for more details: https://github.com/NCAR/noahmp/blob/master/RELEASE_NOTES.md
+
+
+### Noah-MP LSM bug fixes
+
+- Please see Noah-MP code release notes for more details: https://github.com/NCAR/noahmp/blob/master/RELEASE_NOTES.md
+
+
+### HRLDAS module capabilities/enhancements
+
+- add and improve tutorial materials (https://github.com/NCAR/hrldas/pull/63, https://github.com/NCAR/hrldas/pull/66, https://github.com/NCAR/hrldas/pull/70)
+- improve ERA5-Land pre-processing code (https://github.com/NCAR/hrldas/pull/121)
+- improve code to prepare ERA5-Land forcing (https://github.com/NCAR/hrldas/pull/133)
+- add read-in capability for urban 2d fraction (https://github.com/NCAR/hrldas/pull/131)
+- add NLDAS2 Initial conditions (https://github.com/NCAR/hrldas/pull/158)
+- add new snow compaction option for Abolafia-Rosenzweig et al 2024 scheme (JAMES; https://doi.org/10.1029/2023MS003869) (https://github.com/NCAR/hrldas/pull/242)
+- add new wetland option for Zhang et al 2022 scheme (WRR; https://doi.org/10.1029/2021WR030573) (https://github.com/NCAR/hrldas/pull/255)
+- add SNICAR v3 snow albedo scheme and new namelist option for Lin et al 2024 (JHM; https://doi.org/10.1175/JHM-D-24-0082.1) (https://github.com/NCAR/hrldas/pull/257)
+- add new snow cover option for Abolafia-Rosenzweig et al 2025 scheme (JAMES; doi:10.1029/2024MS004704) (https://github.com/NCAR/hrldas/pull/259)
+
+
+### HRLDAS module bug fixes
+
+- update example single point forcing file with UTC (https://github.com/NCAR/hrldas/pull/61)
+- bug fix and parameter table update for urban physics (https://github.com/NCAR/hrldas/pull/76)
+- fix issues with ERA5 forcing processing (https://github.com/NCAR/hrldas/pull/78, https://github.com/NCAR/hrldas/pull/80)
+- bug fix for create_forcing (https://github.com/NCAR/hrldas/pull/107)
+- bug fix for example namelist for rainrate (https://github.com/NCAR/hrldas/pull/109)
+- bug fix for the ground heat flux sign in diagnostic output for urban model (https://github.com/NCAR/hrldas/pull/116)
+- bug fix for SLUCM saturated humidity calculation (https://github.com/NCAR/hrldas/pull/119)
+- modify full_ic_frq mod for gfortran compiler and start j loop (https://github.com/NCAR/hrldas/pull/128)
+- bug fix for compile setup of different compiler for NCAR Derecho HPC (https://github.com/NCAR/hrldas/pull/149)
+- bug fix for restart frequency setup for gfortran compiler (https://github.com/NCAR/hrldas/pull/151)
+- bug fix for LW calculation in SLUCM (https://github.com/NCAR/hrldas/pull/167)
+- correct specific humidity magnitude for ERA5-Land forcing (https://github.com/NCAR/hrldas/pull/204)
+- add a instruction/note file under the tutorial folder to list all these explanations for variables in HRLDAS_setup file (https://github.com/NCAR/hrldas/pull/215)
+- update doc and codes for GLDAS (https://github.com/NCAR/hrldas/pull/228)
+- urban bug fix included in WRF (https://github.com/NCAR/hrldas/pull/240)
+- Bug fix for writing DY global attribute to hrldas_setup file (https://github.com/NCAR/hrldas/pull/260)
+- bug fix for redundant urban printout (https://github.com/NCAR/hrldas/pull/261)
+
+
+### External module capabilities/enhancements
+
+- None
+
+
+
 ## HRLDAS/Noah-MP version 5.0 release
 
 ### LSM capabilities/enhancements
