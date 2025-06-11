@@ -4,7 +4,7 @@
 ### python script to extract gldas variables
 ### origional perl code from Mike's directory
 ### migrate from perl to python 
-
+### 2024-11-14 update by Tzu-Shun Lin
 import glob
 import numpy as np
 import sys,os
@@ -38,30 +38,30 @@ for var in range(len(vars_name)):
             modays = leap_days
         if (yrs[yy] == "00" or "04" or "08" or "12" or "16"):
             modays = leap_days
-        for julday in range(day_start+1,day_end+2,1):
+        for julday in range(day_start,day_end+1,1):
             for mo in range(0,12,1):
                 if (julday>modays[mo] and julday<=modays[mo+1]):
-		    day = (julday - modays[mo])
+                    day = (julday - modays[mo])
                     if (mo<9):
-		        mon = "0"+str(mo+1)
+                        mon = "0"+str(mo+1)
                     else:
-		        mon = str(mo+1)
+                        mon = str(mo+1)
                     if (day<10):
                         day = "0"+str(day)
                     else:
                         day = str(day)
-		    infiles = sorted(glob.glob(data_dir+"/GLDAS_NOAH025_3H.A"+cc[0]+yrs[yy]+(mon)+(day)+"*"))
-		    if (len(infiles)>0):
-			intime      = cc[0]+yrs[yy]+(mon)+(day) 
-			infile_list = infiles
+                    infiles = sorted(glob.glob(data_dir+"/GLDAS_NOAH025_3H.A"+cc[0]+yrs[yy]+(mon)+(day)+"*"))
+                    if (len(infiles)>0):
+                        intime      = cc[0]+yrs[yy]+(mon)+(day)
+                        infile_list = infiles
             for hr in range(0,8):
-	        infile = infile_list[hr]
-		print "working on date: ",intime
-		outfile= results_dir+"/"+vars_short[var]+"/GLDAS_"+vars_name[var]+"_"+intime+hrs[hr]
-		if not os.path.exists(outfile):
-		    print "working on file: ",infile
-	            os.system("ncks -v "+vars_name[var]+" "+infile+" "+outfile)
-	        else:
-		    print "file exist, move to next one"
+                infile = infile_list[hr]
+                print ("working on date: ",intime)
+                outfile= results_dir+"/"+vars_short[var]+"/GLDAS_"+vars_name[var]+"_"+intime+hrs[hr]
+                if not os.path.exists(outfile):    
+                    print ("working on file: ",infile)
+                    os.system("ncks -v "+vars_name[var]+" "+infile+" "+outfile)
+                else:
+                    print ("file exist, move to next one")
 
-print "Successfully extract necessary variables!"
+print ("Successfully extract necessary variables!")

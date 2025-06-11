@@ -2380,7 +2380,7 @@ subroutine open_netcdf_for_output(output_flnm, ncid, version, ix, jx, geo_em, in
   ierr = nf90_put_att(ncid, NF90_GLOBAL, "DX", geo_em%proj%dx)
   call error_handler(ierr, "Problem nf90_put_att DX")
 
-  ierr = nf90_put_att(ncid, NF90_GLOBAL, "DY", geo_em%proj%dx)
+  ierr = nf90_put_att(ncid, NF90_GLOBAL, "DY", geo_em%proj%dy)
   call error_handler(ierr, "Problem nf90_put_att DY")
 
   ierr = nf90_put_att(ncid, NF90_GLOBAL, "TRUELAT1", geo_em%proj%truelat1)

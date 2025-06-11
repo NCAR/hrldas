@@ -44,6 +44,7 @@ contains
     real                              :: truelat2
     real                              :: stdlon
     real                              :: dx
+    real                              :: dy
     real                              :: latinc
     real                              :: loninc
     real                              :: la1
@@ -117,8 +118,11 @@ contains
        iret = nf90_get_att(ncid, NF90_GLOBAL, "DX" , dx)
        call error_handler(iret, "STOP:  nf90_get_att:  DX")
 
+       iret = nf90_get_att(ncid, NF90_GLOBAL, "DY" , dy)
+       call error_handler(iret, "STOP:  nf90_get_att:  DY")
+
        call map_set(PROJ_LC, wrfinput%proj, lat1=la1, lon1=lo1, knowni=1.0, knownj=1.0, &
-            truelat1=truelat1, truelat2=truelat2, stdlon=stdlon, dx=dx)
+            truelat1=truelat1, truelat2=truelat2, stdlon=stdlon, dx=dx, dy=dy)
 
     else if (map_proj == PROJ_PS) then
 
@@ -131,8 +135,11 @@ contains
        iret = nf90_get_att(ncid, NF90_GLOBAL, "DX" , dx)
        call error_handler(iret, "STOP:  nf90_get_att:  DX")
 
+       iret = nf90_get_att(ncid, NF90_GLOBAL, "DY" , dy)
+       call error_handler(iret, "STOP:  nf90_get_att:  DY")
+
        call map_set(PROJ_PS, wrfinput%proj, lat1=la1, lon1=lo1, truelat1=truelat1, &
-            knowni=1.0, knownj=1.0, stdlon=stdlon, dx=dx)
+            knowni=1.0, knownj=1.0, stdlon=stdlon, dx=dx, dy=dy)
 
     else if (map_proj == PROJ_MERC) then
 
@@ -142,13 +149,19 @@ contains
        iret = nf90_get_att(ncid, NF90_GLOBAL, "DX" , dx)
        call error_handler(iret, "STOP:  nf90_get_att:  DX")
 
+       iret = nf90_get_att(ncid, NF90_GLOBAL, "DY" , dy)
+       call error_handler(iret, "STOP:  nf90_get_att:  DY")
+
        call map_set(PROJ_MERC, wrfinput%proj, lat1=la1, lon1=lo1, knowni=1.0, knownj=1.0, &
-            truelat1=truelat1, dx=dx)
+            truelat1=truelat1, dx=dx, dy=dy)
 
     else if (map_proj == PROJ_CASSINI) then
 
        iret = nf90_get_att(ncid, NF90_GLOBAL, "DX" , dx)
        call error_handler(iret, "STOP:  nf90_get_att:  DX")
+
+       iret = nf90_get_att(ncid, NF90_GLOBAL, "DY" , dy)
+       call error_handler(iret, "STOP:  nf90_get_att:  DY")
 
        iret = nf90_get_att(ncid, NF90_GLOBAL, "POLE_LAT" , pole_lat)
        call error_handler(iret, "STOP:  nf90_get_att:  POLE_LAT")
@@ -161,11 +174,11 @@ contains
 
        ! For Cassini projection, module_llxy assumes a spherical earth
        ! with circumference EARTH_CIRC_M
-       latinc = 360.0*dx/EARTH_CIRC_M
+       latinc = 360.0*dy/EARTH_CIRC_M
        loninc = 360.0*dx/EARTH_CIRC_M
 
        call map_set(PROJ_CASSINI, wrfinput%proj, lat1=la1, lon1=lo1, latinc=latinc, loninc=loninc, &
-            knowni=1.0, knownj=1.0, lat0=pole_lat, lon0=pole_lon, stdlon=stdlon)
+            knowni=1.0, knownj=1.0, lat0=pole_lat, lon0=pole_lon, stdlon=stdlon, dx=dx, dy=dy)
 
     else if (map_proj == PROJ_LATLON) then
        stop "PROJ_LATLON is not a valid map projection for WRF."

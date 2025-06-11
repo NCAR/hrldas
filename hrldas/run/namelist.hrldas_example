@@ -1,8 +1,8 @@
 &NOAHLSM_OFFLINE
 
- HRLDAS_SETUP_FILE = "/glade/scratch/cenlinhe/NoahMP_NLDAS/HRLDAS_setup_2000010100_d1"
- INDIR = "/glade/scratch/cenlinhe/NoahMP_NLDAS/forcing/"
- OUTDIR = "/glade/scratch/cenlinhe/test/hrldas_output/"
+ HRLDAS_SETUP_FILE = "/init_condition_dir/HRLDAS_setup_2000010100_d1"
+ INDIR = "/atmos_forcing_dir/forcing/"
+ OUTDIR = "/model_output_dir/hrldas_output/"
 
  START_YEAR  = 2000
  START_MONTH = 01
@@ -10,7 +10,7 @@
  START_HOUR  = 00
  START_MIN   = 00
 
-! RESTART_FILENAME_REQUESTED = "/glade/scratch/cenlinhe/test/hrldas_output/RESTART.2000010100_DOMAIN1"
+! RESTART_FILENAME_REQUESTED = "/model_restart_dir/RESTART.2000010100_DOMAIN1"
 
  KDAY = 365
  SPINUP_LOOPS = 0
@@ -22,7 +22,18 @@
  FORCING_NAME_P = "PSFC"
  FORCING_NAME_LW = "LWDOWN"
  FORCING_NAME_SW = "SWDOWN"
- FORCING_NAME_PR = "PRCP"
+ FORCING_NAME_PR = "RAINRATE"
+
+ ! the following forcing is only needed for SNICAR snow albedo option
+ FORCING_NAME_BCPHI = "BCPHI"
+ FORCING_NAME_BCPHO = "BCPHO"
+ FORCING_NAME_OCPHI = "OCPHI"
+ FORCING_NAME_OCPHO = "OCPHO"
+ FORCING_NAME_DUST1 = "DUST1"
+ FORCING_NAME_DUST2 = "DUST2"
+ FORCING_NAME_DUST3 = "DUST3"
+ FORCING_NAME_DUST4 = "DUST4"
+ FORCING_NAME_DUST5 = "DUST5"
 
  DYNAMIC_VEG_OPTION                = 4
  CANOPY_STOMATAL_RESISTANCE_OPTION = 1
@@ -34,43 +45,62 @@
  FROZEN_SOIL_OPTION                = 1
  SUPERCOOLED_WATER_OPTION          = 1
  RADIATIVE_TRANSFER_OPTION         = 3
- SNOW_ALBEDO_OPTION                = 2
+ SNOW_ALBEDO_OPTION                = 1
+ SNOW_COMPACTION_OPTION            = 2
+ SNOW_COVER_OPTION                 = 1
  PCP_PARTITION_OPTION              = 1
  SNOW_THERMAL_CONDUCTIVITY         = 1
  TBOT_OPTION                       = 2
- TEMP_TIME_SCHEME_OPTION           = 1
+ TEMP_TIME_SCHEME_OPTION           = 3
  GLACIER_OPTION                    = 1
- SURFACE_RESISTANCE_OPTION         = 1
+ SURFACE_RESISTANCE_OPTION         = 4
  SOIL_DATA_OPTION                  = 1
  PEDOTRANSFER_OPTION               = 1
  CROP_OPTION                       = 0
  IRRIGATION_OPTION                 = 0
  IRRIGATION_METHOD                 = 0
  TILE_DRAINAGE_OPTION              = 0
+ WETLAND_OPTION                    = 0
+
+ ! the following options only work for SNICAR snow albedo scheme
+ SNICAR_BANDNUMBER_OPTION          = 1
+ SNICAR_SOLARSPEC_OPTION           = 1
+ SNICAR_SNOWOPTICS_OPTION          = 3
+ SNICAR_DUSTOPTICS_OPTION          = 1
+ SNICAR_RTSOLVER_OPTION            = 2
+ SNICAR_SNOWSHAPE_OPTION           = 3
+ SNICAR_USE_AEROSOL                = .true.
+ SNICAR_SNOWBC_INTMIX              = .true.
+ SNICAR_SNOWDUST_INTMIX            = .false.
+ SNICAR_USE_OC                     = .false.
+ SNICAR_AEROSOL_READTABLE          = .false.
+ SNICAR_OPTIC_FLNM                 = "snicar_optics_5bnd_c013122.nc"
+ SNICAR_AGE_FLNM                   = "snicar_drdt_bst_fit_60_c070416.nc"
 
  FORCING_TIMESTEP = 3600
  NOAH_TIMESTEP    = 1800
+ SOIL_TIMESTEP    = 0.0  ! 0 -> use main NoahMP timestep
  OUTPUT_TIMESTEP  = 3600
 
- SPLIT_OUTPUT_COUNT = 1
- SKIP_FIRST_OUTPUT = .false.
+ SPLIT_OUTPUT_COUNT      = 1
+ SKIP_FIRST_OUTPUT       = .false.
  RESTART_FREQUENCY_HOURS = 24
+ NOAHMP_OUTPUT           = 0 ! 0 -> standard output, 1 -> with additional process output
 
 ! XSTART = 40
 ! XEND   = 380
 ! YSTART = 77
 ! YEND   = 201
 
- NSOIL=4
- soil_thick_input(1) = 0.10
+ NSOIL = 4
+ soil_thick_input(1) = 0.10 ! unit of meter
  soil_thick_input(2) = 0.30
  soil_thick_input(3) = 0.60
  soil_thick_input(4) = 1.00
 
- ZLVL = 10.0
+ ZLVL = 10.0 ! forcing height, unit of meter
 
  SF_URBAN_PHYSICS = 0
  USE_WUDAPT_LCZ = 0
- 
-/
 
+/

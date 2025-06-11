@@ -56,6 +56,7 @@ OBJS = \
         ../../noahmp/drivers/hrldas/PedoTransferSR2006Mod.o \
         ../../noahmp/utility/Machine.o \
         ../../noahmp/utility/CheckNanMod.o \
+        ../../noahmp/utility/PiecewiseLinearInterp1dMod.o \
         ../../noahmp/src/ConstantDefineMod.o \
         ../../noahmp/src/ConfigVarType.o \
         ../../noahmp/src/ForcingVarType.o \
@@ -93,6 +94,7 @@ OBJS = \
         ../../noahmp/src/SnowLayerDivideMod.o \
         ../../noahmp/src/SnowLayerWaterComboMod.o \
         ../../noahmp/src/SnowpackCompactionMod.o \
+        ../../noahmp/src/SnowpackCompactionAR24Mod.o \
         ../../noahmp/src/SnowpackHydrologyMod.o \
         ../../noahmp/src/SnowWaterMainMod.o \
         ../../noahmp/src/SoilHydraulicPropertyMod.o \
@@ -119,9 +121,15 @@ OBJS = \
         ../../noahmp/src/NoahmpMainMod.o \
         ../../noahmp/src/CanopyRadiationTwoStreamMod.o \
         ../../noahmp/src/GroundAlbedoMod.o \
+        ../../noahmp/src/SnowAerosolSnicarMod.o \
         ../../noahmp/src/SnowAgingBatsMod.o \
+        ../../noahmp/src/SnowAgingSnicarMod.o \
         ../../noahmp/src/SnowAlbedoBatsMod.o \
         ../../noahmp/src/SnowAlbedoClassMod.o \
+        ../../noahmp/src/SnowAlbedoSnicarMod.o \
+        ../../noahmp/src/SnowFreshRadiusMod.o \
+        ../../noahmp/src/SnowInputSnicarMod.o \
+        ../../noahmp/src/SnowRadiationSnicarMod.o \
         ../../noahmp/src/SurfaceAlbedoMod.o \
         ../../noahmp/src/SurfaceRadiationMod.o \
         ../../noahmp/src/HumiditySaturationMod.o \
@@ -142,6 +150,7 @@ OBJS = \
         ../../noahmp/src/SoilWaterSupercoolKoren99Mod.o \
         ../../noahmp/src/SoilWaterSupercoolNiu06Mod.o \
         ../../noahmp/src/SnowCoverGroundNiu07Mod.o \
+        ../../noahmp/src/SnowCoverGroundAR25Mod.o \
         ../../noahmp/src/GroundRoughnessPropertyMod.o \
         ../../noahmp/src/SurfaceEmissivityMod.o \
         ../../noahmp/src/PsychrometricVariableMod.o \
@@ -181,7 +190,9 @@ OBJS = \
         ../../noahmp/src/SurfaceEmissivityGlacierMod.o \
         ../../noahmp/src/SurfaceEnergyFluxGlacierMod.o \
         ../../noahmp/src/SurfaceRadiationGlacierMod.o \
-        ../../noahmp/src/WaterMainGlacierMod.o
+        ../../noahmp/src/RunoffSurfaceWetlandMod.o \
+        ../../noahmp/src/WetlandWaterZhang22Mod.o \
+	../../noahmp/src/WaterMainGlacierMod.o
 
 CMD = hrldas.exe
 all:	$(CMD)

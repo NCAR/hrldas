@@ -1,16 +1,16 @@
 &NOAHLSM_OFFLINE
 
- HRLDAS_SETUP_FILE = "/glade/scratch/cenlinhe/NoahMP_NLDAS/HRLDAS_setup_2000010100_d1"
- INDIR = "/glade/scratch/cenlinhe/NoahMP_NLDAS/forcing/"
- OUTDIR = "/glade/scratch/cenlinhe/test/hrldas_output/"
+ HRLDAS_SETUP_FILE = "hrldas_datadir/init/HRLDAS_setup_1980010100_d1"
+ INDIR = "hrldas_datadir/forcing/"
+ OUTDIR = "hrldas_output/"
 
- START_YEAR  = 2000
+ START_YEAR  = 1980
  START_MONTH = 01
  START_DAY   = 01
  START_HOUR  = 00
  START_MIN   = 00
 
-! RESTART_FILENAME_REQUESTED = "/glade/scratch/cenlinhe/test/hrldas_output/RESTART.2000010100_DOMAIN1"
+! RESTART_FILENAME_REQUESTED = "hrldas_output/RESTART.2000010100_DOMAIN1"
 
  KDAY = 365
  SPINUP_LOOPS = 0
@@ -34,19 +34,22 @@
  FROZEN_SOIL_OPTION                = 1
  SUPERCOOLED_WATER_OPTION          = 1
  RADIATIVE_TRANSFER_OPTION         = 3
- SNOW_ALBEDO_OPTION                = 2
+ SNOW_ALBEDO_OPTION                = 1
+ SNOW_COMPACTION_OPTION            = 2
+ SNOW_COVER_OPTION                 = 1
  PCP_PARTITION_OPTION              = 1
  SNOW_THERMAL_CONDUCTIVITY         = 1
  TBOT_OPTION                       = 2
- TEMP_TIME_SCHEME_OPTION           = 1
+ TEMP_TIME_SCHEME_OPTION           = 3
  GLACIER_OPTION                    = 1
- SURFACE_RESISTANCE_OPTION         = 1
+ SURFACE_RESISTANCE_OPTION         = 4
  SOIL_DATA_OPTION                  = 1
  PEDOTRANSFER_OPTION               = 1
  CROP_OPTION                       = 0
  IRRIGATION_OPTION                 = 0
  IRRIGATION_METHOD                 = 0
  TILE_DRAINAGE_OPTION              = 0
+ WETLAND_OPTION                    = 0
 
  FORCING_TIMESTEP = 3600
  NOAH_TIMESTEP    = 1800
