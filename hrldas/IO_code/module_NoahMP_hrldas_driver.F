@@ -882,7 +882,7 @@ contains
        endif
 
 #endif
-       if (NoahmpIO%IOPT_ALB == 3 .and. NoahmpIO%SNICAR_AEROSOL_READTABLE .eqv. .false.) then
+       if((NoahmpIO%IOPT_ALB == 3) .and. (NoahmpIO%SNICAR_AEROSOL_READTABLE .eqv. .false.)) then
           call READFORC_AEROSOL(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,               &
              NoahmpIO%OLDDATE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,     &
              NoahmpIO%reset_spinup_datea, NoahmpIO%startdate,                                       &
