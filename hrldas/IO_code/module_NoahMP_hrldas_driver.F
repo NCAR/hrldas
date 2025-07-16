@@ -188,6 +188,45 @@ contains
     endif
 
 !---------------------------------------------------------------------
+! Noah-MP Mosiac Scheme: Read Landuse fractions (3D)
+!---------------------------------------------------------------------
+
+    if(NoahmpIO%IOPT_MOSAIC .eq. 1) then                               ! subgrid tiling based on land cover type only
+
+      if ( trim(noahmpio%llanduse) == "usgs" ) then
+         noahmpio%NumMosaicCat = 28
+      else if ( trim(noahmpio%llanduse) == "modified_igbp_modis_noah") then
+         noahmpio%NumMosaicCat = 21
+      else if ( trim(noahmpio%llanduse) == "NLCD40") THEN
+         noahmpio%NumMosaicCat = 40
+      end if
+
+      if ( .not. allocated (NoahmpIO%landusef)          ) &
+          allocate ( NoahmpIO%landusef            (XSTART:XEND, 1:noahmpio%NumMosaicCat, YSTART:YEND) )
+      if ( .not. allocated (NoahmpIO%landusefRescaled)  ) &
+          allocate ( NoahmpIO%landusefRescaled    (XSTART:XEND, 1:noahmpio%NumMosaicCat, YSTART:YEND) )
+      if ( .not. allocated (NoahmpIO%landuseIndexSorted)) &
+          allocate ( NoahmpIO%landuseIndexSorted  (XSTART:XEND, 1:noahmpio%NumMosaicCat, YSTART:YEND) )
+      if ( .not. allocated (NoahmpIO%NumberOfTiles)     ) &
+          allocate ( NoahmpIO%NumberOfTiles       (XSTART:XEND,                          YSTART:YEND) )
+
+      NoahmpIO%landusef            = 0.0
+      NoahmpIO%landusefRescaled    = 0.0
+      NoahmpIO%landuseIndexSorted  = 0
+      NoahmpIO%NumberOfTiles       = 0
+      
+      ReadLanduseFraction (NoahmpIO%HRLDAS_SETUP_FILE,              &
+                           NoahmpIO%XSTART,NoahmpIO%XEND,           &
+                           NoahmpIO%YSTART, NoahmpIO%YEND,          &
+                           noahmpio%NumMosaicCat, NoahmpIO%landusef )
+
+      call NoahmpMosaicSortLanduse (NoahmpIO)                          ! sort the landuse fraction decreasing order and identify maximum number of title
+                                                                       ! based on 90% area fraction criteria. and rescale them to 100%
+
+    endif                                                              ! more options can be added with a else option for soil type or hydro type etc.
+
+
+!---------------------------------------------------------------------
 !  Allocate multi-dimension fields for subwindow calculation
 !---------------------------------------------------------------------
 
@@ -642,9 +681,9 @@ contains
 #endif
 
           call READINIT_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend,    &
-                              NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%NSOIL, NoahmpIO%DZS,  &
-                              NoahmpIO%OLDDATE, LDASIN_VERSION, NoahmpIO%SMOIS,              &
-                              NoahmpIO%TSLB, NoahmpIO%CANWAT, NoahmpIO%TSK, NoahmpIO%SNOW,   &
+                              NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%NSOIL, NoahmpIO%DZS,   &
+                              NoahmpIO%OLDDATE, LDASIN_VERSION, NoahmpIO%SMOIS,               &
+                              NoahmpIO%TSLB, NoahmpIO%CANWAT, NoahmpIO%TSK, NoahmpIO%SNOW,    &
                               NoahmpIO%SNOWH, NoahmpIO%FNDSNOWH)
 
           NoahmpIO%VEGFRA =  0.0
@@ -1105,23 +1144,9 @@ contains
                call wrf_message('calling WTABLE')
 
                !gmm update wtable from lateral flow and shed water to rivers
-               call WTABLE_MMF_NOAHMP(NoahmpIO,                                             &
-                                  NoahmpIO%NSOIL, NoahmpIO%XLAND, NoahmpIO%XICE,            & 
-                                  NoahmpIO%XICE_THRESHOLD, NoahmpIO%ISICE,                  &
-                                  NoahmpIO%ISLTYP, NoahmpIO%SMOISEQ, NoahmpIO%DZS,          &       
-                                  NoahmpIO%WTDDT, NoahmpIO%FDEPTHXY, NoahmpIO%AREAXY,       &
-                                  NoahmpIO%TERRAIN, NoahmpIO%ISURBAN, NoahmpIO%IVGTYP,      &
-                                  NoahmpIO%RIVERCONDXY, NoahmpIO%RIVERBEDXY, NoahmpIO%EQZWT,& 
-                                  NoahmpIO%PEXPXY, NoahmpIO%SMOIS, NoahmpIO%SH2O,           & 
-                                  NoahmpIO%SMCWTDXY, NoahmpIO%ZWTXY, NoahmpIO%QLATXY,       & 
-                                  NoahmpIO%QRFXY, NoahmpIO%DEEPRECHXY, NoahmpIO%QSPRINGXY,  &
-                                  NoahmpIO%QSLATXY, NoahmpIO%QRFSXY, NoahmpIO%QSPRINGSXY,   &  
-                                  NoahmpIO%RECHXY,                                          &
-                                  NoahmpIO%IDS, NoahmpIO%IDE, NoahmpIO%JDS, NoahmpIO%JDE,   &
-                                  NoahmpIO%KDS, NoahmpIO%KDE, NoahmpIO%IMS, NoahmpIO%IME,   &
-                                  NoahmpIO%JMS,NoahmpIO%JME, NoahmpIO%KMS,NoahmpIO%KME,     &
-                                  NoahmpIO%ITS,NoahmpIO%ITE, NoahmpIO%JTS,NoahmpIO%JTE,     &
-                                  NoahmpIO%KTS,NoahmpIO%KTE)
+
+               call WTABLE_MMF_NOAHMP(NoahmpIO)
+               
             endif ! MMF timestep
          endif ! MMF groundwater
 

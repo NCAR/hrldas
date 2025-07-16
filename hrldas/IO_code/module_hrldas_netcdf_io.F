@@ -587,6 +587,74 @@ contains
 
 !---------------------------------------------------------------------------------------------------------
 
+  subroutine ReadLanduseFraction(wrfinput_flnm,         & ! in
+                                 xstart, xend,          & ! in
+                                 ystart, yend,          & ! in
+                                 NumberLulcCat,         & ! in
+                                 landusef)                ! out
+
+    implicit none
+    character(len=*),          intent(in)  :: wrfinput_flnm
+    integer,                   intent(in)  :: xstart, xend, ystart, yend, NumberLulcCat
+    real(kind=kind_noahmp),    dimension(xstart:xend,1:NumberLulcCat,ystart:yend), intent(out) :: landusef
+    
+    character(len=256) :: units
+    integer :: ierr
+    integer :: ncid
+    real(kind=kind_noahmp),    dimension(xstart:xend,1:NumberLulcCat,ystart:yend) :: xdum
+    integer :: rank
+    integer :: iltype
+
+#ifdef _PARALLEL_  
+    call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+    if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
+#else
+    rank = 0
+#endif
+
+
+    ! Open the NetCDF file.
+    if (rank == 0) write(*,'("wrfinput_flnm: ''", A, "''")') trim(wrfinput_flnm)
+#ifdef _PARALLEL_
+    ierr = nf90_open_par(wrfinput_flnm, NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+#else
+    ierr = nf90_open(wrfinput_flnm, NF90_NOWRITE, ncid)
+#endif
+    if (ierr /= 0) then
+       write(*,'("ReadLanduseFraction:  Problem opening wrfinput file: ''", A, "''")') trim(wrfinput_flnm)
+#ifdef _PARALLEL_
+       call mpi_finalize(ierr)
+       if (ierr /= 0) write(*, '("Problem with MPI_finalize.")')
+#endif
+       stop
+    endif
+
+    ! Get landuse fraction
+    name = "LANDUSEF"
+    iret = nf90_inq_varid(ncid,  name,  varid)
+    if (iret == 0) then
+
+      ierr = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,NumberLulcCat/))
+
+      do iltype = 1,NumberLulcCat
+        landusef(:,iltype,:) = xdum(:,:,iltype)
+      end do
+
+    else
+
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using default values."
+
+    endif
+
+    ! Close the NetCDF file
+    ierr = nf90_close(ncid)
+    if (ierr /= 0) stop "MODULE_HRLDAS_NETCDF_IO:  ReadLanduseFraction:  NF90_CLOSE"
+
+
+  end subroutine ReadLanduseFraction
+
+!---------------------------------------------------------------------------------------------------------
+
   subroutine read_agriculture_data(agdata_flnm,                            &
        xstart, xend,                                                      &
        ystart, yend,                                                      &
