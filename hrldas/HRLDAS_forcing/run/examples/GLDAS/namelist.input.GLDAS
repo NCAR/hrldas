@@ -14,6 +14,7 @@
  INIT_LAI           = .TRUE.
  VARY_LAI           = .TRUE.
  MASK_WATER         = .TRUE.
+ INIT_MMF           = .FALSE.
 
  geo_em_flnm        = "./geo_em.d01.nc"
  Zfile_template     = "./GLDAS/GLDASp4_elevation_025d.nc4"

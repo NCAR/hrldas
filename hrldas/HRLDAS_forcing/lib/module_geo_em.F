@@ -25,23 +25,27 @@ module module_geo_em
      integer :: islake
      integer :: isurban
      integer :: isice
-     real, pointer, dimension(:,:)   :: lat    ! Grid point latitudes
-     real, pointer, dimension(:,:)   :: lon    ! Grid point longitudes
-     real, pointer, dimension(:,:)   :: ter    ! Terrain field
-     real, pointer, dimension(:,:)   :: use    ! Land-use (vegetation) field
-     real, pointer, dimension(:,:)   :: tmn    ! Deep soil temperature
-     real, pointer, dimension(:,:)   :: soi    ! Soil type
-     real, pointer, dimension(:,:)   :: msk    ! Land mask
-     real, pointer, dimension(:,:)   :: mmx    ! mapfac_mx
-     real, pointer, dimension(:,:)   :: mmy    ! mapfac_my
-     real, pointer, dimension(:,:)   :: ice    ! Seaice placeholder
-     real, pointer, dimension(:,:,:) :: veg
-     real, pointer, dimension(:,:,:) :: lai
+     real, pointer, dimension(:,:)   :: lat      ! Grid point latitudes
+     real, pointer, dimension(:,:)   :: lon      ! Grid point longitudes
+     real, pointer, dimension(:,:)   :: ter      ! Terrain field
+     real, pointer, dimension(:,:)   :: use      ! Land-use (vegetation) field
+     real, pointer, dimension(:,:)   :: tmn      ! Deep soil temperature
+     real, pointer, dimension(:,:)   :: soi      ! Soil type
+     real, pointer, dimension(:,:)   :: msk      ! Land mask
+     real, pointer, dimension(:,:)   :: mmx      ! mapfac_mx
+     real, pointer, dimension(:,:)   :: mmy      ! mapfac_my
+     real, pointer, dimension(:,:)   :: ice      ! Seaice placeholder
+     real, pointer, dimension(:,:,:) :: veg      ! Green vegetation fraction
+     real, pointer, dimension(:,:,:) :: lai      ! Leaf arex index
+     real, pointer, dimension(:,:)   :: fdepth   ! Transmissivity e-folding depth
+     real, pointer, dimension(:,:)   :: rechclim ! Climatological recharge
+     real, pointer, dimension(:,:)   :: eqzwt    ! Climatological water table depth
+     real, pointer, dimension(:,:)   :: riverbed ! Riverbed elevation
   end type geo_em_type
 
 contains
 
-  subroutine read_geo_em_file(flnm, geo_em, ierr)
+  subroutine read_geo_em_file(flnm, geo_em, ierr, init_mmf)
 
 !---------------------------------------------------------------
 !  At the moment, all we need from the geo_em file is the 
@@ -58,6 +62,7 @@ contains
     character(len=*),   intent(in)  :: flnm
     type (geo_em_type), intent(out) :: geo_em
     integer,            intent(out) :: ierr
+    logical,            intent(in)  :: init_mmf
     ! Local:
     integer :: ncid
     integer :: iret
@@ -192,6 +197,24 @@ contains
 ! Get MAPFAC_MY (for MMF groundwater)
     allocate(geo_em%mmy(geo_em%idim, geo_em%jdim))
     call get_2d("MAPFAC_MY", ncid, geo_em%mmy, geo_em%idim, geo_em%jdim)
+
+    if (init_mmf) then
+        ! Get FDEPTH (for MMF groundwater)
+        allocate(geo_em%fdepth(geo_em%idim, geo_em%jdim))
+        call get_2d("FDEPTH", ncid, geo_em%fdepth, geo_em%idim, geo_em%jdim)
+
+        ! Get RECHCLIM (for MMF groundwater)
+        allocate(geo_em%rechclim(geo_em%idim, geo_em%jdim))
+        call get_2d("RECHCLIM", ncid, geo_em%rechclim, geo_em%idim, geo_em%jdim)
+
+        ! Get EQZWT (for MMF groundwater)
+        allocate(geo_em%eqzwt(geo_em%idim, geo_em%jdim))
+        call get_2d("EQZWT", ncid, geo_em%eqzwt, geo_em%idim, geo_em%jdim)
+
+        ! Get RIVERBED (for MMF groundwater)
+        allocate(geo_em%riverbed(geo_em%idim, geo_em%jdim))
+        call get_2d("RIVERBED", ncid, geo_em%riverbed, geo_em%idim, geo_em%jdim)
+    endif
 
 ! Get monthly Greenness Fractions
     allocate(geo_em%veg(geo_em%idim, geo_em%jdim, 12))

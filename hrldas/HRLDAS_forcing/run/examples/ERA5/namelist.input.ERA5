@@ -14,6 +14,7 @@
  INIT_LAI           = .TRUE.
  VARY_LAI           = .TRUE.
  MASK_WATER         = .FALSE.
+ INIT_MMF           = .FALSE.
 
  geo_em_flnm        = "./ERA5_forcing/geo_em.d01.nc"
 

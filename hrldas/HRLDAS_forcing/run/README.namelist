@@ -131,6 +131,13 @@ EXPAND_LOOP
     Default:  1 
     Example:  EXPAND_LOOP = 1 (For input data like NARR, this is usually sufficient unless there
                                are isolated islands)
+INIT_MMF
+
+    Used when one is requied about the initial condition variables for MMF groundwater scheme (OptRunoffSurface =5 and OptRunoffSubsurface = 5 )
+
+    Type:     logical
+    Default:  .FALSE.
+    Example:  INIT_MMF = .FALSE.
 
 GEO_EM_FLNM
 
