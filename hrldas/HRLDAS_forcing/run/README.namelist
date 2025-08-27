@@ -133,7 +133,7 @@ EXPAND_LOOP
                                are isolated islands)
 INIT_MMF
 
-    Used when one is requied about the initial condition variables for MMF groundwater scheme (OptRunoffSurface =5 and OptRunoffSubsurface = 5 )
+    Used when one is requied about the initial condition variables for MMF groundwater scheme (OptRunoffSurface = 5 and OptRunoffSubsurface = 5 )
 
     Type:     logical
     Default:  .FALSE.
