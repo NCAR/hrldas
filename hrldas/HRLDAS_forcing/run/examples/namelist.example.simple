@@ -4,6 +4,7 @@
  DataDir          = "/wig/kmanning/HRLDAS_FORCING_RAW"
 
  RAINFALL_INTERP  = 0
+ INIT_MMF         = .FALSE.
 
  geo_em_flnm      = "/wig/kmanning/more_hrldas/HRLDAS/for_cb_test/geo_em.d01.nc"
  wrfinput_flnm    = "/wig/kmanning/more_hrldas/HRLDAS/for_cb_test/wrfinput_d01"

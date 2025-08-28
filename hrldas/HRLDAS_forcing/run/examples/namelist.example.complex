@@ -5,6 +5,7 @@
  DataDir          = "/d2/hrldas/raw"
  
  RAINFALL_INTERP  = 0
+ INIT_MMF         = .FALSE.
 
  geo_em_flnm      = "/home/kmanning/grids/geo_em.d01.nc"
  wrfinput_flnm    = "/home/kmanning/grids/wrfinput_d01"
