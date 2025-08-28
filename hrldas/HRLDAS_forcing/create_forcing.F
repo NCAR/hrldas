@@ -471,7 +471,7 @@ program create_forcing
            call output_to_netcdf(ncid,"MAPFAC_MY",            "" , geo_em%mmy, geo_em%idim, geo_em%jdim)
            call output_to_netcdf(ncid,   "SHDMAX",           "%" , gvfmax%field, geo_em%idim, geo_em%jdim)
            call output_to_netcdf(ncid,   "SHDMIN",           "%" , gvfmin%field, geo_em%idim, geo_em%jdim)
-           if (init_mmf) then
+           if (init_mmf .eqv. .true.) then
              call output_to_netcdf(ncid,    "EQZWT",            "m" , geo_em%eqzwt, geo_em%idim, geo_em%jdim)
              call output_to_netcdf(ncid,    "FDEPTH",           "m" , geo_em%fdepth, geo_em%idim, geo_em%jdim)
              call output_to_netcdf(ncid,    "RIVERBED",         "m" , geo_em%riverbed, geo_em%idim, geo_em%jdim)
