@@ -198,7 +198,7 @@ contains
     allocate(geo_em%mmy(geo_em%idim, geo_em%jdim))
     call get_2d("MAPFAC_MY", ncid, geo_em%mmy, geo_em%idim, geo_em%jdim)
 
-    if (init_mmf) then
+    if (init_mmf .eqv. .true.) then
         ! Get FDEPTH (for MMF groundwater)
         allocate(geo_em%fdepth(geo_em%idim, geo_em%jdim))
         call get_2d("FDEPTH", ncid, geo_em%fdepth, geo_em%idim, geo_em%jdim)
