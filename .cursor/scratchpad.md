@@ -6,8 +6,7 @@ HRLDAS + Noah‑MP (Fortran) for simulations and Python ML for analysis/training
 
 - Home (`/glade/u/home/wukoutian`)
   - `hrldas/` — driver repo
-  - `noahmp/` — model repo
-  - `noahmp-ml/` — ML repo (training/eval)
+  - `hrldas/noahmp/` — model repo
 - Work (`/glade/work/wukoutian`)
   - `noahmp/inputs/` — simulation inputs (authoritative copy)
   - `noahmp/results/` — retained outputs by run_id
