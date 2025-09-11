@@ -15,8 +15,7 @@ HRLDAS + Noah‑MP (Fortran) for simulations and Python ML for analysis/training
 - Scratch (`/glade/derecho/scratch/wukoutian`)
   - `noahmp/runs/<run_id>/` — per-simulation working dirs
   - `ml/experiments/<exp_id>/` — per-training run workspaces
-- Campaign (placeholder)
-  - Root: `/glade/campaign/<project_path>/noahmp-hrldas/`
+- Campaign (`/glade/campaign/univ/utaa0012/`)
   - `datasets/{raw,curated}/`, `models/releases/`, `manifests/`, `results/<YYYY>/<run_id>/`
 
 Guideline: Stage inputs to Scratch for each run; write intermediates to Scratch; copy minimal results to Work; promote stable datasets/models to Campaign. Do not train directly from Campaign.
