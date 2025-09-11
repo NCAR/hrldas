@@ -33,13 +33,11 @@ Guideline: Stage inputs to Scratch for each run; write intermediates to Scratch;
 ```bash
 # from repo root (e.g., ~/noahmp)
 git checkout -b main
-git checkout -b phs
 git checkout -b wood
 git checkout -b rock
 git checkout -b ai
 mkdir -p ~/noahmp-worktrees
 git worktree add ~/noahmp-worktrees/main     main
-git worktree add ~/noahmp-worktrees/phs      phs
 git worktree add ~/noahmp-worktrees/wood     wood
 git worktree add ~/noahmp-worktrees/rock     rock
 git worktree add ~/noahmp-worktrees/ai       ai
