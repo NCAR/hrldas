@@ -42,11 +42,11 @@ git worktree add ~/noahmp-worktrees/wood     wood
 git worktree add ~/noahmp-worktrees/rock     rock
 git worktree add ~/noahmp-worktrees/ai       ai
 ```
-Build artifacts should go to Scratch (e.g., `/glade/derecho/scratch/$USER/noahmp/build-wood/`).
+Build artifacts and large intermediates should go to Scratch (e.g., `/glade/derecho/scratch/$USER/hrldas-builds/<branch>/`).
 
-### Minimal Job Templates
+### Hardened Job Templates (Derecho/Casper)
 
-Slurm (Derecho) — Noah‑MP CPU run
+Slurm (Derecho) — Noah‑MP CPU run with provenance
 ```bash
 #!/bin/bash
 #SBATCH -J noahmp
@@ -63,22 +63,26 @@ cd "$SCR"
 rsync -av output/ "$WRK/results/$RUN_ID/"
 ```
 
-PBS (Casper) — ML GPU training
+PBS (Derecho) — ML GPU training with provenance
 ```bash
 #!/bin/bash
 #PBS -N noahmp_ml
 #PBS -A <account>
-#PBS -q casper
+#PBS -q derecho
 #PBS -l select=1:ncpus=16:ngpus=1:mem=64GB
 #PBS -l walltime=02:00:00
-module load conda
-source activate noahmp-ml
+set -euo pipefail
+module load conda || true
+source activate noahmp-ml || conda activate noahmp-ml || true
+
 EXP=$(date +%Y%m%d_%H%M%S)
 SCR=/glade/derecho/scratch/$USER/ml/experiments/$EXP
 WRK=/glade/work/$USER/ml
 mkdir -p "$SCR" "$WRK/checkpoints"
-rsync -av "$WRK/datasets/" "$SCR/datasets/"
+rsync -a "$WRK/datasets/" "$SCR/datasets/"
 cd "$SCR"
+
+# Example training
 python -m train --data ./datasets --out ./outputs
 rsync -av "$SCR/outputs/best.ckpt" "$WRK/checkpoints/$EXP.ckpt"
 ```
