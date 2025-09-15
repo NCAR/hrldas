@@ -31,12 +31,9 @@ Guideline: Stage inputs to Scratch for each run; write intermediates to Scratch;
 Use HRLDAS as the superproject with a single `noahmp/` submodule; create and develop Noah‑MP feature branches on your fork (`feature/wood`, `feature/rock`, `feature/ai`) for model changes; create thin HRLDAS branches (`main`, `wood`, `rock`, `ai`) and worktrees at `/glade/u/home/$USER/hrldas-{main,wood,rock,ai}` to pin each variant to a specific `noahmp` commit; in each worktree `git submodule update --init`, check out the target `noahmp` feature commit in detached HEAD, commit the submodule pointer, then build/run there; never create `noahmp_*` directories—always use `noahmp/`; push only to your fork; put build/output under Scratch per branch.
 
 /glade/u/home/wukoutian/
-├── hrldas-env/                    # Shared environment configs
-│   ├── environment.yml            # Conda/mamba environment
-│   ├── modules.sh                 # Module loads for Derecho/Casper
-│   ├── paths.env                  # Common paths (Work/Scratch/Campaign)
-│   └── build-config.sh            # Compiler flags, build options
 ├── hrldas/                        # Main worktree
+│   ├── env/                       # Environment configs (versioned)
+│   │   └── modules.sh             # Module loads for Derecho/Casper
 │   └── noahmp/
 ├── hrldas-wood/                   # Wood variant worktree
 │   └── noahmp/
@@ -56,8 +53,7 @@ Use HRLDAS as the superproject with a single `noahmp/` submodule; create and dev
   - `/glade/u/home/$USER/hrldas-rock` (branch `rock`)
   - `/glade/u/home/$USER/hrldas-ai`   (branch `ai`)
 - Environment config
-  - `/glade/u/home/$USER/hrldas-env/` (separate Git repo: `environment.yml`, `modules.sh`, `paths.env`)
-  - Symlink `env/ -> ../hrldas-env/` in each worktree; source in build/run scripts
+  - `hrldas/env/modules.sh` (module loads for Derecho/Casper)
 
 ### Hardened Job Templates (Derecho/Casper)
 
