@@ -26,23 +26,38 @@ Guideline: Stage inputs to Scratch for each run; write intermediates to Scratch;
 - Repos in Home; builds and runs in Scratch; inputs from Work; archive results to Work.
 - If Noah‑MP is separate from HRLDAS, pin versions via Git submodule.
 
-### Git Layout (variants: main, wood, rock, ai)
+### Git/worktree plan
 
-- Use one repo with branches `main`, `wood`, `rock`, `ai`.
-- Create parallel worktrees for simultaneous builds/runs:
-```bash
-# from repo root (e.g., ~/noahmp)
-git checkout -b main
-git checkout -b wood
-git checkout -b rock
-git checkout -b ai
-mkdir -p ~/noahmp-worktrees
-git worktree add ~/noahmp-worktrees/main     main
-git worktree add ~/noahmp-worktrees/wood     wood
-git worktree add ~/noahmp-worktrees/rock     rock
-git worktree add ~/noahmp-worktrees/ai       ai
-```
-Build artifacts and large intermediates should go to Scratch (e.g., `/glade/derecho/scratch/$USER/hrldas-builds/<branch>/`).
+Use HRLDAS as the superproject with a single `noahmp/` submodule; create and develop Noah‑MP feature branches on your fork (`feature/wood`, `feature/rock`, `feature/ai`) for model changes; create thin HRLDAS branches (`main`, `wood`, `rock`, `ai`) and worktrees at `/glade/u/home/$USER/hrldas-{main,wood,rock,ai}` to pin each variant to a specific `noahmp` commit; in each worktree `git submodule update --init`, check out the target `noahmp` feature commit in detached HEAD, commit the submodule pointer, then build/run there; never create `noahmp_*` directories—always use `noahmp/`; push only to your fork; put build/output under Scratch per branch.
+
+/glade/u/home/wukoutian/
+├── hrldas-env/                    # Shared environment configs
+│   ├── environment.yml            # Conda/mamba environment
+│   ├── modules.sh                 # Module loads for Derecho/Casper
+│   ├── paths.env                  # Common paths (Work/Scratch/Campaign)
+│   └── build-config.sh            # Compiler flags, build options
+├── hrldas/                        # Main worktree
+│   └── noahmp/
+├── hrldas-wood/                   # Wood variant worktree
+│   └── noahmp/
+├── hrldas-rock/                   # Rock variant worktree
+│   └── noahmp/
+└── hrldas-ai/                     # AI variant worktree
+    └── noahmp/
+
+- HRLDAS (superproject)
+  - `main` → `noahmp` @ `NCAR/noahmp:develop` (baseline)
+  - `wood` → `noahmp` @ `fork/feature/wood`
+  - `rock` → `noahmp` @ `fork/feature/rock`
+  - `ai`   → `noahmp` @ `fork/feature/ai`
+- Worktrees
+  - `/glade/u/home/$USER/hrldas-main` (branch `main`)
+  - `/glade/u/home/$USER/hrldas-wood` (branch `wood`)
+  - `/glade/u/home/$USER/hrldas-rock` (branch `rock`)
+  - `/glade/u/home/$USER/hrldas-ai`   (branch `ai`)
+- Environment config
+  - `/glade/u/home/$USER/hrldas-env/` (separate Git repo: `environment.yml`, `modules.sh`, `paths.env`)
+  - Symlink `env/ -> ../hrldas-env/` in each worktree; source in build/run scripts
 
 ### Hardened Job Templates (Derecho/Casper)
 
@@ -94,3 +109,6 @@ rsync -av "$SCR/outputs/best.ckpt" "$WRK/checkpoints/$EXP.ckpt"
 ### Campaign Guidance (Placeholder)
 
 - Confirm root with CISL; suggested structure above. Campaign is not backed up and not for active training; use it to preserve curated datasets, released models, and manifests.
+
+ 
+
