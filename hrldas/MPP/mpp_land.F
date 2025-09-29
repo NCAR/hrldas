@@ -728,6 +728,40 @@ MODULE MODULE_MPP_LAND
       return
   end subroutine write_IO_real
 
+! NoahMP Mosaic <Prasanth Valayamkunnath, July 22, 2025>
+
+  subroutine write_IO_real_mosaic(in_buff,out_buff,ntile)
+     implicit none
+! the IO node will receive the data from the rest process.
+      integer ntile, n
+      real,dimension(:,:,:):: in_buff, out_buff
+      do n = 1, ntile
+         call write_IO_real(in_buff(:,:,n),out_buff(:,:,n))
+      end do
+  end subroutine write_IO_real_mosaic
+
+  subroutine write_IO_real3d_mosaic(in_buff,out_buff,klevel,ntile)
+     implicit none
+! the IO node will receive the data from the rest process.
+      integer klevel, k, ntile
+      real,dimension(:,:,:,:) :: in_buff, out_buff
+      do k = 1, klevel
+         call write_IO_real_mosaic(in_buff(:,k,:,:),out_buff(:,k,:,:),ntile)
+      end do
+  end subroutine write_IO_real3d_mosaic
+
+    subroutine write_io_int_mosaic(in_buff,out_buff,ntile)
+     implicit none
+! the IO node will receive the data from the rest process.
+      integer ntile, n
+      integer,dimension(:,:,:):: in_buff, out_buff
+      do n = 1, ntile
+         call write_io_int(in_buff(:,:,n),out_buff(:,:,n))
+      end do
+  end subroutine write_io_int_mosaic
+
+! NoahMP Mosaic end
+
   subroutine write_IO_RT_real(in_buff,out_buff)
 ! the IO node will receive the data from the rest process.
       real,dimension(:,:) ::  in_buff, out_buff
