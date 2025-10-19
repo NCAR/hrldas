@@ -734,7 +734,7 @@ MODULE MODULE_MPP_LAND
      implicit none
 ! the IO node will receive the data from the rest process.
       integer ntile, n
-      real,dimension(:,:,:):: in_buff, out_buff
+      real,dimension(:,:,:) :: in_buff, out_buff
       do n = 1, ntile
          call write_IO_real(in_buff(:,:,n),out_buff(:,:,n))
       end do
@@ -754,7 +754,7 @@ MODULE MODULE_MPP_LAND
      implicit none
 ! the IO node will receive the data from the rest process.
       integer ntile, n
-      integer,dimension(:,:,:):: in_buff, out_buff
+      integer,dimension(:,:,:) :: in_buff, out_buff
       do n = 1, ntile
          call write_io_int(in_buff(:,:,n),out_buff(:,:,n))
       end do
