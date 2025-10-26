@@ -5,7 +5,8 @@ module module_hrldas_netcdf_io
 #ifdef MPP_LAND
   use module_mpp_land, only:mpp_land_bcast_int1, decompose_data_real, mpp_land_bcast_real1, decompose_data_int, &
                   io_id, global_nx, global_ny, my_id, write_io_real, write_io_int, write_io_real3d,decompose_data_real3d, &
-                   mpp_land_sync,mpp_land_bcast_char,mpp_land_bcast
+                   mpp_land_sync,mpp_land_bcast_char,mpp_land_bcast,write_io_real3d_mosaic,write_IO_real_mosaic, &
+                   write_io_int_mosaic
 #endif
 
 #ifdef _PARALLEL_
@@ -116,9 +117,9 @@ module module_hrldas_netcdf_io
   interface get_from_restart_mosaic
 #ifdef MPP_LAND
      module procedure get_from_restart_2d_float_mpp_mosaic, get_from_restart_2d_integer_mpp_mosaic, get_from_restart_3d_mpp_mosaic, &
-              get_from_restart_att_mosaic
+              get_from_restart_att
 #else
-     module procedure get_from_restart_2d_float_mosaic, get_from_restart_2d_integer_mosaic, get_from_restart_3d_mosaic, get_from_restart_att_mosaic
+     module procedure get_from_restart_2d_float_mosaic, get_from_restart_2d_integer_mosaic, get_from_restart_3d_mosaic, get_from_restart_att
 #endif
   end interface
 
@@ -5080,10 +5081,10 @@ contains
       if(my_id .eq. IO_id) then
           call get_from_restart_2d_float_mosaic(1, global_nx, 1, global_nx, global_ny, ntile, name, garray, return_error)
       endif
-      do
+      
       do n = 1, ntile
          call decompose_data_real(garray(:,:,n),array(:,:,n))
-      end do
+      enddo
 
   end subroutine get_from_restart_2d_float_mpp_mosaic
 
@@ -5323,7 +5324,10 @@ contains
     real(kind=kind_noahmp), dimension(:,:,:), intent(in) :: array
     real(kind=kind_noahmp), dimension(global_nx,global_ny,ntile) :: garray
     character(len=*), intent(in) :: name, description, units
-    call write_io_real(array,garray)
+    integer                      :: n
+    do n = 1, ntile
+      call write_io_real(array(:,:,n),garray(:,:,n))
+    enddo
     if(my_id .eq. io_id) then
          call add_to_output_2d_float_mosaic( garray, name, ntile, description, units )
     endif
@@ -5335,7 +5339,7 @@ contains
     integer, dimension(:,:,:), intent(in) :: array
     character(len=*), intent(in) :: name, description, units
     integer, dimension(global_nx,global_ny,ntile) :: garray
-    call write_io_int_mosaic(array,garray)
+    call write_io_int_mosaic(array,garray,ntile)
     if(my_id .eq. io_id) then
          call add_to_output_2d_integer_mosaic( garray, name, ntile, description, units )
     endif
@@ -5343,8 +5347,8 @@ contains
 
   subroutine add_to_output_3d_mpp_mosaic ( array, name, ntile, description, units, snow_or_soil )
     implicit none
-    integer,                                  intent(in) :: ntile
-    real(kind=kind_noahmp), dimension(:,:,:), intent(in) :: array
+    integer,                                    intent(in) :: ntile
+    real(kind=kind_noahmp), dimension(:,:,:,:), intent(in) :: array
     character(len=*), intent(in) :: name, description, units
     character(len=4), intent(in) :: snow_or_soil
     integer :: k, klevel
@@ -5412,7 +5416,7 @@ contains
   subroutine add_to_output_3d_mosaic ( array, name, ntile, description, units, snow_or_soil )
     implicit none
     integer,                                  intent(in) :: ntile
-    real(kind=kind_noahmp), dimension(:,:,:), intent(in) :: array
+    real(kind=kind_noahmp), dimension(:,:,:,:), intent(in) :: array
     character(len=*), intent(in) :: name, description, units
     character(len=4), intent(in) :: snow_or_soil
     integer :: ixpar, jxpar, kxpar, nxpar
@@ -5446,10 +5450,11 @@ contains
 !-----------------------------------------------------------------------------------------
 !-----------------------------------------------------------------------------------------
 
-  subroutine ReadMosaicTileFrac(wrfinput_flnm,         & ! in
+  subroutine ReadMosaicTileFrac(wrfinput_flnm,          & ! in
                                  xstart, xend,          & ! in
                                  ystart, yend,          & ! in
                                  NumberLulcCat,         & ! in
+                                 SubGrdFracName,        & ! in
                                  landusef)                ! out
 
     implicit none
@@ -5459,9 +5464,12 @@ contains
     character(len=24)                      :: name
     character(len=256)                     :: units
     integer                                :: ierr
+    integer                                :: iret
     integer                                :: ncid
     integer                                :: rank
     integer                                :: iltype
+    integer                                :: varid
+    character(len=24),         intent(in)  :: SubGrdFracName 
     real(kind=kind_noahmp),    dimension(xstart:xend,1:NumberLulcCat,ystart:yend) :: xdum
 
 #ifdef _PARALLEL_  
@@ -5488,8 +5496,8 @@ contains
        stop
     endif
 
-    ! Get landuse fraction
-    name = "LANDUSEF"
+    ! Get subgrid fraction 
+    name = trim(SubGrdFracName)! "LANDUSEF"
     iret = nf90_inq_varid(ncid,  name,  varid)
     if (iret == 0) then
 

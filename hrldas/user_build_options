@@ -1,0 +1,27 @@
+
+#=============================================================================================
+#  Options for Linux with gnu gfortran MPI
+#  Please change the library paths according to your computer setup
+#=============================================================================================
+
+ COMPILERF90    =       mpif90
+ MPPFLAG        =       YES
+ FREESOURCE     =       -ffree-form  -ffree-line-length-none
+ F90FLAGS       =       -g -fconvert=big-endian -fbounds-check -fno-range-check
+ MODFLAG        =       -I ../MPP
+ HYDRO_LIB      =       ../MPP/mpp_land.o ../MPP/CPL_WRF.o
+ LDFLAGS        =
+ CPP            =       cpp
+ CPPFLAGS       =       -P -traditional -DMPP_LAND -D_GFORTRAN_ # -DSPATIAL_SOIL
+ LIBS           =
+ LIBJASPER      =      -L/opt/ohpc/pub/libs/gnu9/spack/0.21.2/opt/spack/linux-rocky8-x86_64_v4/gcc-9.4.0/jasper-1.900.1-fvgz2uy46evsmvewm7mav3tsg63m4kqw/lib -ljasper
+ INCJASPER      =      -I/opt/ohpc/pub/libs/gnu9/spack/0.21.2/opt/spack/linux-rocky8-x86_64_v4/gcc-9.4.0/jasper-1.900.1-fvgz2uy46evsmvewm7mav3tsg63m4kqw/include
+ NETCDFMOD      =      -I/home/prasanth/local/netcdf/include
+ NETCDFLIB      =      -L/home/prasanth/local/netcdf/lib -lnetcdf -lnetcdff
+# NETCDFMOD      =      -I/opt/apps/netcdf/4.8.1/include
+# NETCDFLIB      =      -L/opt/apps/netcdf/4.8.1/lib -lnetcdf -lnetcdff
+ BZIP2          =       NO
+# BZIP2_INCLUDE  =       -I/usr/include
+# BZIP2_LIB      =       -L/usr/lib64 -lbz2
+ RM             =       rm -f
+ CC             =       cc

@@ -13,11 +13,8 @@ OBJS = \
 	MosaicAverageMod.o\
 	WriteNoahmpMosaicGridAverageOutputMod.o\
 	WriteNoahmpMosaicSubgridOutputMod.o\
-	WriteNoahmpOutputMod.o\
 	WriteNoahmpMosaicRestartMod.o\
-	WriteNoahmpRestartMod.o\
-	ReadNoahmpMosaicRestartMod.o\
-	ReadNoahmpRestartMod.o
+	ReadNoahmpMosaicRestartMod.o
 
 CPPHRLDAS = -D_HRLDAS_OFFLINE_ $(MOD_OPT)
 
@@ -67,31 +64,29 @@ module_hrldas_netcdf_io.o: module_hrldas_netcdf_io.F
 #
 
 main_hrldas_driver.o:	$(OBJS_NoahMP)
-$(OBJS_NoahMP):	module_hrldas_netcdf_io.o
+$(OBJS_NoahMP):	module_hrldas_netcdf_io.o\
+				MosaicAverageMod.o\
+				WriteNoahmpMosaicGridAverageOutputMod.o\
+				WriteNoahmpMosaicSubgridOutputMod.o\
+				WriteNoahmpMosaicRestartMod.o\
+				ReadNoahmpMosaicRestartMod.o\
+				../../noahmp/drivers/hrldas/NoahmpMosaicSortTileCatMod.o
+
 MosaicAverageMod.o: ../../noahmp/utility/Machine.o\
                     ../../noahmp/drivers/hrldas/NoahmpIOVarType.o                
 WriteNoahmpMosaicGridAverageOutputMod.o:  ../../noahmp/utility/Machine.o\
                                           ../../noahmp/drivers/hrldas/NoahmpIOVarType.o\
-										  module_hrldas_netcdf_io\
+										  module_hrldas_netcdf_io.o\
 										  MosaicAverageMod.o   
 WriteNoahmpMosaicSubgridOutputMod.o:  ../../noahmp/utility/Machine.o\
                                       ../../noahmp/drivers/hrldas/NoahmpIOVarType.o\
-									  module_hrldas_netcdf_io
-WriteNoahmpOutputMod.o: ../../noahmp/utility/Machine.o\
-                        ../../noahmp/drivers/hrldas/NoahmpIOVarType.o\
-						module_hrldas_netcdf_io
+									  module_hrldas_netcdf_io.o
 WriteNoahmpMosaicRestartMod.o: ../../noahmp/utility/Machine.o\
                                ../../noahmp/drivers/hrldas/NoahmpIOVarType.o\
-						       module_hrldas_netcdf_io
-WriteNoahmpRestartMod.o: ../../noahmp/utility/Machine.o\
-                         ../../noahmp/drivers/hrldas/NoahmpIOVarType.o\
-						 module_hrldas_netcdf_io
+						       module_hrldas_netcdf_io.o
 ReadNoahmpMosaicRestartMod.o: ../../noahmp/utility/Machine.o\
                               ../../noahmp/drivers/hrldas/NoahmpIOVarType.o\
-						      module_hrldas_netcdf_io
-ReadNoahmpRestartMod.o: ../../noahmp/utility/Machine.o\
-                        ../../noahmp/drivers/hrldas/NoahmpIOVarType.o\
-						module_hrldas_netcdf_io
+						      module_hrldas_netcdf_io.o
 
 # This command cleans up object files, etc.
 clean:

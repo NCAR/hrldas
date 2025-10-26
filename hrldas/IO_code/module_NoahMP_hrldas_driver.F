@@ -16,7 +16,9 @@ module module_NoahMP_hrldas_driver
   use SnowInputSnicarMod,       only : SnowInputSnicar
   use WriteNoahmpMosaicGridAverageOutputMod
   use WriteNoahmpMosaicSubgridOutputMod
-  use WriteNoahmpOutputMod
+  use WriteNoahmpMosaicRestartMod
+  use ReadNoahmpMosaicRestartMod
+  use NoahmpMosaicSortTileCatMod
 
 #ifdef MPP_LAND
   use module_mpp_land, only: MPP_LAND_PAR_INI, mpp_land_init, getLocalXY, mpp_land_bcast_char
@@ -205,7 +207,7 @@ contains
       end if
 
       if ( .not. allocated (NoahmpIO%SubGrdFrac)        ) &
-          allocate ( NoahmpIO%landusef            (XSTART:XEND, 1:noahmpio%NumMosaicCat, YSTART:YEND) )
+          allocate ( NoahmpIO%SubGrdFrac            (XSTART:XEND, 1:noahmpio%NumMosaicCat, YSTART:YEND) )
       if ( .not. allocated (NoahmpIO%SubGrdFracRescaled)) &
           allocate ( NoahmpIO%SubGrdFracRescaled    (XSTART:XEND, 1:noahmpio%NumMosaicCat, YSTART:YEND) )
       if ( .not. allocated (NoahmpIO%SubGrdIndexSorted) ) &
@@ -222,8 +224,9 @@ contains
       call ReadMosaicTileFrac  (NoahmpIO%HRLDAS_SETUP_FILE,                &
                                 NoahmpIO%XSTART,NoahmpIO%XEND,             &
                                 NoahmpIO%YSTART, NoahmpIO%YEND,            &
-                                noahmpio%NumMosaicCat, NoahmpIO%SubGrdFrac,&
-                                NoahmpIO%SubGrdFracName                    &
+                                noahmpio%NumMosaicCat,                     &
+                                NoahmpIO%SubGrdFracName,                   &
+                                NoahmpIO%SubGrdFrac                        &
                                 )
 
       call NoahmpMosaicSortTileCat (NoahmpIO)                          ! sort the landuse fraction decreasing order and identify maximum number of title
@@ -399,11 +402,8 @@ contains
 #endif
 
 ! Read restart files
-       if(NoahmpIO%IOPT_MOSAIC > 1) then
-          call ReadNoahmpMosaicRestart (NoahmpIO)
-       else
-          call ReadNoahmpRestart (NoahmpIO)
-       endif
+
+       call ReadNoahmpMosaicRestart (NoahmpIO)
 
        NoahmpIO%STEPWTD = nint(NoahmpIO%WTDDT*60.0/NoahmpIO%DTBL)
        NoahmpIO%STEPWTD = max(NoahmpIO%STEPWTD,1)
@@ -852,10 +852,12 @@ contains
     endif
 
     IF (ITIME == 1 .AND. .NOT. NoahmpIO%RESTART_FLAG ) THEN
-      NoahmpIO%EAHXY = (NoahmpIO%P8W(:,1,:)*NoahmpIO%QV_CURR(:,1,:))/(0.622+NoahmpIO%QV_CURR(:,1,:)) ! Initial guess only.
-      NoahmpIO%TAHXY = NoahmpIO%T_PHY(:,1,:)                                                         ! Initial guess only.
-      NoahmpIO%CHXY = 0.1
-      NoahmpIO%CMXY = 0.1
+      do i=1,NoahmpIO%NTilesMax
+        NoahmpIO%EAHXY(:,:,i) = (NoahmpIO%P8W(:,1,:)*NoahmpIO%QV_CURR(:,1,:))/(0.622+NoahmpIO%QV_CURR(:,1,:)) ! Initial guess only.
+        NoahmpIO%TAHXY(:,:,i) = NoahmpIO%T_PHY(:,1,:)                                                         ! Initial guess only.
+        NoahmpIO%CHXY(:,:,i) = 0.1
+        NoahmpIO%CMXY(:,:,i) = 0.1
+      enddo
     ENDIF
 
 !------------------------------------------------------------------------
@@ -987,20 +989,20 @@ contains
                         NoahmpIO%dzs, NoahmpIO%startdate, NoahmpIO%olddate,               &                                    
                         NoahmpIO%spinup_loop,                                             &                                    
                         NoahmpIO%spinup_loops, NoahmpIO%IVGTYP, NoahmpIO%ISLTYP,          &
-                        NoahmpIO$NTilesMax)
+                        NoahmpIO%NTilesMax)
 
            DEFINE_MODE_LOOP : do imode = 1, 2
 
               call set_output_define_mode(imode)
 
               if(NoahmpIO%IOPT_MOSAIC > 1) then
-                 if(IOPT_MOSAIC_OUTPUT == 0) then
+                 if(NoahmpIO%IOPT_MOSAIC_OUTPUT == 0) then
                    call WriteNoahmpMosaicGridAverageOutput(NoahmpIO)
-                 else if(IOPT_MOSAIC_OUTPUT == 1) then
+                 else if(NoahmpIO%IOPT_MOSAIC_OUTPUT == 1) then
                    call WriteNoahmpMosaicSubgridOutput(NoahmpIO)
                  endif
                else
-                 call WriteNoahmpOutput(NoahmpIO)
+                  call WriteNoahmpMosaicGridAverageOutput(NoahmpIO)
                endif
               
            ! For now, no urban output variables included
@@ -1019,8 +1021,8 @@ contains
        write(*,'(" ***DATE=", A19)', advance="NO") NoahmpIO%olddate
      else
        write(*,'(" ***DATE=", A19, 6F10.5)', advance="NO")     &
-       NoahmpIO%olddate, NoahmpIO%TSLB(NoahmpIO%xstart,1,NoahmpIO%ystart), &
-       NoahmpIO%LAI(NoahmpIO%xstart,NoahmpIO%ystart)
+       NoahmpIO%olddate, NoahmpIO%TSLB(NoahmpIO%xstart,1,NoahmpIO%ystart,1), &
+       NoahmpIO%LAI(NoahmpIO%xstart,NoahmpIO%ystart,1)
      endif
 
 !------------------------------------------------------------------------
@@ -1086,11 +1088,8 @@ subroutine lsm_restart()
                              NoahmpIO%mapproj, NoahmpIO%lat1, NoahmpIO%lon1, NoahmpIO%cen_lon,        &
                              NoahmpIO%iswater, NoahmpIO%ivgtyp, NoahmpIO%NTilesMax)
   
-   if(NoahmpIO%IOPT_MOSAIC > 1) then
-      call WriteNoahmpMosaicRestart (NoahmpIO)
-   else
-      call WriteNoahmpRestart (NoahmpIO)
-   endif
+
+  call WriteNoahmpMosaicRestart (NoahmpIO)
 
   call finalize_restart_file()
 

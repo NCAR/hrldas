@@ -31,14 +31,14 @@ contains
     ! Properties - Assigned or predicted
     call add_to_output( NoahmpIO%IVGTYP                    , "IVGTYP"  , "Dominant vegetation category"         , "category"              )
     call add_to_output( NoahmpIO%ISLTYP                    , "ISLTYP"  , "Dominant soil category"               , "category"              )
-    call add_to_output( NoahmpIO%FVEGXY                    , "FVEG"    , "Green Vegetation Fraction"            , "-"                     )
-    call add_to_output( NoahmpIO%LAI                       , "LAI"     , "Leaf area index"                      , "m2/m2"                 )
-    call add_to_output( NoahmpIO%XSAIXY                    , "SAI"     , "Stem area index"                      , "m2/m2"                 )
+    call add_to_output( MosaicAverage(NoahmpIO%FVEGXY)     , "FVEG"    , "Green Vegetation Fraction"            , "-"                     )
+    call add_to_output( MosaicAverage(NoahmpIO%LAI)        , "LAI"     , "Leaf area index"                      , "m2/m2"                 )
+    call add_to_output( MosaicAverage(NoahmpIO%XSAIXY)     , "SAI"     , "Stem area index"                      , "m2/m2"                 )
     ! Forcing
-    call add_to_output( MosaicAverage(NoahmpIO%SWDOWN)     , "SWFORC"  , "Shortwave forcing"                    , "W/m2"                  )
-    call add_to_output( MosaicAverage(NoahmpIO%COSZEN)     , "COSZ"    , "Cosine of zenith angle"               , "-"                     )
-    call add_to_output( MosaicAverage(NoahmpIO%GLW)        , "LWFORC"  , "Longwave forcing"                     , "W/m2"                  )
-    call add_to_output( MosaicAverage(NoahmpIO%RAINBL)     , "RAINRATE", "Precipitation rate"                   , "mm/timestep"           )
+    call add_to_output( NoahmpIO%SWDOWN     , "SWFORC"  , "Shortwave forcing"                    , "W/m2"                  )
+    call add_to_output( NoahmpIO%COSZEN     , "COSZ"    , "Cosine of zenith angle"               , "-"                     )
+    call add_to_output( NoahmpIO%GLW        , "LWFORC"  , "Longwave forcing"                     , "W/m2"                  )
+    call add_to_output( NoahmpIO%RAINBL     , "RAINRATE", "Precipitation rate"                   , "mm/timestep"           )
     ! Grid energy budget terms
     call add_to_output( MosaicAverage(NoahmpIO%EMISS)      , "EMISS"   , "Grid emissivity"                      , "-"                     )
     call add_to_output( MosaicAverage(NoahmpIO%FSAXY)      , "FSA"     , "Total absorbed SW radiation"          , "W/m2"                  )         
@@ -227,12 +227,12 @@ contains
       call add_to_output( MosaicAverage(NoahmpIO%SMCWTDXY)   , "SMCWTD"   , "soil water content between bottom of the soil and water table", "m3/m3"  )
       call add_to_output( MosaicAverage(NoahmpIO%RECHXY)     , "RECH"     , "recharge to or from the water table when shallow"             , "m"      )
       call add_to_output( MosaicAverage(NoahmpIO%DEEPRECHXY) , "DEEPRECH" , "recharge to or from the water table when deep"                , "m"      )
-      call add_to_output( MosaicAverage(NoahmpIO%QRFSXY)     , "QRFS"     , "accumulated groundwater baselow"                              , "mm"     )
-      call add_to_output( MosaicAverage(NoahmpIO%QRFXY)      , "QRF"      , "groundwater baseflow"                                         , "m"      )
-      call add_to_output( MosaicAverage(NoahmpIO%QSPRINGSXY) , "QSPRINGS" , "accumulated seeping water"                                    , "mm"     )
-      call add_to_output( MosaicAverage(NoahmpIO%QSPRINGXY)  , "QSPRING"  , "instantaneous seeping water"                                  , "m"      )
-      call add_to_output( MosaicAverage(NoahmpIO%QSLATXY)    , "QSLAT"    , "accumulated lateral flow"                                     , "mm"     )
-      call add_to_output( MosaicAverage(NoahmpIO%QLATXY)     , "QLAT"     , "instantaneous lateral flow"                                   , "m"      )
+      call add_to_output( NoahmpIO%QRFSXY                    , "QRFS"     , "accumulated groundwater baselow"                              , "mm"     )
+      call add_to_output( NoahmpIO%QRFXY                     , "QRF"      , "groundwater baseflow"                                         , "m"      )
+      call add_to_output( NoahmpIO%QSPRINGSXY                , "QSPRINGS" , "accumulated seeping water"                                    , "mm"     )
+      call add_to_output( NoahmpIO%QSPRINGXY                 , "QSPRING"  , "instantaneous seeping water"                                  , "m"      )
+      call add_to_output( NoahmpIO%QSLATXY                   , "QSLAT"    , "accumulated lateral flow"                                     , "mm"     )
+      call add_to_output( NoahmpIO%QLATXY                    , "QLAT"     , "instantaneous lateral flow"                                   , "m"      )
     endif
     ! Wetland model
     if ( NoahmpIO%IOPT_WETLAND > 0 ) then

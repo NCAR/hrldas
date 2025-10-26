@@ -13,7 +13,7 @@ module MosaicAverageMod
 
   implicit none
 
-  type(NoahmpIO_type) :: NoahmpIO
+  type(NoahmpIO_type) :: NMPIO ! renamed NoahmpIO 
 
   ! Interface block for MosaicAverage
   interface MosaicAverage
@@ -37,9 +37,9 @@ module MosaicAverageMod
     nxpar = size(InVariable, 3)
 
     ! Check dimensions of SubGrdFracRescaled
-    if (size(NoahmpIO%SubGrdFracRescaled, 1) /= ixpar .or. &
-        size(NoahmpIO%SubGrdFracRescaled, 2) /= jxpar .or. &
-        size(NoahmpIO%SubGrdFracRescaled, 3) /= nxpar) then
+    if (size(NMPIO%SubGrdFracRescaled, 1) /= ixpar .or. &
+        size(NMPIO%SubGrdFracRescaled, 2) /= jxpar .or. &
+        size(NMPIO%SubGrdFracRescaled, 3) /= nxpar) then
       stop "Error: Dimension mismatch in NoahmpIO%SubGrdFracRescaled for MosaicAverage_2d"
     end if
 
@@ -47,7 +47,7 @@ module MosaicAverageMod
     allocate(OutAverage(ixpar, jxpar))
 
     ! Calculate weighted average
-    OutAverage = sum(InVariable * NoahmpIO%SubGrdFracRescaled, dim=3)
+    OutAverage = sum(InVariable * NMPIO%SubGrdFracRescaled, dim=3)
 
   end function MosaicAverage_2d
 
@@ -64,9 +64,9 @@ module MosaicAverageMod
     nxpar = size(InVariable, 4)
 
     ! Check dimensions of SubGrdFracRescaled
-    if (size(NoahmpIO%SubGrdFracRescaled, 1) /= ixpar .or. &
-        size(NoahmpIO%SubGrdFracRescaled, 2) /= jxpar .or. &
-        size(NoahmpIO%SubGrdFracRescaled, 3) /= nxpar) then
+    if (size(NMPIO%SubGrdFracRescaled, 1) /= ixpar .or. &
+        size(NMPIO%SubGrdFracRescaled, 2) /= jxpar .or. &
+        size(NMPIO%SubGrdFracRescaled, 3) /= nxpar) then
       stop "Error: Dimension mismatch in NoahmpIO%SubGrdFracRescaled for MosaicAverage_3d"
     end if
 
@@ -76,7 +76,7 @@ module MosaicAverageMod
 
     ! Populate SubGrdFrac
     do k = 1, kxpar
-      SubGrdFrac(:, k, :, :) = NoahmpIO%SubGrdFracRescaled
+      SubGrdFrac(:, k, :, :) = NMPIO%SubGrdFracRescaled
     end do
 
     ! Calculate weighted average
@@ -98,9 +98,9 @@ module MosaicAverageMod
     nxpar = size(InVariable, 3)
 
     ! Check dimensions of SubGrdFracRescaled
-    if (size(NoahmpIO%SubGrdFracRescaled, 1) /= ixpar .or. &
-        size(NoahmpIO%SubGrdFracRescaled, 2) /= jxpar .or. &
-        size(NoahmpIO%SubGrdFracRescaled, 3) /= nxpar) then
+    if (size(NMPIO%SubGrdFracRescaled, 1) /= ixpar .or. &
+        size(NMPIO%SubGrdFracRescaled, 2) /= jxpar .or. &
+        size(NMPIO%SubGrdFracRescaled, 3) /= nxpar) then
       stop "Error: Dimension mismatch in NoahmpIO%SubGrdFracRescaled for MosaicAverage_2d"
     end if
 
@@ -108,7 +108,7 @@ module MosaicAverageMod
     allocate(OutAverage(ixpar, jxpar))
 
     ! Calculate weighted average
-    OutAverage = nint(sum(InVariable * NoahmpIO%SubGrdFracRescaled, dim=3))
+    OutAverage = nint(sum(InVariable * NMPIO%SubGrdFracRescaled, dim=3))
 
   end function MosaicAverage_2d_int
 

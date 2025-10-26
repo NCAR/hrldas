@@ -27,14 +27,12 @@ contains
     ! local
     integer :: xstart
     integer :: xend
-    integer :: xstart
     integer :: ixfull
     integer :: jxfull
     integer :: ntile
 
     xstart = NoahmpIO%xstart
     xend   = NoahmpIO%xend 
-    xstart = NoahmpIO%xstart
     ixfull = NoahmpIO%ixfull
     jxfull = NoahmpIO%jxfull
     ntile  = NoahmpIO%NTilesMax
