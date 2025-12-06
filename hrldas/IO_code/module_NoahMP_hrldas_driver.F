@@ -1441,13 +1441,19 @@ subroutine lsm_restart()
   
   print*, 'Write restart at '//NoahmpIO%olddate(1:13)
 
-  call prepare_restart_file (trim(NoahmpIO%outdir), version, NoahmpIO%igrid, NoahmpIO%llanduse,       &
-                             NoahmpIO%olddate, NoahmpIO%startdate, NoahmpIO%ixfull, NoahmpIO%jxfull,  &
-                             NoahmpIO%ixpar, NoahmpIO%jxpar, NoahmpIO%xstartpar, NoahmpIO%ystartpar,  &                               
-                             NoahmpIO%NSOIL, NoahmpIO%nsnow, NoahmpIO%NUMRAD, NoahmpIO%max_urban_dim, &
-                             NoahmpIO%dx, NoahmpIO%dy, NoahmpIO%truelat1, NoahmpIO%truelat2,          &
-                             NoahmpIO%mapproj, NoahmpIO%lat1, NoahmpIO%lon1, NoahmpIO%cen_lon,        &
-                             NoahmpIO%iswater, NoahmpIO%ivgtyp)
+  call prepare_restart_file (trim(NoahmpIO%outdir), version, NoahmpIO%igrid, NoahmpIO%llanduse, &
+              NoahmpIO%olddate, NoahmpIO%startdate, NoahmpIO%ixfull, NoahmpIO%jxfull,  &
+              NoahmpIO%ixpar, NoahmpIO%jxpar, NoahmpIO%xstartpar, NoahmpIO%ystartpar,  &
+              NoahmpIO%NSOIL, NoahmpIO%nsnow, NoahmpIO%NUMRAD, NoahmpIO%max_urban_dim, &
+              NoahmpIO%dx, NoahmpIO%dy, NoahmpIO%truelat1, NoahmpIO%truelat2,          &
+              NoahmpIO%mapproj, NoahmpIO%lat1, NoahmpIO%lon1, NoahmpIO%cen_lon,        &
+              NoahmpIO%iswater, NoahmpIO%ivgtyp,               &
+              NoahmpIO%num_urban_hi,  NoahmpIO%urban_map_zrd,  &
+              NoahmpIO%urban_map_zwd, NoahmpIO%urban_map_gd,   &
+              NoahmpIO%urban_map_zd,  NoahmpIO%urban_map_zdf,  &
+              NoahmpIO%urban_map_bd,  NoahmpIO%urban_map_wd,   &
+              NoahmpIO%urban_map_gbd, NoahmpIO%urban_map_fbd,  &
+              NoahmpIO%urban_map_zgrd)
   
   call add_to_restart(NoahmpIO%TSLB      , "SOIL_T", layers="SOIL")
   call add_to_restart(NoahmpIO%TSNOXY    , "SNOW_T", layers="SNOW")
@@ -1612,45 +1618,45 @@ subroutine lsm_restart()
       endif
 
       if ( (NoahmpIO%SF_URBAN_PHYSICS == 2) .or. (NoahmpIO%SF_URBAN_PHYSICS == 3) ) then ! BEP or BEM urban models  
-         call add_to_restart(     NoahmpIO%HI_URB2D  ,      "HI_URB2D", layers="URBN")
-         call add_to_restart(    NoahmpIO%TRB_URB4D  ,     "TRB_URB4D", layers="URBN" )
-         call add_to_restart(    NoahmpIO%TW1_URB4D  ,     "TW1_URB4D", layers="URBN" )
-         call add_to_restart(    NoahmpIO%TW2_URB4D  ,     "TW2_URB4D", layers="URBN" )
-         call add_to_restart(    NoahmpIO%TGB_URB4D  ,     "TGB_URB4D", layers="URBN" )
-         call add_to_restart(   NoahmpIO%SFW1_URB3D  ,    "SFW1_URB3D", layers="URBN" )
-         call add_to_restart(   NoahmpIO%SFW2_URB3D  ,    "SFW2_URB3D", layers="URBN" )
-         call add_to_restart(    NoahmpIO%SFR_URB3D  ,     "SFR_URB3D", layers="URBN" )
-         call add_to_restart(    NoahmpIO%SFG_URB3D  ,     "SFG_URB3D", layers="URBN" )
+         call add_to_restart(     NoahmpIO%HI_URB2D  ,      "HI_URB2D", layers="UBHI" )
+         call add_to_restart(    NoahmpIO%TRB_URB4D  ,     "TRB_URB4D", layers="UZRD" )
+         call add_to_restart(    NoahmpIO%TW1_URB4D  ,     "TW1_URB4D", layers="UZWD" )
+         call add_to_restart(    NoahmpIO%TW2_URB4D  ,     "TW2_URB4D", layers="UZWD" )
+         call add_to_restart(    NoahmpIO%TGB_URB4D  ,     "TGB_URB4D", layers="UBGD" )
+         call add_to_restart(   NoahmpIO%SFW1_URB3D  ,    "SFW1_URB3D", layers="UBZD" )
+         call add_to_restart(   NoahmpIO%SFW2_URB3D  ,    "SFW2_URB3D", layers="UBZD" )
+         call add_to_restart(    NoahmpIO%SFR_URB3D  ,     "SFR_URB3D", layers="UZDF" )
+         call add_to_restart(    NoahmpIO%SFG_URB3D  ,     "SFG_URB3D", layers="UNDM" )
       endif
 
       if ( NoahmpIO%SF_URBAN_PHYSICS == 3 ) then  ! BEM urban model  
-         call add_to_restart(   NoahmpIO%TLEV_URB3D  ,    "TLEV_URB3D", layers="URBN" )
-         call add_to_restart(   NoahmpIO%QLEV_URB3D  ,    "QLEV_URB3D", layers="URBN" )
-         call add_to_restart( NoahmpIO%TW1LEV_URB3D  ,  "TW1LEV_URB3D", layers="URBN" )
-         call add_to_restart( NoahmpIO%TW2LEV_URB3D  ,  "TW2LEV_URB3D", layers="URBN" )
-         call add_to_restart(  NoahmpIO%TGLEV_URB3D  ,   "TGLEV_URB3D", layers="URBN" )
-         call add_to_restart(  NoahmpIO%TFLEV_URB3D  ,   "TFLEV_URB3D", layers="URBN" )
+         call add_to_restart(   NoahmpIO%TLEV_URB3D  ,    "TLEV_URB3D", layers="UBBD" )
+         call add_to_restart(   NoahmpIO%QLEV_URB3D  ,    "QLEV_URB3D", layers="UBBD" )
+         call add_to_restart( NoahmpIO%TW1LEV_URB3D  ,  "TW1LEV_URB3D", layers="UBWD" )
+         call add_to_restart( NoahmpIO%TW2LEV_URB3D  ,  "TW2LEV_URB3D", layers="UBWD" )
+         call add_to_restart(  NoahmpIO%TGLEV_URB3D  ,   "TGLEV_URB3D", layers="UGBD" )
+         call add_to_restart(  NoahmpIO%TFLEV_URB3D  ,   "TFLEV_URB3D", layers="UFBD" )
          call add_to_restart(  NoahmpIO%SF_AC_URB3D  ,   "SF_AC_URB3D" )
          call add_to_restart(  NoahmpIO%LF_AC_URB3D  ,   "LF_AC_URB3D" )
          call add_to_restart(  NoahmpIO%CM_AC_URB3D  ,   "CM_AC_URB3D" )
          call add_to_restart( NoahmpIO%SFVENT_URB3D  ,  "SFVENT_URB3D" )
          call add_to_restart( NoahmpIO%LFVENT_URB3D  ,  "LFVENT_URB3D" )
-         call add_to_restart( NoahmpIO%SFWIN1_URB3D  ,  "SFWIN1_URB3D", layers="URBN" )
-         call add_to_restart( NoahmpIO%SFWIN2_URB3D  ,  "SFWIN2_URB3D", layers="URBN" )
+         call add_to_restart( NoahmpIO%SFWIN1_URB3D  ,  "SFWIN1_URB3D", layers="UBWD" )
+         call add_to_restart( NoahmpIO%SFWIN2_URB3D  ,  "SFWIN2_URB3D", layers="UBWD" )
          call add_to_restart(  NoahmpIO%EP_PV_URB3D  ,   "EP_PV_URB3D" )
-         call add_to_restart(   NoahmpIO%T_PV_URB3D  ,    "T_PV_URB3D", layers="URBN" )
-         call add_to_restart(    NoahmpIO%TRV_URB4D  ,    "TRV_URB4D" , layers="URBN" )
-         call add_to_restart(    NoahmpIO%QR_URB4D   ,     "QR_URB4D" , layers="URBN" )
+         call add_to_restart(   NoahmpIO%T_PV_URB3D  ,    "T_PV_URB3D", layers="UZDF" )
+         call add_to_restart(    NoahmpIO%TRV_URB4D  ,    "TRV_URB4D" , layers="ZGRD" )
+         call add_to_restart(    NoahmpIO%QR_URB4D   ,     "QR_URB4D" , layers="ZGRD" )
          call add_to_restart(   NoahmpIO%QGR_URB3D   ,    "QGR_URB3D"  )
          call add_to_restart(   NoahmpIO%TGR_URB3D   ,    "TGR_URB3D"  )
-         call add_to_restart(   NoahmpIO%DRAIN_URB4D ,   "DRAIN_URB4D", layers="URBN" )
+         call add_to_restart(   NoahmpIO%DRAIN_URB4D ,   "DRAIN_URB4D", layers="UZDF" )
          call add_to_restart( NoahmpIO%DRAINGR_URB3D , "DRAINGR_URB3D" )
-         call add_to_restart(    NoahmpIO%SFRV_URB3D ,    "SFRV_URB3D", layers="URBN" )
-         call add_to_restart(    NoahmpIO%LFRV_URB3D ,    "LFRV_URB3D", layers="URBN" )
-         call add_to_restart(     NoahmpIO%DGR_URB3D ,     "DGR_URB3D", layers="URBN" )
-         call add_to_restart(      NoahmpIO%DG_URB3D ,      "DG_URB3D", layers="URBN" )
-         call add_to_restart(     NoahmpIO%LFR_URB3D ,     "LFR_URB3D", layers="URBN" )
-         call add_to_restart(     NoahmpIO%LFG_URB3D ,     "LFG_URB3D", layers="URBN" )
+         call add_to_restart(    NoahmpIO%SFRV_URB3D ,    "SFRV_URB3D", layers="UZDF" )
+         call add_to_restart(    NoahmpIO%LFRV_URB3D ,    "LFRV_URB3D", layers="UZDF" )
+         call add_to_restart(     NoahmpIO%DGR_URB3D ,     "DGR_URB3D", layers="UZDF" )
+         call add_to_restart(      NoahmpIO%DG_URB3D ,      "DG_URB3D", layers="UNDM" )
+         call add_to_restart(     NoahmpIO%LFR_URB3D ,     "LFR_URB3D", layers="UZDF" )
+         call add_to_restart(     NoahmpIO%LFG_URB3D ,     "LFG_URB3D", layers="UNDM" )
       endif
   endif
 
