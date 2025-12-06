@@ -472,12 +472,11 @@ contains
           call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LP_URB2D"  ,     NoahmpIO%LP_URB2D  )
           call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LB_URB2D"  ,     NoahmpIO%LB_URB2D  )
           call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "HGT_URB2D"  ,    NoahmpIO%HGT_URB2D  )
-          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "MH_URB2D"  ,     NoahmpIO%MH_URB2D  )
-          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "STDH_URB2D"  ,   NoahmpIO%STDH_URB2D  )
-          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "HI_URB2D"  ,     NoahmpIO%HI_URB2D  )
-          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LF_URB2D"  ,     NoahmpIO%LF_URB2D  )
 
           if ( NoahmpIO%SF_URBAN_PHYSICS == 1 ) then  ! single layer urban model
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LF_URB2D"  ,     NoahmpIO%LF_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "MH_URB2D"  ,     NoahmpIO%MH_URB2D  )
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "STDH_URB2D"  ,   NoahmpIO%STDH_URB2D  )
              call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CMR_SFCDIF" ,    NoahmpIO%CMR_SFCDIF )
              call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CHR_SFCDIF" ,    NoahmpIO%CHR_SFCDIF )
              call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CMC_SFCDIF" ,    NoahmpIO%CMC_SFCDIF )
@@ -510,6 +509,7 @@ contains
           endif
 
           if ( (NoahmpIO%SF_URBAN_PHYSICS == 2) .or. (NoahmpIO%SF_URBAN_PHYSICS == 3) ) then  ! BEP or BEM urban models
+             call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "HI_URB2D"  ,     NoahmpIO%HI_URB2D  )
              call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TRB_URB4D"  ,    NoahmpIO%TRB_URB4D  )
              call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TW1_URB4D"  ,    NoahmpIO%TW1_URB4D  )
              call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TW2_URB4D"  ,    NoahmpIO%TW2_URB4D  )
@@ -1575,12 +1575,11 @@ subroutine lsm_restart()
       call add_to_restart(     NoahmpIO%LP_URB2D  ,      "LP_URB2D" )
       call add_to_restart(     NoahmpIO%LB_URB2D  ,      "LB_URB2D" )
       call add_to_restart(    NoahmpIO%HGT_URB2D  ,     "HGT_URB2D" ) 
-      call add_to_restart(     NoahmpIO%MH_URB2D  ,      "MH_URB2D" )
-      call add_to_restart(   NoahmpIO%STDH_URB2D  ,    "STDH_URB2D" )
-      call add_to_restart(     NoahmpIO%HI_URB2D  ,      "HI_URB2D", layers="URBN")
-      call add_to_restart(     NoahmpIO%LF_URB2D  ,      "LF_URB2D", layers="URBN")
          
       if ( NoahmpIO%SF_URBAN_PHYSICS == 1 ) then  ! single layer urban model  
+         call add_to_restart(     NoahmpIO%MH_URB2D  ,      "MH_URB2D" )
+         call add_to_restart(   NoahmpIO%STDH_URB2D  ,    "STDH_URB2D" )
+         call add_to_restart(     NoahmpIO%LF_URB2D  ,     "LF_URB2D", layers="SOIL")
          call add_to_restart(    NoahmpIO%CMR_SFCDIF ,     "CMR_SFCDIF" )
          call add_to_restart(    NoahmpIO%CHR_SFCDIF ,     "CHR_SFCDIF" )
          call add_to_restart(    NoahmpIO%CMC_SFCDIF ,     "CMC_SFCDIF" )
@@ -1613,6 +1612,7 @@ subroutine lsm_restart()
       endif
 
       if ( (NoahmpIO%SF_URBAN_PHYSICS == 2) .or. (NoahmpIO%SF_URBAN_PHYSICS == 3) ) then ! BEP or BEM urban models  
+         call add_to_restart(     NoahmpIO%HI_URB2D  ,      "HI_URB2D", layers="URBN")
          call add_to_restart(    NoahmpIO%TRB_URB4D  ,     "TRB_URB4D", layers="URBN" )
          call add_to_restart(    NoahmpIO%TW1_URB4D  ,     "TW1_URB4D", layers="URBN" )
          call add_to_restart(    NoahmpIO%TW2_URB4D  ,     "TW2_URB4D", layers="URBN" )
