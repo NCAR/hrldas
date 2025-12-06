@@ -59,11 +59,6 @@
  SKIP_FIRST_OUTPUT = .false.
  RESTART_FREQUENCY_HOURS = 24
 
- ! XSTART = 20
- ! XEND   = 20
- ! YSTART = 203
- ! YEND   = 203
-
  NSOIL=4
  soil_thick_input(1) = 0.10
  soil_thick_input(2) = 0.30

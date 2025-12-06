@@ -126,7 +126,7 @@ contains
          NoahmpIO%xend   = (wrfite-1)*finemesh_factor
          NoahmpIO%ystart = (wrfjts-1)*finemesh_factor + 1
          NoahmpIO%yend   = (wrfjte-1)*finemesh_factor
-         call CPL_LAND_INIT(xstart,xend, ystart,yend)
+         call CPL_LAND_INIT(NoahmpIO%xstart,NoahmpIO%xend,NoahmpIO%ystart,NoahmpIO%yend)
          ix_tmp = NoahmpIO%xend - NoahmpIO%xstart + 1
          jx_tmp = NoahmpIO%yend - NoahmpIO%ystart + 1
     else

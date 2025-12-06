@@ -223,11 +223,6 @@ See the full documentation for a complete description of items, but these are th
  SPLIT_OUTPUT_COUNT = split output after this many writes, 0 = all in one file
  RESTART_FREQUENCY_HOURS = write restart files after this many hours
 
- XSTART = uncomment and set if you want to run a subset of your domain 
- XEND   = 
- YSTART = 
- YEND   = 
-
  ZLVL = forcing height 
 
 Note the newest version HRLDAS can cope with different soil layer thickness, so don't need to change soil thickness: https://github.com/NCAR/hrldas/commit/ba09bf052c22f1e0fcbb93065998f3903ce2c033
