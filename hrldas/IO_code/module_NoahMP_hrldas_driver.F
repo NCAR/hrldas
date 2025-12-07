@@ -284,9 +284,6 @@ contains
 !------------------------------------------------------------------------
 
     NoahmpIO%CROPTYPE   = 0       ! make default 0% crops everywhere
-    NoahmpIO%PLANTING   = 126     ! default planting date
-    NoahmpIO%HARVEST    = 290     ! default harvest date
-    NoahmpIO%SEASON_GDD = 1605    ! default total seasonal growing degree days
     if (NoahmpIO%IOPT_CROP == 1) then ! use crop_option=1 for reading crop extra fields
        call READ_CROP_INPUT(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
                             NoahmpIO%CROPTYPE, NoahmpIO%PLANTING, NoahmpIO%HARVEST, NoahmpIO%SEASON_GDD)

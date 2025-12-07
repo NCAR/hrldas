@@ -686,10 +686,10 @@ contains
 
     character(len=*),          intent(in)  :: wrfinput_flnm
     integer,                   intent(in)  :: xstart, xend, ystart, yend
-    real(kind=kind_noahmp),    dimension(xstart:xend,5,ystart:yend), intent(out) :: croptype
-    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(out) :: planting
-    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(out) :: harvest
-    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(out) :: season_gdd
+    real(kind=kind_noahmp),    dimension(xstart:xend,5,ystart:yend), intent(inout) :: croptype
+    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(inout) :: planting
+    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(inout) :: harvest
+    real(kind=kind_noahmp),    dimension(xstart:xend,  ystart:yend), intent(inout) :: season_gdd
     
     character(len=256) :: units
     character(len=24)  :: name
@@ -714,7 +714,7 @@ contains
     ierr = nf90_open(wrfinput_flnm, NF90_NOWRITE, ncid)
 #endif
     if (ierr /= 0) then
-       write(*,'("read_mmf_runoff:  Problem opening wrfinput file: ''", A, "''")') trim(wrfinput_flnm)
+       write(*,'("read_crop_input:  Problem opening wrfinput file: ''", A, "''")') trim(wrfinput_flnm)
 #ifdef _PARALLEL_
        call mpi_finalize(ierr)
        if (ierr /= 0) write(*, '("Problem with MPI_finalize.")')
@@ -740,7 +740,7 @@ contains
     if (iret == 0) then
       ierr = nf90_get_var(ncid, varid, planting, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
     else
-      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using default values."
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using table values."
     endif
 
 ! Get harvest date (HARVEST)
@@ -749,7 +749,7 @@ contains
     if (iret == 0) then
       ierr = nf90_get_var(ncid, varid, harvest, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
     else
-      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using default values."
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using table values."
     endif
 
 ! Get seasonal growing degree days (SEASON_GDD)
@@ -758,7 +758,7 @@ contains
     if (iret == 0) then
       ierr = nf90_get_var(ncid, varid, season_gdd, start=(/xstart,ystart/), count=(/xend-xstart+1,yend-ystart+1/))
     else
-      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using default values."
+      write(*,*) "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file. Using table values."
     endif
 
 ! Close the NetCDF file
