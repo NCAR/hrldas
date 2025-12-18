@@ -5455,12 +5455,12 @@ contains
                                  ystart, yend,          & ! in
                                  NumberLulcCat,         & ! in
                                  SubGrdFracName,        & ! in
-                                 landusef)                ! out
+                                 SubGrdFrac)                ! out
 
     implicit none
     character(len=*),          intent(in)  :: wrfinput_flnm
     integer,                   intent(in)  :: xstart, xend, ystart, yend, NumberLulcCat
-    real(kind=kind_noahmp),    dimension(xstart:xend,1:NumberLulcCat,ystart:yend), intent(out) :: landusef
+    real(kind=kind_noahmp),    dimension(xstart:xend,1:NumberLulcCat,ystart:yend), intent(out) :: SubGrdFrac
     character(len=24)                      :: name
     character(len=256)                     :: units
     integer                                :: ierr
@@ -5504,7 +5504,7 @@ contains
       ierr = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,NumberLulcCat/))
 
       do iltype = 1,NumberLulcCat
-        landusef(:,iltype,:) = xdum(:,:,iltype)
+        SubGrdFrac(:,iltype,:) = xdum(:,:,iltype)
       end do
 
     else

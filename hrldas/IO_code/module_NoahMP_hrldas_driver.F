@@ -72,7 +72,7 @@ contains
     integer, optional, intent(in) :: wrfits,wrfite,wrfjts,wrfjte
     
     !local
-    integer ::   xstart, xend, ystart, yend, ixfull, jxfull, NTilesMax
+    integer ::   xstart, xend, ystart, yend, ixfull, jxfull
     
 #ifdef MPP_LAND
     call  MPP_LAND_INIT()
@@ -198,13 +198,14 @@ contains
 
     if(NoahmpIO%IOPT_MOSAIC .eq. 1) then                               ! subgrid tiling based on land cover type only
 
-      if ( trim(noahmpio%llanduse) == "usgs" ) then
-         noahmpio%NumMosaicCat = 28
-      else if ( trim(noahmpio%llanduse) == "modified_igbp_modis_noah") then
-         noahmpio%NumMosaicCat = 21
-      else if ( trim(noahmpio%llanduse) == "NLCD40") THEN
-         noahmpio%NumMosaicCat = 40
-      end if
+!      NumMosaicCat is read from namelist.hrldas for now
+!      if ( trim(noahmpio%llanduse) == "usgs" ) then
+!         noahmpio%NumMosaicCat = 28
+!      else if ( trim(noahmpio%llanduse) == "modified_igbp_modis_noah") then
+!         noahmpio%NumMosaicCat = 21
+!      else if ( trim(noahmpio%llanduse) == "NLCD40") THEN
+!         noahmpio%NumMosaicCat = 40
+!      end if
 
       if ( .not. allocated (NoahmpIO%SubGrdFrac)        ) &
           allocate ( NoahmpIO%SubGrdFrac            (XSTART:XEND, 1:noahmpio%NumMosaicCat, YSTART:YEND) )
@@ -219,7 +220,7 @@ contains
       NoahmpIO%SubGrdFracRescaled  = 0.0
       NoahmpIO%SubGrdIndexSorted   = 0
       NoahmpIO%NumberOfTiles       = 1
-      NoahmpIO%SubGrdFracName      = "LANDUSEF"
+      NoahmpIO%NTilesMax           = 1 
       
       call ReadMosaicTileFrac  (NoahmpIO%HRLDAS_SETUP_FILE,                &
                                 NoahmpIO%XSTART,NoahmpIO%XEND,             &
@@ -362,8 +363,13 @@ contains
        NoahmpIO%FSATMX = 0.38
        NoahmpIO%WCAP   = 0.1
        call READ_WETLAND_INPUT(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
-                               NoahmpIO%FSATMX,NoahmpIO%WCAP)
+                               NoahmpIO%FSATMX(:,:,1),NoahmpIO%WCAP(:,:,1))
     endif
+
+    do kk = 1,NTilesMax
+       NoahmpIO%FSATMX(:,:,kk) = NoahmpIO%FSATMX(:,:,1)
+       NoahmpIO%WCAP(:,:,kk)   = NoahmpIO%WCAP(:,:,1)
+    end do 
 
 !------------------------------------------------------------------------
 ! For SF_URBAN_PHYSICS > 0 read 2D map of urban parameters
@@ -386,8 +392,7 @@ contains
     ystart = NoahmpIO%ystart
     yend   = NoahmpIO%yend 
     ixfull = NoahmpIO%ixfull
-    jxfull = NoahmpIO%jxfull 
-    NTilesMax = NoahmpIO%NTilesMax
+    jxfull = NoahmpIO%jxfull
     
     if (NoahmpIO%restart_filename_requested /= " ") then
        NoahmpIO%restart_flag = .true.
@@ -495,16 +500,31 @@ contains
           ".LDASIN_DOMAIN"//NoahmpIO%hgrid
 #endif
 
-          call READINIT_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend,    &
-                              NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%NSOIL, NoahmpIO%DZS,   &
-                              NoahmpIO%OLDDATE, LDASIN_VERSION, NoahmpIO%SMOIS,               &
-                              NoahmpIO%TSLB, NoahmpIO%CANWAT, NoahmpIO%TSK, NoahmpIO%SNOW,    &
-                              NoahmpIO%SNOWH, NoahmpIO%FNDSNOWH)
+          call READINIT_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend,         &
+                              NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%NSOIL, NoahmpIO%DZS,        &
+                              NoahmpIO%OLDDATE, LDASIN_VERSION, NoahmpIO%SMOIS(:,:,:,1),           &
+                              NoahmpIO%TSLB(:,:,:,1), NoahmpIO%CANWAT(:,:,1), NoahmpIO%TSK(:,:,1), &
+                              NoahmpIO%SNOW(:,:,1), NoahmpIO%SNOWH(:,:,1), NoahmpIO%FNDSNOWH)
 
           NoahmpIO%VEGFRA =  0.0
-          call READVEG_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend,        &
-                              NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%OLDDATE, NoahmpIO%IVGTYP, &
-                              NoahmpIO%VEGFRA, NoahmpIO%LAI, NoahmpIO%GVFMIN, NoahmpIO%GVFMAX)
+          call READVEG_HRLDAS(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%xstart, NoahmpIO%xend,          &
+                              NoahmpIO%ystart, NoahmpIO%yend, NoahmpIO%OLDDATE, NoahmpIO%IVGTYP,   &
+                              NoahmpIO%VEGFRA(:,:,1), NoahmpIO%LAI(:,:,1), NoahmpIO%GVFMIN(:,:,1), & 
+                              NoahmpIO%GVFMAX(:,:,1))
+
+          ! copy 2D static fields to mosaic dimension
+          do kk = 1,NTilesMax
+             NoahmpIO%SMOIS(:,:,:,kk)  = NoahmpIO%SMOIS(:,:,:,1)
+             NoahmpIO%TSLB(:,:,:,kk)   = NoahmpIO%TSLB(:,:,:,1)
+             NoahmpIO%CANWAT(:,:,kk)   = NoahmpIO%CANWAT(:,:,1)
+             NoahmpIO%TSK(:,:,kk)      = NoahmpIO%TSK(:,:,1)
+             NoahmpIO%SNOW(:,:,kk)     = NoahmpIO%SNOW(:,:,1)
+             NoahmpIO%SNOWH(:,:,kk)    = NoahmpIO%SNOWH(:,:,1)
+             NoahmpIO%VEGFRA(:,:,kk)   = NoahmpIO%VEGFRA(:,:,1)
+             NoahmpIO%LAI(:,:,kk)      = NoahmpIO%LAI(:,:,1)
+             NoahmpIO%GVFMIN(:,:,kk)   = NoahmpIO%GVFMIN(:,:,1)
+             NoahmpIO%GVFMAX(:,:,kk)   = NoahmpIO%GVFMAX(:,:,1)
+          end do 
 
 #ifdef WRF_HYDRO
        else   !  HRLDAS_ini_typ        
@@ -519,13 +539,13 @@ contains
           NoahmpIO%CANWAT, NoahmpIO%TSK, NoahmpIO%SNOW, NoahmpIO%SNOWH, NoahmpIO%lai, NoahmpIO%VEGFRA, NoahmpIO%IVGTYP,                &
           NoahmpIO%FNDSNOWH)
 
-          NoahmpIO%greenfrac = 0.0
+          greenfrac = 0.0
 #ifdef MPP_LAND
           call get_greenfrac_mpp &
 #else
           call get_greenfrac &
 #endif
-          (trim(NoahmpIO%GEO_STATIC_FLNM),NoahmpIO%greenfrac, NoahmpIO%ix, NoahmpIO%jx, NoahmpIO%olddate, NoahmpIO%SHDMAX)
+          (trim(NoahmpIO%GEO_STATIC_FLNM),greenfrac, NoahmpIO%ix, NoahmpIO%jx, NoahmpIO%olddate, NoahmpIO%SHDMAX)
           !yw GVFMAX = maxval(greenfrac)
        endif
 #endif
@@ -699,10 +719,16 @@ contains
                              NoahmpIO%QV_CURR(:,1,:),NoahmpIO%U_PHY(:,1,:),           &
                              NoahmpIO%V_PHY(:,1,:),NoahmpIO%P8W(:,1,:), NoahmpIO%GLW, &
                              NoahmpIO%SWDOWN, NoahmpIO%RAINBL, NoahmpIO%SNOWBL,       &
-                             NoahmpIO%VEGFRA, NoahmpIO%update_veg, NoahmpIO%LAI,      &
-                             NoahmpIO%update_lai, NoahmpIO%reset_spinup_date,         &
-                             NoahmpIO%startdate, NoahmpIO%RadSwDirFrac, NoahmpIO%RadSwVisFrac)
-                             
+                             NoahmpIO%VEGFRA(:,:,1), NoahmpIO%update_veg,             &
+                             NoahmpIO%LAI(:,:,1), NoahmpIO%update_lai,                &
+                             NoahmpIO%reset_spinup_date, NoahmpIO%startdate,          &
+                             NoahmpIO%RadSwDirFrac(:,:,1), NoahmpIO%RadSwVisFrac(:,:,1))
+
+          ! copy 2D static fields to mosaic dimension
+          do kk = 1,NTilesMax
+             NoahmpIO%VEGFRA(:,:,kk) = NoahmpIO%VEGFRA(:,:,1)
+             NoahmpIO%LAI(:,:,kk)    = NoahmpIO%LAI(:,:,1) 
+          enddo                             
              NoahmpIO%VEGFRA = NoahmpIO%VEGFRA * 100.0
      else
         if(NoahmpIO%olddate == forcDate) then
@@ -727,25 +753,48 @@ contains
                           NoahmpIO%forcing_name_DirFrac,NoahmpIO%forcing_name_VisFrac,                       &
                           NoahmpIO%T_PHY(:,1,:),NoahmpIO%QV_CURR(:,1,:),NoahmpIO%U_PHY(:,1,:),               &
                           NoahmpIO%V_PHY(:,1,:),NoahmpIO%P8W(:,1,:), NoahmpIO%GLW, NoahmpIO%SWDOWN,          &
-                          NoahmpIO%RAINBL, NoahmpIO%SNOWBL, NoahmpIO%VEGFRA, NoahmpIO%update_veg,            &
-                          NoahmpIO%LAI, NoahmpIO%update_lai, NoahmpIO%reset_spinup_date, NoahmpIO%startdate, &
-                          NoahmpIO%RadSwDirFrac, NoahmpIO%RadSwVisFrac )    
-          
+                          NoahmpIO%RAINBL, NoahmpIO%SNOWBL, NoahmpIO%VEGFRA(:,:,1), NoahmpIO%update_veg,     &
+                          NoahmpIO%LAI(:,:,1), NoahmpIO%update_lai, NoahmpIO%reset_spinup_date,              &
+                          NoahmpIO%startdate, NoahmpIO%RadSwDirFrac(:,:,1), NoahmpIO%RadSwVisFrac(:,:,1))    
+
+          ! copy 2D static fields to mosaic dimension
+          do kk = 1,NTilesMax
+             NoahmpIO%VEGFRA(:,:,kk) = NoahmpIO%VEGFRA(:,:,1)
+             NoahmpIO%LAI(:,:,kk)    = NoahmpIO%LAI(:,:,1)
+             NoahmpIO%RadSwDirFrac(:,:,kk) = NoahmpIO%RadSwDirFrac(:,:,1) 
+             NoahmpIO%RadSwVisFrac(:,:,kk) = NoahmpIO%RadSwVisFrac(:,:,1)
+          enddo
+
        if(maxval(NoahmpIO%VEGFRA) <= 1 ) then
            NoahmpIO%VEGFRA = NoahmpIO%VEGFRA * 100.   ! added for input vegfra as a fraction (0~1)
        endif
 
 #endif
        if((NoahmpIO%IOPT_ALB == 3) .and. (NoahmpIO%SNICAR_AEROSOL_READTABLE .eqv. .false.)) then
-          call READFORC_AEROSOL(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,               &
-             NoahmpIO%OLDDATE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,     &
+          call READFORC_AEROSOL(NoahmpIO%INFLNM_TEMPLATE, NoahmpIO%FORCING_TIMESTEP,                &
+             NoahmpIO%OLDDATE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,      &
              NoahmpIO%reset_spinup_datea, NoahmpIO%startdate,                                       &
-             NoahmpIO%forcing_name_BCPHI, NoahmpIO%forcing_name_BCPHO, NoahmpIO%forcing_name_OCPHI,&
-             NoahmpIO%forcing_name_OCPHO, NoahmpIO%forcing_name_DUST1, NoahmpIO%forcing_name_DUST2,&
-             NoahmpIO%forcing_name_DUST3, NoahmpIO%forcing_name_DUST4, NoahmpIO%forcing_name_DUST5, NoahmpIO%DepBChydrophiXY,   &
-             NoahmpIO%DepBChydrophoXY, NoahmpIO%DepOChydrophiXY, NoahmpIO%DepOChydrophoXY,         &
-             NoahmpIO%DepDust1XY, NoahmpIO%DepDust2XY, NoahmpIO%DepDust3XY, NoahmpIO%DepDust4XY, NoahmpIO%DepDust5XY    )
+             NoahmpIO%forcing_name_BCPHI, NoahmpIO%forcing_name_BCPHO, NoahmpIO%forcing_name_OCPHI, &
+             NoahmpIO%forcing_name_OCPHO, NoahmpIO%forcing_name_DUST1, NoahmpIO%forcing_name_DUST2, &
+             NoahmpIO%forcing_name_DUST3, NoahmpIO%forcing_name_DUST4, NoahmpIO%forcing_name_DUST5, &
+             NoahmpIO%DepBChydrophiXY(:,:,1), NoahmpIO%DepBChydrophoXY(:,:,1),                      &
+             NoahmpIO%DepOChydrophiXY(:,:,1), NoahmpIO%DepOChydrophoXY(:,:,1),                      &
+             NoahmpIO%DepDust1XY(:,:,1), NoahmpIO%DepDust2XY(:,:,1), NoahmpIO%DepDust3XY(:,:,1),    & 
+             NoahmpIO%DepDust4XY(:,:,1), NoahmpIO%DepDust5XY(:,:,1))
        endif
+
+       ! copy 2D static fields to mosaic dimension
+       do kk = 1,NTilesMax
+         NoahmpIO%DepBChydrophiXY(:,:,kk) = NoahmpIO%DepBChydrophiXY(:,:,1)
+         NoahmpIO%DepBChydrophoXY(:,:,kk) = NoahmpIO%DepBChydrophoXY(:,:,1)
+         NoahmpIO%DepOChydrophiXY(:,:,kk) = NoahmpIO%DepOChydrophiXY(:,:,1)
+         NoahmpIO%DepOChydrophoXY(:,:,kk) = NoahmpIO%DepOChydrophoXY(:,:,1)
+         NoahmpIO%DepDust1XY(:,:,kk)      = NoahmpIO%DepDust1XY(:,:,1)
+         NoahmpIO%DepDust2XY(:,:,kk)      = NoahmpIO%DepDust2XY(:,:,1)
+         NoahmpIO%DepDust3XY(:,:,kk)      = NoahmpIO%DepDust3XY(:,:,1)
+         NoahmpIO%DepDust4XY(:,:,kk)      = NoahmpIO%DepDust4XY(:,:,1)
+         NoahmpIO%DepDust5XY(:,:,kk)      = NoahmpIO%DepDust5XY(:,:,1)
+       enddo
 
 991  continue
 
