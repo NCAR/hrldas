@@ -1,5 +1,32 @@
 # HRLDAS/Noah-MP model release notes
 
+## HRLDAS/Noah-MP version 5.1.1 release
+
+### Noah-MP LSM capabilities/enhancements
+
+- Please see Noah-MP code release notes for more details: https://github.com/NCAR/noahmp/blob/master/RELEASE_NOTES.md
+
+
+### Noah-MP LSM bug fixes
+
+- Please see Noah-MP code release notes for more details: https://github.com/NCAR/noahmp/blob/master/RELEASE_NOTES.md
+
+
+### HRLDAS module capabilities/enhancements
+
+- add INIT_MMF for MMF initial condition variables in create_forcing.F (https://github.com/NCAR/hrldas/pull/279)
+
+
+### HRLDAS module bug fixes
+
+- A few bug fixes and code reformatting (see details at: https://github.com/NCAR/hrldas/pull/296)
+
+
+### External module capabilities/enhancements
+
+- None
+
+
 ## HRLDAS/Noah-MP version 5.1.0 release
 
 ### Noah-MP LSM capabilities/enhancements
