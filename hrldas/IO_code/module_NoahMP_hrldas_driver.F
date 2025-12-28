@@ -55,6 +55,7 @@ module module_NoahMP_hrldas_driver
   integer                                                :: I
   integer                                                :: J
   integer                                                :: imode
+  integer                                                :: N
 
 contains
 
@@ -185,7 +186,11 @@ contains
     NoahmpIO%jme = NoahmpIO%yend 
     NoahmpIO%kms = 1
     NoahmpIO%kme = 2
-  
+    xstart       = NoahmpIO%xstart
+    xend         = NoahmpIO%xend 
+    ystart       = NoahmpIO%ystart
+    yend         = NoahmpIO%yend 
+
     if ( (NoahmpIO%sf_urban_physics == 2) .or. (NoahmpIO%sf_urban_physics == 3) ) then
        NoahmpIO%kde = NoahmpIO%num_urban_atmosphere + 1  ! to be consistent with kme
        NoahmpIO%kme = NoahmpIO%num_urban_atmosphere + 1  ! bug fix for dimension of urban cell interfaces
@@ -198,6 +203,15 @@ contains
 
     if(NoahmpIO%IOPT_MOSAIC .eq. 1) then                               ! subgrid tiling based on land cover type only
 
+      if ( .not. allocated (NoahmpIO%SubGrdFrac)        ) &
+          allocate ( NoahmpIO%SubGrdFrac            (XSTART:XEND, YSTART:YEND, 1:noahmpio%NumMosaicCat) )
+      if ( .not. allocated (NoahmpIO%SubGrdFracRescaled)) &
+          allocate ( NoahmpIO%SubGrdFracRescaled    (XSTART:XEND, YSTART:YEND, 1:noahmpio%NumMosaicCat) )
+      if ( .not. allocated (NoahmpIO%SubGrdIndexSorted) ) &
+          allocate ( NoahmpIO%SubGrdIndexSorted     (XSTART:XEND, YSTART:YEND, 1:noahmpio%NumMosaicCat) )
+      if ( .not. allocated (NoahmpIO%NumberOfTiles)     ) &
+          allocate ( NoahmpIO%NumberOfTiles         (XSTART:XEND, YSTART:YEND)                          )
+
 !      NumMosaicCat is read from namelist.hrldas for now
 !      if ( trim(noahmpio%llanduse) == "usgs" ) then
 !         noahmpio%NumMosaicCat = 28
@@ -206,15 +220,6 @@ contains
 !      else if ( trim(noahmpio%llanduse) == "NLCD40") THEN
 !         noahmpio%NumMosaicCat = 40
 !      end if
-
-      if ( .not. allocated (NoahmpIO%SubGrdFrac)        ) &
-          allocate ( NoahmpIO%SubGrdFrac            (XSTART:XEND, 1:noahmpio%NumMosaicCat, YSTART:YEND) )
-      if ( .not. allocated (NoahmpIO%SubGrdFracRescaled)) &
-          allocate ( NoahmpIO%SubGrdFracRescaled    (XSTART:XEND, 1:noahmpio%NumMosaicCat, YSTART:YEND) )
-      if ( .not. allocated (NoahmpIO%SubGrdIndexSorted) ) &
-          allocate ( NoahmpIO%SubGrdIndexSorted  (XSTART:XEND, 1:noahmpio%NumMosaicCat, YSTART:YEND) )
-      if ( .not. allocated (NoahmpIO%NumberOfTiles)     ) &
-          allocate ( NoahmpIO%NumberOfTiles       (XSTART:XEND,                          YSTART:YEND) )
 
       NoahmpIO%SubGrdFrac          = 0.0
       NoahmpIO%SubGrdFracRescaled  = 0.0
@@ -232,12 +237,27 @@ contains
 
       call NoahmpMosaicSortTileCat (NoahmpIO)                          ! sort the landuse fraction decreasing order and identify maximum number of title
                                                                        ! based on 90% area fraction criteria. and rescale them to 100%
-
+      if ( .not. allocated (NoahmpIO%SubGrdFracMosaic) ) &
+      allocate ( NoahmpIO%SubGrdFracMosaic (XSTART:XEND, YSTART:YEND, 1:noahmpio%NTilesMax) )   
+      NoahmpIO%SubGrdFracMosaic(:,:,1:noahmpio%NTilesMax) = NoahmpIO%SubGrdFracRescaled (:,:,1:noahmpio%NTilesMax)
+                                                                   
     else                                                               ! more options can be added with a else option for soil type or hydro type etc.
+
+      if ( .not. allocated (NoahmpIO%SubGrdFrac)        ) &
+          allocate ( NoahmpIO%SubGrdFrac            (XSTART:XEND, YSTART:YEND, 1) )
+      if ( .not. allocated (NoahmpIO%SubGrdFracRescaled)) &
+          allocate ( NoahmpIO%SubGrdFracRescaled    (XSTART:XEND, YSTART:YEND, 1) )
+      if ( .not. allocated (NoahmpIO%SubGrdIndexSorted) ) &
+          allocate ( NoahmpIO%SubGrdIndexSorted     (XSTART:XEND, YSTART:YEND, 1) )
+      if ( .not. allocated (NoahmpIO%NumberOfTiles)     ) &
+          allocate ( NoahmpIO%NumberOfTiles         (XSTART:XEND, YSTART:YEND)                          )
+
       ! since all variables are with subgrid dimension, it should be 1 when mosaic is off
       NoahmpIO%NTilesMax          = 1                                  ! maximum subgrid tiles
       NoahmpIO%NumberOfTiles      = 1                                  ! 2D array of number of subgrid tiles
       NoahmpIO%SubGrdFracRescaled = 1                                  ! 3D array of subgrid fractions
+      NoahmpIO%SubGrdFracMosaic   = 1
+
     endif
 
 ! Noah-MP Mosiac Scheme: Initialization Ends
@@ -364,12 +384,12 @@ contains
        NoahmpIO%WCAP   = 0.1
        call READ_WETLAND_INPUT(NoahmpIO%HRLDAS_SETUP_FILE, NoahmpIO%XSTART, NoahmpIO%XEND, NoahmpIO%YSTART, NoahmpIO%YEND,&
                                NoahmpIO%FSATMX(:,:,1),NoahmpIO%WCAP(:,:,1))
-    endif
+       do N = 1,NoahmpIO%NTilesMax
+          NoahmpIO%FSATMX(:,:,N) = NoahmpIO%FSATMX(:,:,1)
+          NoahmpIO%WCAP(:,:,N)   = NoahmpIO%WCAP(:,:,1)
+       end do 
 
-    do kk = 1,NTilesMax
-       NoahmpIO%FSATMX(:,:,kk) = NoahmpIO%FSATMX(:,:,1)
-       NoahmpIO%WCAP(:,:,kk)   = NoahmpIO%WCAP(:,:,1)
-    end do 
+    endif
 
 !------------------------------------------------------------------------
 ! For SF_URBAN_PHYSICS > 0 read 2D map of urban parameters
@@ -513,17 +533,17 @@ contains
                               NoahmpIO%GVFMAX(:,:,1))
 
           ! copy 2D static fields to mosaic dimension
-          do kk = 1,NTilesMax
-             NoahmpIO%SMOIS(:,:,:,kk)  = NoahmpIO%SMOIS(:,:,:,1)
-             NoahmpIO%TSLB(:,:,:,kk)   = NoahmpIO%TSLB(:,:,:,1)
-             NoahmpIO%CANWAT(:,:,kk)   = NoahmpIO%CANWAT(:,:,1)
-             NoahmpIO%TSK(:,:,kk)      = NoahmpIO%TSK(:,:,1)
-             NoahmpIO%SNOW(:,:,kk)     = NoahmpIO%SNOW(:,:,1)
-             NoahmpIO%SNOWH(:,:,kk)    = NoahmpIO%SNOWH(:,:,1)
-             NoahmpIO%VEGFRA(:,:,kk)   = NoahmpIO%VEGFRA(:,:,1)
-             NoahmpIO%LAI(:,:,kk)      = NoahmpIO%LAI(:,:,1)
-             NoahmpIO%GVFMIN(:,:,kk)   = NoahmpIO%GVFMIN(:,:,1)
-             NoahmpIO%GVFMAX(:,:,kk)   = NoahmpIO%GVFMAX(:,:,1)
+          do N = 1,NoahmpIO%NTilesMax
+             NoahmpIO%SMOIS(:,:,:,N)  = NoahmpIO%SMOIS(:,:,:,1)
+             NoahmpIO%TSLB(:,:,:,N)   = NoahmpIO%TSLB(:,:,:,1)
+             NoahmpIO%CANWAT(:,:,N)   = NoahmpIO%CANWAT(:,:,1)
+             NoahmpIO%TSK(:,:,N)      = NoahmpIO%TSK(:,:,1)
+             NoahmpIO%SNOW(:,:,N)     = NoahmpIO%SNOW(:,:,1)
+             NoahmpIO%SNOWH(:,:,N)    = NoahmpIO%SNOWH(:,:,1)
+             NoahmpIO%VEGFRA(:,:,N)   = NoahmpIO%VEGFRA(:,:,1)
+             NoahmpIO%LAI(:,:,N)      = NoahmpIO%LAI(:,:,1)
+             NoahmpIO%GVFMIN(:,:,N)   = NoahmpIO%GVFMIN(:,:,1)
+             NoahmpIO%GVFMAX(:,:,N)   = NoahmpIO%GVFMAX(:,:,1)
           end do 
 
 #ifdef WRF_HYDRO
@@ -725,9 +745,9 @@ contains
                              NoahmpIO%RadSwDirFrac(:,:,1), NoahmpIO%RadSwVisFrac(:,:,1))
 
           ! copy 2D static fields to mosaic dimension
-          do kk = 1,NTilesMax
-             NoahmpIO%VEGFRA(:,:,kk) = NoahmpIO%VEGFRA(:,:,1)
-             NoahmpIO%LAI(:,:,kk)    = NoahmpIO%LAI(:,:,1) 
+          do N = 1,NoahmpIO%NTilesMax
+             NoahmpIO%VEGFRA(:,:,N) = NoahmpIO%VEGFRA(:,:,1)
+             NoahmpIO%LAI(:,:,N)    = NoahmpIO%LAI(:,:,1) 
           enddo                             
              NoahmpIO%VEGFRA = NoahmpIO%VEGFRA * 100.0
      else
@@ -758,11 +778,11 @@ contains
                           NoahmpIO%startdate, NoahmpIO%RadSwDirFrac(:,:,1), NoahmpIO%RadSwVisFrac(:,:,1))    
 
           ! copy 2D static fields to mosaic dimension
-          do kk = 1,NTilesMax
-             NoahmpIO%VEGFRA(:,:,kk) = NoahmpIO%VEGFRA(:,:,1)
-             NoahmpIO%LAI(:,:,kk)    = NoahmpIO%LAI(:,:,1)
-             NoahmpIO%RadSwDirFrac(:,:,kk) = NoahmpIO%RadSwDirFrac(:,:,1) 
-             NoahmpIO%RadSwVisFrac(:,:,kk) = NoahmpIO%RadSwVisFrac(:,:,1)
+          do N = 1,NoahmpIO%NTilesMax
+             NoahmpIO%VEGFRA(:,:,N) = NoahmpIO%VEGFRA(:,:,1)
+             NoahmpIO%LAI(:,:,N)    = NoahmpIO%LAI(:,:,1)
+             NoahmpIO%RadSwDirFrac(:,:,N) = NoahmpIO%RadSwDirFrac(:,:,1) 
+             NoahmpIO%RadSwVisFrac(:,:,N) = NoahmpIO%RadSwVisFrac(:,:,1)
           enddo
 
        if(maxval(NoahmpIO%VEGFRA) <= 1 ) then
@@ -781,20 +801,20 @@ contains
              NoahmpIO%DepOChydrophiXY(:,:,1), NoahmpIO%DepOChydrophoXY(:,:,1),                      &
              NoahmpIO%DepDust1XY(:,:,1), NoahmpIO%DepDust2XY(:,:,1), NoahmpIO%DepDust3XY(:,:,1),    & 
              NoahmpIO%DepDust4XY(:,:,1), NoahmpIO%DepDust5XY(:,:,1))
-       endif
 
-       ! copy 2D static fields to mosaic dimension
-       do kk = 1,NTilesMax
-         NoahmpIO%DepBChydrophiXY(:,:,kk) = NoahmpIO%DepBChydrophiXY(:,:,1)
-         NoahmpIO%DepBChydrophoXY(:,:,kk) = NoahmpIO%DepBChydrophoXY(:,:,1)
-         NoahmpIO%DepOChydrophiXY(:,:,kk) = NoahmpIO%DepOChydrophiXY(:,:,1)
-         NoahmpIO%DepOChydrophoXY(:,:,kk) = NoahmpIO%DepOChydrophoXY(:,:,1)
-         NoahmpIO%DepDust1XY(:,:,kk)      = NoahmpIO%DepDust1XY(:,:,1)
-         NoahmpIO%DepDust2XY(:,:,kk)      = NoahmpIO%DepDust2XY(:,:,1)
-         NoahmpIO%DepDust3XY(:,:,kk)      = NoahmpIO%DepDust3XY(:,:,1)
-         NoahmpIO%DepDust4XY(:,:,kk)      = NoahmpIO%DepDust4XY(:,:,1)
-         NoahmpIO%DepDust5XY(:,:,kk)      = NoahmpIO%DepDust5XY(:,:,1)
-       enddo
+          ! copy 2D static fields to mosaic dimension
+          do N = 1,NoahmpIO%NTilesMax
+            NoahmpIO%DepBChydrophiXY(:,:,N) = NoahmpIO%DepBChydrophiXY(:,:,1)
+            NoahmpIO%DepBChydrophoXY(:,:,N) = NoahmpIO%DepBChydrophoXY(:,:,1)
+            NoahmpIO%DepOChydrophiXY(:,:,N) = NoahmpIO%DepOChydrophiXY(:,:,1)
+            NoahmpIO%DepOChydrophoXY(:,:,N) = NoahmpIO%DepOChydrophoXY(:,:,1)
+            NoahmpIO%DepDust1XY(:,:,N)      = NoahmpIO%DepDust1XY(:,:,1)
+            NoahmpIO%DepDust2XY(:,:,N)      = NoahmpIO%DepDust2XY(:,:,1)
+            NoahmpIO%DepDust3XY(:,:,N)      = NoahmpIO%DepDust3XY(:,:,1)
+            NoahmpIO%DepDust4XY(:,:,N)      = NoahmpIO%DepDust4XY(:,:,1)
+            NoahmpIO%DepDust5XY(:,:,N)      = NoahmpIO%DepDust5XY(:,:,1)
+          enddo
+       endif
 
 991  continue
 
@@ -901,11 +921,11 @@ contains
     endif
 
     IF (ITIME == 1 .AND. .NOT. NoahmpIO%RESTART_FLAG ) THEN
-      do i=1,NoahmpIO%NTilesMax
-        NoahmpIO%EAHXY(:,:,i) = (NoahmpIO%P8W(:,1,:)*NoahmpIO%QV_CURR(:,1,:))/(0.622+NoahmpIO%QV_CURR(:,1,:)) ! Initial guess only.
-        NoahmpIO%TAHXY(:,:,i) = NoahmpIO%T_PHY(:,1,:)                                                         ! Initial guess only.
-        NoahmpIO%CHXY(:,:,i) = 0.1
-        NoahmpIO%CMXY(:,:,i) = 0.1
+      do N=1,NoahmpIO%NTilesMax
+        NoahmpIO%EAHXY(:,:,N) = (NoahmpIO%P8W(:,1,:)*NoahmpIO%QV_CURR(:,1,:))/(0.622+NoahmpIO%QV_CURR(:,1,:)) ! Initial guess only.
+        NoahmpIO%TAHXY(:,:,N) = NoahmpIO%T_PHY(:,1,:)                                                         ! Initial guess only.
+        NoahmpIO%CHXY(:,:,N) = 0.1
+        NoahmpIO%CMXY(:,:,N) = 0.1
       enddo
     ENDIF
 
@@ -1043,23 +1063,23 @@ contains
            DEFINE_MODE_LOOP : do imode = 1, 2
 
               call set_output_define_mode(imode)
-
-              if(NoahmpIO%IOPT_MOSAIC > 1) then
+              
+              if(NoahmpIO%IOPT_MOSAIC >= 1) then
                  if(NoahmpIO%IOPT_MOSAIC_OUTPUT == 0) then
                    call WriteNoahmpMosaicGridAverageOutput(NoahmpIO)
                  else if(NoahmpIO%IOPT_MOSAIC_OUTPUT == 1) then
                    call WriteNoahmpMosaicSubgridOutput(NoahmpIO)
                  endif
-               else
+               else if(NoahmpIO%IOPT_MOSAIC == 0) then
                   call WriteNoahmpMosaicGridAverageOutput(NoahmpIO)
                endif
-              
+            
            ! For now, no urban output variables included
 
            enddo DEFINE_MODE_LOOP
-
-           call finalize_output_file(NoahmpIO%split_output_count,itime)
-                   
+      
+           call finalize_output_file(NoahmpIO%split_output_count,itime)  
+                 
         endif
    
         if(NoahmpIO%skip_first_output) NoahmpIO%skip_first_output = .false.

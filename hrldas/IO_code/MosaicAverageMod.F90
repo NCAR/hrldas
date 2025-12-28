@@ -13,8 +13,6 @@ module MosaicAverageMod
 
   implicit none
 
-  type(NoahmpIO_type) :: NMPIO ! renamed NoahmpIO 
-
   ! Interface block for MosaicAverage
   interface MosaicAverage
     module procedure MosaicAverage_2d
@@ -26,9 +24,10 @@ module MosaicAverageMod
 
   !=== Calculate averages along subgrid fractions ===!
 
-  function MosaicAverage_2d(InVariable) result(OutAverage)
+  function MosaicAverage_2d(InVariable,NMPIO) result(OutAverage)
     real(kind=kind_noahmp), dimension(:,:,:), intent(in) :: InVariable
-    real(kind=kind_noahmp), allocatable, dimension(:,:) :: OutAverage
+    real(kind=kind_noahmp), allocatable, dimension(:,:)  :: OutAverage
+    type(NoahmpIO_type), intent(in)                      :: NMPIO
     integer :: ixpar, jxpar, nxpar
 
     ! Get dimensions
@@ -36,25 +35,26 @@ module MosaicAverageMod
     jxpar = size(InVariable, 2)
     nxpar = size(InVariable, 3)
 
-    ! Check dimensions of SubGrdFracRescaled
-    if (size(NMPIO%SubGrdFracRescaled, 1) /= ixpar .or. &
-        size(NMPIO%SubGrdFracRescaled, 2) /= jxpar .or. &
-        size(NMPIO%SubGrdFracRescaled, 3) /= nxpar) then
-      stop "Error: Dimension mismatch in NoahmpIO%SubGrdFracRescaled for MosaicAverage_2d"
+    ! Check dimensions of SubGrdFracMosaic
+    if (size(NMPIO%SubGrdFracMosaic, 1) /= ixpar .or. &
+        size(NMPIO%SubGrdFracMosaic, 2) /= jxpar .or. &
+        size(NMPIO%SubGrdFracMosaic, 3) /= nxpar) then
+      stop "Error: Dimension mismatch in NoahmpIO%SubGrdFracMosaic for MosaicAverage_2d"
     end if
 
     ! Allocate output array
     allocate(OutAverage(ixpar, jxpar))
 
     ! Calculate weighted average
-    OutAverage = sum(InVariable * NMPIO%SubGrdFracRescaled, dim=3)
+    OutAverage = sum(InVariable * NMPIO%SubGrdFracMosaic, dim=3)
 
   end function MosaicAverage_2d
 
-  function MosaicAverage_3d(InVariable) result(OutAverage)
-    real(kind=kind_noahmp), dimension(:,:,:,:), intent(in) :: InVariable
-    real(kind=kind_noahmp), allocatable, dimension(:,:,:) :: OutAverage
+  function MosaicAverage_3d(InVariable,NMPIO) result(OutAverage)
+    real(kind=kind_noahmp), dimension(:,:,:,:), intent(in)  :: InVariable
+    real(kind=kind_noahmp), allocatable, dimension(:,:,:)   :: OutAverage
     real(kind=kind_noahmp), allocatable, dimension(:,:,:,:) :: SubGrdFrac
+    type(NoahmpIO_type), intent(in)                         :: NMPIO
     integer :: ixpar, jxpar, kxpar, nxpar, k
 
     ! Get dimensions
@@ -63,11 +63,11 @@ module MosaicAverageMod
     jxpar = size(InVariable, 3)
     nxpar = size(InVariable, 4)
 
-    ! Check dimensions of SubGrdFracRescaled
-    if (size(NMPIO%SubGrdFracRescaled, 1) /= ixpar .or. &
-        size(NMPIO%SubGrdFracRescaled, 2) /= jxpar .or. &
-        size(NMPIO%SubGrdFracRescaled, 3) /= nxpar) then
-      stop "Error: Dimension mismatch in NoahmpIO%SubGrdFracRescaled for MosaicAverage_3d"
+    ! Check dimensions of SubGrdFracMosaic
+    if (size(NMPIO%SubGrdFracMosaic, 1) /= ixpar .or. &
+        size(NMPIO%SubGrdFracMosaic, 2) /= jxpar .or. &
+        size(NMPIO%SubGrdFracMosaic, 3) /= nxpar) then
+      stop "Error: Dimension mismatch in NoahmpIO%SubGrdFracMosaic for MosaicAverage_3d"
     end if
 
     ! Allocate arrays
@@ -76,7 +76,7 @@ module MosaicAverageMod
 
     ! Populate SubGrdFrac
     do k = 1, kxpar
-      SubGrdFrac(:, k, :, :) = NMPIO%SubGrdFracRescaled
+      SubGrdFrac(:, k, :, :) = NMPIO%SubGrdFracMosaic
     end do
 
     ! Calculate weighted average
@@ -87,9 +87,10 @@ module MosaicAverageMod
 
   end function MosaicAverage_3d
 
-  function MosaicAverage_2d_int (InVariable) result(OutAverage)
+  function MosaicAverage_2d_int (InVariable, NMPIO) result(OutAverage)
     integer, dimension(:,:,:), intent(in) :: InVariable
     integer, allocatable, dimension(:,:)  :: OutAverage
+    type(NoahmpIO_type), intent(in)       :: NMPIO
     integer :: ixpar, jxpar, nxpar
 
     ! Get dimensions
@@ -97,18 +98,18 @@ module MosaicAverageMod
     jxpar = size(InVariable, 2)
     nxpar = size(InVariable, 3)
 
-    ! Check dimensions of SubGrdFracRescaled
-    if (size(NMPIO%SubGrdFracRescaled, 1) /= ixpar .or. &
-        size(NMPIO%SubGrdFracRescaled, 2) /= jxpar .or. &
-        size(NMPIO%SubGrdFracRescaled, 3) /= nxpar) then
-      stop "Error: Dimension mismatch in NoahmpIO%SubGrdFracRescaled for MosaicAverage_2d"
+    ! Check dimensions of SubGrdFracMosaic
+    if (size(NMPIO%SubGrdFracMosaic, 1) /= ixpar .or. &
+        size(NMPIO%SubGrdFracMosaic, 2) /= jxpar .or. &
+        size(NMPIO%SubGrdFracMosaic, 3) /= nxpar) then
+      stop "Error: Dimension mismatch in NoahmpIO%SubGrdFracMosaic for MosaicAverage_2d"
     end if
 
     ! Allocate output array
     allocate(OutAverage(ixpar, jxpar))
 
     ! Calculate weighted average
-    OutAverage = nint(sum(InVariable * NMPIO%SubGrdFracRescaled, dim=3))
+    OutAverage = nint(sum(InVariable * NMPIO%SubGrdFracMosaic, dim=3))
 
   end function MosaicAverage_2d_int
 

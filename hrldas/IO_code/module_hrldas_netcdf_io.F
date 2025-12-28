@@ -5460,7 +5460,7 @@ contains
     implicit none
     character(len=*),          intent(in)  :: wrfinput_flnm
     integer,                   intent(in)  :: xstart, xend, ystart, yend, NumberLulcCat
-    real(kind=kind_noahmp),    dimension(xstart:xend,1:NumberLulcCat,ystart:yend), intent(out) :: SubGrdFrac
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend,1:NumberLulcCat), intent(out) :: SubGrdFrac
     character(len=24)                      :: name
     character(len=256)                     :: units
     integer                                :: ierr
@@ -5470,7 +5470,7 @@ contains
     integer                                :: iltype
     integer                                :: varid
     character(len=24),         intent(in)  :: SubGrdFracName 
-    real(kind=kind_noahmp),    dimension(xstart:xend,1:NumberLulcCat,ystart:yend) :: xdum
+    real(kind=kind_noahmp),    dimension(xstart:xend,ystart:yend,1:NumberLulcCat) :: xdum
 
 #ifdef _PARALLEL_  
     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
@@ -5504,7 +5504,7 @@ contains
       ierr = nf90_get_var(ncid, varid, xdum, start=(/xstart,ystart,1/), count=(/xend-xstart+1,yend-ystart+1,NumberLulcCat/))
 
       do iltype = 1,NumberLulcCat
-        SubGrdFrac(:,iltype,:) = xdum(:,:,iltype)
+        SubGrdFrac(:,:,iltype) = xdum(:,:,iltype)
       end do
 
     else
@@ -5516,7 +5516,6 @@ contains
     ! Close the NetCDF file
     ierr = nf90_close(ncid)
     if (ierr /= 0) stop "MODULE_HRLDAS_NETCDF_IO:  ReadMosaicTileFrac:  NF90_CLOSE"
-
 
   end subroutine ReadMosaicTileFrac
 

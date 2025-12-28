@@ -22,7 +22,7 @@ contains
  
     implicit none
 
-    type(NoahmpIO_type), intent(inout)  :: NoahmpIO
+    type(NoahmpIO_type), intent(in)  :: NoahmpIO
 
     ! For 3D arrays, we need to know whether the Z dimension is snow layers, or soil layers.
 
