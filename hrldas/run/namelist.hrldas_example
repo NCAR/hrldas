@@ -62,6 +62,13 @@
  TILE_DRAINAGE_OPTION              = 0
  WETLAND_OPTION                    = 0
 
+! the following are options for NoahMP Mosaic Scheme
+MOSAIC_SCHEME_OPTION               = 0
+MOSAIC_FRACT_NAME                  = "LANDUSEF"
+MOSAIC_NUMBER_OF_CATEGORIES        = 21
+MOSAIC_NUMBER_OF_TILES             = 5    
+MOSAIC_WRITE_OUTPUT                = 0
+
  ! the following options only work for SNICAR snow albedo scheme
  SNICAR_BANDNUMBER_OPTION          = 1
  SNICAR_SOLARSPEC_OPTION           = 1

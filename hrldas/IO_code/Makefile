@@ -1,7 +1,7 @@
 # Makefile 
 #
 .SUFFIXES:
-.SUFFIXES: .o .F
+.SUFFIXES: .o .F .F90
 
 include ../user_build_options
 
@@ -9,7 +9,12 @@ OBJS_NoahMP = module_NoahMP_hrldas_driver.o
 
 OBJS = \
 	main_hrldas_driver.o \
-	module_hrldas_netcdf_io.o
+	module_hrldas_netcdf_io.o\
+	MosaicAverageMod.o\
+	WriteNoahmpMosaicGridAverageOutputMod.o\
+	WriteNoahmpMosaicSubgridOutputMod.o\
+	WriteNoahmpMosaicRestartMod.o\
+	ReadNoahmpMosaicRestartMod.o
 
 CPPHRLDAS = -D_HRLDAS_OFFLINE_ $(MOD_OPT)
 
@@ -47,14 +52,41 @@ module_hrldas_netcdf_io.o: module_hrldas_netcdf_io.F
 	$(COMPILERF90) -o $(@) -c $(F90FLAGS) $(FREESOURCE) $(*).f90
 	@echo ""
 
-
+.F90.o:
+	@echo ""
+	$(RM) $(*).f90
+	$(CPP) $(CPPFLAGS) $(CPPHRLDAS) $(*).F90 > $(*).f90
+	$(COMPILERF90) -o $(@) -c $(F90FLAGS) $(FREESOURCE) -I. -I../../noahmp/utility -I../../noahmp/drivers/hrldas $(*).f90
+	@echo ""
 
 #
 # Dependencies:
 #
 
 main_hrldas_driver.o:	$(OBJS_NoahMP)
-$(OBJS_NoahMP):	module_hrldas_netcdf_io.o
+$(OBJS_NoahMP):	module_hrldas_netcdf_io.o\
+				MosaicAverageMod.o\
+				WriteNoahmpMosaicGridAverageOutputMod.o\
+				WriteNoahmpMosaicSubgridOutputMod.o\
+				WriteNoahmpMosaicRestartMod.o\
+				ReadNoahmpMosaicRestartMod.o\
+				../../noahmp/drivers/hrldas/NoahmpMosaicSortTileCatMod.o
+
+MosaicAverageMod.o: ../../noahmp/utility/Machine.o\
+                    ../../noahmp/drivers/hrldas/NoahmpIOVarType.o                
+WriteNoahmpMosaicGridAverageOutputMod.o:  ../../noahmp/utility/Machine.o\
+                                          ../../noahmp/drivers/hrldas/NoahmpIOVarType.o\
+										  module_hrldas_netcdf_io.o\
+										  MosaicAverageMod.o   
+WriteNoahmpMosaicSubgridOutputMod.o:  ../../noahmp/utility/Machine.o\
+                                      ../../noahmp/drivers/hrldas/NoahmpIOVarType.o\
+									  module_hrldas_netcdf_io.o
+WriteNoahmpMosaicRestartMod.o: ../../noahmp/utility/Machine.o\
+                               ../../noahmp/drivers/hrldas/NoahmpIOVarType.o\
+						       module_hrldas_netcdf_io.o
+ReadNoahmpMosaicRestartMod.o: ../../noahmp/utility/Machine.o\
+                              ../../noahmp/drivers/hrldas/NoahmpIOVarType.o\
+						      module_hrldas_netcdf_io.o
 
 # This command cleans up object files, etc.
 clean:

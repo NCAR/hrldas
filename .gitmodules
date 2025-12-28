@@ -1,4 +1,4 @@
 [submodule "noahmp"]
 	path = noahmp
-	url = https://github.com/NCAR/noahmp
-	branch = develop
+	url = https://github.com/prasanthvkrishna/noahmp
+	branch = subgrid

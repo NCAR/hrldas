@@ -22,6 +22,11 @@ OBJS_NoahMP = ../IO_code/module_NoahMP_hrldas_driver.o
 OBJS = \
 	../IO_code/main_hrldas_driver.o \
 	../IO_code/module_hrldas_netcdf_io.o \
+	../IO_code/MosaicAverageMod.o\
+	../IO_code/ReadNoahmpMosaicRestartMod.o\
+        ../IO_code/WriteNoahmpMosaicGridAverageOutputMod.o\
+	../IO_code/WriteNoahmpMosaicRestartMod.o\
+	../IO_code/WriteNoahmpMosaicSubgridOutputMod.o\
         ../../urban/wrf/module_bep_bem_helper.o \
 	../../urban/wrf/module_sf_urban.o \
 	../../urban/wrf/module_sf_bep.o \
@@ -54,6 +59,7 @@ OBJS = \
         ../../noahmp/drivers/hrldas/WaterVarInTransferMod.o \
         ../../noahmp/drivers/hrldas/BiochemVarInTransferMod.o \
         ../../noahmp/drivers/hrldas/PedoTransferSR2006Mod.o \
+	../../noahmp/drivers/hrldas/NoahmpMosaicSortTileCatMod.o\
         ../../noahmp/utility/Machine.o \
         ../../noahmp/utility/CheckNanMod.o \
         ../../noahmp/utility/PiecewiseLinearInterp1dMod.o \

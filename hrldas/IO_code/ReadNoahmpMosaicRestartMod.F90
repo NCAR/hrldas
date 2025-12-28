@@ -1,0 +1,250 @@
+module ReadNoahmpMosaicRestartMod
+
+!!! This module part of NoahMP Mosaic/Subgrid Tiling Scheme
+!!! Purpose: To write grid average values of Noah-MP Mosaic. 
+
+! ------------------------ Code history -----------------------------------
+! Original code : Prasanth Valayamkunnath (IISER Thiruvananthapuram)
+! Date          : September 12, 2025
+! -------------------------------------------------------------------------
+
+  use Machine
+  use NoahmpIOVarType
+  use module_hrldas_netcdf_io
+
+  implicit none
+
+contains
+
+!=== sort landuse/soiltype/hydrotype index based on area fraction and identify most dominant types
+
+  subroutine ReadNoahmpMosaicRestart (NoahmpIO)
+ 
+    implicit none
+
+    type(NoahmpIO_type), intent(inout)  :: NoahmpIO
+
+    ! local
+    integer :: xstart
+    integer :: xend
+    integer :: ixfull
+    integer :: jxfull
+    integer :: ntile
+
+    xstart = NoahmpIO%xstart
+    xend   = NoahmpIO%xend 
+    ixfull = NoahmpIO%ixfull
+    jxfull = NoahmpIO%jxfull
+    ntile  = NoahmpIO%NTilesMax
+
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SOIL_T"  , NoahmpIO%TSLB     )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SNOW_T"  , NoahmpIO%TSNOXY   )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SMC"     , NoahmpIO%SMOIS    )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SH2O"    , NoahmpIO%SH2O     )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ZSNSO"   , NoahmpIO%ZSNSOXY  )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SNICE"   , NoahmpIO%SNICEXY  )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SNLIQ"   , NoahmpIO%SNLIQXY  )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "FWET"    , NoahmpIO%FWETXY   )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SNEQVO"  , NoahmpIO%SNEQVOXY )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "EAH"     , NoahmpIO%EAHXY    )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "TAH"     , NoahmpIO%TAHXY    )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ALBOLD"  , NoahmpIO%ALBOLDXY )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "CM"      , NoahmpIO%CMXY     )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "CH"      , NoahmpIO%CHXY     )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ISNOW"   , NoahmpIO%ISNOWXY  ) 
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "CANLIQ"  , NoahmpIO%CANLIQXY )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "CANICE"  , NoahmpIO%CANICEXY )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SNEQV"   , NoahmpIO%SNOW     )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SNOWH"   , NoahmpIO%SNOWH    )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "TV"      , NoahmpIO%TVXY     )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "TG"      , NoahmpIO%TGXY     )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ZWT"     , NoahmpIO%ZWTXY    )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "WA"      , NoahmpIO%WAXY     )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "WT"      , NoahmpIO%WTXY     )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "WSLAKE"  , NoahmpIO%WSLAKEXY )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "LFMASS"  , NoahmpIO%LFMASSXY )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "RTMASS"  , NoahmpIO%RTMASSXY )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "STMASS"  , NoahmpIO%STMASSXY )
+
+    call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "CROPCAT" , NoahmpIO%CROPCAT  )
+
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "WOOD"    , NoahmpIO%WOODXY   )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "GRAIN"   , NoahmpIO%GRAINXY  )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "GDD"     , NoahmpIO%GDDXY    )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "STBLCP"  , NoahmpIO%STBLCPXY )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "FASTCP"  , NoahmpIO%FASTCPXY )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "LAI"     , NoahmpIO%LAI      )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SAI"     , NoahmpIO%XSAIXY   )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "VEGFRA"  , NoahmpIO%VEGFRA   )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "GVFMIN"  , NoahmpIO%GVFMIN   )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "GVFMAX"  , NoahmpIO%GVFMAX   )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ACMELT"  , NoahmpIO%ACSNOM   )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ACSNOW"  , NoahmpIO%ACSNOW   )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "TAUSS"   , NoahmpIO%TAUSSXY  )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "QSFC"    , NoahmpIO%QSFC     )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SFCRUNOFF",NoahmpIO%SFCRUNOFF)
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "UDRUNOFF" ,NoahmpIO%UDRUNOFF )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "QTDRAIN"  ,NoahmpIO%QTDRAIN  )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ACC_SSOIL" , NoahmpIO%ACC_SSOILXY )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ACC_QINSUR", NoahmpIO%ACC_QINSURXY)
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ACC_QSEVA" , NoahmpIO%ACC_QSEVAXY )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ACC_ETRANI", NoahmpIO%ACC_ETRANIXY)
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ACC_DWATER", NoahmpIO%ACC_DWATERXY)
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ACC_PRCP"  , NoahmpIO%ACC_PRCPXY  )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ACC_ECAN"  , NoahmpIO%ACC_ECANXY  )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ACC_ETRAN" , NoahmpIO%ACC_ETRANXY )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ACC_EDIR"  , NoahmpIO%ACC_EDIRXY  )
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ACC_GLAFLW", NoahmpIO%ACC_GLAFLWXY)
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ALBSOILDIR", NoahmpIO%ALBSOILDIRXY)
+    call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "ALBSOILDIF", NoahmpIO%ALBSOILDIFXY)
+
+    ! below for SNICAR snow albedo scheme
+    if (NoahmpIO%IOPT_ALB == 3)then
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SNRDS"   , NoahmpIO%SNRDSXY  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SNFR"    , NoahmpIO%SNFRXY   )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "BCPHI"   , NoahmpIO%BCPHIXY  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "BCPHO"   , NoahmpIO%BCPHOXY  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "OCPHI"   , NoahmpIO%OCPHIXY  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "OCPHO"   , NoahmpIO%OCPHOXY  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "DUST1"   , NoahmpIO%DUST1XY  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "DUST2"   , NoahmpIO%DUST2XY  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "DUST3"   , NoahmpIO%DUST3XY  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "DUST4"   , NoahmpIO%DUST4XY  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "DUST5"   , NoahmpIO%DUST5XY  )
+    endif
+
+    ! below for irrigation scheme
+    if ( NoahmpIO%IOPT_IRR > 0 ) then
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "IRNUMSI" , NoahmpIO%IRNUMSI  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "IRNUMMI" , NoahmpIO%IRNUMMI  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "IRNUMFI" , NoahmpIO%IRNUMFI  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "IRWATSI" , NoahmpIO%IRWATSI  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "IRWATMI" , NoahmpIO%IRWATMI  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "IRWATFI" , NoahmpIO%IRWATFI  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "IRSIVOL" , NoahmpIO%IRSIVOL  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "IRMIVOL" , NoahmpIO%IRMIVOL  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "IRFIVOL" , NoahmpIO%IRFIVOL  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "IRELOSS" , NoahmpIO%IRELOSS  )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "IRRSPLH" , NoahmpIO%IRRSPLH  )
+    endif
+
+    ! below for MMF groundwater scheme
+    if ( NoahmpIO%IOPT_RUNSUB == 5 ) then
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SMOISEQ"   , NoahmpIO%SMOISEQ    )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "DEEPRECHXY", NoahmpIO%DEEPRECHXY )  
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "SMCWTDXY"  , NoahmpIO%SMCWTDXY   )  
+
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "AREAXY"    , NoahmpIO%AREAXY     )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QRFXY"     , NoahmpIO%QRFXY      )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSPRINGXY" , NoahmpIO%QSPRINGXY  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSLATXY"   , NoahmpIO%QSLATXY    )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QRFSXY"    , NoahmpIO%QRFSXY     )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "QSPRINGSXY", NoahmpIO%QSPRINGSXY )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "RECHXY"    , NoahmpIO%RECHXY     )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FDEPTHXY"   ,NoahmpIO%FDEPTHXY   )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "RIVERCONDXY",NoahmpIO%RIVERCONDXY)
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "RIVERBEDXY" ,NoahmpIO%RIVERBEDXY )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "EQZWT"      ,NoahmpIO%EQZWT      )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "PEXPXY"     ,NoahmpIO%PEXPXY     )
+    endif
+
+    ! for wetland scheme
+    if ( NoahmpIO%IOPT_WETLAND > 0 ) then
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "FSATXY"     , NoahmpIO%FSATXY    )
+      call get_from_restart_mosaic(xstart, xend, xstart, ixfull, jxfull, ntile, "WSURFXY"    , NoahmpIO%WSURFXY   )
+    endif
+
+   ! below for urban model
+    if ( NoahmpIO%SF_URBAN_PHYSICS > 0 ) then
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "SH_URB2D"  ,     NoahmpIO%SH_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LH_URB2D"  ,     NoahmpIO%LH_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,       "G_URB2D"  ,      NoahmpIO%G_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "RN_URB2D"  ,     NoahmpIO%RN_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TS_URB2D"  ,     NoahmpIO%TS_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "FRC_URB2D"  ,    NoahmpIO%FRC_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "UTYPE_URB2D"  ,  NoahmpIO%UTYPE_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LP_URB2D"  ,     NoahmpIO%LP_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LB_URB2D"  ,     NoahmpIO%LB_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "HGT_URB2D"  ,    NoahmpIO%HGT_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "MH_URB2D"  ,     NoahmpIO%MH_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "STDH_URB2D"  ,   NoahmpIO%STDH_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "HI_URB2D"  ,     NoahmpIO%HI_URB2D  )
+      call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "LF_URB2D"  ,     NoahmpIO%LF_URB2D  )
+
+      if ( NoahmpIO%SF_URBAN_PHYSICS == 1 ) then  ! single layer urban model
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CMR_SFCDIF" ,    NoahmpIO%CMR_SFCDIF )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CHR_SFCDIF" ,    NoahmpIO%CHR_SFCDIF )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CMC_SFCDIF" ,    NoahmpIO%CMC_SFCDIF )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "CHC_SFCDIF" ,    NoahmpIO%CHC_SFCDIF )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "CMGR_SFCDIF" ,   NoahmpIO%CMGR_SFCDIF )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "CHGR_SFCDIF" ,   NoahmpIO%CHGR_SFCDIF )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TR_URB2D"  ,     NoahmpIO%TR_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TB_URB2D"  ,     NoahmpIO%TB_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TG_URB2D"  ,     NoahmpIO%TG_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "TC_URB2D"  ,     NoahmpIO%TC_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "QC_URB2D"  ,     NoahmpIO%QC_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "UC_URB2D"  ,     NoahmpIO%UC_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "XXXR_URB2D"  ,   NoahmpIO%XXXR_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "XXXB_URB2D"  ,   NoahmpIO%XXXB_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "XXXG_URB2D"  ,   NoahmpIO%XXXG_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "XXXC_URB2D"  ,   NoahmpIO%XXXC_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TRL_URB3D"  ,    NoahmpIO%TRL_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TBL_URB3D"  ,    NoahmpIO%TBL_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGL_URB3D"  ,    NoahmpIO%TGL_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "CMCR_URB2D"  ,   NoahmpIO%CMCR_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGR_URB2D"  ,    NoahmpIO%TGR_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "TGRL_URB3D"  ,   NoahmpIO%TGRL_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "SMR_URB3D"  ,    NoahmpIO%SMR_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRELR_URB2D"  ,  NoahmpIO%DRELR_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRELB_URB2D"  ,  NoahmpIO%DRELB_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRELG_URB2D"  ,  NoahmpIO%DRELG_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FLXHUMR_URB2D"  ,NoahmpIO%FLXHUMR_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FLXHUMB_URB2D"  ,NoahmpIO%FLXHUMB_URB2D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "FLXHUMG_URB2D"  ,NoahmpIO%FLXHUMG_URB2D  )
+      endif
+
+      if ( (NoahmpIO%SF_URBAN_PHYSICS == 2) .or. (NoahmpIO%SF_URBAN_PHYSICS == 3) ) then  ! BEP or BEM urban models
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TRB_URB4D"  ,    NoahmpIO%TRB_URB4D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TW1_URB4D"  ,    NoahmpIO%TW1_URB4D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TW2_URB4D"  ,    NoahmpIO%TW2_URB4D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGB_URB4D"  ,    NoahmpIO%TGB_URB4D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "SFW1_URB3D"  ,   NoahmpIO%SFW1_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "SFW2_URB3D"  ,   NoahmpIO%SFW2_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "SFR_URB3D"  ,    NoahmpIO%SFR_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "SFG_URB3D"  ,    NoahmpIO%SFG_URB3D  )
+      endif
+
+      if ( NoahmpIO%SF_URBAN_PHYSICS == 3 ) then  ! BEM urban model        
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "TLEV_URB3D"  ,   NoahmpIO%TLEV_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "QLEV_URB3D"  ,   NoahmpIO%QLEV_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "TW1LEV_URB3D"  , NoahmpIO%TW1LEV_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "TW2LEV_URB3D"  , NoahmpIO%TW2LEV_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "TGLEV_URB3D"  ,  NoahmpIO%TGLEV_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "TFLEV_URB3D"  ,  NoahmpIO%TFLEV_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "SF_AC_URB3D"  ,  NoahmpIO%SF_AC_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "LF_AC_URB3D"  ,  NoahmpIO%LF_AC_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "CM_AC_URB3D"  ,  NoahmpIO%CM_AC_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "SFVENT_URB3D"  , NoahmpIO%SFVENT_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "LFVENT_URB3D"  , NoahmpIO%LFVENT_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "SFWIN1_URB3D"  , NoahmpIO%SFWIN1_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,  "SFWIN2_URB3D"  , NoahmpIO%SFWIN2_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "EP_PV_URB3D"  ,  NoahmpIO%EP_PV_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "T_PV_URB3D"  ,   NoahmpIO%T_PV_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TRV_URB4D"  ,    NoahmpIO%TRV_URB4D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "QR_URB4D"  ,     NoahmpIO%QR_URB4D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "QGR_URB3D"  ,    NoahmpIO%QGR_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "TGR_URB3D"  ,    NoahmpIO%TGR_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,   "DRAIN_URB4D"  ,  NoahmpIO%DRAIN_URB4D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull, "DRAINGR_URB3D"  ,NoahmpIO%DRAINGR_URB3D  ) 
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "SFRV_URB3D"  ,   NoahmpIO%SFRV_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,    "LFRV_URB3D"  ,   NoahmpIO%LFRV_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "DGR_URB3D"  ,    NoahmpIO%DGR_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,      "DG_URB3D"  ,     NoahmpIO%DG_URB3D  )
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "LFR_URB3D"  ,    NoahmpIO%LFR_URB3D  ) 
+          call get_from_restart(xstart, xend, xstart, ixfull, jxfull,     "LFG_URB3D"  ,    NoahmpIO%LFG_URB3D  )
+      endif 
+    endif
+
+  end subroutine ReadNoahmpMosaicRestart
+
+end module ReadNoahmpMosaicRestartMod
