@@ -42,11 +42,12 @@ void info_jpeg2000(char *buffer, int *length, int *width, int *height, jas_image
   }
 
   /* Decode the image. */
-
-  if (!(*image = jpc_decode(*instream, opts))) {
+  /* if (!(*image = jpc_decode(*instream, opts))) {  */
+  if (!(*image = jas_image_decode(*instream, fmtid, opts))) {
     fprintf(stderr, "cannot load image\n");
     exit (1);
   }
+
   pcmpt=(*image)->cmpts_[0];
   *width = pcmpt->width_;
   *height = pcmpt->height_;

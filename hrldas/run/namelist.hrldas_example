@@ -87,11 +87,6 @@
  RESTART_FREQUENCY_HOURS = 24
  NOAHMP_OUTPUT           = 0 ! 0 -> standard output, 1 -> with additional process output
 
-! XSTART = 40
-! XEND   = 380
-! YSTART = 77
-! YEND   = 201
-
  NSOIL = 4
  soil_thick_input(1) = 0.10 ! unit of meter
  soil_thick_input(2) = 0.30

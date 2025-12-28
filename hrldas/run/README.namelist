@@ -35,12 +35,6 @@
                                                              !     If  0, do not write restart files
                                                              !     If <0, write at beginning of the month
 
-                                                             ! Set these four to perform simulation over a sub-domain
- XSTART = 20                                                 !    Defines start of sub-domain in x        [default = 1   ]
- XEND   = 20                                                 !    Defines end of sub-domain in x          [default = 0   ]
- YSTART = 203                                                !    Defines start of sub-domain in y        [default = 1   ]
- YEND   = 203                                                !    Defines end of sub-domain in y          [default = 0   ]
-
  NSOIL  = 4                                                  !*** Number of soil layers                   [default = none]
 
  soil_thick_input(1) = 0.10                                  !*** Vector of soil layer thicknesses
