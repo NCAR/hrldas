@@ -119,6 +119,7 @@ program create_forcing
   logical            :: init_lai
   logical            :: vary_lai
   logical            :: mask_water
+  logical            :: init_mmf
   character(len=256), dimension(MAXTEMPLATE) :: Tfile_template         ! T forcing
   character(len=256), dimension(MAXTEMPLATE) :: Qfile_template         ! Q forcing
   character(len=256), dimension(MAXTEMPLATE) :: Pfile_template         ! P forcing
@@ -147,7 +148,7 @@ program create_forcing
        rainfall_interp, full_ic_frq, rescale_shortwave,    &
        update_snow, forcing_height_2d,                     &
        truncate_sw, expand_loop,                           &
-       init_lai, vary_lai,mask_water,                      &
+       init_lai, vary_lai,mask_water,init_mmf,             &
        Tfile_template, Qfile_template, Pfile_template,     &
        Ufile_template, Vfile_template, LWfile_template,    &
        SWfile_primary, SWfile_secondary, PCPfile_primary,  &
@@ -165,6 +166,7 @@ program create_forcing
   init_lai           = .FALSE.
   vary_lai           = .FALSE.
   mask_water         = .FALSE.
+  init_mmf           = .FALSE.
   expand_loop        = 0
   Tfile_template     = " "
   Qfile_template     = " "
@@ -256,7 +258,7 @@ program create_forcing
   call strrep(geo_em_flnm, "<DataDir>", trim(DataDir))
   write(*,'(A)') 'geo_em_flnm    = "'//trim(geo_em_flnm)//'"'
 
-  call read_geo_em_file(trim(geo_em_flnm), geo_em, ierr)
+  call read_geo_em_file(trim(geo_em_flnm), geo_em, ierr, init_mmf)
   if (ierr /= 0) stop "Problem reading geo_em file"
   write(hgrid,'(I1)') geo_em%grid_id
 
@@ -469,6 +471,12 @@ program create_forcing
            call output_to_netcdf(ncid,"MAPFAC_MY",            "" , geo_em%mmy, geo_em%idim, geo_em%jdim)
            call output_to_netcdf(ncid,   "SHDMAX",           "%" , gvfmax%field, geo_em%idim, geo_em%jdim)
            call output_to_netcdf(ncid,   "SHDMIN",           "%" , gvfmin%field, geo_em%idim, geo_em%jdim)
+           if (init_mmf .eqv. .true.) then
+             call output_to_netcdf(ncid,    "EQZWT",            "m" , geo_em%eqzwt, geo_em%idim, geo_em%jdim)
+             call output_to_netcdf(ncid,    "FDEPTH",           "m" , geo_em%fdepth, geo_em%idim, geo_em%jdim)
+             call output_to_netcdf(ncid,    "RIVERBED",         "m" , geo_em%riverbed, geo_em%idim, geo_em%jdim)
+             call output_to_netcdf(ncid,    "RECHCLIM",         "mm", geo_em%rechclim, geo_em%idim, geo_em%jdim)
+           endif
 
            if(init_lai) then
 	     call interpolate_vegetation("LAI", date, geo_em%idim, geo_em%jdim, geo_em%lai, lai%field)

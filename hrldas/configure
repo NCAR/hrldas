@@ -1,77 +1,72 @@
 #!/usr/bin/perl
+use feature 'switch';
 
-  if($#ARGV == 0) {
-     $response = shift(@ARGV) ;
-     print("Configure HRLDAS: $response \n");
-  }else {
-     print "Please select from following supported architectures: \n\n";
+if ($#ARGV == 0) {
+    $response = shift(@ARGV);
+    print("Configure HRLDAS: $response \n");
+} else {
+    print "Please select from the following supported architectures: \n\n";
 
-     print "   1. Linux PGI compiler serial \n";
-     print "   2. Linux PGI compiler MPI \n";
-     print "   3. Linux intel compiler serial \n";
-     print "   4. Linux intel compiler MPI      \n";
-     print "   5. Linux intel compiler MPI (NCAR/Derecho) \n";
-     print "   6. Linux gfortran/gcc compiler serial \n";
-     print "   7. Linux gfortran/gcc compiler MPI \n";
-     print "   8. Linux gfortran/gcc compiler MPI (NCAR/Derecho) \n";
-     print "   9. Linux gfortran/gcc compiler MPI (Docker container) \n";
-     print "   0. exit only \n";
+    print "   1. Linux PGI compiler serial \n";
+    print "   2. Linux PGI compiler MPI \n";
+    print "   3. Linux intel compiler serial \n";
+    print "   4. Linux intel compiler MPI \n";
+    print "   5. Linux intel compiler MPI (NCAR/Derecho) \n";
+    print "   6. Linux gfortran/gcc compiler serial \n";
+    print "   7. Linux gfortran/gcc compiler MPI \n";
+    print "   8. Linux gfortran/gcc compiler MPI (NCAR/Derecho) \n";
+    print "   9. Linux gfortran/gcc compiler MPI (Docker container) \n";
+    print "   0. exit only \n";
 
-     printf "\nEnter selection [%d-%d] : ",0,9 ;
+    printf "\nEnter selection [%d-%d] : ", 0, 9;
 
-     $response = <STDIN> ;
-     chop($response);
-  }
+    $response = <STDIN>;
+    chomp($response);
+}
 
-  use Switch;
-  switch ($response) {
-     case 1 { 
-              # serial PGI 
-              system "cp arch/user_build_options.pgi.serial user_build_options"; 
-            }
+given ($response) {
+    when (1) {
+        # serial PGI
+        system "cp arch/user_build_options.pgi.serial user_build_options";
+    }
+    when (2) {
+        # MPI PGI
+        system "cp arch/user_build_options.pgi.mpi user_build_options";
+    }
+    when (3) {
+        # serial intel
+        system "cp arch/user_build_options.ifort.serial user_build_options";
+    }
+    when (4) {
+        # MPI intel
+        system "cp arch/user_build_options.ifort.mpi user_build_options";
+    }
+    when (5) {
+        # MPI intel (NCAR/Derecho)
+        system "cp arch/user_build_options.ifort.mpi.derecho user_build_options";
+    }
+    when (6) {
+        # serial GFORTRAN
+        system "cp arch/user_build_options.gfortran.serial user_build_options";
+    }
+    when (7) {
+        # MPI GFORTRAN
+        system "cp arch/user_build_options.gfortran.mpi user_build_options";
+    }
+    when (8) {
+        # MPI GFORTRAN (NCAR/Derecho)
+        system "cp arch/user_build_options.gfortran.mpi.derecho user_build_options";
+    }
+    when (9) {
+        # MPI GFORTRAN for Docker container
+        system "cp arch/user_build_options.gfortran.mpi.container user_build_options";
+    }
+    default {
+        print "no selection $response\n";
+        last;
+    }
+}
 
-     case 2 {
-              # MPI PGI 
-              system "cp arch/user_build_options.pgi.mpi user_build_options"; 
-            }
+print "The user_build_options file used for compiling source code has been successfully generated. \n";
+print "Please check and change the software package path in the generated user_build_options file before compiling! \n";
 
-     case 3 {
-              # serial intel
-              system "cp arch/user_build_options.ifort.serial user_build_options"; 
-            }
-
-     case 4 {
-              # MPI intel
-              system "cp arch/user_build_options.ifort.mpi user_build_options"; 
-            }
-
-     case 5 {
-              # MPI intel (NCAR/Derecho)
-              system "cp arch/user_build_options.ifort.mpi.derecho user_build_options";
-            }
-
-     case 6 {
-              # serial GFORTRAN
-              system "cp arch/user_build_options.gfortran.serial user_build_options"; 
-            }
-
-     case 7 {
-              # MPI GFORTRAN
-              system "cp arch/user_build_options.gfortran.mpi user_build_options";
-            }
-
-     case 8 {
-              # MPI GFORTRAN (NCAR/Derecho)
-              system "cp arch/user_build_options.gfortran.mpi.derecho user_build_options";
-            }
-
-     case 9 {
-              # MPI GFORTRAN for Docker container
-              system "cp arch/user_build_options.gfortran.mpi.container user_build_options";
-            }
-
-     else   {print "no selection $response\n"; last} 
-  }
-
-  print "The user_build_options file used for compiling source code has been successfully generated. \n";
-  print "Please check and change the software package path in the generated user_build_options file before compiling! \n";

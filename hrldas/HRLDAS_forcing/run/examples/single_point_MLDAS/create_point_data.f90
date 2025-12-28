@@ -316,7 +316,7 @@ write(*,*) "Creating: "//filename
     iret = nf90_put_att(ncid, var_id_force_sw, "units", "W/m2")
 
   iret = nf90_def_var(ncid,   "RAINRATE", NF90_FLOAT, (/dim_id_we,dim_id_sn,dim_id_time/), var_id_force_precip)
-    iret = nf90_put_att(ncid, var_id_force_precip, "description", "temperature")
+    iret = nf90_put_att(ncid, var_id_force_precip, "description", "rain rate")
     iret = nf90_put_att(ncid, var_id_force_precip, "units", "mm/s")
 
   iret = nf90_put_att(ncid, NF90_GLOBAL, "TITLE"  , "Created from HRLDAS create_point_data")
