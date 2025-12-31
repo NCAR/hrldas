@@ -20,20 +20,20 @@ endif
 OBJS_NoahMP = ../IO_code/module_NoahMP_hrldas_driver.o 
 
 OBJS = \
-	../IO_code/main_hrldas_driver.o \
-	../IO_code/module_hrldas_netcdf_io.o \
+        ../IO_code/main_hrldas_driver.o \
+        ../IO_code/module_hrldas_netcdf_io.o \
         ../../urban/wrf/module_bep_bem_helper.o \
-	../../urban/wrf/module_sf_urban.o \
-	../../urban/wrf/module_sf_bep.o \
-	../../urban/wrf/module_sf_bem.o \
-	../../urban/wrf/module_sf_bep_bem.o \
+        ../../urban/wrf/module_sf_urban.o \
+        ../../urban/wrf/module_sf_bep.o \
+        ../../urban/wrf/module_sf_bem.o \
+        ../../urban/wrf/module_sf_bep_bem.o \
         ../../urban/wrf/NoahmpUrbanDriverMainMod.o \
-	../Utility_routines/module_wrf_utilities.o \
-	../Utility_routines/module_model_constants.o \
-	../Utility_routines/module_date_utilities.o \
-	../Utility_routines/kwm_string_utilities.o \
+        ../Utility_routines/module_wrf_utilities.o \
+        ../Utility_routines/module_model_constants.o \
+        ../Utility_routines/module_date_utilities.o \
+        ../Utility_routines/kwm_string_utilities.o \
         ../Utility_routines/module_wrf_error.o \
-	../Utility_routines/module_ra_gfdleta.o \
+        ../Utility_routines/module_ra_gfdleta.o \
         ../Utility_routines/module_domain.o\
         ../../noahmp/drivers/hrldas/NoahmpDriverMainMod.o \
         ../../noahmp/drivers/hrldas/NoahmpInitMainMod.o \
@@ -54,6 +54,7 @@ OBJS = \
         ../../noahmp/drivers/hrldas/WaterVarInTransferMod.o \
         ../../noahmp/drivers/hrldas/BiochemVarInTransferMod.o \
         ../../noahmp/drivers/hrldas/PedoTransferSR2006Mod.o \
+        ../../noahmp/drivers/hrldas/GroundWaterMmfMod.o \
         ../../noahmp/utility/Machine.o \
         ../../noahmp/utility/CheckNanMod.o \
         ../../noahmp/utility/PiecewiseLinearInterp1dMod.o \
@@ -167,7 +168,6 @@ OBJS = \
         ../../noahmp/src/IrrigationPrepareMod.o \
         ../../noahmp/src/BalanceErrorCheckMod.o \
         ../../noahmp/src/GeneralInitMod.o \
-        ../../noahmp/src/GroundWaterMmfMod.o \
         ../../noahmp/src/BalanceErrorCheckGlacierMod.o \
         ../../noahmp/src/EnergyMainGlacierMod.o \
         ../../noahmp/src/GeneralInitGlacierMod.o \
@@ -192,7 +192,7 @@ OBJS = \
         ../../noahmp/src/SurfaceRadiationGlacierMod.o \
         ../../noahmp/src/RunoffSurfaceWetlandMod.o \
         ../../noahmp/src/WetlandWaterZhang22Mod.o \
-	../../noahmp/src/WaterMainGlacierMod.o
+        ../../noahmp/src/WaterMainGlacierMod.o
 
 CMD = hrldas.exe
 all:	$(CMD)
