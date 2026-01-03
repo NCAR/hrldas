@@ -245,18 +245,17 @@ contains
 
       if ( .not. allocated (NoahmpIO%SubGrdFrac)        ) &
           allocate ( NoahmpIO%SubGrdFrac            (XSTART:XEND, YSTART:YEND, 1) )
-      if ( .not. allocated (NoahmpIO%SubGrdFracRescaled)) &
-          allocate ( NoahmpIO%SubGrdFracRescaled    (XSTART:XEND, YSTART:YEND, 1) )
+      if ( .not. allocated (NoahmpIO%SubGrdFracMosaic)  ) &
+          allocate ( NoahmpIO%SubGrdFracMosaic (XSTART:XEND, YSTART:YEND, 1) )
       if ( .not. allocated (NoahmpIO%SubGrdIndexSorted) ) &
           allocate ( NoahmpIO%SubGrdIndexSorted     (XSTART:XEND, YSTART:YEND, 1) )
       if ( .not. allocated (NoahmpIO%NumberOfTiles)     ) &
-          allocate ( NoahmpIO%NumberOfTiles         (XSTART:XEND, YSTART:YEND)                          )
+          allocate ( NoahmpIO%NumberOfTiles         (XSTART:XEND, YSTART:YEND) )
 
       ! since all variables are with subgrid dimension, it should be 1 when mosaic is off
       NoahmpIO%NTilesMax          = 1                                  ! maximum subgrid tiles
       NoahmpIO%NumberOfTiles      = 1                                  ! 2D array of number of subgrid tiles
-      NoahmpIO%SubGrdFracRescaled = 1                                  ! 3D array of subgrid fractions
-      NoahmpIO%SubGrdFracMosaic   = 1
+      NoahmpIO%SubGrdFracMosaic   = 1.0
 
     endif
 
