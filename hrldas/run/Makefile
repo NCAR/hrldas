@@ -54,6 +54,7 @@ OBJS = \
         ../../noahmp/drivers/hrldas/WaterVarInTransferMod.o \
         ../../noahmp/drivers/hrldas/BiochemVarInTransferMod.o \
         ../../noahmp/drivers/hrldas/PedoTransferSR2006Mod.o \
+        ../../noahmp/drivers/hrldas/GroundWaterMmfMod.o \
         ../../noahmp/utility/Machine.o \
         ../../noahmp/utility/CheckNanMod.o \
         ../../noahmp/utility/PiecewiseLinearInterp1dMod.o \
@@ -167,7 +168,6 @@ OBJS = \
         ../../noahmp/src/IrrigationPrepareMod.o \
         ../../noahmp/src/BalanceErrorCheckMod.o \
         ../../noahmp/src/GeneralInitMod.o \
-        ../../noahmp/src/GroundWaterMmfMod.o \
         ../../noahmp/src/BalanceErrorCheckGlacierMod.o \
         ../../noahmp/src/EnergyMainGlacierMod.o \
         ../../noahmp/src/GeneralInitGlacierMod.o \
