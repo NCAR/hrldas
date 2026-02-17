@@ -1,5 +1,32 @@
 # HRLDAS/Noah-MP model release notes
 
+## HRLDAS/Noah-MP version 5.2.0 release
+
+### Noah-MP LSM capabilities/enhancements
+
+- Refactored Noah-MP coupled with WRF. Please see Noah-MP code release notes for more details: https://github.com/NCAR/noahmp/blob/master/RELEASE_NOTES.md
+
+
+### Noah-MP LSM bug fixes
+
+- None
+
+
+### HRLDAS module capabilities/enhancements
+
+- minor changes to work with the Noah-MP v5.2.0 which is coupled to WRF.
+
+
+### HRLDAS module bug fixes
+
+- None
+
+
+### External module capabilities/enhancements
+
+- None
+
+
 ## HRLDAS/Noah-MP version 5.1.1 release
 
 ### Noah-MP LSM capabilities/enhancements
