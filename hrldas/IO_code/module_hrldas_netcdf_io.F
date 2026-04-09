@@ -3579,7 +3579,7 @@ contains
        nsoil, nsnow, nrad, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,&
        iswater, vegtyp, num_urban_hi, urban_map_zrd, urban_map_zwd, &
        urban_map_gd, urban_map_zd, urban_map_zdf,  urban_map_bd,    &
-       urban_map_wd, urban_map_gbd, urban_map_fbd, urban_map_zgrd)
+       urban_map_wd, urban_map_gbd, urban_map_fbd, urban_map_zgrd, urban_map_ndm)
 
     implicit none
 
@@ -3610,6 +3610,7 @@ contains
     integer,                               intent(in) :: urban_map_gbd
     integer,                               intent(in) :: urban_map_fbd
     integer,                               intent(in) :: urban_map_zgrd
+    integer,                               intent(in) :: urban_map_ndm
     real(kind=kind_noahmp),                intent(in) :: dx, dy
     real(kind=kind_noahmp),                intent(in) :: truelat1, truelat2
     integer,                               intent(in) :: mapproj
@@ -3625,7 +3626,7 @@ contains
        nsoil, nsnow, nrad, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon, &
        iswater, gvegtyp, num_urban_hi, urban_map_zrd, urban_map_zwd, &
        urban_map_gd, urban_map_zd, urban_map_zdf,  urban_map_bd,    &
-       urban_map_wd, urban_map_gbd, urban_map_fbd, urban_map_zgrd )
+       urban_map_wd, urban_map_gbd, urban_map_fbd, urban_map_zgrd, urban_map_ndm )
     endif 
 
     call mpp_land_sync()
@@ -3638,7 +3639,7 @@ contains
        nsoil, nsnow, nrad, num_urban_layers, dx, dy, truelat1, truelat2, mapproj, lat1, lon1, cen_lon,  &
        iswater, vegtyp, num_urban_hi, urban_map_zrd, urban_map_zwd, &
        urban_map_gd, urban_map_zd, urban_map_zdf,  urban_map_bd,    &
-       urban_map_wd, urban_map_gbd, urban_map_fbd, urban_map_zgrd)
+       urban_map_wd, urban_map_gbd, urban_map_fbd, urban_map_zgrd, urban_map_ndm)
 
     implicit none
 #include <netcdf.inc>
@@ -3670,6 +3671,7 @@ contains
     integer,                               intent(in) :: urban_map_gbd
     integer,                               intent(in) :: urban_map_fbd
     integer,                               intent(in) :: urban_map_zgrd
+    integer,                               intent(in) :: urban_map_ndm
     real(kind=kind_noahmp),                intent(in) :: dx, dy
     real(kind=kind_noahmp),                intent(in) :: truelat1, truelat2
     integer,                               intent(in) :: mapproj
@@ -3686,7 +3688,7 @@ contains
                dimid_layers,dimid_snow_layers, dimid_sosn_layers,     &
                dimid_urban,dimid_numrad_layers,dimid_ubhi,dimid_uzrd, &
                dimid_uzwd,dimid_ubgd,dimid_ubzd,dimid_uzdf,dimid_ubbd,&
-               dimid_ubwd,dimid_ugbd,dimid_ufbd,dimid_zgrd
+               dimid_ubwd,dimid_ugbd,dimid_ufbd,dimid_zgrd,dimid_undm
     character(len=19) :: date19
     integer :: rank
 
@@ -3747,6 +3749,7 @@ contains
     ierr = nf90_def_dim(ncid, "ugbd_layers", urban_map_gbd, dimid_ugbd)
     ierr = nf90_def_dim(ncid, "ufbd_layers", urban_map_fbd, dimid_ufbd)
     ierr = nf90_def_dim(ncid, "zgrd_layers", urban_map_zgrd, dimid_zgrd)
+    ierr = nf90_def_dim(ncid, "undm_layers", urban_map_ndm, dimid_undm)
 
     ierr = nf90_put_att(ncid, NF90_GLOBAL, "TITLE", "RESTART FILE FROM HRLDAS "//version)
     ierr = nf90_put_att(ncid, NF90_GLOBAL, "missing_value", -1.E33)
@@ -4112,6 +4115,9 @@ contains
     else if (output_layers == "ZGRD") then
        ierr = nf90_inq_dimid(ncid, "zgrd_layers", dimid_kx)
        call error_handler(ierr, "ADD_TO_RESTART:  nf90_inq_dimid for 'zgrd_layers'")
+    else if (output_layers == "UNDM") then
+       ierr = nf90_inq_dimid(ncid, "undm_layers", dimid_kx)
+       call error_handler(ierr, "ADD_TO_RESTART:  nf90_inq_dimid for 'undm_layers'")       
     else
        stop "No vertical dimension found in restart save!"
     endif

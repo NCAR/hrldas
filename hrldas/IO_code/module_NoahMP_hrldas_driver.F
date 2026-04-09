@@ -1450,7 +1450,7 @@ subroutine lsm_restart()
               NoahmpIO%urban_map_zd,  NoahmpIO%urban_map_zdf,  &
               NoahmpIO%urban_map_bd,  NoahmpIO%urban_map_wd,   &
               NoahmpIO%urban_map_gbd, NoahmpIO%urban_map_fbd,  &
-              NoahmpIO%urban_map_zgrd)
+              NoahmpIO%urban_map_zgrd, NoahmpIO%num_urban_ndm)
   
   call add_to_restart(NoahmpIO%TSLB      , "SOIL_T", layers="SOIL")
   call add_to_restart(NoahmpIO%TSNOXY    , "SNOW_T", layers="SNOW")
