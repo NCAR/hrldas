@@ -1441,7 +1441,7 @@ subroutine lsm_restart()
   call prepare_restart_file (trim(NoahmpIO%outdir), version, NoahmpIO%igrid, NoahmpIO%llanduse, &
               NoahmpIO%olddate, NoahmpIO%startdate, NoahmpIO%ixfull, NoahmpIO%jxfull,  &
               NoahmpIO%ixpar, NoahmpIO%jxpar, NoahmpIO%xstartpar, NoahmpIO%ystartpar,  &
-              NoahmpIO%NSOIL, NoahmpIO%nsnow, NoahmpIO%NUMRAD, NoahmpIO%max_urban_dim, &
+              NoahmpIO%NSOIL, NoahmpIO%nsnow, NoahmpIO%NUMRAD,                         &
               NoahmpIO%dx, NoahmpIO%dy, NoahmpIO%truelat1, NoahmpIO%truelat2,          &
               NoahmpIO%mapproj, NoahmpIO%lat1, NoahmpIO%lon1, NoahmpIO%cen_lon,        &
               NoahmpIO%iswater, NoahmpIO%ivgtyp,               &
@@ -1450,7 +1450,8 @@ subroutine lsm_restart()
               NoahmpIO%urban_map_zd,  NoahmpIO%urban_map_zdf,  &
               NoahmpIO%urban_map_bd,  NoahmpIO%urban_map_wd,   &
               NoahmpIO%urban_map_gbd, NoahmpIO%urban_map_fbd,  &
-              NoahmpIO%urban_map_zgrd, NoahmpIO%num_urban_ndm)
+              NoahmpIO%urban_map_zgrd,NoahmpIO%num_urban_ndm,  &
+              NoahmpIO%SF_URBAN_PHYSICS)
   
   call add_to_restart(NoahmpIO%TSLB      , "SOIL_T", layers="SOIL")
   call add_to_restart(NoahmpIO%TSNOXY    , "SNOW_T", layers="SNOW")
