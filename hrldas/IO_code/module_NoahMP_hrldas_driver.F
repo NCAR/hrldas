@@ -614,6 +614,15 @@ contains
 
        endif ! NoahmpIO%SF_URBAN_PHYSICS
 
+       if ( NoahmpIO%SF_URBAN_PHYSICS > 1 ) then  !urban
+          do i = 1, NoahmpIO%num_urban_atmosphere-1
+             NoahmpIO%dz_urban(:,i,:) = NoahmpIO%urban_atmosphere_thickness  ! thickness of full levels
+          enddo
+          NoahmpIO%dz_urban(:,NoahmpIO%num_urban_atmosphere,:) =                                   &
+                       2*(NoahmpIO%zlvl - NoahmpIO%urban_atmosphere_thickness*(NoahmpIO%num_urban_atmosphere-1))
+          print*, NoahmpIO%dz_urban(1,:,1)
+       endif
+
     else
 
        NoahmpIO%restart_flag = .false.
@@ -959,7 +968,7 @@ contains
          NoahmpIO%height_urban = NoahmpIO%height_urban + NoahmpIO%urban_atmosphere_thickness
        END DO    
      ENDIF
-  
+
 !------------------------------------------------------------------------
 ! Noah-MP updates we can do before spatial loop.
 !------------------------------------------------------------------------
