@@ -23,7 +23,6 @@ contains
     implicit none
 
     type(NoahmpIO_type), intent(inout)  :: NoahmpIO
-
     call add_to_restart_mosaic(NoahmpIO%TSLB      , "SOIL_T", NoahmpIO%NTilesMax, layers="SOIL")
     call add_to_restart_mosaic(NoahmpIO%TSNOXY    , "SNOW_T", NoahmpIO%NTilesMax, layers="SNOW")
     call add_to_restart_mosaic(NoahmpIO%SMOIS     , "SMC"   , NoahmpIO%NTilesMax, layers="SOIL")

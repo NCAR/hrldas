@@ -1646,6 +1646,7 @@ contains
     integer, intent(in) :: xstart, xend, ystart, yend
 #ifdef MPP_LAND
     real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(inout) :: array
+    real(kind=kind_noahmp), allocatable, dimension(:,:) :: g_array
 #else
     real(kind=kind_noahmp), dimension(xstart:xend,ystart:yend), intent(out) :: array
 #endif
@@ -1657,18 +1658,22 @@ contains
     logical, intent(in) :: fatal_if_error 
     integer, intent(out) :: ierr
 #ifdef MPP_LAND
-    real(kind=kind_noahmp):: g_array(global_nx,global_ny)
+    !real(kind=kind_noahmp):: g_array(global_nx,global_ny)
+     if(my_id .eq. 0) then
+        allocate(g_array(global_nx,global_ny))
+      else
+        allocate(g_array(1,1))
+      endif
 #endif
     units = " "
-    
+
 #ifdef MPP_LAND
     if(my_id .eq. 0) then
 #endif
-
     iret = nf90_inq_varid(ncid,  name,  varid)
+
     if (iret /= 0) then
        if (FATAL_IF_ERROR) then
-          print*, 'ncid = ', ncid
           call error_handler(iret, "MODULE_HRLDAS_NETCDF_IO:  Problem finding variable '"//trim(name)//"' in NetCDF file.")
        else
           ierr = iret
@@ -1678,7 +1683,6 @@ contains
           return
        endif
     endif
-
     iret = nf90_get_att(ncid, varid, "units", units)
     if (iret /= 0) units = "units unknown"
 !KWM    if (iret /= 0) then
@@ -1701,14 +1705,12 @@ contains
           goto 9991
 #endif
        if (FATAL_IF_ERROR) then
-          print*, 'ncid =', ncid
           call error_handler(iret, "MODULE_HRLDAS_NETCDF_IO:  Problem retrieving variable '"//trim(name)//"' from NetCDF file.")
        else
           ierr = iret
           return
        endif
     endif
-
     ierr = 0;
 #ifdef MPP_LAND
 9991    continue
@@ -1855,7 +1857,7 @@ contains
 
     ierr = nf90_open_par(netcdf_flnm, NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
 #else
-    rank = 0
+    !rank = 0
     ierr = nf90_open(netcdf_flnm, NF90_NOWRITE, ncid)
 #endif
     if (rank == 0) write(*,'("netcdf_flnm: ''", A, "''")') trim(netcdf_flnm)
@@ -1938,24 +1940,20 @@ contains
     
     ierr = nf90_inq_varid(ncid,  "DZS",  varid)
     ierr = nf90_get_var(ncid, varid, values=dzs, start=(/1/), count=(/nsoil/))
-    
+
     layer_top(1) = 0.0
     layer_bottom(1) = dzs(1)
     do isoil = 2, nsoil
       layer_top(isoil) = layer_bottom(isoil-1)
       layer_bottom(isoil) = layer_top(isoil) + dzs(isoil)
     end do
-	
+
     call get_netcdf_soillevel("TSLB", ncid, nsoil, soildummy, units,  xstart, xend, ystart, yend, FATAL, ierr)
-    
     write(*, '("layer_bottom(1:nsoil) = ", 4F9.4)') layer_bottom(1:nsoil)
     write(*, '("layer_top(1:nsoil)    = ", 4F9.4)') layer_top(1:nsoil)
     write(*, '("Soil depth = ", 10F12.6)') sldpth
-    
     call init_interp(xstart, xend, ystart, yend, nsoil, sldpth, stc, nsoil, soildummy, layer_bottom(1:nsoil), layer_top(1:nsoil))
-
     call get_netcdf_soillevel("SMOIS", ncid, nsoil, soildummy, units,  xstart, xend, ystart, yend, FATAL, ierr)
-
     call init_interp(xstart, xend, ystart, yend, nsoil, sldpth, smc, nsoil, soildummy, layer_bottom(1:nsoil), layer_top(1:nsoil))
 
     ierr = nf90_close(ncid)
@@ -4544,57 +4542,129 @@ contains
 #ifdef MPP_LAND
   subroutine add_to_restart_2d_float_mpp_mosaic(array, name, ntile, units, description)
     implicit none
-    integer,                                                      intent(in)   :: ntile
-    real(kind=kind_noahmp),            dimension(:,:,:),          intent(in)   :: array
-    real(kind=kind_noahmp),            dimension(global_nx,global_ny,ntile)    :: garray
-    character(len=*),                                             intent(in)   :: name
-    character(len=*), optional,                                   intent(in)   :: units
-    character(len=*), optional,                                   intent(in)   :: description
+    integer, intent(in) :: ntile
+    real(kind=kind_noahmp), dimension(:,:,:), intent(in) :: array        ! local, shape (local_nx, local_ny, ntile)
+    character(len=*), intent(in) :: name
+    character(len=*), optional, intent(in) :: units
+    character(len=*), optional, intent(in) :: description
 
-    call write_io_real_mosaic(array,garray,ntile)
-    if(my_id .eq. IO_id) then
-         call add_to_restart_2d_float_mosaic(garray, name, ntile, units, description)
+    real(kind=kind_noahmp), allocatable, dimension(:,:,:) :: garray   ! global array
+    integer :: ierr
+
+    ! Only IO rank allocates the full global array
+    if (my_id == IO_id) then
+       allocate(garray(global_nx, global_ny, ntile), stat=ierr)
+       if (ierr /= 0) then
+          write(6,'(A)') "ERROR: Failed to allocate garray in add_to_restart_2d_float_mpp_mosaic"
+          call mpp_land_abort()
+       endif
+    else
+       allocate(garray(1,1,1), stat=ierr)   ! dummy allocation on other ranks
+       if (ierr /= 0) call mpp_land_abort()
     endif
-    call mpp_land_sync()
+
+    ! Gather local data from all ranks into global array on IO rank
+    call write_IO_real_mosaic(array, garray, ntile)
+
+    ! Only IO rank writes to restart file
+    if (my_id == IO_id) then
+       call add_to_restart_2d_float_mosaic(garray, name, ntile, units, description)
+    endif
+
+    ! Clean up memory
+    if (allocated(garray)) deallocate(garray)
+
+    ! Optional: barrier only if you really need strict synchronization here
+    ! call mpp_land_sync()
+
   end subroutine add_to_restart_2d_float_mpp_mosaic
 
   subroutine add_to_restart_2d_integer_mpp_mosaic(array, name, ntile, units, description)
     implicit none
-    integer,                                                      intent(in) :: ntile
-    integer,            dimension(:,:,:),                         intent(in) :: array
-    integer,            dimension(global_nx,global_ny, ntile)                :: garray
-    character(len=*),                                             intent(in) :: name
-    character(len=*), optional,                                   intent(in) :: units
-    character(len=*), optional,                                   intent(in) :: description
-    call write_io_int_mosaic(array,garray,ntile)
-    if(my_id .eq. IO_id) then
-         call add_to_restart_2d_integer_mosaic(garray, name, ntile, units, description)
+    integer, intent(in) :: ntile
+    integer, dimension(:,:,:), intent(in) :: array               ! local array: (local_nx, local_ny, ntile)
+
+    character(len=*), intent(in) :: name
+    character(len=*), optional, intent(in) :: units
+    character(len=*), optional, intent(in) :: description
+
+    integer, allocatable, dimension(:,:,:) :: garray             ! global array
+    integer :: ierr
+
+    ! ===================================================================
+    ! Only IO rank allocates the full global array. Other ranks use dummy.
+    ! ===================================================================
+    if (my_id == IO_id) then
+       allocate(garray(global_nx, global_ny, ntile), stat=ierr)
+       if (ierr /= 0) then
+          write(6,'(A)') "ERROR: Failed to allocate garray in add_to_restart_2d_integer_mpp_mosaic"
+          call mpp_land_abort()
+       endif
+    else
+       allocate(garray(1, 1, 1), stat=ierr)
+       if (ierr /= 0) call mpp_land_abort()
     endif
-    call mpp_land_sync()
+
+    ! Gather data from all ranks into global array on IO rank
+    call write_io_int_mosaic(array, garray, ntile)
+
+    ! Only IO rank calls the actual restart writing routine
+    if (my_id == IO_id) then
+       call add_to_restart_2d_integer_mosaic(garray, name, ntile, units, description)
+    endif
+
+    ! Clean up memory on all ranks
+    if (allocated(garray)) deallocate(garray)
+
+    ! Optional: Remove this barrier unless you have a strong reason to keep it
+    ! call mpp_land_sync()
+
   end subroutine add_to_restart_2d_integer_mpp_mosaic
 
   subroutine add_to_restart_3d_mpp_mosaic(array, name, ntile, units, description, layers)
     implicit none
-    integer,                                                      intent(in) :: ntile  
-    real(kind=kind_noahmp),            dimension(:,:,:,:),        intent(in) :: array
-    character(len=*),                                             intent(in) :: name
-    character(len=*), optional,                                   intent(in) :: units
-    character(len=*), optional,                                   intent(in) :: description
-    character(len=4), optional,                                   intent(in) :: layers
-    integer  :: k, klevel
+    integer, intent(in) :: ntile
+    real(kind=kind_noahmp), dimension(:,:,:,:), intent(in) :: array   ! local: (local_nx, klevel, local_ny, ntile)
 
-    real(kind=kind_noahmp), allocatable, dimension(:,:,:,:)                  :: garray
-    klevel = size(array,2)
-    allocate(garray(global_nx,klevel,global_ny,ntile))
+    character(len=*), intent(in) :: name
+    character(len=*), optional, intent(in) :: units
+    character(len=*), optional, intent(in) :: description
+    character(len=4), optional, intent(in) :: layers
 
-    call write_io_real3d_mosaic(array,garray,klevel,ntile)
+    real(kind=kind_noahmp), allocatable, dimension(:,:,:,:) :: garray   ! global array
+    integer :: klevel
+    integer :: ierr
 
-    if(my_id .eq. IO_id) then
-         call add_to_restart_3d_mosaic(garray, name, ntile, units, description, layers)
+    klevel = size(array, 2)
+
+    ! ===================================================================
+    ! Allocate global array ONLY on IO rank. Other ranks get dummy array.
+    ! ===================================================================
+    if (my_id == IO_id) then
+       allocate(garray(global_nx, klevel, global_ny, ntile), stat=ierr)
+       if (ierr /= 0) then
+          write(6,'(A)') "ERROR: Failed to allocate garray in add_to_restart_3d_mpp_mosaic"
+          call mpp_land_abort()
+       endif
+    else
+       allocate(garray(1, 1, 1, 1), stat=ierr)
+       if (ierr /= 0) call mpp_land_abort()
     endif
-    deallocate(garray)
 
-    call mpp_land_sync()
+    ! Gather data from all ranks into global array on IO rank
+    call write_io_real3d_mosaic(array, garray, klevel, ntile)
+
+    ! Only IO rank writes to the restart file
+    if (my_id == IO_id) then
+       call add_to_restart_3d_mosaic(garray, name, ntile, units, description, layers)
+    endif
+
+    ! Clean up memory on ALL ranks
+    if (allocated(garray)) deallocate(garray)
+
+    ! Optional: Only keep barrier if absolutely necessary for debugging
+    ! call mpp_land_sync()
+
   end subroutine add_to_restart_3d_mpp_mosaic
 #endif
 

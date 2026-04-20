@@ -760,6 +760,28 @@ MODULE MODULE_MPP_LAND
       end do
   end subroutine write_io_int_mosaic
 
+  subroutine calculate_ntilemax_mpp(local_NTilesMax,global_NTilesMax)
+    integer, intent (in)  :: local_NTilesMax
+    integer, intent (out) :: global_NTilesMax
+    integer               :: i, ierr, temp_idx
+
+    global_NTilesMax = 1
+    if (my_id == IO_id) then
+         global_NTilesMax = local_NTilesMax
+         do i = 0, numprocs - 1
+            if (i /= my_id) then
+               call mpi_recv(temp_idx, 1, MPI_INTEGER, i, 101, &
+                             MPI_COMM_WORLD, mpp_status, ierr)
+               global_NTilesMax = max(global_NTilesMax, temp_idx)
+            end if
+         end do
+    else
+         call mpi_send(local_NTilesMax, 1, MPI_INTEGER, IO_id, 101, &
+                       MPI_COMM_WORLD, ierr)
+    end if
+
+  end subroutine calculate_ntilemax_mpp
+
 ! NoahMP Mosaic end
 
   subroutine write_IO_RT_real(in_buff,out_buff)
