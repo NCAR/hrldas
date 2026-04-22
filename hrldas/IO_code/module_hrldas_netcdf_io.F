@@ -5392,9 +5392,23 @@ contains
     implicit none
     integer,                                  intent(in) :: ntile
     real(kind=kind_noahmp), dimension(:,:,:), intent(in) :: array
-    real(kind=kind_noahmp), dimension(global_nx,global_ny,ntile) :: garray
+    !real(kind=kind_noahmp), dimension(global_nx,global_ny,ntile) :: garray
+    real(kind=kind_noahmp), allocatable, dimension(:,:,:) :: garray   ! global array
     character(len=*), intent(in) :: name, description, units
-    integer                      :: n
+    integer                      :: n, ierr
+    
+    ! Only IO rank allocates the full global array
+    if (my_id == IO_id) then
+       allocate(garray(global_nx, global_ny, ntile), stat=ierr)
+       if (ierr /= 0) then
+          write(6,'(A)') "ERROR: Failed to allocate garray in add_to_output_2d_float_mpp_mosaic"
+          call mpp_land_abort()
+       endif
+    else
+       allocate(garray(1,1,1), stat=ierr)   ! dummy allocation on other ranks
+       if (ierr /= 0) call mpp_land_abort()
+    endif
+
     do n = 1, ntile
       call write_io_real(array(:,:,n),garray(:,:,n))
     enddo
@@ -5408,8 +5422,24 @@ contains
     integer,                   intent(in) :: ntile
     integer, dimension(:,:,:), intent(in) :: array
     character(len=*), intent(in) :: name, description, units
-    integer, dimension(global_nx,global_ny,ntile) :: garray
+    !integer, dimension(global_nx,global_ny,ntile) :: garray
+    integer, allocatable, dimension(:,:,:) :: garray   ! global array
+    integer  :: ierr
+
+    ! Only IO rank allocates the full global array
+    if (my_id == IO_id) then
+       allocate(garray(global_nx, global_ny, ntile), stat=ierr)
+       if (ierr /= 0) then
+          write(6,'(A)') "ERROR: Failed to allocate garray in add_to_output_2d_float_mpp_mosaic"
+          call mpp_land_abort()
+       endif
+    else
+       allocate(garray(1,1,1), stat=ierr)   ! dummy allocation on other ranks
+       if (ierr /= 0) call mpp_land_abort()
+    endif
+
     call write_io_int_mosaic(array,garray,ntile)
+
     if(my_id .eq. io_id) then
          call add_to_output_2d_integer_mosaic( garray, name, ntile, description, units )
     endif
@@ -5421,12 +5451,22 @@ contains
     real(kind=kind_noahmp), dimension(:,:,:,:), intent(in) :: array
     character(len=*), intent(in) :: name, description, units
     character(len=4), intent(in) :: snow_or_soil
-    integer :: k, klevel
-
+    integer :: k, klevel, ierr
     real(kind=kind_noahmp), allocatable, dimension(:,:,:,:) :: garray
+
     klevel = size(array,2)
 
-    allocate(garray(global_nx,klevel,global_ny,ntile))
+    ! Only IO rank allocates the full global array
+    if (my_id == IO_id) then
+       allocate(garray(global_nx,klevel,global_ny,ntile), stat=ierr)
+       if (ierr /= 0) then
+          write(6,'(A)') "ERROR: Failed to allocate garray in add_to_output_2d_float_mpp_mosaic"
+          call mpp_land_abort()
+       endif
+    else
+       allocate(garray(1,1,1,1), stat=ierr)   ! dummy allocation on other ranks
+       if (ierr /= 0) call mpp_land_abort()
+    endif
 
     call write_io_real3d_mosaic(array,garray,klevel,ntile)
     if(my_id .eq. io_id) then
