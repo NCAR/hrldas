@@ -3756,7 +3756,6 @@ contains
         ierr = nf90_def_dim(ncid, "ugbd_layers", urban_map_gbd, dimid_ugbd)
         ierr = nf90_def_dim(ncid, "ufbd_layers", urban_map_fbd, dimid_ufbd)
         ierr = nf90_def_dim(ncid, "zgrd_layers", urban_map_zgrd, dimid_zgrd)
-        ierr = nf90_def_dim(ncid, "undm_layers", urban_map_ndm, dimid_undm)
     endif
 
     ierr = nf90_put_att(ncid, NF90_GLOBAL, "TITLE", "RESTART FILE FROM HRLDAS "//version)
