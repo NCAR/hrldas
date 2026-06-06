@@ -10,7 +10,7 @@
  MODFLAG        =       -I
  LDFLAGS        =
  CPP            =       cpp
- CPPFLAGS       =       -P -traditional -D_GFORTRAN_ # -DSPATIAL_SOIL
+ CPPFLAGS       =       -P -traditional -D_GFORTRAN_ # -DWRFIO_NCD_LARGE_FILE_SUPPORT  -DSPATIAL_SOIL
  LIBS           =
  LIBJASPER      =      -ljasper
  INCJASPER      =      -I/usr/include/jasper

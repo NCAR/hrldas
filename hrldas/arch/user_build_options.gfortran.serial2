@@ -10,7 +10,7 @@
  MODFLAG        =       -I
  LDFLAGS        =
  CPP            =       cpp
- CPPFLAGS       =       -P -traditional -D_GFORTRAN_
+ CPPFLAGS       =       -P -traditional -D_GFORTRAN_ # -DWRFIO_NCD_LARGE_FILE_SUPPORT
  LIBS           =
  LIBJASPER      =      -L/home/xxxxx/Build_WRF/LIBRARIES/grib2/lib -ljasper -ljpeg
  INCJASPER      =      -I/home/xxxxx/Build_WRF/LIBRARIES/grib2/include

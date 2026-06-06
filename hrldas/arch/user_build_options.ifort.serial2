@@ -9,7 +9,7 @@
  MODFLAG        =      -I
  LDFLAGS        =
  CPP            =      cpp
- CPPFLAGS       =      -P -traditional
+ CPPFLAGS       =      -P -traditional # -DWRFIO_NCD_LARGE_FILE_SUPPORT
  LIBS           =
  LIBJASPER      =      -L/usr/local/jasper-1.701.0/lib -ljasper
  INCJASPER      =      -I/usr/local/jasper-1.701.0/include
