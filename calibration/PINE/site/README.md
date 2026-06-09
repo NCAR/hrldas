@@ -3,6 +3,19 @@
 An LSTM-emulator-based rapid parameter-calibration system for the Noah-MP land
 surface model.
 
+The code needed to reproduce the experiments is available in this repository and
+at [https://doi.org/10.5194/gmd-19-2197-2026](https://doi.org/10.5194/gmd-19-2197-2026).
+
+## Citation
+
+If you use this code in your research, please cite:
+
+> Cheng, Y., Wang, Y., Furtado, K., He, C., Chen, F., Ziegler, A. D., Chen, S.,
+> Detto, M., Mao, Y., Pan, B., Kosugi, Y., Lion, M., Noguchi, S., Takanashi, S.,
+> Melling, L., and Zhang, B.: Assessing and enhancing Noah-MP land surface
+> modeling over tropical forests using machine learning techniques, *Geosci. Model
+> Dev.*, 19, 2197–2217, [https://doi.org/10.5194/gmd-19-2197-2026](https://doi.org/10.5194/gmd-19-2197-2026), 2026.
+
 ## Features for Physical Interpretability
 
 PINE embeds physical constraints from multiple angles to improve the
@@ -25,19 +38,6 @@ interpretability of both the emulator and the calibrated parameters:
   let users inject expert prior knowledge directly into the search space. This
   extra layer of constraint further safeguards the physical plausibility and
   interpretability of the final calibrated parameters.
-
-The code needed to reproduce the experiments is available in this repository and
-at [https://doi.org/10.5194/gmd-19-2197-2026](https://doi.org/10.5194/gmd-19-2197-2026).
-
-## Citation
-
-If you use this code in your research, please cite:
-
-> Cheng, Y., Wang, Y., Furtado, K., He, C., Chen, F., Ziegler, A. D., Chen, S.,
-> Detto, M., Mao, Y., Pan, B., Kosugi, Y., Lion, M., Noguchi, S., Takanashi, S.,
-> Melling, L., and Zhang, B.: Assessing and enhancing Noah-MP land surface
-> modeling over tropical forests using machine learning techniques, *Geosci. Model
-> Dev.*, 19, 2197–2217, [https://doi.org/10.5194/gmd-19-2197-2026](https://doi.org/10.5194/gmd-19-2197-2026), 2026.
 
 ## Workflow Overview
 
