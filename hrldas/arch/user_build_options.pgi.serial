@@ -10,7 +10,7 @@
  HYDRO_LIB      =       
  LDFLAGS	=	
  CPP		=	cpp
- CPPFLAGS	=	-P -traditional
+ CPPFLAGS	=	-P -traditional # -DWRFIO_NCD_LARGE_FILE_SUPPORT
  LIBS		=	
  LIBJASPER      =       -ljpeg -L/usr/lib -ljasper
  INCJASPER      =       -I/usr/include
