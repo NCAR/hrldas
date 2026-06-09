@@ -3,6 +3,29 @@
 An LSTM-emulator-based rapid parameter-calibration system for the Noah-MP land
 surface model.
 
+## Features for Physical Interpretability
+
+PINE embeds physical constraints from multiple angles to improve the
+interpretability of both the emulator and the calibrated parameters:
+
+- **Process-variable relationships.** The emulator predicts a broad set of
+  energy and water variables, not just the final calibration targets. By
+  enforcing relationships among process variables, the model learns physically
+  consistent internal pathways rather than memorizing end-to-end mappings. This
+  guards against the "good results but poor intermediate processes" pitfall and
+  enables explicit verification of mass and energy conservation.
+
+- **Multi-objective calibration.** The calibration framework jointly optimizes
+  multiple target variables, so trade-offs among them are naturally accounted
+  for instead of pushing a single variable to its best fit. This prevents the
+  optimizer from drifting into physically unrealistic parameter sets that merely
+  minimize one metric.
+
+- **Expert-informed parameter ranges.** Configurable bounds for each parameter
+  let users inject expert prior knowledge directly into the search space. This
+  extra layer of constraint further safeguards the physical plausibility and
+  interpretability of the final calibrated parameters.
+
 The code needed to reproduce the experiments is available in this repository and
 at [https://doi.org/10.5194/gmd-19-2197-2026](https://doi.org/10.5194/gmd-19-2197-2026).
 
