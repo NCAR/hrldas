@@ -4,6 +4,33 @@
 
 ### Noah-MP LSM capabilities/enhancements
 
+- Please see Noah-MP code release notes for more details: https://github.com/NCAR/noahmp/blob/master/RELEASE_NOTES.md
+
+
+### Noah-MP LSM bug fixes
+
+- Please see Noah-MP code release notes for more details: https://github.com/NCAR/noahmp/blob/master/RELEASE_NOTES.md
+
+
+### HRLDAS module capabilities/enhancements
+
+- None
+
+
+### HRLDAS module bug fixes
+
+- fix urban restart, allocation variables issue and units of evaporation for imp_scheme==2 in slucm (https://github.com/NCAR/hrldas/pull/320)
+
+
+### External module capabilities/enhancements
+
+- None
+
+
+## HRLDAS/Noah-MP version 5.2.0 release
+
+### Noah-MP LSM capabilities/enhancements
+
 - Refactored Noah-MP coupled with WRF. Please see Noah-MP code release notes for more details: https://github.com/NCAR/noahmp/blob/master/RELEASE_NOTES.md
 
 
