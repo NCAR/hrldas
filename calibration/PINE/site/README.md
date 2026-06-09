@@ -1,4 +1,4 @@
-# Code for "Assessing and enhancing Noah-MP land surface modeling over tropical forests using machine learning techniques"
+# PINE (Physically Interpretable Noah-MP Emulator) for parameter-calibration
 
 An LSTM-emulator-based rapid parameter-calibration system for the Noah-MP land
 surface model.
