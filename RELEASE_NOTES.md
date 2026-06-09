@@ -1,6 +1,6 @@
 # HRLDAS/Noah-MP model release notes
 
-## HRLDAS/Noah-MP version 5.2.0 release
+## HRLDAS/Noah-MP version 5.2.1 release
 
 ### Noah-MP LSM capabilities/enhancements
 
