@@ -13,8 +13,8 @@ If you use this code in your research, please cite:
 > Cheng, Y., Wang, Y., Furtado, K., He, C., Chen, F., Ziegler, A. D., Chen, S.,
 > Detto, M., Mao, Y., Pan, B., Kosugi, Y., Lion, M., Noguchi, S., Takanashi, S.,
 > Melling, L., and Zhang, B.: Assessing and enhancing Noah-MP land surface
-> modeling over tropical forests using machine learning techniques, *Geosci. Model
-> Dev.*, 19, 2197–2217, [https://doi.org/10.5194/gmd-19-2197-2026](https://doi.org/10.5194/gmd-19-2197-2026), 2026.
+> modeling over tropical forests using machine learning techniques, _Geosci. Model
+> Dev._, 19, 2197–2217, [https://doi.org/10.5194/gmd-19-2197-2026](https://doi.org/10.5194/gmd-19-2197-2026), 2026.
 
 ## Features for Physical Interpretability
 
@@ -70,11 +70,26 @@ You will also need:
 
 - A compiled `hrldas.exe` binary at `noahmp/point_run/hrldas.exe` built for
   your environment (the shipped binary is unlikely to run on your machine).
+- A `NoahmpTable.TBL` parameter table at `noahmp/point_run/NoahmpTable.TBL`
+  and `noahmp/TBL_generator/NoahmpTable.TBL`. This must match the HRLDAS
+  source version used to build `hrldas.exe`.
+- A `namelist.hrldas` at `noahmp/point_run/namelist.hrldas` configured for
+  your site and forcing.
 - Your site's 30-min LDASIN forcing files in `FORCING_SOURCE`.
 - An observation CSV converted via `src/prepare_observation_data.py` (see
   below).
 - Python dependencies: `pip install -r requirements.txt`, or
   `conda env create -f environment.yml`.
+
+> **Note:** The `hrldas.exe`, `NoahmpTable.TBL`, and `namelist.hrldas`
+> files are **not** generated automatically by the calibration scripts.
+> Empty placeholder files (`put_your_compiled_hrldas.exe_here`,
+> `put_your_NoahmpTable.TBL_here`, `put_your_namelist.hrldas_here`) are
+> shipped in `noahmp/point_run/` (and the TBL placeholder also in
+> `noahmp/TBL_generator/`) to mark where these files should go. Replace
+> each placeholder with the real file using the standard names
+> (`hrldas.exe`, `NoahmpTable.TBL`, `namelist.hrldas`) before running the
+> workflow.
 
 Then:
 
@@ -120,7 +135,7 @@ At a glance:
 - Calibration targets live in `MAIN_TARGETS` in `config_forward_comprehensive.py`
   (default: `['SOIL_M', 'LH', 'HFX']`).
 - Per-variable loss weights are passed via `--weights`/`--weight_vars` to
-  `run_calibration.sh` and 05_*.py (paired 1:1).
+  `run_calibration.sh` and 05\_\*.py (paired 1:1).
 - Forcing variables live in `FORCING_VARIABLES` in the same config file.
 - Calibrated parameters: edit `value_bounds.csv` and
   `noahmp/TBL_generator/var_info_matrix.csv`, then re-run from sample
@@ -237,8 +252,8 @@ SATDK(log),-5.05,-3.3
 | VCMX25    | Maximum carboxylation rate       |
 | HVT       | Canopy top height                |
 | HVB       | Canopy bottom height             |
-| CWPVT    | Canopy wind parameter            |
-| Z0MVT    | Momentum roughness length        |
+| CWPVT     | Canopy wind parameter            |
+| Z0MVT     | Momentum roughness length        |
 | WLTSMC    | Wilting point soil moisture      |
 | REFSMC    | Reference soil moisture          |
 | MAXSMC    | Saturated soil moisture          |
