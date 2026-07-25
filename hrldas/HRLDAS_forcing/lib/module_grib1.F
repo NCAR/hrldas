@@ -598,7 +598,8 @@ contains
     ! print*, 'isign = ', isign
     ! print*, 'characteristic = ', characteristic
     ! print*, 'mantissa = ', mantissa
-    xref2 = real(dble(mantissa) / dble(2**24) * dble(16 ** (characteristic-64)))
+    
+    xref2 = real( dble(mantissa) * 2.0d0**(-24) * 2.0d0**(4*(characteristic-64)) )
     if (isign==1) xref2 = -xref2
     ! print*, 'Reference value = ', xref2
     sec4%reference_value = xref2
