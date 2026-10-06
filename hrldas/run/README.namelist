@@ -195,7 +195,7 @@
 
  SNOW_COMPACTION_OPTION            = 2                       ! options for ground snowpack compaction [default = 2]
                                                              !   1 -> original scheme from Anderson 1976
-                                                             ! **2 -> updated scheme from Abolafia-Rosenzweigh et al. (2024)
+                                                             ! **2 -> updated scheme from Abolafia-Rosenzweig et al. (2024)
 
  SNOW_COVER_OPTION                 = 1                       ! options for ground snow cover fraction [default = 2]
                                                              ! **1 -> original scheme from Niu and Yang (2007) using veg-class based MPTABLE parameters
